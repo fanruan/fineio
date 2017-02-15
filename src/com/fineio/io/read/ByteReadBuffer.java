@@ -7,6 +7,8 @@ import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * Created by daniel on 2017/2/9.
  */
@@ -24,22 +26,24 @@ public class ByteReadBuffer {
     }
 
 
-    private final synchronized void loadData(){
-        if(load){
-            return;
+    private final  void loadData(){
+        synchronized (this) {
+            if (load) {
+                return;
+            }
+            byte[] bytes = connector.read(block);
+            if (bytes == null) {
+                throw new BlockNotFoundException("block:" + block.toString() + " not found!");
+            }
+            byteLen = bytes.length;
+            address = MemoryUtils.allocate(bytes.length);
+            long i = 0;
+            for (byte b : bytes) {
+                MemoryUtils.put(address, i++, b);
+            }
+            load = true;
+            max_size = byteLen >> getLengthOffset();
         }
-        byte[] bytes = connector.read(block);
-        if(bytes == null){
-            throw new BlockNotFoundException("block:" + block.toString() +" not found!");
-        }
-        byteLen = bytes.length;
-        max_size = byteLen >> getLengthOffset();
-        address = MemoryUtils.allocate(bytes.length);
-        long i = 0;
-        for(byte b : bytes){
-            MemoryUtils.put(address, i++, b);
-        }
-        load = true;
     }
 
     protected int getLengthOffset() {
@@ -69,16 +73,18 @@ public class ByteReadBuffer {
     }
 
     public final synchronized void clear() {
-        if(!load){
-            return;
+        synchronized (this) {
+            if (!load) {
+                return;
+            }
+            load = false;
+            max_size = 0;
+            //释放方法要给时间允许get返回
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+            }
+            MemoryUtils.free(address);
         }
-        max_size = 0;
-        load = false;
-        //释放方法要给时间允许get返回
-        try {
-            Thread.sleep(1);
-        } catch (InterruptedException e) {
-        }
-        MemoryUtils.free(address);
     }
 }

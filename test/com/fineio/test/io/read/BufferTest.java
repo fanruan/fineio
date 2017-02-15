@@ -9,6 +9,7 @@ import com.fineio.storage.Connector;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
+import org.junit.runners.Parameterized;
 import sun.misc.Unsafe;
 
 import java.io.File;
@@ -208,6 +209,51 @@ public class BufferTest  extends TestCase {
         }
         assertTrue(exp);
         db.clear();
+    }
+
+    public void testMultiThread() throws Exception{
+        final byte[] value = createRandomByte();
+        IMocksControl control = EasyMock.createControl();
+        Connector connector = control.createMock(Connector.class);
+        URI u = new URI("");
+        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        constructor.setAccessible(true);
+        FileBlock block = constructor.newInstance(u, "0");
+        EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(value).anyTimes();
+        control.replay();
+        final ByteReadBuffer buffer = new ByteReadBuffer(connector, block);
+        Thread[] t = new Thread[100];
+        for(int i = 0; i < t.length; i++){
+            if((i & 1) == 0) {
+                t[i] = new Thread() {
+                    public void run() {
+                        try {
+                            byte b = 0;
+                            for (int k = 0; k < value.length; k++) {
+                                b += buffer.get(k);
+                            }
+                        } catch (Throwable e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+            } else {
+                t[i] = new Thread() {
+                    public void run() {
+                        for(int k = 0; k < value.length; k++){
+                            buffer.clear();
+                        }
+                    }
+                };
+            }
+        }
+        for(int i = 0; i < t.length; i++){
+            t[i].start();
+        }
+        for(int i = 0; i < t.length; i++){
+            t[i].join();
+        }
+
     }
 
 }

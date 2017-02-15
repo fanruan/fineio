@@ -37,6 +37,45 @@ public class K {
         FileBlock block = constructor.newInstance(u, "0");
         EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(bytes).anyTimes();
         control.replay();
+        byteTest(bytes, connector, block);
+        intTest(bytes, connector, block);
+        doubleTest(bytes, connector, block);
+    }
+
+    private static void doubleTest(byte[] bytes, Connector connector, FileBlock block) {
+        long t = System.currentTimeMillis();
+        DoubleReadBuffer db = new DoubleReadBuffer(connector, block);
+        double d = 0;
+        for(int k = 0, klen = (bytes.length >> 3); k < klen; k++){
+            d +=db.getDouble(k);
+        }
+        System.out.println( "first get double:"+(System.currentTimeMillis() - t) +"ms result："+ d);
+        t = System.currentTimeMillis();
+        d = 0;
+        for(int k = 0, klen = (bytes.length >> 3); k < klen; k++){
+            d +=db.getDouble(k);
+        }
+        System.out.println( "second get double:"+(System.currentTimeMillis() - t)+"ms result："+ d);
+    }
+
+    private static void intTest(byte[] bytes, Connector connector, FileBlock block) {
+        long t = System.currentTimeMillis();
+        IntReadBuffer ib = new IntReadBuffer(connector, block);
+        int v = 0;
+        for(int k = 0, klen = (bytes.length >> 2); k < klen; k++){
+            v +=ib.getInt(k);
+        }
+        System.out.println( "first get int:"+(System.currentTimeMillis() - t) +"ms result："+ v);
+        t = System.currentTimeMillis();
+        v = 0;
+        for(int k = 0, klen = (bytes.length >> 2); k < klen; k++){
+            v +=ib.getInt(k);
+        }
+        System.out.println( "second get int:"+(System.currentTimeMillis() - t)+"ms result："+ v);
+        ib.clear();
+    }
+
+    private static void byteTest(byte[] bytes, Connector connector, FileBlock block) {
         ByteReadBuffer buffer = new ByteReadBuffer(connector, block);
         long t = System.currentTimeMillis();
         byte r = 0;
@@ -51,31 +90,5 @@ public class K {
         }
         System.out.println( "second get byte:"+(System.currentTimeMillis() - t) +"ms result："+ r);
         buffer.clear();
-        t = System.currentTimeMillis();
-        IntReadBuffer ib = new IntReadBuffer(connector, block);
-        int v = 0;
-        for(int k = 0, klen = (bytes.length >> 2); k < klen; k++){
-            v +=ib.getInt(k);
-        }
-        System.out.println( "first get int:"+(System.currentTimeMillis() - t) +"ms result："+ v);
-        t = System.currentTimeMillis();
-        v = 0;
-        for(int k = 0, klen = (bytes.length >> 2); k < klen; k++){
-            v +=ib.getInt(k);
-        }
-        System.out.println( "second get int:"+(System.currentTimeMillis() - t)+"ms result："+ v);
-        ib.clear();
-        DoubleReadBuffer db = new DoubleReadBuffer(connector, block);
-        double d = 0;
-        for(int k = 0, klen = (bytes.length >> 3); k < klen; k++){
-            d +=db.getDouble(k);
-        }
-        System.out.println( "first get double:"+(System.currentTimeMillis() - t) +"ms result："+ d);
-        t = System.currentTimeMillis();
-        d = 0;
-        for(int k = 0, klen = (bytes.length >> 3); k < klen; k++){
-            d +=db.getDouble(k);
-        }
-        System.out.println( "second get double:"+(System.currentTimeMillis() - t)+"ms result："+ d);
     }
 }
