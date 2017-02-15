@@ -8,8 +8,8 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/14.
  */
-public class ShortReadBuffer extends ByteReadBuffer {
-    public ShortReadBuffer(Connector connector, FileBlock block) {
+public class ShortReadBuffer extends ReadBuffer {
+    private ShortReadBuffer(Connector connector, FileBlock block) {
         super(connector, block);
     }
 
@@ -17,7 +17,7 @@ public class ShortReadBuffer extends ByteReadBuffer {
         return MemoryConstants.OFFSET_SHORT;
     }
 
-    public final short getShort(int p) {
+    public final short get(int p) {
         checkIndex(p);
         return MemoryUtils.getShort(address, p);
     }

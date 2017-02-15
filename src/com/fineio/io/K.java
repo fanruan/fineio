@@ -1,6 +1,5 @@
 package com.fineio.io;
 
-import com.fineio.base.Bits;
 import com.fineio.file.FileBlock;
 import com.fineio.io.read.ByteReadBuffer;
 import com.fineio.io.read.DoubleReadBuffer;
@@ -44,39 +43,39 @@ public class K {
 
     private static void doubleTest(byte[] bytes, Connector connector, FileBlock block) {
         long t = System.currentTimeMillis();
-        DoubleReadBuffer db = new DoubleReadBuffer(connector, block);
+        DoubleReadBuffer db = createBuffer(DoubleReadBuffer.class, connector, block);
         double d = 0;
         for(int k = 0, klen = (bytes.length >> 3); k < klen; k++){
-            d +=db.getDouble(k);
+            d +=db.get(k);
         }
         System.out.println( "first get double:"+(System.currentTimeMillis() - t) +"ms result："+ d);
         t = System.currentTimeMillis();
         d = 0;
         for(int k = 0, klen = (bytes.length >> 3); k < klen; k++){
-            d +=db.getDouble(k);
+            d +=db.get(k);
         }
         System.out.println( "second get double:"+(System.currentTimeMillis() - t)+"ms result："+ d);
     }
 
     private static void intTest(byte[] bytes, Connector connector, FileBlock block) {
         long t = System.currentTimeMillis();
-        IntReadBuffer ib = new IntReadBuffer(connector, block);
+        IntReadBuffer ib = createBuffer(IntReadBuffer.class, connector, block);
         int v = 0;
         for(int k = 0, klen = (bytes.length >> 2); k < klen; k++){
-            v +=ib.getInt(k);
+            v +=ib.get(k);
         }
         System.out.println( "first get int:"+(System.currentTimeMillis() - t) +"ms result："+ v);
         t = System.currentTimeMillis();
         v = 0;
         for(int k = 0, klen = (bytes.length >> 2); k < klen; k++){
-            v +=ib.getInt(k);
+            v +=ib.get(k);
         }
         System.out.println( "second get int:"+(System.currentTimeMillis() - t)+"ms result："+ v);
         ib.clear();
     }
 
     private static void byteTest(byte[] bytes, Connector connector, FileBlock block) {
-        ByteReadBuffer buffer = new ByteReadBuffer(connector, block);
+        ByteReadBuffer buffer = createBuffer(ByteReadBuffer.class, connector, block);
         long t = System.currentTimeMillis();
         byte r = 0;
         for(int i = 0; i < bytes.length; i++){
@@ -90,5 +89,16 @@ public class K {
         }
         System.out.println( "second get byte:"+(System.currentTimeMillis() - t) +"ms result："+ r);
         buffer.clear();
+    }
+
+    private  static  <T extends Buffer>  T createBuffer(Class<T> clazz, Object connector, Object block) {
+        try {
+            Constructor<T>  constructor= clazz.getDeclaredConstructor(Connector.class, FileBlock.class);
+            constructor.setAccessible(true);
+            return  constructor.newInstance(connector, block);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

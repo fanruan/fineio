@@ -3,28 +3,27 @@ package com.fineio.test.io.read;
 import com.fineio.base.Bits;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
+import com.fineio.io.Buffer;
 import com.fineio.io.read.*;
-import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
-import org.junit.runners.Parameterized;
-import sun.misc.Unsafe;
 
-import java.io.File;
-import java.io.RandomAccessFile;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-import java.nio.ByteBuffer;
-import java.nio.DoubleBuffer;
-import java.nio.channels.FileChannel;
 
 /**
  * Created by daniel on 2017/2/13.
  */
 public class BufferTest  extends TestCase {
+
+
+    public void  testOffSet() {
+
+    }
+
 
     private byte[] createRandomByte(){
         int len = 1 << 10;
@@ -61,8 +60,19 @@ public class BufferTest  extends TestCase {
         floatTest(value, connector, block);
     }
 
+    private  static  <T extends Buffer>  T createBuffer(Class<T> clazz, Object connector, Object block) {
+        try {
+            Constructor<T>  constructor= clazz.getDeclaredConstructor(Connector.class, FileBlock.class);
+            constructor.setAccessible(true);
+            return  constructor.newInstance(connector, block);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     private void byteTest(byte[] value, Connector connector, FileBlock block) {
-        ByteReadBuffer buffer = new ByteReadBuffer(connector, block);
+        ByteReadBuffer buffer = createBuffer(ByteReadBuffer.class, connector, block);
         byte r = 0;
         for(int k = 0; k < value.length; k++){
             r +=value[k];
@@ -83,19 +93,19 @@ public class BufferTest  extends TestCase {
     }
 
     private void intTest(byte[] value, Connector connector, FileBlock block) {
-        boolean exp;IntReadBuffer ib = new IntReadBuffer(connector, block);
+        boolean exp;IntReadBuffer ib = createBuffer(IntReadBuffer.class, connector, block);
         int v1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=4){
             v1 += Bits.getInt(value, k);
         }
         int v2 = 0;
         for(int k = 0, klen = (value.length >> 2); k < klen; k++){
-            v2 +=ib.getInt(k);
+            v2 +=ib.get(k);
         }
         assertEquals(v1, v2);
         exp = false;
         try {
-            ib.getInt(value.length);
+            ib.get(value.length);
         } catch (BufferIndexOutOfBoundsException e) {
             exp = true;
         }
@@ -105,19 +115,19 @@ public class BufferTest  extends TestCase {
 
 
     private void floatTest(byte[] value, Connector connector, FileBlock block) {
-        boolean exp;FloatReadBuffer ib = new FloatReadBuffer(connector, block);
+        boolean exp;FloatReadBuffer ib = createBuffer(FloatReadBuffer.class, connector, block);
         float v1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=4){
             v1 += Bits.getFloat(value, k);
         }
         float v2 = 0;
         for(int k = 0, klen = (value.length >> 2); k < klen; k++){
-            v2 +=ib.getFloat(k);
+            v2 +=ib.get(k);
         }
         assertEquals(v1, v2);
         exp = false;
         try {
-            ib.getFloat(value.length);
+            ib.get(value.length);
         } catch (BufferIndexOutOfBoundsException e) {
             exp = true;
         }
@@ -126,19 +136,19 @@ public class BufferTest  extends TestCase {
     }
 
     private void doubleTest(byte[] value, Connector connector, FileBlock block) {
-        boolean exp;DoubleReadBuffer db = new DoubleReadBuffer(connector, block);
+        boolean exp;DoubleReadBuffer db = createBuffer(DoubleReadBuffer.class, connector, block);
         double d1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=8){
             d1 += Bits.getDouble(value, k);
         }
         double d2 = 0;
         for(int k = 0, klen = (value.length >> 3); k < klen; k++){
-            d2 +=db.getDouble(k);
+            d2 +=db.get(k);
         }
         assertEquals(d1, d2);
         exp = false;
         try {
-            db.getDouble(value.length);
+            db.get(value.length);
         } catch (BufferIndexOutOfBoundsException e) {
             exp = true;
         }
@@ -147,19 +157,19 @@ public class BufferTest  extends TestCase {
     }
 
     private void charTest(byte[] value, Connector connector, FileBlock block) {
-        boolean exp;CharReadBuffer cb = new CharReadBuffer(connector, block);
+        boolean exp;CharReadBuffer cb = createBuffer(CharReadBuffer.class, connector, block);
         char c1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=2){
             c1 += Bits.getChar(value, k);
         }
         char c2 = 0;
         for(int k = 0, klen = (value.length >> 1); k < klen; k++){
-            c2 +=cb.getChar(k);
+            c2 +=cb.get(k);
         }
         assertEquals(c1, c2);
         exp = false;
         try {
-            cb.getChar(value.length);
+            cb.get(value.length);
         } catch (BufferIndexOutOfBoundsException e) {
             exp = true;
         }
@@ -169,19 +179,19 @@ public class BufferTest  extends TestCase {
 
 
     private void shortTest(byte[] value, Connector connector, FileBlock block) {
-        boolean exp;ShortReadBuffer cb = new ShortReadBuffer(connector, block);
+        boolean exp;ShortReadBuffer cb = createBuffer(ShortReadBuffer.class,connector, block);
         short c1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=2){
             c1 += Bits.getChar(value, k);
         }
         short c2 = 0;
         for(int k = 0, klen = (value.length >> 1); k < klen; k++){
-            c2 +=cb.getShort(k);
+            c2 +=cb.get(k);
         }
         assertEquals(c1, c2);
         exp = false;
         try {
-            cb.getShort(value.length);
+            cb.get(value.length);
         } catch (BufferIndexOutOfBoundsException e) {
             exp = true;
         }
@@ -191,19 +201,19 @@ public class BufferTest  extends TestCase {
 
 
     private void longTest(byte[] value, Connector connector, FileBlock block) {
-        boolean exp;LongReadBuffer db = new LongReadBuffer(connector, block);
+        boolean exp;LongReadBuffer db = createBuffer(LongReadBuffer.class,connector, block);
         long d1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=8){
             d1 += Bits.getLong(value, k);
         }
         long d2 = 0;
         for(int k = 0, klen = (value.length >> 3); k < klen; k++){
-            d2 +=db.getLong(k);
+            d2 +=db.get(k);
         }
         assertEquals(d1, d2);
         exp = false;
         try {
-            db.getLong(value.length);
+            db.get(value.length);
         } catch (BufferIndexOutOfBoundsException e) {
             exp = true;
         }
@@ -221,7 +231,7 @@ public class BufferTest  extends TestCase {
         FileBlock block = constructor.newInstance(u, "0");
         EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(value).anyTimes();
         control.replay();
-        final ByteReadBuffer buffer = new ByteReadBuffer(connector, block);
+        final ByteReadBuffer buffer =  createBuffer(ByteReadBuffer.class, connector, block);
         Thread[] t = new Thread[100];
         for(int i = 0; i < t.length; i++){
             if((i & 1) == 0) {

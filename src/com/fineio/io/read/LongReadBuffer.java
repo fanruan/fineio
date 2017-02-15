@@ -8,8 +8,8 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/14.
  */
-public class LongReadBuffer extends ByteReadBuffer {
-    public LongReadBuffer(Connector connector, FileBlock block) {
+public class LongReadBuffer extends ReadBuffer {
+    private LongReadBuffer(Connector connector, FileBlock block) {
         super(connector, block);
     }
 
@@ -17,7 +17,7 @@ public class LongReadBuffer extends ByteReadBuffer {
         return MemoryConstants.OFFSET_LONG;
     }
 
-    public final long getLong(int p) {
+    public final long get(int p) {
         checkIndex(p);
         return MemoryUtils.getLong(address, p);
     }

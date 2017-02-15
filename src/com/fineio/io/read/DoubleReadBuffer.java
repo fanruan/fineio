@@ -8,8 +8,8 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/14.
  */
-public class DoubleReadBuffer extends ByteReadBuffer {
-    public DoubleReadBuffer(Connector connector, FileBlock block) {
+public class DoubleReadBuffer extends ReadBuffer {
+    private DoubleReadBuffer(Connector connector, FileBlock block) {
         super(connector, block);
     }
 
@@ -17,7 +17,7 @@ public class DoubleReadBuffer extends ByteReadBuffer {
         return MemoryConstants.OFFSET_DOUBLE;
     }
 
-    public final double getDouble(int p) {
+    public final double get(int p) {
         checkIndex(p);
         return MemoryUtils.getDouble(address, p);
     }

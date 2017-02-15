@@ -2,15 +2,19 @@ package com.fineio.file;
 
 import com.fineio.base.Bits;
 import com.fineio.exception.BlockNotFoundException;
+import com.fineio.exception.BufferConstructException;
+import com.fineio.io.Buffer;
+import com.fineio.io.read.ReadBuffer;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 
+import java.lang.reflect.Constructor;
 import java.net.URI;
 
 /**
  * Created by daniel on 2017/2/9.
  */
-public final class FineReadIOFile extends FineIOFile {
+public final class FineReadIOFile extends FineIOFile<ReadBuffer> {
 
     FineReadIOFile(Connector connector, URI uri){
         super(connector, uri);
@@ -31,13 +35,5 @@ public final class FineReadIOFile extends FineIOFile {
     public String getPath(){
         return uri.getPath();
     }
-
-
-//    public Buffer createBuffer(int index) {
-//
-//    }
-
-
-
 
 }

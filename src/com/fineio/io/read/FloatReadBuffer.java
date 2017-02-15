@@ -8,8 +8,8 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/14.
  */
-public class FloatReadBuffer extends ByteReadBuffer {
-    public FloatReadBuffer(Connector connector, FileBlock block) {
+public class FloatReadBuffer extends ReadBuffer {
+    private FloatReadBuffer(Connector connector, FileBlock block) {
         super(connector, block);
     }
 
@@ -17,7 +17,7 @@ public class FloatReadBuffer extends ByteReadBuffer {
         return MemoryConstants.OFFSET_FLOAT;
     }
 
-    public final float getFloat(int p) {
+    public final float get(int p) {
         checkIndex(p);
         return MemoryUtils.getFloat(address, p);
     }

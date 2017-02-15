@@ -6,6 +6,9 @@ import com.fineio.exception.ConstructException;
 import com.fineio.exception.MemorySetException;
 import com.fineio.file.FineIOFile;
 import com.fineio.file.FineWriteIOFile;
+import com.fineio.io.Buffer;
+import com.fineio.io.read.ReadBuffer;
+import com.fineio.io.write.WriteBuffer;
 import com.fineio.memory.MemoryConf;
 import com.fineio.storage.Connector;
 
@@ -20,6 +23,30 @@ public final  class FineIO {
 
     private static Constructor<FineReadIOFile> CONS_READ ;
     private static Constructor<FineWriteIOFile> CONS_WRITE ;
+
+    public interface MODEL<T extends Buffer> {
+         MODEL<ReadBuffer> READ = new MODEL<ReadBuffer>() {
+
+             @Override
+             public FineReadIOFile createIOFile(Connector connector, URI uri) {
+                 return createReadIOFile(connector, uri);
+             }
+         };
+         MODEL<WriteBuffer> WRITE = new MODEL<WriteBuffer>() {
+
+             @Override
+             public FineWriteIOFile createIOFile(Connector connector, URI uri) {
+                 return  createWriteIOFile(connector, uri);
+             }
+         };
+
+        FineIOFile<T> createIOFile(Connector connector, URI uri);
+    }
+
+    public static <T extends Buffer> FineIOFile<T> createIOFile(Connector connector, URI uri , MODEL<T> model) {
+        return model.createIOFile(connector, uri);
+    }
+
 
     static {
         try {
@@ -39,7 +66,7 @@ public final  class FineIO {
      * @param uri
      * @return
      */
-    public static FineIOFile createReadIOFile(Connector connector, URI uri) {
+    private static FineReadIOFile createReadIOFile(Connector connector, URI uri) {
         try {
             return CONS_READ.newInstance(connector, uri);
         } catch (InstantiationException e) {
@@ -58,7 +85,7 @@ public final  class FineIO {
      * @param uri
      * @return
      */
-    public static FineIOFile createWriteIOFile(Connector connector, URI uri) {
+    public static FineWriteIOFile createWriteIOFile(Connector connector, URI uri) {
         try {
             return CONS_WRITE.newInstance(connector, uri);
         } catch (InstantiationException e) {

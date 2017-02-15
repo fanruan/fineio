@@ -3,6 +3,8 @@ package com.fineio.test;
 import com.fineio.FineIO;
 import com.fineio.base.Bits;
 import com.fineio.file.*;
+import com.fineio.io.read.ReadBuffer;
+import com.fineio.io.write.WriteBuffer;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
@@ -33,7 +35,7 @@ public class FineIOTest extends TestCase {
         FileBlock block = constructor.newInstance(u, head.get(null));
         EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(res).anyTimes();
         control.replay();
-        FineIOFile file = FineIO.createReadIOFile(connector , u);
+        FineIOFile<ReadBuffer> file = FineIO.createIOFile(connector , u, FineIO.MODEL.READ);
         assertTrue(file instanceof FineReadIOFile);
     }
 
@@ -41,7 +43,7 @@ public class FineIOTest extends TestCase {
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
         URI u = new URI("");
-        FineIOFile file = FineIO.createWriteIOFile(connector, u);
+        FineIOFile<WriteBuffer> file = FineIO.createWriteIOFile(connector, u);
         assertTrue(file instanceof FineWriteIOFile);
     }
 }

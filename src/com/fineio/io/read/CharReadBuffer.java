@@ -8,8 +8,8 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/14.
  */
-public class CharReadBuffer extends ByteReadBuffer {
-    public CharReadBuffer(Connector connector, FileBlock block) {
+public class CharReadBuffer extends ReadBuffer {
+    private CharReadBuffer(Connector connector, FileBlock block) {
         super(connector, block);
     }
 
@@ -18,7 +18,7 @@ public class CharReadBuffer extends ByteReadBuffer {
     }
 
 
-    public final char getChar(int p) {
+    public final char get(int p) {
         checkIndex(p);
         return MemoryUtils.getChar(address, p);
     }

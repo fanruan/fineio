@@ -8,9 +8,9 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/14.
  */
-public class IntReadBuffer extends ByteReadBuffer {
+public class IntReadBuffer extends ReadBuffer {
 
-    public IntReadBuffer(Connector connector, FileBlock block) {
+    private IntReadBuffer(Connector connector, FileBlock block) {
         super(connector, block);
     }
 
@@ -19,7 +19,7 @@ public class IntReadBuffer extends ByteReadBuffer {
     }
 
 
-    public final int getInt(int p) {
+    public final int get(int p) {
         checkIndex(p);
         return MemoryUtils.getInt(address, p);
     }

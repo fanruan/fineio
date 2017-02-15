@@ -98,7 +98,7 @@ public class StandardEncrypter implements IEncrypter {
 		Random rand = new Random();
 		
 		for (int i = 0; i < buff.length; i ++) {
-			// Encrypted to get less predictability for poorly implemented
+			// Encrypted to getByte less predictability for poorly implemented
 			// rand functions.
 			buff[i] = encryptByte((byte) rand.nextInt(256));
 		}
