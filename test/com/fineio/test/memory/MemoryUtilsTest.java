@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 /**
  * Created by daniel on 2017/2/8.
  */
-public class memoryUtilsTest extends TestCase {
+public class MemoryUtilsTest extends TestCase {
 
 
     public void testDouble(){

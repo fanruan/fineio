@@ -43,6 +43,14 @@ public final  class FineIO {
         FineIOFile<T> createIOFile(Connector connector, URI uri);
     }
 
+    /**
+     * 创建IO文件
+     * @param connector 连接器
+     * @param uri uri
+     * @param model 模式
+     * @param <T>
+     * @return
+     */
     public static <T extends Buffer> FineIOFile<T> createIOFile(Connector connector, URI uri , MODEL<T> model) {
         return model.createIOFile(connector, uri);
     }
@@ -85,7 +93,7 @@ public final  class FineIO {
      * @param uri
      * @return
      */
-    public static FineWriteIOFile createWriteIOFile(Connector connector, URI uri) {
+    private static FineWriteIOFile createWriteIOFile(Connector connector, URI uri) {
         try {
             return CONS_WRITE.newInstance(connector, uri);
         } catch (InstantiationException e) {
@@ -105,6 +113,14 @@ public final  class FineIO {
      */
     public static void setTotalMemSize(long size) throws MemorySetException {
         MemoryConf.setTotalMemSize(size);
+    }
+
+    /**
+     * @see MemoryConf
+     * @return
+     */
+    public static long getTotalMemSize() {
+        return MemoryConf.getTotalMemSize();
     }
 
     /**

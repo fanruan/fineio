@@ -43,7 +43,7 @@ public class FineIOTest extends TestCase {
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
         URI u = new URI("");
-        FineIOFile<WriteBuffer> file = FineIO.createWriteIOFile(connector, u);
+        FineIOFile<WriteBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE);
         assertTrue(file instanceof FineWriteIOFile);
     }
 }
