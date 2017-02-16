@@ -14,12 +14,14 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class ByteReadBuffer extends  ReadBuffer {
 
+    public static final int OFFSET = MemoryConstants.OFFSET_BYTE;
+
     private ByteReadBuffer(Connector connector, FileBlock block) {
         super(connector, block);
     }
 
     protected int getLengthOffset() {
-        return MemoryConstants.OFFSET_BYTE;
+        return OFFSET;
     }
 
 

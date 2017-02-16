@@ -23,11 +23,18 @@ public interface Connector {
     void write(FileBlock file, byte[] v);
 
     /**
-     * 写文件时单个块的最大size
-     * 建议大于4M，并且是2的次方，建议提供用户配置自定义配置块的尺寸
-     * 单位是byte建议
+     * 删除块
+     * @param block
      * @return
      */
-    long getBlockSize();
+    boolean delete(FileBlock block);
+
+    /**
+     * 写文件时单个块的最大size偏移量
+     * 用1L << value 表示单个块的最大尺寸，不建议超过28 （256M） 不小于22 (4M)
+     * 可以根据磁盘的读写能力控制这个值的大小
+     * @return
+     */
+    byte getBlockOffset();
 
 }

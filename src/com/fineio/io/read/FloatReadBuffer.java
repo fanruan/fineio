@@ -9,12 +9,15 @@ import com.fineio.storage.Connector;
  * Created by daniel on 2017/2/14.
  */
 public class FloatReadBuffer extends ReadBuffer {
+
+    public static final int OFFSET = MemoryConstants.OFFSET_FLOAT;
+
     private FloatReadBuffer(Connector connector, FileBlock block) {
         super(connector, block);
     }
 
     protected int getLengthOffset() {
-        return MemoryConstants.OFFSET_FLOAT;
+        return OFFSET;
     }
 
     public final float get(int p) {

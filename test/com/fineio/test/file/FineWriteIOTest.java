@@ -20,13 +20,13 @@ public class FineWriteIOTest extends TestCase {
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
         URI u = new URI("");
-        long size = 61217293;
-        connector.getBlockSize();
+        byte size = 26;
+        connector.getBlockOffset();
         EasyMock.expectLastCall().andReturn(size).anyTimes();
         control.replay();
         FineIOFile file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE);
-        Field field = FineIOFile.class.getDeclaredField("block_size");
+        Field field = FineIOFile.class.getDeclaredField("block_size_offset");
         field.setAccessible(true);
-        assertEquals(size, ((Long)field.get(file)).longValue());
+        assertEquals(size, ((Byte)field.get(file)).byteValue());
     }
 }

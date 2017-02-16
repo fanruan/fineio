@@ -5,6 +5,8 @@ package com.fineio.file;
  */
 public final class FileConstants {
 
+    final static String OFFSET_FIELD_NAME = "OFFSET";
+
     final static String HEAD = "head";
 
 }

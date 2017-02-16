@@ -5,7 +5,10 @@ import com.fineio.exception.BlockNotFoundException;
 import com.fineio.file.FileBlock;
 import com.fineio.file.FileConstants;
 import com.fineio.file.FineReadIOFile;
+import com.fineio.io.read.IntReadBuffer;
+import com.fineio.io.read.LongReadBuffer;
 import com.fineio.storage.Connector;
+import com.fr.third.org.apache.poi.hssf.record.formula.functions.Int;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
@@ -20,17 +23,9 @@ import java.net.URI;
  */
 public class FineReadIOFileTest extends TestCase {
 
-    private long[] createRandomLong(){
-        int len = (int) (Math.random()*1000);
-        long[] arrays = new long[len];
-        for(int i = 0; i< len; i++){
-            arrays[i] = Double.doubleToLongBits(Math.random() * 100000000000d);
-        }
-        return arrays;
-    }
 
     public void testConstruct() throws Exception{
-        for(int i = 0 ;i < 10000; i++){
+        for(int i = 0 ;i < 100; i++){
             constructTest();
         }
     }
@@ -48,26 +43,19 @@ public class FineReadIOFileTest extends TestCase {
         control.replay();
         boolean exp = false;
         try {
-            Constructor<FineReadIOFile> cons = FineReadIOFile.class.getDeclaredConstructor(Connector.class, URI.class);
-            cons.setAccessible(true);
-            cons.newInstance(connector, u);
+            FineReadIOFile.createFineIO(connector, u, LongReadBuffer.class);
         } catch (BlockNotFoundException e){
             exp = true;
-        } catch (InvocationTargetException e) {
-            if(e.getTargetException() instanceof  BlockNotFoundException){
-                exp = true;
-            }
         }
         assertTrue(exp);
 
     }
 
     public void constructTest() throws Exception {
-        long[] length = createRandomLong();
-        int len = length.length;
+        int len =  (int)(Math.random() * 100d);
         byte[] res = new byte[16];
-        Bits.putLong(res, 0, (long)len);
-        Bits.putLong(res, 8, (long)len * 2);
+        Bits.putInt(res, 0, len * 2);
+        res[8] =  (byte) len;
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
         URI u = new URI("");
@@ -78,15 +66,21 @@ public class FineReadIOFileTest extends TestCase {
         FileBlock block = constructor.newInstance(u, head.get(null));
         EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(res).anyTimes();
         control.replay();
-        Constructor<FineReadIOFile> cons = FineReadIOFile.class.getDeclaredConstructor(Connector.class, URI.class);
-        cons.setAccessible(true);
-        FineReadIOFile file = cons.newInstance(connector, u);
+        FineReadIOFile<LongReadBuffer> file = FineReadIOFile.createFineIO(connector, u, LongReadBuffer.class);
         Field lenField = FineReadIOFile.class.getSuperclass().getDeclaredField("blocks");
-        Field blockSizeField =  FineReadIOFile.class.getSuperclass().getDeclaredField("block_size");
+        Field blockSizeField =  FineReadIOFile.class.getSuperclass().getDeclaredField("block_size_offset");
         lenField.setAccessible(true);
         blockSizeField.setAccessible(true);
         assertEquals(file.getPath(), u.getPath());
-        assertEquals(len, ((Long)lenField.get(file)).longValue());
-        assertEquals(len * 2, ((Long)blockSizeField.get(file)).longValue());
+        assertEquals(len * 2, ((Integer)lenField.get(file)).intValue());
+        assertEquals(len - LongReadBuffer.OFFSET, ((Byte)blockSizeField.get(file)).byteValue());
+        FineReadIOFile<IntReadBuffer> ifile = FineReadIOFile.createFineIO(connector, u, IntReadBuffer.class);
+        lenField = FineReadIOFile.class.getSuperclass().getDeclaredField("blocks");
+        blockSizeField =  FineReadIOFile.class.getSuperclass().getDeclaredField("block_size_offset");
+        lenField.setAccessible(true);
+        blockSizeField.setAccessible(true);
+        assertEquals(ifile.getPath(), u.getPath());
+        assertEquals(len * 2, ((Integer)lenField.get(ifile)).intValue());
+        assertEquals(len - IntReadBuffer.OFFSET, ((Byte)blockSizeField.get(ifile)).byteValue());
     }
 }

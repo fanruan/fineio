@@ -6,12 +6,10 @@ import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
 import com.fineio.file.FileConstants;
 import com.fineio.file.FineIOFile;
-import com.fineio.file.FineReadIOFile;
 import com.fineio.io.Buffer;
 import com.fineio.io.read.*;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
-import com.fr.third.org.apache.poi.hssf.record.formula.functions.Char;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
@@ -29,8 +27,7 @@ public class BufferTest  extends TestCase {
 
 
     public void  testOffSet() throws  Exception {
-        byte[] length = createRandomByte();
-        int len = length.length;
+        int len = (int)(Math.random() * 100d);
         byte[] res = new byte[16];
         Bits.putLong(res, 0, (long)len);
         Bits.putLong(res, 8, (long)len * 2);
@@ -44,43 +41,59 @@ public class BufferTest  extends TestCase {
         FileBlock block = constructor.newInstance(u, head.get(null));
         EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(res).anyTimes();
         control.replay();
-        FineIOFile<ReadBuffer> readIOFile = FineIO.createIOFile(connector, u, FineIO.MODEL.READ);
-        ByteReadBuffer byteReadBuffer = readIOFile.createBuffer(ByteReadBuffer.class, 0);
+        FineIOFile readIOFile = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_LONG);
+        ByteReadBuffer byteReadBuffer = getReadBuffer(readIOFile,ByteReadBuffer.class );
         Method method = ByteReadBuffer.class.getDeclaredMethod("getLengthOffset");
         method.setAccessible(true);
         int v = (Integer) method.invoke(byteReadBuffer);
         assertEquals(v, MemoryConstants.OFFSET_BYTE);
-        DoubleReadBuffer doubleReadBuffer = readIOFile.createBuffer(DoubleReadBuffer.class, 0);
+        DoubleReadBuffer doubleReadBuffer = getReadBuffer(readIOFile, DoubleReadBuffer.class);
         method = DoubleReadBuffer.class.getDeclaredMethod("getLengthOffset");
         method.setAccessible(true);
         v = (Integer) method.invoke(doubleReadBuffer);
-        LongReadBuffer longReadBuffer = readIOFile.createBuffer(LongReadBuffer.class, 0);
+        LongReadBuffer longReadBuffer = getReadBuffer(readIOFile, LongReadBuffer.class );
         method = LongReadBuffer.class.getDeclaredMethod("getLengthOffset");
         method.setAccessible(true);
         v = (Integer) method.invoke(longReadBuffer);
         assertEquals(v, MemoryConstants.OFFSET_LONG);
-        IntReadBuffer intReadBuffer = readIOFile.createBuffer(IntReadBuffer.class, 0);
+        IntReadBuffer intReadBuffer = getReadBuffer(readIOFile, IntReadBuffer.class );
         method = IntReadBuffer.class.getDeclaredMethod("getLengthOffset");
         method.setAccessible(true);
         v = (Integer) method.invoke(intReadBuffer);
         assertEquals(v, MemoryConstants.OFFSET_INT);
-        CharReadBuffer charReadBuffer = readIOFile.createBuffer(CharReadBuffer.class, 0);
+        CharReadBuffer charReadBuffer = getReadBuffer(readIOFile, CharReadBuffer.class );
         method = CharReadBuffer.class.getDeclaredMethod("getLengthOffset");
         method.setAccessible(true);
         v = (Integer) method.invoke(charReadBuffer);
         assertEquals(v, MemoryConstants.OFFSET_CHAR);
-        FloatReadBuffer floatReadBuffer = readIOFile.createBuffer(FloatReadBuffer.class, 0);
+        FloatReadBuffer floatReadBuffer = getReadBuffer(readIOFile, FloatReadBuffer.class );
         method = FloatReadBuffer.class.getDeclaredMethod("getLengthOffset");
         method.setAccessible(true);
         v = (Integer) method.invoke(floatReadBuffer);
         assertEquals(v, MemoryConstants.OFFSET_FLOAT);
 
-        ShortReadBuffer shortReadBuffer = readIOFile.createBuffer(ShortReadBuffer.class, 0);
+        ShortReadBuffer shortReadBuffer = getReadBuffer(readIOFile, ShortReadBuffer.class );
         method = ShortReadBuffer.class.getDeclaredMethod("getLengthOffset");
         method.setAccessible(true);
         v = (Integer) method.invoke(shortReadBuffer);
         assertEquals(v, MemoryConstants.OFFSET_SHORT);
 
+    }
+
+    private static <T extends ReadBuffer> T getReadBuffer(FineIOFile<ReadBuffer> readIOFile, Class<T> clazz) {
+        try {
+            Method method = FineIOFile.class.getDeclaredMethod("createBuffer", Class.class, int.class);
+            method.setAccessible(true);
+            return (T) method.invoke(readIOFile, clazz, 0);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 
@@ -291,7 +304,7 @@ public class BufferTest  extends TestCase {
         EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(value).anyTimes();
         control.replay();
         final ByteReadBuffer buffer =  createBuffer(ByteReadBuffer.class, connector, block);
-        Thread[] t = new Thread[100];
+        Thread[] t = new Thread[1000];
         for(int i = 0; i < t.length; i++){
             if((i & 1) == 0) {
                 t[i] = new Thread() {
@@ -302,7 +315,7 @@ public class BufferTest  extends TestCase {
                                 b += buffer.get(k);
                             }
                         } catch (Throwable e) {
-                            e.printStackTrace();
+                            assertFalse(true);
                         }
                     }
                 };

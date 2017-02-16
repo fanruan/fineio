@@ -30,7 +30,12 @@ public class ZipConnector implements Connector {
     }
 
     @Override
-    public long getBlockSize() {
-        return 1 << 26;
+    public boolean delete(FileBlock block) {
+        return false;
+    }
+
+    @Override
+    public byte getBlockOffset() {
+        return 26;
     }
 }

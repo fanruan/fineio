@@ -15,8 +15,8 @@ public abstract class FineIOFile<E extends Buffer> {
 
     protected URI uri;
     protected Connector connector;
-    protected long blocks;
-    protected long block_size;
+    protected int blocks;
+    protected byte block_size_offset;
 
 
     FineIOFile(Connector connector, URI uri) {
@@ -28,7 +28,7 @@ public abstract class FineIOFile<E extends Buffer> {
     }
 
 
-    public <T extends E> T createBuffer(Class<T> clazz, int index) {
+    protected  <T extends E> T createBuffer(Class<T> clazz, int index) {
         try {
             Constructor<T> constructor = clazz.getDeclaredConstructor(Connector.class, FileBlock.class);
             constructor.setAccessible(true);

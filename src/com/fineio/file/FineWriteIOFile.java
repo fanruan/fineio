@@ -1,6 +1,5 @@
 package com.fineio.file;
 
-import com.fineio.io.Buffer;
 import com.fineio.io.write.WriteBuffer;
 import com.fineio.storage.Connector;
 
@@ -13,7 +12,7 @@ public final class FineWriteIOFile extends  FineIOFile<WriteBuffer> {
 
     FineWriteIOFile(Connector connector, URI uri){
         super(connector, uri);
-        this.block_size = connector.getBlockSize();
+        this.block_size_offset = connector.getBlockOffset();
     }
 
 

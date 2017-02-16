@@ -10,11 +10,22 @@ import org.easymock.IMocksControl;
 
 import java.lang.reflect.Constructor;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by daniel on 2017/2/13.
  */
 public class K {
+
+    private static class Q<T extends List> {
+
+        private T[] v;
+
+        public void  create() {
+            v = (T[])new List[10];
+        }
+    }
 
 
     private static  byte[] createRandomByte(){
@@ -27,6 +38,7 @@ public class K {
     }
 
     public static void main(String[] args) throws Exception {
+        new Q<ArrayList>().create();
         byte[] bytes  = createRandomByte();
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
