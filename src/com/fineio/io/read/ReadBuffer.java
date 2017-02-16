@@ -42,9 +42,7 @@ public abstract class ReadBuffer extends Buffer {
                 byte[] bytes = new byte[max_byte_len];
                 byteLen = is.read(bytes);
                 address = MemoryUtils.allocate(byteLen);
-                for ( int i  = 0;i < byteLen; i++) {
-                    MemoryUtils.put(address, i, bytes[i]);
-                }
+                MemoryUtils.copyMemory(bytes, address, byteLen);
                 load = true;
                 max_size = byteLen >> getLengthOffset();
             } catch (IOException e) {

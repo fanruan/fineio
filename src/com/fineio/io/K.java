@@ -36,7 +36,7 @@ public class K {
     }
 
     public static void main(String[] args) throws Exception {
-        doubleSumTest();
+
         final byte[] bytes  = createRandomByte(1 << 30);
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
@@ -54,6 +54,7 @@ public class K {
         byteTest(bytes, connector, block);
         intTest(bytes, connector, block);
         doubleTest(bytes, connector, block);
+        doubleSumTest();
     }
 
     private static void doubleSumTest() throws Exception {

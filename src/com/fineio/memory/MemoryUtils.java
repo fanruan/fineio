@@ -21,6 +21,12 @@ public final class MemoryUtils {
         }
     }
 
+    private static final long arrayBaseOffset = (long)unsafe.arrayBaseOffset(byte[].class);
+
+    public static void copyMemory(byte[] src, long address, long size) {
+        unsafe.copyMemory(src, arrayBaseOffset, null, address, size);
+    }
+
     private static Unsafe getUnsafe() {
         return  unsafe;
     }
