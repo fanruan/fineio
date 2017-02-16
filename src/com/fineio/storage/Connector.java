@@ -2,6 +2,9 @@ package com.fineio.storage;
 
 import com.fineio.file.FileBlock;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
  * Created by daniel on 2017/2/9.
  * 存储对接接口
@@ -13,14 +16,14 @@ public interface Connector {
      * @param file
      * @return
      */
-    byte[] read(FileBlock file);
+    InputStream read(FileBlock file);
 
     /**
      * 写整快的方法
      * @param file
      * @param v
      */
-    void write(FileBlock file, byte[] v);
+    void write(FileBlock file, OutputStream outputStream);
 
     /**
      * 删除块

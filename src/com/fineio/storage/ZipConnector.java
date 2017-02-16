@@ -4,6 +4,9 @@ import com.fineio.file.FileBlock;
 import com.fineio.third.zip4j.core.ZipFile;
 import com.fineio.third.zip4j.exception.ZipException;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+
 
 /**
  * Created by daniel on 2017/2/9.
@@ -20,12 +23,12 @@ public class ZipConnector implements Connector {
     }
 
     @Override
-    public byte[] read(FileBlock file) {
-        return new byte[0];
+    public InputStream read(FileBlock file) {
+        return null;
     }
 
     @Override
-    public void write(FileBlock file, byte[] v) {
+    public void write(FileBlock file, OutputStream outputStream) {
 
     }
 

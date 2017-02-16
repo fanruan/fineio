@@ -7,6 +7,8 @@ import com.fineio.io.read.*;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.net.URI;
@@ -136,17 +138,23 @@ public final class FineReadIOFile<T extends ReadBuffer> extends FineIOFile<T> {
 
 
     private void readHeader(byte offset) {
-        byte[] header = this.connector.read(new FileBlock(uri, FileConstants.HEAD));
-        if(header == null){
+        InputStream is  = this.connector.read(new FileBlock(uri, FileConstants.HEAD));
+        if(is == null){
             throw new BlockNotFoundException("block:" + uri.toString() +" not found!");
         }
-        int p = 0;
-        blocks = Bits.getInt(header, p);
-        buffers = (T[])new ReadBuffer[blocks];
-        //先空个long的位置
-        p += MemoryConstants.STEP_LONG;
-        block_size_offset = (byte) (header[p] - offset);
-        single_block_len = (1L << block_size_offset) - 1;
+        try {
+            byte[] header = new byte[9];
+            is.read(header);
+            int p = 0;
+            blocks = Bits.getInt(header, p);
+            buffers = (T[])new ReadBuffer[blocks];
+            //先空个long的位置
+            p += MemoryConstants.STEP_LONG;
+            block_size_offset = (byte) (header[p] - offset);
+            single_block_len = (1L << block_size_offset) - 1;
+        } catch (IOException e) {
+            throw new BlockNotFoundException("block:" + uri.toString() +" not found!");
+        }
     }
 
     public String getPath(){

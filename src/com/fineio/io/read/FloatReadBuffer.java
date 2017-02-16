@@ -12,8 +12,8 @@ public class FloatReadBuffer extends ReadBuffer {
 
     public static final int OFFSET = MemoryConstants.OFFSET_FLOAT;
 
-    private FloatReadBuffer(Connector connector, FileBlock block) {
-        super(connector, block);
+    private FloatReadBuffer(Connector connector, FileBlock block, int max_offset) {
+        super(connector, block, max_offset);
     }
 
     protected int getLengthOffset() {

@@ -1,5 +1,6 @@
 package com.fineio.io.read;
 
+import com.fineio.base.Bits;
 import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
@@ -8,6 +9,10 @@ import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Created by daniel on 2017/2/9.
  */
@@ -15,9 +20,12 @@ public abstract class ReadBuffer extends Buffer {
     protected volatile int byteLen;
     protected volatile int max_size;
     private volatile boolean load = false;
+    private int max_byte_len;
 
-    protected ReadBuffer(Connector connector, FileBlock block) {
+
+    protected ReadBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block);
+        this.max_byte_len = 1 << (max_offset + getLengthOffset());
     }
 
 
@@ -26,18 +34,22 @@ public abstract class ReadBuffer extends Buffer {
             if (load) {
                 return;
             }
-            byte[] bytes = connector.read(block);
-            if (bytes == null) {
+            InputStream is = connector.read(block);
+            if (is == null) {
                 throw new BlockNotFoundException("block:" + block.toString() + " not found!");
             }
-            byteLen = bytes.length;
-            address = MemoryUtils.allocate(bytes.length);
-            long i = 0;
-            for (byte b : bytes) {
-                MemoryUtils.put(address, i++, b);
+            try {
+                byte[] bytes = new byte[max_byte_len];
+                byteLen = is.read(bytes);
+                address = MemoryUtils.allocate(byteLen);
+                for ( int i  = 0;i < byteLen; i++) {
+                    MemoryUtils.put(address, i, bytes[i]);
+                }
+                load = true;
+                max_size = byteLen >> getLengthOffset();
+            } catch (IOException e) {
+                throw new BlockNotFoundException("block:" + block.toString() + " not found!");
             }
-            load = true;
-            max_size = byteLen >> getLengthOffset();
         }
     }
 
@@ -59,9 +71,13 @@ public abstract class ReadBuffer extends Buffer {
         if(load){
             throw new BufferIndexOutOfBoundsException(p);
         } else {
-            loadData();
-            checkIndex(p);
+            ll(p);
         }
+    }
+
+    private void ll(int p) {
+        loadData();
+        checkIndex(p);
     }
 
     public synchronized void clear() {

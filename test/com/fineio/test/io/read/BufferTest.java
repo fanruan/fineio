@@ -10,10 +10,14 @@ import com.fineio.io.Buffer;
 import com.fineio.io.read.*;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
+import com.sun.mail.iap.ByteArray;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
+import org.easymock.IAnswer;
 import org.easymock.IMocksControl;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -39,7 +43,8 @@ public class BufferTest  extends TestCase {
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, head.get(null));
-        EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(res).anyTimes();
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(res);
+        EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(byteArrayInputStream).anyTimes();
         control.replay();
         FineIOFile readIOFile = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_LONG);
         ByteReadBuffer byteReadBuffer = getReadBuffer(readIOFile,ByteReadBuffer.class );
@@ -97,8 +102,8 @@ public class BufferTest  extends TestCase {
     }
 
 
-    private byte[] createRandomByte(){
-        int len = 1 << 10;
+    private byte[] createRandomByte(int off){
+        int len = 1 << off;
         byte[] arrays = new byte[len];
         for(int i = 0; i< len; i++){
             arrays[i] =  (byte)(Double.doubleToLongBits(Math.random() * 100000000000d));
@@ -113,38 +118,43 @@ public class BufferTest  extends TestCase {
     }
 
     public void testBuffer() throws Exception {
-
-        byte[] value = createRandomByte();
+        int len = 10;
+        final byte[] value = createRandomByte(len);
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
         URI u = new URI("");
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, "0");
-        EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(value).anyTimes();
+        EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
+            @Override
+            public InputStream answer() throws Throwable {
+                return new ByteArrayInputStream(value);
+            }
+        }).anyTimes();
         control.replay();
-        byteTest(value, connector, block);
-        intTest(value, connector, block);
-        doubleTest(value, connector, block);
-        charTest(value, connector, block);
-        shortTest(value, connector, block);
-        longTest(value, connector, block);
-        floatTest(value, connector, block);
+        byteTest(value, connector, block, len);
+        intTest(value, connector, block, len);
+        doubleTest(value, connector, block, len);
+        charTest(value, connector, block, len);
+        shortTest(value, connector, block, len);
+        longTest(value, connector, block, len);
+        floatTest(value, connector, block, len);
     }
 
-    private  static  <T extends Buffer>  T createBuffer(Class<T> clazz, Object connector, Object block) {
+    private  static  <T extends Buffer>  T createBuffer(Class<T> clazz, Object connector, Object block, int offset) {
         try {
-            Constructor<T>  constructor= clazz.getDeclaredConstructor(Connector.class, FileBlock.class);
+            Constructor<T>  constructor= clazz.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
             constructor.setAccessible(true);
-            return  constructor.newInstance(connector, block);
+            return  constructor.newInstance(connector, block, offset);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    private void byteTest(byte[] value, Connector connector, FileBlock block) {
-        ByteReadBuffer buffer = createBuffer(ByteReadBuffer.class, connector, block);
+    private void byteTest(byte[] value, Connector connector, FileBlock block, int off) {
+        ByteReadBuffer buffer = createBuffer(ByteReadBuffer.class, connector, block, off);
         byte r = 0;
         for(int k = 0; k < value.length; k++){
             r +=value[k];
@@ -164,8 +174,8 @@ public class BufferTest  extends TestCase {
         buffer.clear();
     }
 
-    private void intTest(byte[] value, Connector connector, FileBlock block) {
-        boolean exp;IntReadBuffer ib = createBuffer(IntReadBuffer.class, connector, block);
+    private void intTest(byte[] value, Connector connector, FileBlock block, int off) {
+        boolean exp;IntReadBuffer ib = createBuffer(IntReadBuffer.class, connector, block, off -2);
         int v1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=4){
             v1 += Bits.getInt(value, k);
@@ -186,8 +196,8 @@ public class BufferTest  extends TestCase {
     }
 
 
-    private void floatTest(byte[] value, Connector connector, FileBlock block) {
-        boolean exp;FloatReadBuffer ib = createBuffer(FloatReadBuffer.class, connector, block);
+    private void floatTest(byte[] value, Connector connector, FileBlock block, int off) {
+        boolean exp;FloatReadBuffer ib = createBuffer(FloatReadBuffer.class, connector, block, off -2);
         float v1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=4){
             v1 += Bits.getFloat(value, k);
@@ -207,8 +217,8 @@ public class BufferTest  extends TestCase {
         ib.clear();
     }
 
-    private void doubleTest(byte[] value, Connector connector, FileBlock block) {
-        boolean exp;DoubleReadBuffer db = createBuffer(DoubleReadBuffer.class, connector, block);
+    private void doubleTest(byte[] value, Connector connector, FileBlock block, int off) {
+        boolean exp;DoubleReadBuffer db = createBuffer(DoubleReadBuffer.class, connector, block, off -3);
         double d1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=8){
             d1 += Bits.getDouble(value, k);
@@ -228,8 +238,8 @@ public class BufferTest  extends TestCase {
         db.clear();
     }
 
-    private void charTest(byte[] value, Connector connector, FileBlock block) {
-        boolean exp;CharReadBuffer cb = createBuffer(CharReadBuffer.class, connector, block);
+    private void charTest(byte[] value, Connector connector, FileBlock block, int off) {
+        boolean exp;CharReadBuffer cb = createBuffer(CharReadBuffer.class, connector, block, off -1);
         char c1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=2){
             c1 += Bits.getChar(value, k);
@@ -250,8 +260,8 @@ public class BufferTest  extends TestCase {
     }
 
 
-    private void shortTest(byte[] value, Connector connector, FileBlock block) {
-        boolean exp;ShortReadBuffer cb = createBuffer(ShortReadBuffer.class,connector, block);
+    private void shortTest(byte[] value, Connector connector, FileBlock block, int off) {
+        boolean exp;ShortReadBuffer cb = createBuffer(ShortReadBuffer.class,connector, block, off -1);
         short c1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=2){
             c1 += Bits.getChar(value, k);
@@ -272,8 +282,8 @@ public class BufferTest  extends TestCase {
     }
 
 
-    private void longTest(byte[] value, Connector connector, FileBlock block) {
-        boolean exp;LongReadBuffer db = createBuffer(LongReadBuffer.class,connector, block);
+    private void longTest(byte[] value, Connector connector, FileBlock block, int off) {
+        boolean exp;LongReadBuffer db = createBuffer(LongReadBuffer.class,connector, block, off - 3);
         long d1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=8){
             d1 += Bits.getLong(value, k);
@@ -294,29 +304,30 @@ public class BufferTest  extends TestCase {
     }
 
     public void testMultiThread() throws Exception{
-        final byte[] value = createRandomByte();
+        final byte[] value = createRandomByte(10);
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
         URI u = new URI("");
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, "0");
-        EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(value).anyTimes();
+        EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
+            @Override
+            public InputStream answer() throws Throwable {
+                return new ByteArrayInputStream(value);
+            }
+        }).anyTimes();
         control.replay();
-        final ByteReadBuffer buffer =  createBuffer(ByteReadBuffer.class, connector, block);
+        final ByteReadBuffer buffer =  createBuffer(ByteReadBuffer.class, connector, block, 10);
         Thread[] t = new Thread[1000];
         for(int i = 0; i < t.length; i++){
             if((i & 1) == 0) {
                 t[i] = new Thread() {
                     public void run() {
-                        try {
                             byte b = 0;
                             for (int k = 0; k < value.length; k++) {
                                 b += buffer.get(k);
                             }
-                        } catch (Throwable e) {
-                            assertFalse(true);
-                        }
                     }
                 };
             } else {

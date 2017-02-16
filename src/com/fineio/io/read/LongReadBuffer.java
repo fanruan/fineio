@@ -11,8 +11,8 @@ import com.fineio.storage.Connector;
 public class LongReadBuffer extends ReadBuffer {
     public static final int OFFSET = MemoryConstants.OFFSET_LONG;
 
-    private LongReadBuffer(Connector connector, FileBlock block) {
-        super(connector, block);
+    private LongReadBuffer(Connector connector, FileBlock block, int max_offset) {
+        super(connector, block, max_offset);
     }
 
     protected int getLengthOffset() {

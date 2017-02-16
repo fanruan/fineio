@@ -8,8 +8,11 @@ import com.fineio.io.write.WriteBuffer;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
+import org.easymock.IAnswer;
 import org.easymock.IMocksControl;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -33,7 +36,8 @@ public class FineIOTest extends TestCase {
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, head.get(null));
-        EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(res).anyTimes();
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(res);
+        EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(byteArrayInputStream).anyTimes();
         control.replay();
         FineIOFile file = FineIO.createIOFile(connector , u, FineIO.MODEL.READ_LONG);
         assertTrue(file instanceof FineReadIOFile);
@@ -61,12 +65,12 @@ public class FineIOTest extends TestCase {
         int blocks = 4;
         int block_off_set = 23;
         int byteLen = (1 << block_off_set);
-        byte[] block0 =  createRandomByte(byteLen);
-        byte[] block1 =  createRandomByte(byteLen);
-        byte[] block2 =  createRandomByte(byteLen);
-        byte[] block3 =  createRandomByte(byteLen >> 3);
+        final byte[] block0 =  createRandomByte(byteLen);
+        final byte[] block1 =  createRandomByte(byteLen);
+        final byte[] block2 =  createRandomByte(byteLen);
+        final byte[] block3 =  createRandomByte(byteLen >> 3);
         long totalLen = (((long)byteLen) * 3 + block3.length) ;
-        byte[] head = new byte[16];
+        final byte[] head = new byte[16];
         Bits.putInt(head, 0, blocks);
         head[8] = (byte) block_off_set;
         IMocksControl control = EasyMock.createControl();
@@ -77,15 +81,40 @@ public class FineIOTest extends TestCase {
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, fieldHead.get(null));
-        EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(head).anyTimes();
+        EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
+            @Override
+            public InputStream answer() throws Throwable {
+                return new ByteArrayInputStream(head);
+            }
+        }).anyTimes();
         FileBlock block_0 = constructor.newInstance(u, String.valueOf(0));
-        EasyMock.expect(connector.read(EasyMock.eq(block_0))).andReturn(block0).anyTimes();
+        EasyMock.expect(connector.read(EasyMock.eq(block_0))).andAnswer(new IAnswer<InputStream>() {
+            @Override
+            public InputStream answer() throws Throwable {
+                return new ByteArrayInputStream(block0);
+            }
+        }).anyTimes();
         FileBlock block_1 = constructor.newInstance(u, String.valueOf(1));
-        EasyMock.expect(connector.read(EasyMock.eq(block_1))).andReturn(block1).anyTimes();
+        EasyMock.expect(connector.read(EasyMock.eq(block_1))).andAnswer(new IAnswer<InputStream>() {
+            @Override
+            public InputStream answer() throws Throwable {
+                return new ByteArrayInputStream(block1);
+            }
+        }).anyTimes();
         FileBlock block_2 = constructor.newInstance(u, String.valueOf(2));
-        EasyMock.expect(connector.read(EasyMock.eq(block_2))).andReturn(block2).anyTimes();
+        EasyMock.expect(connector.read(EasyMock.eq(block_2))).andAnswer(new IAnswer<InputStream>() {
+            @Override
+            public InputStream answer() throws Throwable {
+                return new ByteArrayInputStream(block2);
+            }
+        }).anyTimes();
         FileBlock block_3 = constructor.newInstance(u, String.valueOf(3));
-        EasyMock.expect(connector.read(EasyMock.eq(block_3))).andReturn(block3).anyTimes();
+        EasyMock.expect(connector.read(EasyMock.eq(block_3))).andAnswer(new IAnswer<InputStream>() {
+            @Override
+            public InputStream answer() throws Throwable {
+                return new ByteArrayInputStream(block3);
+            }
+        }).anyTimes();
         control.replay();
         FineReadIOFile<LongReadBuffer> file = (FineReadIOFile<LongReadBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.READ_LONG);
         long v1 = 0;

@@ -12,8 +12,8 @@ public class CharReadBuffer extends ReadBuffer {
 
     public static final int OFFSET = MemoryConstants.OFFSET_CHAR;
 
-    private CharReadBuffer(Connector connector, FileBlock block) {
-        super(connector, block);
+    private CharReadBuffer(Connector connector, FileBlock block, int max_offset) {
+        super(connector, block, max_offset);
     }
 
     protected int getLengthOffset() {

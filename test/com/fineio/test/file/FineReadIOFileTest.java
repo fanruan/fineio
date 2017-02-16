@@ -11,8 +11,11 @@ import com.fineio.storage.Connector;
 import com.fr.third.org.apache.poi.hssf.record.formula.functions.Int;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
+import org.easymock.IAnswer;
 import org.easymock.IMocksControl;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -53,7 +56,7 @@ public class FineReadIOFileTest extends TestCase {
 
     public void constructTest() throws Exception {
         int len =  (int)(Math.random() * 100d);
-        byte[] res = new byte[16];
+        final byte[] res = new byte[16];
         Bits.putInt(res, 0, len * 2);
         res[8] =  (byte) len;
         IMocksControl control = EasyMock.createControl();
@@ -64,7 +67,12 @@ public class FineReadIOFileTest extends TestCase {
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, head.get(null));
-        EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(res).anyTimes();
+        EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
+            @Override
+            public InputStream answer() throws Throwable {
+                return new ByteArrayInputStream(res);
+            }
+        }).anyTimes();
         control.replay();
         FineReadIOFile<LongReadBuffer> file = FineReadIOFile.createFineIO(connector, u, LongReadBuffer.class);
         Field lenField = FineReadIOFile.class.getSuperclass().getDeclaredField("blocks");

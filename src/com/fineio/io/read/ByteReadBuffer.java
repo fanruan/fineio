@@ -16,8 +16,8 @@ public class ByteReadBuffer extends  ReadBuffer {
 
     public static final int OFFSET = MemoryConstants.OFFSET_BYTE;
 
-    private ByteReadBuffer(Connector connector, FileBlock block) {
-        super(connector, block);
+    private ByteReadBuffer(Connector connector, FileBlock block, int max_offset) {
+        super(connector, block, max_offset);
     }
 
     protected int getLengthOffset() {
