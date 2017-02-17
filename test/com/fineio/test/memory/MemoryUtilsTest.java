@@ -30,6 +30,18 @@ public class MemoryUtilsTest extends TestCase {
         }
     }
 
+    public void testReallocate() {
+        byte[] bytes = createRandomByte();
+        int len = bytes.length;
+        long address = MemoryUtils.allocate(len);
+        MemoryUtils.copyMemory(bytes, address);
+        long a2 = MemoryUtils.reallocate(address, len * 2);
+        MemoryUtils.copyMemory(bytes, a2 + len);
+        for(int i = 0; i < len; i++){
+            assertEquals(MemoryUtils.getByte(a2, i), MemoryUtils.getByte(a2, len + i));
+        }
+    }
+
 
     public void testDouble(){
         for(int i = 0 ;i < 10000; i++){

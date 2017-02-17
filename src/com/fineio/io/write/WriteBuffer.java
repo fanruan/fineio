@@ -7,9 +7,13 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/15.
  */
-public class WriteBuffer extends Buffer {
+public abstract class WriteBuffer extends Buffer {
 
-    protected WriteBuffer(Connector connector, FileBlock block) {
-        super(connector, block);
+    private int byteLen;
+
+
+    protected WriteBuffer(Connector connector, FileBlock block, int max_offset) {
+        super(connector, block, max_offset);
     }
+
 }

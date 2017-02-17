@@ -305,7 +305,7 @@ public class BufferTest  extends TestCase {
 
     public void testThread() throws Exception{
         int i = 0;
-        while (i ++ < 1000) {
+        while (i ++ < 10) {
             testMultiThread();
         }
     }

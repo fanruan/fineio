@@ -20,12 +20,10 @@ public abstract class ReadBuffer extends Buffer {
     protected volatile int byteLen;
     protected volatile int max_size;
     private volatile boolean load = false;
-    private int max_byte_len;
 
 
     protected ReadBuffer(Connector connector, FileBlock block, int max_offset) {
-        super(connector, block);
-        this.max_byte_len = 1 << (max_offset + getLengthOffset());
+        super(connector, block, max_offset);
     }
 
 
@@ -46,6 +44,8 @@ public abstract class ReadBuffer extends Buffer {
                     off+=len;
                 }
                 byteLen = off;
+
+                //TODO cache部分要做内存限制等处理  还有预加载线程
                 address = MemoryUtils.allocate(byteLen);
                 MemoryUtils.copyMemory(bytes, address, byteLen);
                 load = true;
@@ -55,13 +55,6 @@ public abstract class ReadBuffer extends Buffer {
             }
         }
     }
-
-    /**
-     *基础类型相对于byte类型的偏移量比如int是4个byte那么便宜量是2
-     * long是8个byte那么偏移量是3
-     * @return
-     */
-    protected abstract int getLengthOffset();
 
     protected final void checkIndex(int p) {
         if (ir(p)){

@@ -8,11 +8,11 @@ import java.net.URI;
 /**
  * Created by daniel on 2017/2/10.
  */
-public final class FineWriteIOFile extends  FineIOFile<WriteBuffer> {
+public final class FineWriteIOFile<T extends WriteBuffer> extends  FineIOFile<T> {
 
-    FineWriteIOFile(Connector connector, URI uri){
-        super(connector, uri);
-        this.block_size_offset = connector.getBlockOffset();
+    FineWriteIOFile(Connector connector, URI uri, Class<T> clazz){
+        super(connector, uri, clazz);
+        this.block_size_offset = (byte) (connector.getBlockOffset() - getOffset());
     }
 
 

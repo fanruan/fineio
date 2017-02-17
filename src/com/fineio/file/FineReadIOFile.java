@@ -9,8 +9,6 @@ import com.fineio.storage.Connector;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
 import java.net.URI;
 
 /**
@@ -20,12 +18,11 @@ public final class FineReadIOFile<T extends ReadBuffer> extends FineIOFile<T> {
 
     private long single_block_len;
     private T[] buffers;
-    private Class<T> parameterClazz;
+
 
     private FineReadIOFile(Connector connector, URI uri,  Class<T> clazz){
-        super(connector, uri);
-        byte offset = initParameterClazz(clazz);
-        readHeader(offset);
+        super(connector, uri, clazz);
+        readHeader(getOffset());
 
     }
 
@@ -41,15 +38,6 @@ public final class FineReadIOFile<T extends ReadBuffer> extends FineIOFile<T> {
         return  new FineReadIOFile<E>(connector, uri, clazz);
     }
 
-    private byte initParameterClazz(Class<T> clazz) {
-        parameterClazz = clazz;
-        try {
-            Field field = parameterClazz.getDeclaredField(FileConstants.OFFSET_FIELD_NAME);
-            return ((byte) ((Integer)field.get(null)).intValue());
-        } catch (Exception e) {
-            return ByteReadBuffer.OFFSET;
-        }
-    }
 
     private int checkIndex(int index){
         if(index > -1 && index < blocks){

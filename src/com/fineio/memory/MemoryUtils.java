@@ -47,14 +47,41 @@ public final class MemoryUtils {
         return  unsafe;
     }
 
+    /**
+     * 分配指定大小的内存
+     * @param size
+     * @return
+     */
     public static long allocate(long size){
         return unsafe.allocateMemory(size);
     }
 
+    /**
+     * reallocate用法：参数1 老的地址
+     * 参数2 新的总内存大小
+     * 返回新的地址替换原来的地址
+     * @param address
+     * @param size
+     * @return
+     */
+    public static long reallocate(long address, long size) {
+        return unsafe.reallocateMemory(address, size);
+    }
+
+    /**
+     * 释放内存的方法
+     * @param s
+     */
     public static void free(long s){
         unsafe.freeMemory(s);
     }
 
+    /**
+     * 给指定位置赋值
+     * @param s
+     * @param offset
+     * @param b
+     */
     public static void put(long s, long offset, byte b){
         unsafe.putByte(s + offset, b);
     }
