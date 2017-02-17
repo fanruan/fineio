@@ -303,6 +303,12 @@ public class BufferTest  extends TestCase {
         db.clear();
     }
 
+    public void testThread() throws Exception{
+        while (true) {
+            testMultiThread();
+        }
+    }
+
     public void testMultiThread() throws Exception{
         final byte[] value = createRandomByte(10);
         IMocksControl control = EasyMock.createControl();

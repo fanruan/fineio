@@ -10,12 +10,12 @@ import com.fineio.io.read.ByteReadBuffer;
 import com.fineio.io.read.DoubleReadBuffer;
 import com.fineio.io.read.IntReadBuffer;
 import com.fineio.storage.Connector;
+import com.fineio.third.zip4j.core.ZipFile;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.easymock.IMocksControl;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -31,13 +31,15 @@ public class PerformanceTest {
     private static  byte[] createRandomByte(int len){
         byte[] arrays = new byte[len];
         for(int i = 0; i< len; i++){
-            arrays[i] =  (byte)(Double.doubleToLongBits(Math.random() * 100000000000d));
+            arrays[i] =  111;
         }
         return arrays;
     }
 
     public static void main(String[] args) throws Exception {
-
+        //Thread.sleep(20000);
+//        createFile();
+//        doubleSumFileTest();
         final byte[] bytes  = createRandomByte(1 << 30);
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
@@ -56,6 +58,90 @@ public class PerformanceTest {
         intTest(bytes, connector, block);
         doubleTest(bytes, connector, block);
         doubleSumTest();
+//        while (true) {
+//            Thread.sleep(10000);
+//        }
+    }
+
+    private static void doubleSumFileTest() throws Exception {
+        int totalDoubleLen = 111238473;
+        long byteLen = ((long)totalDoubleLen) << 3;
+        int block_off_set = 22;
+        long singleByteLen = 1L << block_off_set;
+        int blocks =  (int)(byteLen>>block_off_set) + 1;
+        IMocksControl control = EasyMock.createControl();
+        Connector connector = control.createMock(Connector.class);
+        URI u = new URI("");
+        Field fieldHead = FileConstants.class.getDeclaredField("HEAD");
+        fieldHead.setAccessible(true);
+        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        constructor.setAccessible(true);
+        FileBlock block = constructor.newInstance(u, fieldHead.get(null));
+        final ZipFile file = new ZipFile("D:/fine.cube");
+        EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
+            @Override
+            public InputStream answer() throws Throwable {
+                return file.getInputStream(file.getFileHeader("head"));
+            }
+        }).anyTimes();
+        for(int i = 0; i < blocks; i++) {
+            FileBlock block_i = constructor.newInstance(u, String.valueOf(i));
+            final int index = i;
+            EasyMock.expect(connector.read(EasyMock.eq(block_i))).andAnswer(new IAnswer<InputStream>() {
+                @Override
+                public InputStream answer() throws Throwable {
+                    return file.getInputStream(file.getFileHeader(String.valueOf(index)));
+                }
+            }).anyTimes();
+        }
+        control.replay();
+        FineReadIOFile<DoubleReadBuffer> dfile = (FineReadIOFile<DoubleReadBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.READ_DOUBLE);
+        double d1 = 0;
+        long t = System.currentTimeMillis();
+        for(long i = 0, ilen = totalDoubleLen; i < ilen; i++){
+            d1 +=FineReadIOFile.getDouble(dfile, i);
+        }
+        System.out.println("first cost:"  + (System.currentTimeMillis() - t) + "ms value:" + d1);
+        d1 = 0;
+        t = System.currentTimeMillis();
+        for(long i = 0, ilen = totalDoubleLen; i < ilen; i++){
+            d1 +=FineReadIOFile.getDouble(dfile, i);
+        }
+        System.out.println("second cost:"  + (System.currentTimeMillis() - t) + "ms value:" + d1);
+    }
+
+    private static void createFile() {
+        int totalDoubleLen = 111238473;
+        long byteLen = ((long)totalDoubleLen) << 3;
+        int block_off_set = 22;
+        long singleByteLen = 1L << block_off_set;
+        int blocks =  (int)(byteLen>>block_off_set) + 1;
+        final byte[] head = new byte[16];
+        Bits.putInt(head, 0, blocks);
+        head[8] = (byte) block_off_set;
+        writeFile("head", head);
+        for(int i = 0; i < blocks; i++) {
+            long len = singleByteLen;
+            if(i == blocks - 1){
+                len = byteLen & (singleByteLen - 1);
+            }
+            byte[] bytes = createRandomByte((int)len);
+            writeFile(String.valueOf(i), bytes);
+        }
+    }
+
+    private static void writeFile(String name, byte[] bytes) {
+        File file = new File(name);
+        try {
+            if(!file.exists()){
+                file.createNewFile();
+            }
+            FileOutputStream fs = new FileOutputStream(file);
+            fs.write(bytes);
+            fs.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static void doubleSumTest() throws Exception {

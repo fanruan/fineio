@@ -40,7 +40,12 @@ public abstract class ReadBuffer extends Buffer {
             }
             try {
                 byte[] bytes = new byte[max_byte_len];
-                byteLen = is.read(bytes);
+                int off = 0;
+                int len = 0;
+                while ((len = is.read(bytes, off, max_byte_len - off)) > 0) {
+                    off+=len;
+                }
+                byteLen = off;
                 address = MemoryUtils.allocate(byteLen);
                 MemoryUtils.copyMemory(bytes, address, byteLen);
                 load = true;
@@ -59,17 +64,26 @@ public abstract class ReadBuffer extends Buffer {
     protected abstract int getLengthOffset();
 
     protected final void checkIndex(int p) {
-        if (p > -1 && p < max_size){
+        if (ir(p)){
             return;
         }
         lc(p);
     }
 
+    private boolean ir(int p){
+        return p > -1 && p < max_size;
+    }
+
     private final void lc(int p) {
-        if(load){
-            throw new BufferIndexOutOfBoundsException(p);
-        } else {
-            ll(p);
+        synchronized (this) {
+            if (load) {
+                if (ir(p)){
+                    return;
+                }
+                throw new BufferIndexOutOfBoundsException(p);
+            } else {
+                ll(p);
+            }
         }
     }
 
