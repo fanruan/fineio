@@ -1,6 +1,5 @@
 package com.fineio.file;
 
-import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.net.URI;
@@ -20,7 +19,7 @@ public final class FileBlock {
     }
 
     public String toString() {
-        return (uri == null ? StringUtils.EMPTY:uri.toString()) + File.separator + (StringUtils.isEmpty(fileName) ? StringUtils.EMPTY : fileName);
+        return (uri == null ? "":uri.toString()) + File.separator + (fileName == null ? "": fileName);
     }
 
     @Override

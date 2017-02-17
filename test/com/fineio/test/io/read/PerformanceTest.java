@@ -31,7 +31,7 @@ public class PerformanceTest {
     private static  byte[] createRandomByte(int len){
         byte[] arrays = new byte[len];
         for(int i = 0; i< len; i++){
-            arrays[i] =  111;
+            arrays[i] =  (byte) (Math.random()*1000000000d);
         }
         return arrays;
     }
@@ -77,11 +77,11 @@ public class PerformanceTest {
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, fieldHead.get(null));
-        final ZipFile file = new ZipFile("D:/fine.cube");
+        final java.util.zip.ZipFile file = new java.util.zip.ZipFile("D:/fine.cube");
         EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
             @Override
             public InputStream answer() throws Throwable {
-                return file.getInputStream(file.getFileHeader("head"));
+                return file.getInputStream(file.getEntry("head"));
             }
         }).anyTimes();
         for(int i = 0; i < blocks; i++) {
@@ -90,7 +90,7 @@ public class PerformanceTest {
             EasyMock.expect(connector.read(EasyMock.eq(block_i))).andAnswer(new IAnswer<InputStream>() {
                 @Override
                 public InputStream answer() throws Throwable {
-                    return file.getInputStream(file.getFileHeader(String.valueOf(index)));
+                    return file.getInputStream(file.getEntry(String.valueOf(index)));
                 }
             }).anyTimes();
         }
