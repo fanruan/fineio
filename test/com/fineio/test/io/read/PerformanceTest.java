@@ -1,10 +1,11 @@
-package com.fineio.io;
+package com.fineio.test.io.read;
 
 import com.fineio.FineIO;
 import com.fineio.base.Bits;
 import com.fineio.file.FileBlock;
 import com.fineio.file.FileConstants;
 import com.fineio.file.FineReadIOFile;
+import com.fineio.io.Buffer;
 import com.fineio.io.read.ByteReadBuffer;
 import com.fineio.io.read.DoubleReadBuffer;
 import com.fineio.io.read.IntReadBuffer;
@@ -24,7 +25,7 @@ import java.util.List;
 /**
  * Created by daniel on 2017/2/13.
  */
-public class K {
+public class PerformanceTest {
 
 
     private static  byte[] createRandomByte(int len){
@@ -63,10 +64,9 @@ public class K {
         int block_off_set = 22;
         long singleByteLen = 1L << block_off_set;
         int blocks =  (int)(byteLen>>block_off_set) + 1;
-        byte[] head = new byte[16];
+        final byte[] head = new byte[16];
         Bits.putInt(head, 0, blocks);
         head[8] = (byte) block_off_set;
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(head);
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
         URI u = new URI("");
@@ -75,16 +75,25 @@ public class K {
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, fieldHead.get(null));
-        EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(byteArrayInputStream).anyTimes();
+        EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
+            @Override
+            public InputStream answer() throws Throwable {
+                return new ByteArrayInputStream(head);
+            }
+        }).anyTimes();
         for(int i = 0; i < blocks; i++) {
             long len = singleByteLen;
             if(i == blocks - 1){
                 len = byteLen & (singleByteLen - 1);
             }
-            byte[] bytes = createRandomByte((int)len);
+            final byte[] bytes = createRandomByte((int)len);
             FileBlock block_i = constructor.newInstance(u, String.valueOf(i));
-            ByteArrayInputStream bai = new ByteArrayInputStream(bytes);
-            EasyMock.expect(connector.read(EasyMock.eq(block_i))).andReturn(bai).anyTimes();
+            EasyMock.expect(connector.read(EasyMock.eq(block_i))).andAnswer(new IAnswer<InputStream>() {
+                @Override
+                public InputStream answer() throws Throwable {
+                    return new ByteArrayInputStream(bytes);
+                }
+            }).anyTimes();
         }
         control.replay();
         FineReadIOFile<DoubleReadBuffer> dfile = (FineReadIOFile<DoubleReadBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.READ_DOUBLE);
