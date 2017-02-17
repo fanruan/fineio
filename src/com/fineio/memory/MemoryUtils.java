@@ -23,8 +23,24 @@ public final class MemoryUtils {
 
     private static final long arrayBaseOffset = (long)unsafe.arrayBaseOffset(byte[].class);
 
+    /**
+     * 复制数组对象的值到堆外内存葱address开始的地址
+     * @param src
+     * @param address
+     * @param size
+     */
     public static void copyMemory(byte[] src, long address, long size) {
         unsafe.copyMemory(src, arrayBaseOffset, null, address, size);
+    }
+
+
+    /**
+     * 复制数组对象的值到堆外内存葱address开始的地址
+     * @param src
+     * @param address
+     */
+    public static void copyMemory(byte[] src, long address) {
+        copyMemory(src, address, src.length);
     }
 
     private static Unsafe getUnsafe() {

@@ -10,6 +10,26 @@ import junit.framework.TestCase;
  */
 public class MemoryUtilsTest extends TestCase {
 
+    public void testCopyMemory() {
+        byte[] bytes = createRandomByte();
+        int len = bytes.length;
+        long address = MemoryUtils.allocate(len);
+        MemoryUtils.copyMemory(bytes, address);
+        for(int i = 0; i < len; i++){
+            assertEquals(bytes[i], MemoryUtils.getByte(address, i));
+        }
+    }
+
+    public void testCopyMemoryLen() {
+        byte[] bytes = createRandomByte();
+        int len = bytes.length;
+        long address = MemoryUtils.allocate(len);
+        MemoryUtils.copyMemory(bytes, address, len /2);
+        for(int i = 0; i < len /2; i++){
+            assertEquals(bytes[i], MemoryUtils.getByte(address, i));
+        }
+    }
+
 
     public void testDouble(){
         for(int i = 0 ;i < 10000; i++){
