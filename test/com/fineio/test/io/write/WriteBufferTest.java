@@ -130,6 +130,55 @@ public class WriteBufferTest extends TestCase {
         assertTrue(exp);
     }
 
+    public void testCharWriteDESC() throws  Exception {
+        int len = 20;
+        char[] bytes = createRandomChar(len);
+        Constructor<CharWriteBuffer> constructor = CharWriteBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
+        constructor.setAccessible(true);
+        CharWriteBuffer bb = constructor.newInstance(null, null, len);
+        for(int i = bytes.length;i > 0 ; i--){
+            bb.put(i - 1, bytes[i -1]);
+        }
+        Field field = Buffer.class.getDeclaredField("address");
+        field.setAccessible(true);
+        long address = (Long)field.get(bb);
+        for(int i = 0;i < bytes.length; i++){
+            assertEquals(bytes[i], MemoryUtils.getChar(address, i));
+        }
+        boolean exp = false;
+        try {
+            bb.put(bytes.length, (char) 0);
+        }catch (BufferIndexOutOfBoundsException exception) {
+            exp = true;
+        }
+        assertTrue(exp);
+    }
+
+    public void testDoubleWriteDESC() throws  Exception {
+        int len = 20;
+        double[] bytes = createRandomDouble(len);
+        Constructor<DoubleWriteBuffer> constructor = DoubleWriteBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
+        constructor.setAccessible(true);
+        DoubleWriteBuffer bb = constructor.newInstance(null, null, len);
+        for(int i =  bytes.length;i > 0; i--){
+            bb.put(i - 1, bytes[i -1]);
+        }
+        Field field = Buffer.class.getDeclaredField("address");
+        field.setAccessible(true);
+        long address = (Long)field.get(bb);
+        for(int i = 0;i < bytes.length; i++){
+            assertEquals(bytes[i], MemoryUtils.getDouble(address, i));
+        }
+        boolean exp = false;
+        try {
+            bb.put(bytes.length, (double) 0);
+        }catch (BufferIndexOutOfBoundsException exception) {
+            exp = true;
+        }
+        assertTrue(exp);
+    }
+
+
     public void testDoubleWrite() throws  Exception {
         int len = 20;
         double[] bytes = createRandomDouble(len);
@@ -179,6 +228,30 @@ public class WriteBufferTest extends TestCase {
         assertTrue(exp);
     }
 
+    public void testFloatWriteDESC() throws  Exception {
+        int len = 20;
+        float[] bytes = createRandomFloat(len);
+        Constructor<FloatWriteBuffer> constructor = FloatWriteBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
+        constructor.setAccessible(true);
+        FloatWriteBuffer bb = constructor.newInstance(null, null, len);
+        for(int i = bytes.length;i > 0 ; i--){
+            bb.put(i - 1, bytes[i -1]);
+        }
+        Field field = Buffer.class.getDeclaredField("address");
+        field.setAccessible(true);
+        long address = (Long)field.get(bb);
+        for(int i = 0;i < bytes.length; i++){
+            assertEquals(bytes[i], MemoryUtils.getFloat(address, i));
+        }
+        boolean exp = false;
+        try {
+            bb.put(bytes.length, (float) 0);
+        }catch (BufferIndexOutOfBoundsException exception) {
+            exp = true;
+        }
+        assertTrue(exp);
+    }
+
 
     public void testIntWrite() throws  Exception {
         int len = 20;
@@ -204,6 +277,31 @@ public class WriteBufferTest extends TestCase {
         assertTrue(exp);
     }
 
+    public void testIntWriteDESC() throws  Exception {
+        int len = 20;
+        int[] bytes = createRandomInt(len);
+        Constructor<IntWriteBuffer> constructor = IntWriteBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
+        constructor.setAccessible(true);
+        IntWriteBuffer bb = constructor.newInstance(null, null, len);
+        for(int i = bytes.length;i > 0 ; i--){
+            bb.put(i - 1, bytes[i -1]);
+        }
+        Field field = Buffer.class.getDeclaredField("address");
+        field.setAccessible(true);
+        long address = (Long)field.get(bb);
+        for(int i = 0;i < bytes.length; i++){
+            assertEquals(bytes[i], MemoryUtils.getInt(address, i));
+        }
+        boolean exp = false;
+        try {
+            bb.put(bytes.length, (int) 0);
+        }catch (BufferIndexOutOfBoundsException exception) {
+            exp = true;
+        }
+        assertTrue(exp);
+    }
+
+
     public void testLongWrite() throws  Exception {
         int len = 20;
         long[] bytes = createRandomLong(len);
@@ -228,6 +326,30 @@ public class WriteBufferTest extends TestCase {
         assertTrue(exp);
     }
 
+    public void testLongWriteDESC() throws  Exception {
+        int len = 20;
+        long[] bytes = createRandomLong(len);
+        Constructor<LongWriteBuffer> constructor = LongWriteBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
+        constructor.setAccessible(true);
+        LongWriteBuffer bb = constructor.newInstance(null, null, len);
+        for(int i =  bytes.length;i > 0; i--){
+            bb.put(i - 1, bytes[i - 1]);
+        }
+        Field field = Buffer.class.getDeclaredField("address");
+        field.setAccessible(true);
+        long address = (Long)field.get(bb);
+        for(int i = 0;i < bytes.length; i++){
+            assertEquals(bytes[i], MemoryUtils.getLong(address, i));
+        }
+        boolean exp = false;
+        try {
+            bb.put(bytes.length, (long) 0);
+        }catch (BufferIndexOutOfBoundsException exception) {
+            exp = true;
+        }
+        assertTrue(exp);
+    }
+
     public void testShortWrite() throws  Exception {
         int len = 20;
         short[] bytes = createRandomShort(len);
@@ -236,6 +358,30 @@ public class WriteBufferTest extends TestCase {
         ShortWriteBuffer bb = constructor.newInstance(null, null, len);
         for(int i = 0;i < bytes.length; i++){
             bb.put(i, bytes[i]);
+        }
+        Field field = Buffer.class.getDeclaredField("address");
+        field.setAccessible(true);
+        long address = (Long)field.get(bb);
+        for(int i = 0;i < bytes.length; i++){
+            assertEquals(bytes[i], MemoryUtils.getShort(address, i));
+        }
+        boolean exp = false;
+        try {
+            bb.put(bytes.length, (short) 0);
+        }catch (BufferIndexOutOfBoundsException exception) {
+            exp = true;
+        }
+        assertTrue(exp);
+    }
+
+    public void testShortWriteDESC() throws  Exception {
+        int len = 20;
+        short[] bytes = createRandomShort(len);
+        Constructor<ShortWriteBuffer> constructor = ShortWriteBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
+        constructor.setAccessible(true);
+        ShortWriteBuffer bb = constructor.newInstance(null, null, len);
+        for(int i =bytes.length;i > 0 ; i--){
+            bb.put(i -1, bytes[i -1]);
         }
         Field field = Buffer.class.getDeclaredField("address");
         field.setAccessible(true);
