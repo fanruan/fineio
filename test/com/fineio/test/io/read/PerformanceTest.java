@@ -5,12 +5,11 @@ import com.fineio.base.Bits;
 import com.fineio.file.FileBlock;
 import com.fineio.file.FileConstants;
 import com.fineio.file.FineReadIOFile;
-import com.fineio.io.Buffer;
+import com.fineio.io.AbstractBuffer;
 import com.fineio.io.read.ByteReadBuffer;
 import com.fineio.io.read.DoubleReadBuffer;
 import com.fineio.io.read.IntReadBuffer;
 import com.fineio.storage.Connector;
-import com.fineio.third.zip4j.core.ZipFile;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.easymock.IMocksControl;
@@ -19,8 +18,6 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by daniel on 2017/2/13.
@@ -249,7 +246,7 @@ public class PerformanceTest {
         buffer.clear();
     }
 
-    private  static  <T extends Buffer>  T createBuffer(Class<T> clazz, Object connector, Object block, int off) {
+    private  static  <T extends AbstractBuffer>  T createBuffer(Class<T> clazz, Object connector, Object block, int off) {
         try {
             Constructor<T>  constructor= clazz.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
             constructor.setAccessible(true);

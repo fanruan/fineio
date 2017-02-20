@@ -6,11 +6,10 @@ import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
 import com.fineio.file.FileConstants;
 import com.fineio.file.FineIOFile;
-import com.fineio.io.Buffer;
+import com.fineio.io.AbstractBuffer;
 import com.fineio.io.read.*;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
-import com.sun.mail.iap.ByteArray;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -142,7 +141,7 @@ public class BufferTest  extends TestCase {
         floatTest(value, connector, block, len);
     }
 
-    private  static  <T extends Buffer>  T createBuffer(Class<T> clazz, Object connector, Object block, int offset) {
+    private  static  <T extends AbstractBuffer>  T createBuffer(Class<T> clazz, Object connector, Object block, int offset) {
         try {
             Constructor<T>  constructor= clazz.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
             constructor.setAccessible(true);

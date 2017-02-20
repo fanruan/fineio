@@ -1,22 +1,19 @@
 package com.fineio.io.read;
 
-import com.fineio.base.Bits;
 import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
-import com.fineio.io.Buffer;
-import com.fineio.memory.MemoryConstants;
+import com.fineio.io.AbstractBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 /**
  * Created by daniel on 2017/2/9.
  */
-public abstract class ReadBuffer extends Buffer {
+public abstract class ReadBuffer extends AbstractBuffer implements Read {
     private volatile boolean load = false;
     protected int max_byte_len;
 

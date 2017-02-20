@@ -14,12 +14,10 @@ import java.net.URI;
 /**
  * Created by daniel on 2017/2/9.
  */
-public final class FineReadIOFile<T extends ReadBuffer> extends FineIOFile<T> {
+public final class FineReadIOFile<T extends Read> extends FineAbstractReadFile<T> {
 
     private FineReadIOFile(Connector connector, URI uri,  Class<T> clazz){
         super(connector, uri, clazz);
-        readHeader(getOffset());
-
     }
 
     /**
@@ -30,7 +28,7 @@ public final class FineReadIOFile<T extends ReadBuffer> extends FineIOFile<T> {
      * @param <E> 继承ReadBuffer的子类型
      * @return
      */
-    public static final <E extends ReadBuffer> FineReadIOFile<E> createFineIO(Connector connector, URI uri, Class<E> clazz){
+    public static final <E extends Read> FineReadIOFile<E> createFineIO(Connector connector, URI uri, Class<E> clazz){
         return  new FineReadIOFile<E>(connector, uri, clazz);
     }
 
@@ -62,27 +60,6 @@ public final class FineReadIOFile<T extends ReadBuffer> extends FineIOFile<T> {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
-
-
-    private void readHeader(byte offset) {
-        InputStream is  = this.connector.read(new FileBlock(uri, FileConstants.HEAD));
-        if(is == null){
-            throw new BlockNotFoundException("block:" + uri.toString() +" not found!");
-        }
-        try {
-            byte[] header = new byte[9];
-            is.read(header);
-            int p = 0;
-            blocks = Bits.getInt(header, p);
-            buffers = (T[])new ReadBuffer[blocks];
-            //先空个long的位置
-            p += MemoryConstants.STEP_LONG;
-            block_size_offset = (byte) (header[p] - offset);
-            single_block_len = (1L << block_size_offset) - 1;
-        } catch (IOException e) {
-            throw new BlockNotFoundException("block:" + uri.toString() +" not found!");
-        }
-    }
 
     public String getPath(){
         return uri.getPath();

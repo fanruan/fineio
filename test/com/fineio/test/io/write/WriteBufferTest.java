@@ -2,11 +2,10 @@ package com.fineio.test.io.write;
 
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
-import com.fineio.io.Buffer;
+import com.fineio.io.AbstractBuffer;
 import com.fineio.io.write.*;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
-import com.fr.third.org.apache.poi.hssf.record.formula.functions.T;
 import junit.framework.TestCase;
 
 import java.lang.reflect.Constructor;
@@ -90,7 +89,7 @@ public class WriteBufferTest extends TestCase {
         for(int i = 0;i < bytes.length; i++){
             bb.put(i, bytes[i]);
         }
-        Field field = Buffer.class.getDeclaredField("address");
+        Field field = AbstractBuffer.class.getDeclaredField("address");
         field.setAccessible(true);
         long address = (Long)field.get(bb);
         for(int i = 0;i < bytes.length; i++){
@@ -115,7 +114,7 @@ public class WriteBufferTest extends TestCase {
         for(int i = 0;i < bytes.length; i++){
             bb.put(i, bytes[i]);
         }
-        Field field = Buffer.class.getDeclaredField("address");
+        Field field = AbstractBuffer.class.getDeclaredField("address");
         field.setAccessible(true);
         long address = (Long)field.get(bb);
         for(int i = 0;i < bytes.length; i++){
@@ -139,7 +138,7 @@ public class WriteBufferTest extends TestCase {
         for(int i = bytes.length;i > 0 ; i--){
             bb.put(i - 1, bytes[i -1]);
         }
-        Field field = Buffer.class.getDeclaredField("address");
+        Field field = AbstractBuffer.class.getDeclaredField("address");
         field.setAccessible(true);
         long address = (Long)field.get(bb);
         for(int i = 0;i < bytes.length; i++){
@@ -163,7 +162,7 @@ public class WriteBufferTest extends TestCase {
         for(int i =  bytes.length;i > 0; i--){
             bb.put(i - 1, bytes[i -1]);
         }
-        Field field = Buffer.class.getDeclaredField("address");
+        Field field = AbstractBuffer.class.getDeclaredField("address");
         field.setAccessible(true);
         long address = (Long)field.get(bb);
         for(int i = 0;i < bytes.length; i++){
@@ -188,7 +187,7 @@ public class WriteBufferTest extends TestCase {
         for(int i = 0;i < bytes.length; i++){
             bb.put(i, bytes[i]);
         }
-        Field field = Buffer.class.getDeclaredField("address");
+        Field field = AbstractBuffer.class.getDeclaredField("address");
         field.setAccessible(true);
         long address = (Long)field.get(bb);
         for(int i = 0;i < bytes.length; i++){
@@ -213,7 +212,7 @@ public class WriteBufferTest extends TestCase {
         for(int i = 0;i < bytes.length; i++){
             bb.put(i, bytes[i]);
         }
-        Field field = Buffer.class.getDeclaredField("address");
+        Field field = AbstractBuffer.class.getDeclaredField("address");
         field.setAccessible(true);
         long address = (Long)field.get(bb);
         for(int i = 0;i < bytes.length; i++){
@@ -237,7 +236,7 @@ public class WriteBufferTest extends TestCase {
         for(int i = bytes.length;i > 0 ; i--){
             bb.put(i - 1, bytes[i -1]);
         }
-        Field field = Buffer.class.getDeclaredField("address");
+        Field field = AbstractBuffer.class.getDeclaredField("address");
         field.setAccessible(true);
         long address = (Long)field.get(bb);
         for(int i = 0;i < bytes.length; i++){
@@ -262,7 +261,7 @@ public class WriteBufferTest extends TestCase {
         for(int i = 0;i < bytes.length; i++){
             bb.put(i, bytes[i]);
         }
-        Field field = Buffer.class.getDeclaredField("address");
+        Field field = AbstractBuffer.class.getDeclaredField("address");
         field.setAccessible(true);
         long address = (Long)field.get(bb);
         for(int i = 0;i < bytes.length; i++){
@@ -286,7 +285,7 @@ public class WriteBufferTest extends TestCase {
         for(int i = bytes.length;i > 0 ; i--){
             bb.put(i - 1, bytes[i -1]);
         }
-        Field field = Buffer.class.getDeclaredField("address");
+        Field field = AbstractBuffer.class.getDeclaredField("address");
         field.setAccessible(true);
         long address = (Long)field.get(bb);
         for(int i = 0;i < bytes.length; i++){
@@ -311,7 +310,7 @@ public class WriteBufferTest extends TestCase {
         for(int i = 0;i < bytes.length; i++){
             bb.put(i, bytes[i]);
         }
-        Field field = Buffer.class.getDeclaredField("address");
+        Field field = AbstractBuffer.class.getDeclaredField("address");
         field.setAccessible(true);
         long address = (Long)field.get(bb);
         for(int i = 0;i < bytes.length; i++){
@@ -335,7 +334,7 @@ public class WriteBufferTest extends TestCase {
         for(int i =  bytes.length;i > 0; i--){
             bb.put(i - 1, bytes[i - 1]);
         }
-        Field field = Buffer.class.getDeclaredField("address");
+        Field field = AbstractBuffer.class.getDeclaredField("address");
         field.setAccessible(true);
         long address = (Long)field.get(bb);
         for(int i = 0;i < bytes.length; i++){
@@ -359,7 +358,7 @@ public class WriteBufferTest extends TestCase {
         for(int i = 0;i < bytes.length; i++){
             bb.put(i, bytes[i]);
         }
-        Field field = Buffer.class.getDeclaredField("address");
+        Field field = AbstractBuffer.class.getDeclaredField("address");
         field.setAccessible(true);
         long address = (Long)field.get(bb);
         for(int i = 0;i < bytes.length; i++){
@@ -383,7 +382,7 @@ public class WriteBufferTest extends TestCase {
         for(int i =bytes.length;i > 0 ; i--){
             bb.put(i -1, bytes[i -1]);
         }
-        Field field = Buffer.class.getDeclaredField("address");
+        Field field = AbstractBuffer.class.getDeclaredField("address");
         field.setAccessible(true);
         long address = (Long)field.get(bb);
         for(int i = 0;i < bytes.length; i++){

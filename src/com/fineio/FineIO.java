@@ -2,18 +2,16 @@ package com.fineio;
 
 
 import com.fineio.file.FineReadIOFile;
-import com.fineio.exception.ConstructException;
 import com.fineio.exception.MemorySetException;
 import com.fineio.file.FineIOFile;
 import com.fineio.file.FineWriteIOFile;
+import com.fineio.io.AbstractBuffer;
 import com.fineio.io.Buffer;
 import com.fineio.io.read.*;
 import com.fineio.io.write.*;
 import com.fineio.memory.MemoryConf;
 import com.fineio.storage.Connector;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 
 /**
