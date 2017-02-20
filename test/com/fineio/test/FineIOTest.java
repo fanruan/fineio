@@ -4,6 +4,7 @@ import com.fineio.FineIO;
 import com.fineio.base.Bits;
 import com.fineio.file.*;
 import com.fineio.io.read.*;
+import com.fineio.io.write.DoubleWriteBuffer;
 import com.fineio.io.write.WriteBuffer;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
@@ -47,7 +48,7 @@ public class FineIOTest extends TestCase {
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
         URI u = new URI("");
-        FineIOFile<WriteBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE);
+        FineIOFile<DoubleWriteBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_DOUBLE);
         assertTrue(file instanceof FineWriteIOFile);
     }
 
@@ -161,5 +162,17 @@ public class FineIOTest extends TestCase {
             }
         }
         assertEquals(d1, d2);
+    }
+
+    public void testWrite() throws Exception {
+        IMocksControl control = EasyMock.createControl();
+        Connector connector = control.createMock(Connector.class);
+        URI u = new URI("");
+        EasyMock.expect(connector.getBlockOffset()).andReturn((byte)22).anyTimes();
+        control.replay();
+        FineWriteIOFile<DoubleWriteBuffer> dfile = (FineWriteIOFile<DoubleWriteBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.WRITE_DOUBLE);
+
+
+
     }
 }

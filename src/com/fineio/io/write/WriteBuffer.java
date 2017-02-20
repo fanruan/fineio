@@ -21,8 +21,6 @@ public abstract class WriteBuffer extends Buffer {
 
     protected int max_offset;
 
-    protected int position;
-
     protected WriteBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block);
         this.max_offset = max_offset;
@@ -35,9 +33,9 @@ public abstract class WriteBuffer extends Buffer {
     }
 
 
-    protected void ensureCapacity(){
+    protected void ensureCapacity(int position){
         if(position < max_size) {
-            if ( position >= current_max_size){
+            while ( position >= current_max_size){
                 setCurrentCapacity(this.current_max_offset + 1);
                 this.address = MemoryUtils.reallocate(address, this.current_max_size << getLengthOffset());
             }

@@ -88,7 +88,7 @@ public class WriteBufferTest extends TestCase {
         constructor.setAccessible(true);
         ByteWriteBuffer bb = constructor.newInstance(null, null, len);
         for(int i = 0;i < bytes.length; i++){
-            bb.put(bytes[i]);
+            bb.put(i, bytes[i]);
         }
         Field field = Buffer.class.getDeclaredField("address");
         field.setAccessible(true);
@@ -98,7 +98,7 @@ public class WriteBufferTest extends TestCase {
         }
         boolean exp = false;
         try {
-            bb.put((byte) 0);
+            bb.put(bytes.length, (byte) 0);
         }catch (BufferIndexOutOfBoundsException exception) {
             exp = true;
         }
@@ -113,7 +113,7 @@ public class WriteBufferTest extends TestCase {
         constructor.setAccessible(true);
         CharWriteBuffer bb = constructor.newInstance(null, null, len);
         for(int i = 0;i < bytes.length; i++){
-            bb.put(bytes[i]);
+            bb.put(i, bytes[i]);
         }
         Field field = Buffer.class.getDeclaredField("address");
         field.setAccessible(true);
@@ -123,7 +123,7 @@ public class WriteBufferTest extends TestCase {
         }
         boolean exp = false;
         try {
-            bb.put((char) 0);
+            bb.put(bytes.length, (char) 0);
         }catch (BufferIndexOutOfBoundsException exception) {
             exp = true;
         }
@@ -137,7 +137,7 @@ public class WriteBufferTest extends TestCase {
         constructor.setAccessible(true);
         DoubleWriteBuffer bb = constructor.newInstance(null, null, len);
         for(int i = 0;i < bytes.length; i++){
-            bb.put(bytes[i]);
+            bb.put(i, bytes[i]);
         }
         Field field = Buffer.class.getDeclaredField("address");
         field.setAccessible(true);
@@ -147,7 +147,7 @@ public class WriteBufferTest extends TestCase {
         }
         boolean exp = false;
         try {
-            bb.put((double) 0);
+            bb.put(bytes.length, (double) 0);
         }catch (BufferIndexOutOfBoundsException exception) {
             exp = true;
         }
@@ -162,7 +162,7 @@ public class WriteBufferTest extends TestCase {
         constructor.setAccessible(true);
         FloatWriteBuffer bb = constructor.newInstance(null, null, len);
         for(int i = 0;i < bytes.length; i++){
-            bb.put(bytes[i]);
+            bb.put(i, bytes[i]);
         }
         Field field = Buffer.class.getDeclaredField("address");
         field.setAccessible(true);
@@ -172,7 +172,7 @@ public class WriteBufferTest extends TestCase {
         }
         boolean exp = false;
         try {
-            bb.put((float) 0);
+            bb.put(bytes.length, (float) 0);
         }catch (BufferIndexOutOfBoundsException exception) {
             exp = true;
         }
@@ -187,7 +187,7 @@ public class WriteBufferTest extends TestCase {
         constructor.setAccessible(true);
         IntWriteBuffer bb = constructor.newInstance(null, null, len);
         for(int i = 0;i < bytes.length; i++){
-            bb.put(bytes[i]);
+            bb.put(i, bytes[i]);
         }
         Field field = Buffer.class.getDeclaredField("address");
         field.setAccessible(true);
@@ -197,7 +197,7 @@ public class WriteBufferTest extends TestCase {
         }
         boolean exp = false;
         try {
-            bb.put((int) 0);
+            bb.put(bytes.length, (int) 0);
         }catch (BufferIndexOutOfBoundsException exception) {
             exp = true;
         }
@@ -211,7 +211,7 @@ public class WriteBufferTest extends TestCase {
         constructor.setAccessible(true);
         LongWriteBuffer bb = constructor.newInstance(null, null, len);
         for(int i = 0;i < bytes.length; i++){
-            bb.put(bytes[i]);
+            bb.put(i, bytes[i]);
         }
         Field field = Buffer.class.getDeclaredField("address");
         field.setAccessible(true);
@@ -221,7 +221,7 @@ public class WriteBufferTest extends TestCase {
         }
         boolean exp = false;
         try {
-            bb.put((long) 0);
+            bb.put(bytes.length, (long) 0);
         }catch (BufferIndexOutOfBoundsException exception) {
             exp = true;
         }
@@ -235,7 +235,7 @@ public class WriteBufferTest extends TestCase {
         constructor.setAccessible(true);
         ShortWriteBuffer bb = constructor.newInstance(null, null, len);
         for(int i = 0;i < bytes.length; i++){
-            bb.put(bytes[i]);
+            bb.put(i, bytes[i]);
         }
         Field field = Buffer.class.getDeclaredField("address");
         field.setAccessible(true);
@@ -245,7 +245,7 @@ public class WriteBufferTest extends TestCase {
         }
         boolean exp = false;
         try {
-            bb.put((short) 0);
+            bb.put(bytes.length, (short) 0);
         }catch (BufferIndexOutOfBoundsException exception) {
             exp = true;
         }

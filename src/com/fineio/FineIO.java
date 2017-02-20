@@ -8,7 +8,7 @@ import com.fineio.file.FineIOFile;
 import com.fineio.file.FineWriteIOFile;
 import com.fineio.io.Buffer;
 import com.fineio.io.read.*;
-import com.fineio.io.write.WriteBuffer;
+import com.fineio.io.write.*;
 import com.fineio.memory.MemoryConf;
 import com.fineio.storage.Connector;
 
@@ -20,8 +20,6 @@ import java.net.URI;
  * Created by daniel on 2017/2/9.
  */
 public final  class FineIO {
-
-    private static Constructor<FineWriteIOFile> CONS_WRITE ;
 
     public interface MODEL<T extends Buffer> {
          MODEL<LongReadBuffer> READ_LONG = new MODEL<LongReadBuffer>() {
@@ -69,13 +67,49 @@ public final  class FineIO {
         };
 
 
-         MODEL<WriteBuffer> WRITE = new MODEL<WriteBuffer>() {
+        MODEL<LongWriteBuffer> WRITE_LONG = new MODEL<LongWriteBuffer>() {
 
-             @Override
-             public FineWriteIOFile createIOFile(Connector connector, URI uri) {
-                 return  createWriteIOFile(connector, uri);
-             }
-         };
+            @Override
+            public FineWriteIOFile<LongWriteBuffer> createIOFile(Connector connector, URI uri) {
+                return FineWriteIOFile.createFineIO(connector, uri, LongWriteBuffer.class);
+            }
+        };
+        MODEL<DoubleWriteBuffer> WRITE_DOUBLE = new MODEL<DoubleWriteBuffer>() {
+
+            @Override
+            public FineWriteIOFile<DoubleWriteBuffer> createIOFile(Connector connector, URI uri) {
+                return FineWriteIOFile.createFineIO(connector, uri, DoubleWriteBuffer.class);
+            }
+        };
+        MODEL<IntWriteBuffer> WRITE_INT = new MODEL<IntWriteBuffer>() {
+
+            @Override
+            public FineWriteIOFile<IntWriteBuffer> createIOFile(Connector connector, URI uri) {
+                return FineWriteIOFile.createFineIO(connector, uri, IntWriteBuffer.class);
+            }
+        };
+        MODEL<CharWriteBuffer> WRITE_CHAR = new MODEL<CharWriteBuffer>() {
+
+            @Override
+            public FineWriteIOFile<CharWriteBuffer> createIOFile(Connector connector, URI uri) {
+                return FineWriteIOFile.createFineIO(connector, uri, CharWriteBuffer.class);
+            }
+        };
+        MODEL<ByteWriteBuffer> WRITE_BYTE = new MODEL<ByteWriteBuffer>() {
+
+            @Override
+            public FineWriteIOFile<ByteWriteBuffer> createIOFile(Connector connector, URI uri) {
+                return FineWriteIOFile.createFineIO(connector, uri, ByteWriteBuffer.class);
+            }
+        };
+
+        MODEL<ShortWriteBuffer> WRITE_SHORT = new MODEL<ShortWriteBuffer>() {
+
+            @Override
+            public FineWriteIOFile<ShortWriteBuffer> createIOFile(Connector connector, URI uri) {
+                return FineWriteIOFile.createFineIO(connector, uri, ShortWriteBuffer.class);
+            }
+        };
 
         FineIOFile<T> createIOFile(Connector connector, URI uri);
     }
@@ -90,35 +124,6 @@ public final  class FineIO {
      */
     public static <T extends Buffer> FineIOFile<T> createIOFile(Connector connector, URI uri , MODEL<T> model) {
         return model.createIOFile(connector, uri);
-    }
-
-
-    static {
-        try {
-            CONS_WRITE = FineWriteIOFile.class.getDeclaredConstructor(Connector.class, URI.class);
-            CONS_WRITE.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            throw new ConstructException(e);
-        }
-    }
-
-
-    /**
-     * 创建写的文件
-     * @param connector
-     * @param uri
-     * @return
-     */
-    private static FineWriteIOFile createWriteIOFile(Connector connector, URI uri) {
-        try {
-            return CONS_WRITE.newInstance(connector, uri);
-        } catch (InstantiationException e) {
-            throw new ConstructException(e);
-        } catch (IllegalAccessException e) {
-            throw new ConstructException(e);
-        } catch (InvocationTargetException e) {
-            throw new ConstructException(e);
-        }
     }
 
 

@@ -21,8 +21,13 @@ public class IntWriteBuffer extends WriteBuffer {
     }
 
 
-    public final void put(int b) {
-        ensureCapacity();
-        MemoryUtils.put(address, position++, b);
+    /**
+     *
+     * @param position 位置
+     * @param b 值
+     */
+    public final void put(int position, int b) {
+        ensureCapacity(position);
+        MemoryUtils.put(address, position, b);
     }
 }

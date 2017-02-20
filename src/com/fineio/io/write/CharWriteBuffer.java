@@ -21,9 +21,13 @@ public class CharWriteBuffer extends WriteBuffer {
         return OFFSET;
     }
 
-
-    public  final void put(char b) {
-        ensureCapacity();
-        MemoryUtils.put(address, position++, b);
+    /**
+     *
+     * @param position 位置
+     * @param b 值
+     */
+    public  final void put(int position, char b) {
+        ensureCapacity(position);
+        MemoryUtils.put(address, position, b);
     }
 }

@@ -19,9 +19,13 @@ public class ShortWriteBuffer extends WriteBuffer {
     protected int getLengthOffset() {
         return OFFSET;
     }
-
-    public final void put(short b) {
-        ensureCapacity();
-        MemoryUtils.put(address, position++, b);
+    /**
+     *
+     * @param position 位置
+     * @param b 值
+     */
+    public final void put(int position, short b) {
+        ensureCapacity(position);
+        MemoryUtils.put(address, position, b);
     }
 }
