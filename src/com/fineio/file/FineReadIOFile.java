@@ -16,10 +16,6 @@ import java.net.URI;
  */
 public final class FineReadIOFile<T extends ReadBuffer> extends FineIOFile<T> {
 
-    private long single_block_len;
-    private T[] buffers;
-
-
     private FineReadIOFile(Connector connector, URI uri,  Class<T> clazz){
         super(connector, uri, clazz);
         readHeader(getOffset());
@@ -38,89 +34,32 @@ public final class FineReadIOFile<T extends ReadBuffer> extends FineIOFile<T> {
         return  new FineReadIOFile<E>(connector, uri, clazz);
     }
 
-
-    private int checkIndex(int index){
-        if(index > -1 && index < blocks){
-            return index;
-        }
-        throw new BufferIndexOutOfBoundsException(index);
-    }
-
-    private T getBuffer(int index){
-        return buffers[checkIndex(index)] != null ? buffers[index] : initBuffer(index);
-    }
-
-    private T initBuffer(int index) {
-        synchronized (this){
-            if(buffers[index] == null) {
-                buffers[index] = createBuffer(parameterClazz, index);
-            }
-            return buffers[index];
-        }
-    }
-
-    private int gi(long p) {
-        return (int)(p >> block_size_offset);
-    }
-
-    private int gp(long p){
-        return (int)(p & single_block_len);
-    }
-
-    public static long getLong(FineReadIOFile<LongReadBuffer> file, long p) {
+    public final static long getLong(FineIOFile<LongReadBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
-    public static int getInt(FineReadIOFile<IntReadBuffer> file, long p) {
+    public final static int getInt(FineIOFile<IntReadBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
-    public static int getChar(FineReadIOFile<CharReadBuffer> file, long p) {
+    public final static int getChar(FineIOFile<CharReadBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
-    public static double getDouble(FineReadIOFile<DoubleReadBuffer> file, long p) {
+    public final static double getDouble(FineIOFile<DoubleReadBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
-    public static float getFloat(FineReadIOFile<FloatReadBuffer> file, long p) {
+    public final static float getFloat(FineIOFile<FloatReadBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
-    public static byte getByte(FineReadIOFile<ByteReadBuffer> file, long p) {
+    public final static byte getByte(FineIOFile<ByteReadBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
-    public static short getShort(FineReadIOFile<ShortReadBuffer> file, long p) {
+    public final static short getShort(FineIOFile<ShortReadBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
-    }
-
-    public static long getLong(FineIOFile<LongReadBuffer> file, long p) {
-        return getLong((FineReadIOFile<LongReadBuffer>)file, p);
-    }
-
-    public static int getInt(FineIOFile<IntReadBuffer> file, long p) {
-        return getInt((FineReadIOFile<IntReadBuffer>)file, p);
-    }
-
-    public static int getChar(FineIOFile<CharReadBuffer> file, long p) {
-        return getChar((FineReadIOFile<CharReadBuffer>)file, p);
-    }
-
-    public static double getDouble(FineIOFile<DoubleReadBuffer> file, long p) {
-        return getDouble((FineReadIOFile<DoubleReadBuffer>)file, p);
-    }
-
-    public static float getFloat(FineIOFile<FloatReadBuffer> file, long p) {
-        return getFloat((FineReadIOFile<FloatReadBuffer>)file, p);
-    }
-
-    public static byte getByte(FineIOFile<ByteReadBuffer> file, long p) {
-        return getByte((FineReadIOFile<ByteReadBuffer>)file, p);
-    }
-
-    public static short getShort(FineIOFile<ShortReadBuffer> file, long p) {
-        return getShort((FineReadIOFile<ShortReadBuffer>)file, p);
     }
 
 

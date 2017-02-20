@@ -1,6 +1,7 @@
 package com.fineio.file;
 
 import com.fineio.exception.BufferConstructException;
+import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.io.Buffer;
 import com.fineio.io.read.ByteReadBuffer;
 import com.fineio.storage.Connector;
@@ -20,6 +21,8 @@ public abstract class FineIOFile<E extends Buffer> {
     protected int blocks;
     protected byte block_size_offset;
     protected Class<E> parameterClazz;
+    protected long single_block_len;
+    protected E[] buffers;
 
 
     FineIOFile(Connector connector, URI uri, Class<E> clazz) {
@@ -31,12 +34,42 @@ public abstract class FineIOFile<E extends Buffer> {
         parameterClazz = clazz;
     }
 
+
+    protected final int gi(long p) {
+        return (int)(p >> block_size_offset);
+    }
+
+    protected final int gp(long p){
+        return (int)(p & single_block_len);
+    }
+
     protected byte getOffset() {
         try {
             Field field = parameterClazz.getDeclaredField(FileConstants.OFFSET_FIELD_NAME);
             return ((byte) ((Integer)field.get(null)).intValue());
         } catch (Exception e) {
             return ByteReadBuffer.OFFSET;
+        }
+    }
+
+    protected final E getBuffer(int index){
+        return buffers[checkIndex(index)] != null ? buffers[index] : initBuffer(index);
+    }
+
+
+    private int checkIndex(int index){
+        if(index > -1 && index < blocks){
+            return index;
+        }
+        throw new BufferIndexOutOfBoundsException(index);
+    }
+
+    private E initBuffer(int index) {
+        synchronized (this){
+            if(buffers[index] == null) {
+                buffers[index] = createBuffer(parameterClazz, index);
+            }
+            return buffers[index];
         }
     }
 
