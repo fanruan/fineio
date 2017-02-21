@@ -9,7 +9,7 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/14.
  */
-public class DoubleEditBuffer extends ReadBuffer {
+public final  class DoubleEditBuffer extends EditBuffer {
 
     public static final int OFFSET = MemoryConstants.OFFSET_DOUBLE;
 
@@ -24,5 +24,24 @@ public class DoubleEditBuffer extends ReadBuffer {
     public final double get(int p) {
         checkIndex(p);
         return MemoryUtils.getDouble(address, p);
+    }
+
+    /**
+     *
+     * @param position 位置
+     * @param b 值
+     */
+    public  final  void put(int position, double b) {
+        ensureCapacity(position);
+        judeChange(position, b);
+        MemoryUtils.put(address, position, b);
+    }
+
+    private final void judeChange(int position, double b) {
+        if(!changed) {
+            if(b != get(position)){
+                changed = true;
+            }
+        }
     }
 }

@@ -66,7 +66,7 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
         lc(p);
     }
 
-    private boolean ir(int p){
+    private final boolean ir(int p){
         return p > -1 && p < max_size;
     }
 
@@ -83,7 +83,7 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
         }
     }
 
-    private void ll(int p) {
+    private final void ll(int p) {
         loadData();
         checkIndex(p);
     }

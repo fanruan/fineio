@@ -8,7 +8,7 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/14.
  */
-public class ShortReadBuffer extends ReadBuffer {
+public final  class ShortReadBuffer extends ReadBuffer {
     public static final int OFFSET = MemoryConstants.OFFSET_SHORT;
 
     private ShortReadBuffer(Connector connector, FileBlock block, int max_offset) {

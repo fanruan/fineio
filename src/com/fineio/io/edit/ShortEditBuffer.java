@@ -9,7 +9,7 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/14.
  */
-public class ShortEditBuffer extends ReadBuffer {
+public final  class ShortEditBuffer extends EditBuffer {
     public static final int OFFSET = MemoryConstants.OFFSET_SHORT;
 
     private ShortEditBuffer(Connector connector, FileBlock block, int max_offset) {
@@ -23,5 +23,24 @@ public class ShortEditBuffer extends ReadBuffer {
     public final short get(int p) {
         checkIndex(p);
         return MemoryUtils.getShort(address, p);
+    }
+
+    /**
+     *
+     * @param position 位置
+     * @param b 值
+     */
+    public  final  void put(int position, short b) {
+        ensureCapacity(position);
+        judeChange(position, b);
+        MemoryUtils.put(address, position, b);
+    }
+
+    private final void judeChange(int position, short b) {
+        if(!changed) {
+            if(b != get(position)){
+                changed = true;
+            }
+        }
     }
 }

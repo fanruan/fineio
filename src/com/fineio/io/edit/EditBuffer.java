@@ -2,6 +2,7 @@ package com.fineio.io.edit;
 
 import com.fineio.base.Maths;
 import com.fineio.exception.BlockNotFoundException;
+import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
 import com.fineio.io.write.WriteBuffer;
 import com.fineio.memory.MemoryUtils;
@@ -17,11 +18,16 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
 
     private volatile boolean load = false;
 
+    protected volatile boolean changed = false;
+
 
     protected EditBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block, max_offset);
     }
 
+    public boolean hasChanged() {
+        return changed;
+    }
 
     private final  void loadData(){
         synchronized (this) {
@@ -46,13 +52,45 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
                     offset++;
                 }
                 //TODO cache部分要做内存限制等处理  这部分与写共享内存，不考虑边写边释放问题
-                address = MemoryUtils.allocate(1 << offset << getLengthOffset());
+                len = 1 << offset << getLengthOffset();
+                address = MemoryUtils.allocate(len);
                 MemoryUtils.copyMemory(bytes, address, off);
+                MemoryUtils.fill0(address + off, len - off);
                 load = true;
+                this.max_position = max_position;
                 setCurrentCapacity(offset);
             } catch (IOException e) {
                 throw new BlockNotFoundException("block:" + block.toString() + " not found!");
             }
         }
+    }
+
+    protected final void checkIndex(int p) {
+        if (ir(p)){
+            return;
+        }
+        lc(p);
+    }
+
+    private final boolean ir(int p){
+        return p > -1 && p < max_position;
+    }
+
+    private final void lc(int p) {
+        synchronized (this) {
+            if (load) {
+                if (ir(p)){
+                    return;
+                }
+                throw new BufferIndexOutOfBoundsException(p);
+            } else {
+                ll(p);
+            }
+        }
+    }
+
+    private final void ll(int p) {
+        loadData();
+        checkIndex(p);
     }
 }

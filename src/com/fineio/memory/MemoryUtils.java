@@ -68,6 +68,10 @@ public final class MemoryUtils {
         return unsafe.reallocateMemory(address, size);
     }
 
+    public static void fill0(long address, long size) {
+        unsafe.setMemory(address, size, (byte) 0);
+    }
+
     /**
      * 释放内存的方法
      * @param s

@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Created by daniel on 2017/2/9.
  */
-public class ByteReadBuffer extends  ReadBuffer {
+public final class ByteReadBuffer extends  ReadBuffer {
 
     public static final int OFFSET = MemoryConstants.OFFSET_BYTE;
 

@@ -9,7 +9,7 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/14.
  */
-public class FloatEditBuffer extends ReadBuffer {
+public final  class FloatEditBuffer extends EditBuffer {
 
     public static final int OFFSET = MemoryConstants.OFFSET_FLOAT;
 
@@ -24,5 +24,24 @@ public class FloatEditBuffer extends ReadBuffer {
     public final float get(int p) {
         checkIndex(p);
         return MemoryUtils.getFloat(address, p);
+    }
+
+    /**
+     *
+     * @param position 位置
+     * @param b 值
+     */
+    public  final  void put(int position, float b) {
+        ensureCapacity(position);
+        judeChange(position, b);
+        MemoryUtils.put(address, position, b);
+    }
+
+    private final void judeChange(int position, float b) {
+        if(!changed) {
+            if(b != get(position)){
+                changed = true;
+            }
+        }
     }
 }

@@ -9,7 +9,7 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/14.
  */
-public class IntWriteBuffer extends WriteBuffer {
+public final  class IntWriteBuffer extends WriteBuffer {
     public static final int OFFSET = MemoryConstants.OFFSET_INT;
 
     private IntWriteBuffer(Connector connector, FileBlock block, int max_offset) {

@@ -31,6 +31,7 @@ public class MemoryUtilsTest extends TestCase {
     }
 
 
+
     public void testCopyMemory2() {
         byte[] bytes = createRandomByte();
         int len = bytes.length;
@@ -39,6 +40,31 @@ public class MemoryUtilsTest extends TestCase {
         MemoryUtils.copyMemory(bytes, address + len);
         for(int i = 0; i < len; i++){
             assertEquals(MemoryUtils.getByte(address, len + i), MemoryUtils.getByte(address, i));
+        }
+    }
+
+    public void  testFill0() {
+        long address = MemoryUtils.allocate(2000);
+        for(int i = 0; i < 2000; i++) {
+            MemoryUtils.put(address, i, (byte) 20);
+        }
+        MemoryUtils.fill0(address + 100, 0);
+        MemoryUtils.fill0(address + 50, 50);
+        MemoryUtils.fill0(address + 350, 50);
+        MemoryUtils.fill0(address + 1350, 50);
+        for(int i = 0; i < 50; i++) {
+            assertEquals(0, MemoryUtils.getByte(address, i + 50));
+        }
+        assertEquals(MemoryUtils.getByte(address, 100), 20);
+        for(int i = 0; i < 50; i++) {
+            assertEquals(20, MemoryUtils.getByte(address, i + 150));
+        }
+        for(int i = 0; i < 50; i++) {
+            assertEquals(0, MemoryUtils.getByte(address, i + 350));
+        }
+
+        for(int i = 0; i < 50; i++) {
+            assertEquals(0, MemoryUtils.getByte(address, i + 1350));
         }
     }
 
@@ -52,6 +78,7 @@ public class MemoryUtilsTest extends TestCase {
         for(int i = 0; i < len; i++){
             assertEquals(MemoryUtils.getByte(a2, i), MemoryUtils.getByte(a2, len + i));
         }
+        MemoryUtils.free(a2);
     }
 
 

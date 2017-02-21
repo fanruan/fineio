@@ -9,7 +9,7 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/14.
  */
-public class DoubleWriteBuffer extends WriteBuffer {
+public final  class DoubleWriteBuffer extends WriteBuffer {
 
     public static final int OFFSET = MemoryConstants.OFFSET_DOUBLE;
 

@@ -8,7 +8,7 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/14.
  */
-public class CharReadBuffer extends ReadBuffer {
+public final  class CharReadBuffer extends ReadBuffer {
 
     public static final int OFFSET = MemoryConstants.OFFSET_CHAR;
 

@@ -29,27 +29,41 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         this.max_size = 1 << max_offset;
     }
 
-    protected void setCurrentCapacity(int offset) {
+    protected final void setCurrentCapacity(int offset) {
         this.current_max_offset = offset;
         this.current_max_size = 1 << offset;
     }
 
 
-    protected void ensureCapacity(int position){
+    protected final void ensureCapacity(int position){
         if(position < max_size) {
-            while ( position >= current_max_size){
-                setCurrentCapacity(this.current_max_offset + 1);
-                //TODO memory control
-                this.address = MemoryUtils.reallocate(address, this.current_max_size << getLengthOffset());
-            }
-            if(position > max_position){
-                max_position = position;
-            }
+            addCapacity(position);
         } else {
             throw new BufferIndexOutOfBoundsException(position);
         }
     }
 
+    private final void setMaxPosition(int position) {
+        if(position > max_position){
+            max_position = position;
+        }
+    }
+
+    private final void addCapacity(int position) {
+        while ( position >= current_max_size){
+            addCapacity();
+        }
+        setMaxPosition(position);
+    }
+
+    private final void addCapacity() {
+        int len = this.current_max_size << getLengthOffset();
+        setCurrentCapacity(this.current_max_offset + 1);
+        int newLen = this.current_max_size << getLengthOffset();
+        //TODO memory control
+        this.address = MemoryUtils.reallocate(address, newLen);
+        MemoryUtils.fill0(this.address + len, newLen - len);
+    }
 
 
 }
