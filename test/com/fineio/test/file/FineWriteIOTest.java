@@ -1,7 +1,7 @@
 package com.fineio.test.file;
 
 import com.fineio.FineIO;
-import com.fineio.file.FineIOFile;
+import com.fineio.file.IOFile;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
@@ -24,8 +24,8 @@ public class FineWriteIOTest extends TestCase {
         connector.getBlockOffset();
         EasyMock.expectLastCall().andReturn(size).anyTimes();
         control.replay();
-        FineIOFile file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_BYTE);
-        Field field = FineIOFile.class.getDeclaredField("block_size_offset");
+        IOFile file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_BYTE);
+        Field field = IOFile.class.getDeclaredField("block_size_offset");
         field.setAccessible(true);
         assertEquals(size, ((Byte)field.get(file)).byteValue());
     }

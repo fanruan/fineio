@@ -1,20 +1,111 @@
 package com.fineio.test.io.write;
 
+import com.fineio.FineIO;
+import com.fineio.base.Bits;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
+import com.fineio.file.FileConstants;
+import com.fineio.file.IOFile;
 import com.fineio.io.AbstractBuffer;
 import com.fineio.io.write.*;
+import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
+import org.easymock.EasyMock;
+import org.easymock.IAnswer;
+import org.easymock.IMocksControl;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URI;
 
 /**
  * Created by daniel on 2017/2/20.
  */
 public class WriteBufferTest extends TestCase {
+
+
+    public void  testOffSet() throws  Exception {
+        int len = (int)(Math.random() * 100d);
+        final byte[] res = new byte[16];
+        Bits.putLong(res, 0, (long)len);
+        Bits.putLong(res, 8, (long)len * 2);
+        IMocksControl control = EasyMock.createControl();
+        Connector connector = control.createMock(Connector.class);
+        URI u = new URI("");
+        Field head = FileConstants.class.getDeclaredField("HEAD");
+        head.setAccessible(true);
+        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        constructor.setAccessible(true);
+        FileBlock block = constructor.newInstance(u, head.get(null));
+        EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
+            @Override
+            public InputStream answer() throws Throwable {
+                return new ByteArrayInputStream(res);
+            }
+        }).anyTimes();
+        EasyMock.expect(connector.getBlockOffset()).andReturn((byte)22).anyTimes();
+        control.replay();
+        IOFile writeIOFile = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_LONG);
+        ByteWriteBuffer byteWriteBuffer = getWriteBuffer(writeIOFile,ByteWriteBuffer.class );
+        Method method = ByteWriteBuffer.class.getDeclaredMethod("getLengthOffset");
+        method.setAccessible(true);
+        int v = (Integer) method.invoke(byteWriteBuffer);
+        assertEquals(v, MemoryConstants.OFFSET_BYTE);
+        DoubleWriteBuffer doubleWriteBuffer = getWriteBuffer(writeIOFile, DoubleWriteBuffer.class);
+        method = DoubleWriteBuffer.class.getDeclaredMethod("getLengthOffset");
+        method.setAccessible(true);
+        v = (Integer) method.invoke(doubleWriteBuffer);
+        LongWriteBuffer longWriteBuffer = getWriteBuffer(writeIOFile, LongWriteBuffer.class );
+        method = LongWriteBuffer.class.getDeclaredMethod("getLengthOffset");
+        method.setAccessible(true);
+        v = (Integer) method.invoke(longWriteBuffer);
+        assertEquals(v, MemoryConstants.OFFSET_LONG);
+        IntWriteBuffer intWriteBuffer = getWriteBuffer(writeIOFile, IntWriteBuffer.class );
+        method = IntWriteBuffer.class.getDeclaredMethod("getLengthOffset");
+        method.setAccessible(true);
+        v = (Integer) method.invoke(intWriteBuffer);
+        assertEquals(v, MemoryConstants.OFFSET_INT);
+        CharWriteBuffer charWriteBuffer = getWriteBuffer(writeIOFile, CharWriteBuffer.class );
+        method = CharWriteBuffer.class.getDeclaredMethod("getLengthOffset");
+        method.setAccessible(true);
+        v = (Integer) method.invoke(charWriteBuffer);
+        assertEquals(v, MemoryConstants.OFFSET_CHAR);
+        FloatWriteBuffer floatWriteBuffer = getWriteBuffer(writeIOFile, FloatWriteBuffer.class );
+        method = FloatWriteBuffer.class.getDeclaredMethod("getLengthOffset");
+        method.setAccessible(true);
+        v = (Integer) method.invoke(floatWriteBuffer);
+        assertEquals(v, MemoryConstants.OFFSET_FLOAT);
+
+        ShortWriteBuffer shortWriteBuffer = getWriteBuffer(writeIOFile, ShortWriteBuffer.class );
+        method = ShortWriteBuffer.class.getDeclaredMethod("getLengthOffset");
+        method.setAccessible(true);
+        v = (Integer) method.invoke(shortWriteBuffer);
+        assertEquals(v, MemoryConstants.OFFSET_SHORT);
+
+    }
+
+    private static <T extends WriteBuffer> T getWriteBuffer(IOFile<WriteBuffer> writeIOFile, Class<T> clazz) {
+        try {
+            Method method = IOFile.class.getDeclaredMethod("createBuffer", Class.class, int.class);
+            method.setAccessible(true);
+            return (T) method.invoke(writeIOFile, clazz, 0);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
 
     private byte[] createRandomByte(int off){
         int len = 1 << off;

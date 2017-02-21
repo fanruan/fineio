@@ -5,7 +5,6 @@ import com.fineio.base.Bits;
 import com.fineio.file.*;
 import com.fineio.io.read.*;
 import com.fineio.io.write.DoubleWriteBuffer;
-import com.fineio.io.write.WriteBuffer;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
@@ -40,16 +39,16 @@ public class FineIOTest extends TestCase {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(res);
         EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(byteArrayInputStream).anyTimes();
         control.replay();
-        FineIOFile file = FineIO.createIOFile(connector , u, FineIO.MODEL.READ_LONG);
-        assertTrue(file instanceof FineReadIOFile);
+        IOFile file = FineIO.createIOFile(connector , u, FineIO.MODEL.READ_LONG);
+        assertTrue(file instanceof ReadIOFile);
     }
 
     public void testCreateWriteIOFile() throws Exception {
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
         URI u = new URI("");
-        FineIOFile<DoubleWriteBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_DOUBLE);
-        assertTrue(file instanceof FineWriteIOFile);
+        IOFile<DoubleWriteBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_DOUBLE);
+        assertTrue(file instanceof WriteIOFile);
     }
 
 
@@ -117,10 +116,10 @@ public class FineIOTest extends TestCase {
             }
         }).anyTimes();
         control.replay();
-        FineReadIOFile<LongReadBuffer> file = (FineReadIOFile<LongReadBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.READ_LONG);
+        ReadIOFile<LongReadBuffer> file = (ReadIOFile<LongReadBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.READ_LONG);
         long v1 = 0;
         for(long i = 0, ilen = (totalLen >> 3); i < ilen; i++){
-            v1 +=FineReadIOFile.getLong(file, i);
+            v1 += ReadIOFile.getLong(file, i);
         }
         long v2 = 0;
         for(int i = 0;i < byteLen; i+=8){
@@ -132,10 +131,10 @@ public class FineIOTest extends TestCase {
             }
         }
         assertEquals(v1, v2);
-        FineReadIOFile<IntReadBuffer> ifile = (FineReadIOFile<IntReadBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.READ_INT);
+        ReadIOFile<IntReadBuffer> ifile = (ReadIOFile<IntReadBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.READ_INT);
         v1 = 0;
         for(long i = 0, ilen = (totalLen >> 2); i < ilen; i++){
-            v1 +=FineReadIOFile.getInt(ifile, i);
+            v1 += ReadIOFile.getInt(ifile, i);
         }
         v2 = 0;
         for(int i = 0;i < byteLen; i+=4){
@@ -147,10 +146,10 @@ public class FineIOTest extends TestCase {
             }
         }
         assertEquals(v1, v2);
-        FineReadIOFile<DoubleReadBuffer> dfile = (FineReadIOFile<DoubleReadBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.READ_DOUBLE);
+        ReadIOFile<DoubleReadBuffer> dfile = (ReadIOFile<DoubleReadBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.READ_DOUBLE);
         double d1 = 0;
         for(long i = 0, ilen = (totalLen >> 3); i < ilen; i++){
-            d1 +=FineReadIOFile.getDouble(dfile, i);
+            d1 += ReadIOFile.getDouble(dfile, i);
         }
         double d2 = 0;
         for(int i = 0;i < byteLen; i+=8){
@@ -170,7 +169,7 @@ public class FineIOTest extends TestCase {
         URI u = new URI("");
         EasyMock.expect(connector.getBlockOffset()).andReturn((byte)22).anyTimes();
         control.replay();
-        FineWriteIOFile<DoubleWriteBuffer> dfile = (FineWriteIOFile<DoubleWriteBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.WRITE_DOUBLE);
+        WriteIOFile<DoubleWriteBuffer> dfile = (WriteIOFile<DoubleWriteBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.WRITE_DOUBLE);
 
 
 

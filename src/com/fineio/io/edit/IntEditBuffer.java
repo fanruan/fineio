@@ -9,10 +9,10 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/14.
  */
-public final  class IntReadBuffer extends EditBuffer {
+public final  class IntEditBuffer extends EditBuffer {
     public static final int OFFSET = MemoryConstants.OFFSET_INT;
 
-    private IntReadBuffer(Connector connector, FileBlock block, int max_offset) {
+    private IntEditBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block, max_offset);
     }
 

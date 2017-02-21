@@ -5,7 +5,7 @@ import com.fineio.base.Bits;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
 import com.fineio.file.FileConstants;
-import com.fineio.file.FineIOFile;
+import com.fineio.file.IOFile;
 import com.fineio.io.AbstractBuffer;
 import com.fineio.io.read.*;
 import com.fineio.memory.MemoryConstants;
@@ -31,7 +31,7 @@ public class BufferTest  extends TestCase {
 
     public void  testOffSet() throws  Exception {
         int len = (int)(Math.random() * 100d);
-        byte[] res = new byte[16];
+        final byte[] res = new byte[16];
         Bits.putLong(res, 0, (long)len);
         Bits.putLong(res, 8, (long)len * 2);
         IMocksControl control = EasyMock.createControl();
@@ -43,9 +43,14 @@ public class BufferTest  extends TestCase {
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, head.get(null));
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(res);
-        EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(byteArrayInputStream).anyTimes();
+        EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
+            @Override
+            public InputStream answer() throws Throwable {
+                return new ByteArrayInputStream(res);
+            }
+        }).anyTimes();
         control.replay();
-        FineIOFile readIOFile = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_LONG);
+        IOFile readIOFile = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_LONG);
         ByteReadBuffer byteReadBuffer = getReadBuffer(readIOFile,ByteReadBuffer.class );
         Method method = ByteReadBuffer.class.getDeclaredMethod("getLengthOffset");
         method.setAccessible(true);
@@ -84,9 +89,9 @@ public class BufferTest  extends TestCase {
 
     }
 
-    private static <T extends ReadBuffer> T getReadBuffer(FineIOFile<ReadBuffer> readIOFile, Class<T> clazz) {
+    private static <T extends ReadBuffer> T getReadBuffer(IOFile<ReadBuffer> readIOFile, Class<T> clazz) {
         try {
-            Method method = FineIOFile.class.getDeclaredMethod("createBuffer", Class.class, int.class);
+            Method method = IOFile.class.getDeclaredMethod("createBuffer", Class.class, int.class);
             method.setAccessible(true);
             return (T) method.invoke(readIOFile, clazz, 0);
         } catch (NoSuchMethodException e) {

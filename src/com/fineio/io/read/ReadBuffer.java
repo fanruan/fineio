@@ -3,6 +3,7 @@ package com.fineio.io.read;
 import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
+import com.fineio.file.ReadIOFile;
 import com.fineio.io.AbstractBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
@@ -21,7 +22,7 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
      * max_offset 为什么要作为参数传进来而不是从connector里面读呢 是因为可能我上次写的cube的时候配置的4M 后来改成了64M这样的情况下读取connecter的值就会导致原来的值不对
      * 因为File里面获取到的offset是去掉类型偏移量的值，所以这里的offset需要加上偏移量，纯粹是比较2，不过这里都是不对外公开的，无所谓拉
      * 所以这个max_offset是传进来的，并且是当前文件的offset的值
-     * @see com.fineio.file.FineReadIOFile
+     * @see ReadIOFile
      * @param connector
      * @param block
      * @param max_offset

@@ -2,7 +2,6 @@ package com.fineio.file;
 
 import com.fineio.base.Bits;
 import com.fineio.exception.BlockNotFoundException;
-import com.fineio.io.AbstractBuffer;
 import com.fineio.io.Buffer;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
@@ -14,8 +13,8 @@ import java.net.URI;
 /**
  * Created by daniel on 2017/2/20.
  */
-public abstract class FineAbstractReadFile<T extends Buffer> extends FineIOFile<T> {
-    FineAbstractReadFile(Connector connector, URI uri, Class<T> clazz) {
+public abstract class AbstractReadIOFile<T extends Buffer> extends IOFile<T> {
+    AbstractReadIOFile(Connector connector, URI uri, Class<T> clazz) {
         super(connector, uri, clazz);
         readHeader(getOffset());
     }

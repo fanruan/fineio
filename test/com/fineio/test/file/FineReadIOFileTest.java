@@ -4,11 +4,10 @@ import com.fineio.base.Bits;
 import com.fineio.exception.BlockNotFoundException;
 import com.fineio.file.FileBlock;
 import com.fineio.file.FileConstants;
-import com.fineio.file.FineReadIOFile;
+import com.fineio.file.ReadIOFile;
 import com.fineio.io.read.IntReadBuffer;
 import com.fineio.io.read.LongReadBuffer;
 import com.fineio.storage.Connector;
-import com.fr.third.org.apache.poi.hssf.record.formula.functions.Int;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -18,7 +17,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 
 /**
@@ -46,7 +44,7 @@ public class FineReadIOFileTest extends TestCase {
         control.replay();
         boolean exp = false;
         try {
-            FineReadIOFile.createFineIO(connector, u, LongReadBuffer.class);
+            ReadIOFile.createFineIO(connector, u, LongReadBuffer.class);
         } catch (BlockNotFoundException e){
             exp = true;
         }
@@ -74,17 +72,17 @@ public class FineReadIOFileTest extends TestCase {
             }
         }).anyTimes();
         control.replay();
-        FineReadIOFile<LongReadBuffer> file = FineReadIOFile.createFineIO(connector, u, LongReadBuffer.class);
-        Field lenField = FineReadIOFile.class.getSuperclass().getSuperclass().getDeclaredField("blocks");
-        Field blockSizeField =  FineReadIOFile.class.getSuperclass().getSuperclass().getDeclaredField("block_size_offset");
+        ReadIOFile<LongReadBuffer> file = ReadIOFile.createFineIO(connector, u, LongReadBuffer.class);
+        Field lenField = ReadIOFile.class.getSuperclass().getSuperclass().getDeclaredField("blocks");
+        Field blockSizeField =  ReadIOFile.class.getSuperclass().getSuperclass().getDeclaredField("block_size_offset");
         lenField.setAccessible(true);
         blockSizeField.setAccessible(true);
         assertEquals(file.getPath(), u.getPath());
         assertEquals(len * 2, ((Integer)lenField.get(file)).intValue());
         assertEquals(len - LongReadBuffer.OFFSET, ((Byte)blockSizeField.get(file)).byteValue());
-        FineReadIOFile<IntReadBuffer> ifile = FineReadIOFile.createFineIO(connector, u, IntReadBuffer.class);
-        lenField = FineReadIOFile.class.getSuperclass().getSuperclass().getDeclaredField("blocks");
-        blockSizeField =  FineReadIOFile.class.getSuperclass().getSuperclass().getDeclaredField("block_size_offset");
+        ReadIOFile<IntReadBuffer> ifile = ReadIOFile.createFineIO(connector, u, IntReadBuffer.class);
+        lenField = ReadIOFile.class.getSuperclass().getSuperclass().getDeclaredField("blocks");
+        blockSizeField =  ReadIOFile.class.getSuperclass().getSuperclass().getDeclaredField("block_size_offset");
         lenField.setAccessible(true);
         blockSizeField.setAccessible(true);
         assertEquals(ifile.getPath(), u.getPath());

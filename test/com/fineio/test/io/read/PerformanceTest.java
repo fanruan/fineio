@@ -4,7 +4,7 @@ import com.fineio.FineIO;
 import com.fineio.base.Bits;
 import com.fineio.file.FileBlock;
 import com.fineio.file.FileConstants;
-import com.fineio.file.FineReadIOFile;
+import com.fineio.file.ReadIOFile;
 import com.fineio.io.AbstractBuffer;
 import com.fineio.io.read.ByteReadBuffer;
 import com.fineio.io.read.DoubleReadBuffer;
@@ -92,17 +92,17 @@ public class PerformanceTest {
             }).anyTimes();
         }
         control.replay();
-        FineReadIOFile<DoubleReadBuffer> dfile = (FineReadIOFile<DoubleReadBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.READ_DOUBLE);
+        ReadIOFile<DoubleReadBuffer> dfile = (ReadIOFile<DoubleReadBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.READ_DOUBLE);
         double d1 = 0;
         long t = System.currentTimeMillis();
         for(long i = 0, ilen = totalDoubleLen; i < ilen; i++){
-            d1 +=FineReadIOFile.getDouble(dfile, i);
+            d1 += ReadIOFile.getDouble(dfile, i);
         }
         System.out.println("first cost:"  + (System.currentTimeMillis() - t) + "ms value:" + d1);
         d1 = 0;
         t = System.currentTimeMillis();
         for(long i = 0, ilen = totalDoubleLen; i < ilen; i++){
-            d1 +=FineReadIOFile.getDouble(dfile, i);
+            d1 += ReadIOFile.getDouble(dfile, i);
         }
         System.out.println("second cost:"  + (System.currentTimeMillis() - t) + "ms value:" + d1);
     }
@@ -179,17 +179,17 @@ public class PerformanceTest {
             }).anyTimes();
         }
         control.replay();
-        FineReadIOFile<DoubleReadBuffer> dfile = (FineReadIOFile<DoubleReadBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.READ_DOUBLE);
+        ReadIOFile<DoubleReadBuffer> dfile = (ReadIOFile<DoubleReadBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.READ_DOUBLE);
         double d1 = 0;
         long t = System.currentTimeMillis();
         for(long i = 0, ilen = totalDoubleLen; i < ilen; i++){
-            d1 +=FineReadIOFile.getDouble(dfile, i);
+            d1 += ReadIOFile.getDouble(dfile, i);
         }
         System.out.println("first cost:"  + (System.currentTimeMillis() - t) + "ms value:" + d1);
         d1 = 0;
         t = System.currentTimeMillis();
         for(long i = 0, ilen = totalDoubleLen; i < ilen; i++){
-            d1 +=FineReadIOFile.getDouble(dfile, i);
+            d1 += ReadIOFile.getDouble(dfile, i);
         }
         System.out.println("second cost:"  + (System.currentTimeMillis() - t) + "ms value:" + d1);
     }

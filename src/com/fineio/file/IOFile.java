@@ -15,7 +15,7 @@ import java.net.URI;
 /**
  * Created by daniel on 2017/2/10.
  */
-public abstract class FineIOFile<E extends Buffer> {
+public abstract class IOFile<E extends Buffer> {
 
     /**
      * 内部路径 key
@@ -44,7 +44,7 @@ public abstract class FineIOFile<E extends Buffer> {
     protected E[] buffers;
 
 
-    FineIOFile(Connector connector, URI uri, Class<E> clazz) {
+    IOFile(Connector connector, URI uri, Class<E> clazz) {
         if(uri == null || connector == null){
             throw new IOSetException("uri  or connector can't be null");
         }
