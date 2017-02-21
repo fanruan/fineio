@@ -21,13 +21,15 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
 
     protected int max_offset;
 
+    protected int max_position = 0;
+
     protected WriteBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block);
         this.max_offset = max_offset;
         this.max_size = 1 << max_offset;
     }
 
-    private void setCurrentCapacity(int offset) {
+    protected void setCurrentCapacity(int offset) {
         this.current_max_offset = offset;
         this.current_max_size = 1 << offset;
     }
@@ -39,6 +41,9 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
                 setCurrentCapacity(this.current_max_offset + 1);
                 //TODO memory control
                 this.address = MemoryUtils.reallocate(address, this.current_max_size << getLengthOffset());
+            }
+            if(position > max_position){
+                max_position = position;
             }
         } else {
             throw new BufferIndexOutOfBoundsException(position);

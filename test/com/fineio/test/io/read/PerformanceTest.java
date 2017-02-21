@@ -34,27 +34,27 @@ public class PerformanceTest {
     }
 
     public static void main(String[] args) throws Exception {
-        //Thread.sleep(20000);
+//        Thread.sleep(20000);
 //        createFile();
-//        doubleSumFileTest();
-        final byte[] bytes  = createRandomByte(1 << 30);
-        IMocksControl control = EasyMock.createControl();
-        Connector connector = control.createMock(Connector.class);
-        URI u = new URI("");
-        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
-        constructor.setAccessible(true);
-        FileBlock block = constructor.newInstance(u, "0");
-        EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
-            @Override
-            public InputStream answer() throws Throwable {
-                return new ByteArrayInputStream(bytes);
-            }
-        }).anyTimes();
-        control.replay();
-        byteTest(bytes, connector, block);
-        intTest(bytes, connector, block);
-        doubleTest(bytes, connector, block);
-        doubleSumTest();
+        doubleSumFileTest();
+//        final byte[] bytes  = createRandomByte(1 << 30);
+//        IMocksControl control = EasyMock.createControl();
+//        Connector connector = control.createMock(Connector.class);
+//        URI u = new URI("");
+//        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+//        constructor.setAccessible(true);
+//        FileBlock block = constructor.newInstance(u, "0");
+//        EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
+//            @Override
+//            public InputStream answer() throws Throwable {
+//                return new ByteArrayInputStream(bytes);
+//            }
+//        }).anyTimes();
+//        control.replay();
+//        byteTest(bytes, connector, block);
+//        intTest(bytes, connector, block);
+//        doubleTest(bytes, connector, block);
+//        doubleSumTest();
 //        while (true) {
 //            Thread.sleep(10000);
 //        }
@@ -74,7 +74,7 @@ public class PerformanceTest {
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, fieldHead.get(null));
-        final java.util.zip.ZipFile file = new java.util.zip.ZipFile("D:/fine.cube");
+        final java.util.zip.ZipFile file = new java.util.zip.ZipFile("D:/fine2.cube");
         EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
             @Override
             public InputStream answer() throws Throwable {
