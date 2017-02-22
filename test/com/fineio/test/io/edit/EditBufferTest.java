@@ -8,7 +8,6 @@ import com.fineio.file.FileConstants;
 import com.fineio.file.IOFile;
 import com.fineio.io.AbstractBuffer;
 import com.fineio.io.edit.*;
-import com.fineio.io.read.*;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
@@ -127,6 +126,12 @@ public class EditBufferTest extends TestCase {
         return arrays;
     }
 
+    public void testBuffer100() throws Exception {
+        for(int i = 0; i< 100; i++) {
+            testBuffer();
+        }
+    }
+
 
 
     public void testBuffer() throws Exception {
@@ -152,6 +157,18 @@ public class EditBufferTest extends TestCase {
         shortTest(value, connector, block, len+1);
         longTest(value, connector, block, len+1);
         floatTest(value, connector, block, len+1);
+        testReloadData(value, connector, block, len+1);
+    }
+
+    private void testReloadData(byte[] value, Connector connector, FileBlock block, int off) {
+        ByteEditBuffer buffer = createBuffer(ByteEditBuffer.class, connector, block, off);
+        for(int k = value.length/2; k < value.length; k++){
+            buffer.put(k, (byte) 0);
+        }
+        for(int k = 0; k <  value.length/2; k++){
+            assertEquals(buffer.get(k), value[k]);
+        }
+
     }
 
     private void byteTest(byte[] value, Connector connector, FileBlock block, int off) {

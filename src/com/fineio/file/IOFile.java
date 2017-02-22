@@ -1,12 +1,10 @@
 package com.fineio.file;
 
-import com.fineio.exception.BufferConstructException;
-import com.fineio.exception.BufferIndexOutOfBoundsException;
+import com.fineio.exception.*;
 import com.fineio.io.AbstractBuffer;
 import com.fineio.io.Buffer;
 import com.fineio.io.read.ByteReadBuffer;
 import com.fineio.storage.Connector;
-import com.fineio.exception.IOSetException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -95,7 +93,7 @@ public abstract class IOFile<E extends Buffer> {
             Field field = parameterClazz.getInterfaces()[0].getDeclaredField(FileConstants.OFFSET_FIELD_NAME);
             return ((byte) ((Integer)field.get(null)).intValue());
         } catch (Exception e) {
-            return ByteReadBuffer.OFFSET;
+            throw new ClassDefException(e);
         }
     }
 

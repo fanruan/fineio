@@ -26,31 +26,31 @@ public final class EditIOFile<T extends Edit> extends AbstractReadIOFile<T> {
         return  new EditIOFile<E>(connector, uri, clazz);
     }
 
-    public static void put(IOFile<DoubleEditBuffer> file, int p, double d) {
+    public static void put(IOFile<DoubleEditBuffer> file, long p, double d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
 
-    public static void put(IOFile<ByteEditBuffer> file, int p, byte d) {
+    public static void put(IOFile<ByteEditBuffer> file, long p, byte d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
 
-    public static void put(IOFile<CharEditBuffer> file, int p, char d) {
+    public static void put(IOFile<CharEditBuffer> file, long p, char d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
 
-    public static void put(IOFile<FloatEditBuffer> file, int p, float d) {
+    public static void put(IOFile<FloatEditBuffer> file, long p, float d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
 
-    public static void put(IOFile<LongEditBuffer> file, int p, long d) {
+    public static void put(IOFile<LongEditBuffer> file, long p, long d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
 
-    public static void put(IOFile<IntEditBuffer> file, int p, int d) {
+    public static void put(IOFile<IntEditBuffer> file, long p, int d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
 
-    public static void put(IOFile<ShortEditBuffer> file, int p, short d) {
+    public static void put(IOFile<ShortEditBuffer> file, long p, short d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
 
@@ -61,6 +61,7 @@ public final class EditIOFile<T extends Edit> extends AbstractReadIOFile<T> {
     public final static int getInt(IOFile<IntEditBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
+
 
     public final static int getChar(IOFile<CharEditBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));

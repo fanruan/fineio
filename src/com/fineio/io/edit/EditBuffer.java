@@ -35,34 +35,39 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
                 return;
             }
             InputStream is = connector.read(block);
-            if (is == null) {
-                throw new BlockNotFoundException("block:" + block.toString() + " not found!");
-            }
-            try {
-                int max_byte_len = max_size << getLengthOffset();
-                byte[] bytes = new byte[max_byte_len];
-                int off = 0;
-                int len = 0;
-                while ((len = is.read(bytes, off, max_byte_len - off)) > 0) {
-                    off+=len;
+            int max_byte_len = max_size << getLengthOffset();
+            byte[] bytes = new byte[max_byte_len];
+            int off = 0;
+            int len = 0;
+            if (is != null) {
+                try {
+                    while ((len = is.read(bytes, off, max_byte_len - off)) > 0) {
+                        off += len;
+                    }
+                } catch (IOException e) {
                 }
-                int max_position = off >> getLengthOffset();
-                int offset = Maths.log2(max_position);
-                if(max_position > (1 << offset)){
-                    offset++;
-                }
-                //TODO cache部分要做内存限制等处理  这部分与写共享内存，不考虑边写边释放问题
-                len = 1 << offset << getLengthOffset();
-                address = MemoryUtils.allocate(len);
-                MemoryUtils.copyMemory(bytes, address, off);
-                MemoryUtils.fill0(address + off, len - off);
-                load = true;
-                this.max_position = max_position;
-                setCurrentCapacity(offset);
-            } catch (IOException e) {
-                throw new BlockNotFoundException("block:" + block.toString() + " not found!");
             }
+            int max_position = off >> getLengthOffset();
+            int offset = Maths.log2(max_position);
+            if(max_position > (1 << offset)){
+                offset++;
+            }
+            //TODO cache部分要做内存限制等处理  这部分与写共享内存，不考虑边写边释放问题
+            len = 1 << offset << getLengthOffset();
+            address = MemoryUtils.allocate(len);
+            MemoryUtils.copyMemory(bytes, address, off);
+            MemoryUtils.fill0(address + off, len - off);
+            load = true;
+            this.max_position = max_position;
+            setCurrentCapacity(offset);
         }
+    }
+
+    protected void ensureCapacity(int position){
+        if(!load) {
+            loadData();
+        }
+        super.ensureCapacity(position);
     }
 
     protected final void checkIndex(int p) {

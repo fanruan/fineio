@@ -2,8 +2,6 @@ package com.fineio.io.write;
 
 import com.fineio.file.FileBlock;
 import com.fineio.io.LongBuffer;
-import com.fineio.io.read.ReadBuffer;
-import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 

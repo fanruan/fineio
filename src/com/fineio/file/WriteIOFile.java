@@ -28,31 +28,31 @@ public final class WriteIOFile<T extends Write> extends IOFile<T> {
         return  new WriteIOFile<E>(connector, uri, clazz);
     }
 
-    public static void put(IOFile<DoubleWriteBuffer> file, int p, double d) {
+    public static void put(IOFile<DoubleWriteBuffer> file, long p, double d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
 
-    public static void put(IOFile<ByteWriteBuffer> file, int p, byte d) {
+    public static void put(IOFile<ByteWriteBuffer> file, long p, byte d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
 
-    public static void put(IOFile<CharWriteBuffer> file, int p, char d) {
+    public static void put(IOFile<CharWriteBuffer> file, long p, char d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
 
-    public static void put(IOFile<FloatWriteBuffer> file, int p, float d) {
+    public static void put(IOFile<FloatWriteBuffer> file, long p, float d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
 
-    public static void put(IOFile<LongWriteBuffer> file, int p, long d) {
+    public static void put(IOFile<LongWriteBuffer> file, long p, long d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
 
-    public static void put(IOFile<IntWriteBuffer> file, int p, int d) {
+    public static void put(IOFile<IntWriteBuffer> file, long p, int d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
 
-    public static void put(IOFile<ShortWriteBuffer> file, int p, short d) {
+    public static void put(IOFile<ShortWriteBuffer> file, long p, short d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
 

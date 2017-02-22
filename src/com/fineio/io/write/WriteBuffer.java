@@ -35,7 +35,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     }
 
 
-    protected final void ensureCapacity(int position){
+    protected void ensureCapacity(int position){
         if(position < max_size) {
             addCapacity(position);
         } else {

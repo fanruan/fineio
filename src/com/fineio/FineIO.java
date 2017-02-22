@@ -210,31 +210,31 @@ public final  class FineIO {
      * @param p
      * @param d
      */
-    public static void put(EditIOFile<DoubleEditBuffer> file, int p, double d) {
+    public static void put(EditIOFile<DoubleEditBuffer> file, long p, double d) {
         EditIOFile.put(file, p, d);
     }
 
-    public static void put(EditIOFile<ByteEditBuffer> file, int p, byte d) {
+    public static void put(EditIOFile<ByteEditBuffer> file, long p, byte d) {
         EditIOFile.put(file, p, d);
     }
 
-    public static void put(EditIOFile<CharEditBuffer> file, int p, char d) {
+    public static void put(EditIOFile<CharEditBuffer> file, long p, char d) {
         EditIOFile.put(file, p, d);
     }
 
-    public static void put(EditIOFile<FloatEditBuffer> file, int p, float d) {
+    public static void put(EditIOFile<FloatEditBuffer> file, long p, float d) {
         EditIOFile.put(file, p, d);
     }
 
-    public static void put(EditIOFile<LongEditBuffer> file, int p, long d) {
+    public static void put(EditIOFile<LongEditBuffer> file, long p, long d) {
         EditIOFile.put(file, p, d);
     }
 
-    public static void put(EditIOFile<IntEditBuffer> file, int p, int d) {
+    public static void put(EditIOFile<IntEditBuffer> file, long p, int d) {
         EditIOFile.put(file, p, d);
     }
 
-    public static void put(EditIOFile<ShortEditBuffer> file, int p, short d) {
+    public static void put(EditIOFile<ShortEditBuffer> file, long p, short d) {
         EditIOFile.put(file, p, d);
     }
 
@@ -297,31 +297,31 @@ public final  class FineIO {
 
 
 
-    public static void put(IOFile<DoubleWriteBuffer> file, int p, double d) {
+    public static void put(IOFile<DoubleWriteBuffer> file, long p, double d) {
         WriteIOFile.put(file, p, d);
     }
 
-    public static void put(IOFile<ByteWriteBuffer> file, int p, byte d) {
+    public static void put(IOFile<ByteWriteBuffer> file, long p, byte d) {
         WriteIOFile.put(file, p, d);
     }
 
-    public static void put(IOFile<CharWriteBuffer> file, int p, char d) {
+    public static void put(IOFile<CharWriteBuffer> file, long p, char d) {
         WriteIOFile.put(file, p, d);
     }
 
-    public static void put(IOFile<FloatWriteBuffer> file, int p, float d) {
+    public static void put(IOFile<FloatWriteBuffer> file, long p, float d) {
         WriteIOFile.put(file, p, d);
     }
 
-    public static void put(IOFile<LongWriteBuffer> file, int p, long d) {
+    public static void put(IOFile<LongWriteBuffer> file, long p, long d) {
         WriteIOFile.put(file, p, d);
     }
 
-    public static void put(IOFile<IntWriteBuffer> file, int p, int d) {
+    public static void put(IOFile<IntWriteBuffer> file, long p, int d) {
         WriteIOFile.put(file, p, d);
     }
 
-    public static void put(IOFile<ShortWriteBuffer> file, int p, short d) {
+    public static void put(IOFile<ShortWriteBuffer> file, long p, short d) {
         WriteIOFile.put(file, p, d);
     }
 
