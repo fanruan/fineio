@@ -1,6 +1,7 @@
 package com.fineio.io.edit;
 
 import com.fineio.file.FileBlock;
+import com.fineio.io.LongBuffer;
 import com.fineio.io.read.ReadBuffer;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
@@ -9,8 +10,7 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/14.
  */
-public  final class LongEditBuffer extends EditBuffer {
-    public static final int OFFSET = MemoryConstants.OFFSET_LONG;
+public  final class LongEditBuffer extends EditBuffer implements LongBuffer{
 
     private LongEditBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block, max_offset);

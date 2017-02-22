@@ -92,7 +92,7 @@ public abstract class IOFile<E extends Buffer> {
 
     protected byte getOffset() {
         try {
-            Field field = parameterClazz.getDeclaredField(FileConstants.OFFSET_FIELD_NAME);
+            Field field = parameterClazz.getInterfaces()[0].getDeclaredField(FileConstants.OFFSET_FIELD_NAME);
             return ((byte) ((Integer)field.get(null)).intValue());
         } catch (Exception e) {
             return ByteReadBuffer.OFFSET;

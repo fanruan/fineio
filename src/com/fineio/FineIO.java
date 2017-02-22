@@ -205,7 +205,7 @@ public final  class FineIO {
 
 
     /**
-     * 转方法转发
+     * 保存的方法
      * @param file
      * @param p
      * @param d

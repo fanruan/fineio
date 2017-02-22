@@ -3,6 +3,7 @@ package com.fineio.test;
 import com.fineio.FineIO;
 import com.fineio.base.Bits;
 import com.fineio.file.*;
+import com.fineio.io.edit.DoubleEditBuffer;
 import com.fineio.io.read.*;
 import com.fineio.io.write.DoubleWriteBuffer;
 import com.fineio.storage.Connector;
@@ -25,7 +26,7 @@ public class FineIOTest extends TestCase {
     public void testCreateReadIOFile() throws Exception {
 
         byte len = (byte) (Math.random() * 100d);
-        byte[] res = new byte[16];
+        final byte[] res = new byte[16];
         Bits.putInt(res, 0, len * 2);
         res[8] = len;
         IMocksControl control = EasyMock.createControl();
@@ -36,8 +37,12 @@ public class FineIOTest extends TestCase {
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, head.get(null));
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(res);
-        EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(byteArrayInputStream).anyTimes();
+        EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
+            @Override
+            public InputStream answer() throws Throwable {
+                return  new ByteArrayInputStream(res);
+            }
+        }).anyTimes();
         control.replay();
         IOFile file = FineIO.createIOFile(connector , u, FineIO.MODEL.READ_LONG);
         assertTrue(file instanceof ReadIOFile);
@@ -51,6 +56,30 @@ public class FineIOTest extends TestCase {
         assertTrue(file instanceof WriteIOFile);
     }
 
+    public void testCreateEditIOFile() throws Exception {
+        byte len = (byte) (Math.random() * 100d);
+        final byte[] res = new byte[16];
+        Bits.putInt(res, 0, len * 2);
+        res[8] = len;
+        IMocksControl control = EasyMock.createControl();
+        Connector connector = control.createMock(Connector.class);
+        URI u = new URI("");
+        Field head = FileConstants.class.getDeclaredField("HEAD");
+        head.setAccessible(true);
+        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        constructor.setAccessible(true);
+        FileBlock block = constructor.newInstance(u, head.get(null));
+        EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
+            @Override
+            public InputStream answer() throws Throwable {
+                return  new ByteArrayInputStream(res);
+            }
+        }).anyTimes();
+        control.replay();
+        IOFile<DoubleEditBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.EDIT_DOUBLE);
+        assertTrue(file instanceof EditIOFile);
+    }
+
 
     private byte[] createRandomByte(int len){
         byte[] arrays = new byte[len];
@@ -58,6 +87,11 @@ public class FineIOTest extends TestCase {
             arrays[i] =  (byte)(Double.doubleToLongBits(Math.random() * 100000000000d));
         }
         return arrays;
+    }
+
+    public void testEdit() throws  Exception {
+
+
     }
 
 

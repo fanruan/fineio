@@ -24,6 +24,7 @@ public abstract class AbstractBuffer implements Buffer{
     /**
      *基础类型相对于byte类型的偏移量比如int是4个byte那么便宜量是2
      * long是8个byte那么偏移量是3
+     * 不放在接口里面是因为protected类型
      * @return
      */
     protected abstract int getLengthOffset();
