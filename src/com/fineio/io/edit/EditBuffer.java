@@ -34,19 +34,19 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
             if (load) {
                 return;
             }
-            InputStream is = connector.read(block);
+
             int max_byte_len = max_size << getLengthOffset();
             byte[] bytes = new byte[max_byte_len];
             int off = 0;
             int len = 0;
-            if (is != null) {
                 try {
+                    InputStream is = connector.read(block);
                     while ((len = is.read(bytes, off, max_byte_len - off)) > 0) {
                         off += len;
                     }
-                } catch (IOException e) {
+                } catch (Throwable e) {
+                    //文件不存在新建一个不loaddata了
                 }
-            }
             int max_position = off >> getLengthOffset();
             int offset = Maths.log2(max_position);
             if(max_position > (1 << offset)){
