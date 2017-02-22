@@ -39,7 +39,7 @@ public final  class FloatEditBuffer extends EditBuffer {
 
     private final void judeChange(int position, float b) {
         if(!changed) {
-            if(b != get(position)){
+            if(Float.compare(b, get(position)) != 0){
                 changed = true;
             }
         }

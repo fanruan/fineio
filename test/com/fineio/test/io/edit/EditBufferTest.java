@@ -145,13 +145,13 @@ public class EditBufferTest extends TestCase {
             }
         }).anyTimes();
         control.replay();
-        byteTest(value, connector, block, len*2);
-        intTest(value, connector, block, len*2);
-        doubleTest(value, connector, block, len*2);
-        charTest(value, connector, block, len*2);
-        shortTest(value, connector, block, len*2);
-        longTest(value, connector, block, len*2);
-        floatTest(value, connector, block, len*2);
+        byteTest(value, connector, block, len+1);
+        intTest(value, connector, block, len+1);
+        doubleTest(value, connector, block, len+1);
+        charTest(value, connector, block, len+1);
+        shortTest(value, connector, block, len+1);
+        longTest(value, connector, block, len+1);
+        floatTest(value, connector, block, len+1);
     }
 
     private void byteTest(byte[] value, Connector connector, FileBlock block, int off) {
@@ -183,8 +183,16 @@ public class EditBufferTest extends TestCase {
             exp = true;
         }
         assertFalse(exp);
+        exp = false;
         try {
             buffer.get(1 << off);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertTrue(exp);
+        exp = false;
+        try {
+            buffer.put(1 << off, (byte) 0);
         } catch (BufferIndexOutOfBoundsException e) {
             exp = true;
         }
@@ -200,11 +208,37 @@ public class EditBufferTest extends TestCase {
         int v2 = 0;
         for(int k = 0, klen = (value.length >> 2); k < klen; k++){
             v2 +=ib.get(k);
+            ib.put(k, ib.get(k));
+        }
+        assertFalse(ib.hasChanged());
+        int klen = (value.length >> 2);
+        for(int k = 0; k < klen; k++){
+            ib.put(klen+ k, ib.get(klen - k- 1));
+        }
+        assertTrue(ib.hasChanged());
+        int v3 = 0;
+        for(int k = 0; k < klen; k++){
+            v3 +=ib.get(klen + k);
         }
         assertEquals(v1, v2);
+        assertEquals(v1, v3);
         exp = false;
         try {
-            ib.get(value.length);
+            ib.get(klen);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertFalse(exp);
+        exp = false;
+        try {
+            ib.get(1 << (off - 2));
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertTrue(exp);
+        exp = false;
+        try {
+            ib.put(1 << (off - 2), 0);
         } catch (BufferIndexOutOfBoundsException e) {
             exp = true;
         }
@@ -219,13 +253,46 @@ public class EditBufferTest extends TestCase {
             v1 += Bits.getFloat(value, k);
         }
         float v2 = 0;
-        for(int k = 0, klen = (value.length >> 2); k < klen; k++){
+        int klen = (value.length >> 2);
+        for(int k = 0; k < klen; k++){
             v2 +=ib.get(k);
+            ib.put(k, ib.get(k));
         }
+        assertFalse(ib.hasChanged());
         assertEquals(v1, v2);
         exp = false;
         try {
-            ib.get(value.length);
+            ib.get(klen);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertFalse(ib.hasChanged());
+        assertTrue(exp);
+        for(int k = 0; k < klen; k++){
+            ib.put(klen+ k, ib.get(klen - k- 1));
+        }
+        assertTrue(ib.hasChanged());
+        exp = false;
+        try {
+            ib.get(klen);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertFalse(exp);
+        float v3 = 0;
+        for(int k = klen; k > 0; k--){
+            v3 +=ib.get(klen + k - 1);
+        }
+        assertEquals(v1, v3);
+        try {
+            ib.get(1 << (off - 2));
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertTrue(exp);
+        exp = false;
+        try {
+            ib.put(1 << (off - 2), 0);
         } catch (BufferIndexOutOfBoundsException e) {
             exp = true;
         }
@@ -233,19 +300,52 @@ public class EditBufferTest extends TestCase {
     }
 
     private void doubleTest(byte[] value, Connector connector, FileBlock block, int off) {
-        boolean exp;DoubleEditBuffer db = createBuffer(DoubleEditBuffer.class, connector, block, off -3);
-        double d1 = 0;
+        boolean exp;DoubleEditBuffer ib = createBuffer(DoubleEditBuffer.class, connector, block, off -3);
+        double v1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=8){
-            d1 += Bits.getDouble(value, k);
+            v1 += Bits.getDouble(value, k);
         }
-        double d2 = 0;
-        for(int k = 0, klen = (value.length >> 3); k < klen; k++){
-            d2 +=db.get(k);
+        double v2 = 0;
+        int klen = (value.length >> 3);
+        for(int k = 0; k < klen; k++){
+            v2 +=ib.get(k);
+            ib.put(k, ib.get(k));
         }
-        assertEquals(d1, d2);
+        assertFalse(ib.hasChanged());
+        assertEquals(v1, v2);
         exp = false;
         try {
-            db.get(value.length);
+            ib.get(klen);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertFalse(ib.hasChanged());
+        assertTrue(exp);
+        for(int k = 0; k < klen; k++){
+            ib.put(klen+ k, ib.get(klen - k- 1));
+        }
+        assertTrue(ib.hasChanged());
+        exp = false;
+        try {
+            ib.get(klen);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertFalse(exp);
+        double v3 = 0;
+        for(int k = klen; k > 0; k--){
+            v3 +=ib.get(klen + k - 1);
+        }
+        assertEquals(v1, v3);
+        try {
+            ib.get(1 << (off - 3));
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertTrue(exp);
+        exp = false;
+        try {
+            ib.put(1 << (off - 3), 0);
         } catch (BufferIndexOutOfBoundsException e) {
             exp = true;
         }
@@ -253,19 +353,52 @@ public class EditBufferTest extends TestCase {
     }
 
     private void charTest(byte[] value, Connector connector, FileBlock block, int off) {
-        boolean exp;CharEditBuffer cb = createBuffer(CharEditBuffer.class, connector, block, off -1);
-        char c1 = 0;
+        boolean exp;CharEditBuffer ib = createBuffer(CharEditBuffer.class, connector, block, off -1);
+        char v1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=2){
-            c1 += Bits.getChar(value, k);
+            v1 += Bits.getShort(value, k);
         }
-        char c2 = 0;
-        for(int k = 0, klen = (value.length >> 1); k < klen; k++){
-            c2 +=cb.get(k);
+        char v2 = 0;
+        int klen = (value.length >> 1);
+        for(int k = 0; k < klen; k++){
+            v2 +=ib.get(k);
+            ib.put(k, ib.get(k));
         }
-        assertEquals(c1, c2);
+        assertFalse(ib.hasChanged());
+        assertEquals(v1, v2);
         exp = false;
         try {
-            cb.get(value.length);
+            ib.get(klen);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertFalse(ib.hasChanged());
+        assertTrue(exp);
+        for(int k = 0; k < klen; k++){
+            ib.put(klen+ k, ib.get(klen - k- 1));
+        }
+        assertTrue(ib.hasChanged());
+        exp = false;
+        try {
+            ib.get(klen);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertFalse(exp);
+        char v3 = 0;
+        for(int k = klen; k > 0; k--){
+            v3 +=ib.get(klen + k - 1);
+        }
+        assertEquals(v1, v3);
+        try {
+            ib.get(1 << (off - 1));
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertTrue(exp);
+        exp = false;
+        try {
+            ib.put(1 << (off - 1), (char)0);
         } catch (BufferIndexOutOfBoundsException e) {
             exp = true;
         }
@@ -274,19 +407,52 @@ public class EditBufferTest extends TestCase {
 
 
     private void shortTest(byte[] value, Connector connector, FileBlock block, int off) {
-        boolean exp;ShortEditBuffer cb = createBuffer(ShortEditBuffer.class,connector, block, off -1);
-        short c1 = 0;
+        boolean exp;ShortEditBuffer ib = createBuffer(ShortEditBuffer.class,connector, block, off -1);
+        short v1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=2){
-            c1 += Bits.getChar(value, k);
+            v1 += Bits.getShort(value, k);
         }
-        short c2 = 0;
-        for(int k = 0, klen = (value.length >> 1); k < klen; k++){
-            c2 +=cb.get(k);
+        short v2 = 0;
+        int klen = (value.length >> 1);
+        for(int k = 0; k < klen; k++){
+            v2 +=ib.get(k);
+            ib.put(k, ib.get(k));
         }
-        assertEquals(c1, c2);
+        assertFalse(ib.hasChanged());
+        assertEquals(v1, v2);
         exp = false;
         try {
-            cb.get(value.length);
+            ib.get(klen);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertFalse(ib.hasChanged());
+        assertTrue(exp);
+        for(int k = 0; k < klen; k++){
+            ib.put(klen+ k, ib.get(klen - k- 1));
+        }
+        assertTrue(ib.hasChanged());
+        exp = false;
+        try {
+            ib.get(klen);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertFalse(exp);
+        short v3 = 0;
+        for(int k = klen; k > 0; k--){
+            v3 +=ib.get(klen + k - 1);
+        }
+        assertEquals(v1, v3);
+        try {
+            ib.get(1 << (off - 1));
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertTrue(exp);
+        exp = false;
+        try {
+            ib.put(1 << (off - 1), (short)0);
         } catch (BufferIndexOutOfBoundsException e) {
             exp = true;
         }
@@ -295,19 +461,52 @@ public class EditBufferTest extends TestCase {
 
 
     private void longTest(byte[] value, Connector connector, FileBlock block, int off) {
-        boolean exp;LongEditBuffer db = createBuffer(LongEditBuffer.class,connector, block, off - 3);
-        long d1 = 0;
+        boolean exp;LongEditBuffer ib = createBuffer(LongEditBuffer.class,connector, block, off - 3);
+        long v1 = 0;
         for(int k = 0, klen = value.length; k < klen; k+=8){
-            d1 += Bits.getLong(value, k);
+            v1 += Bits.getLong(value, k);
         }
-        long d2 = 0;
-        for(int k = 0, klen = (value.length >> 3); k < klen; k++){
-            d2 +=db.get(k);
+        long v2 = 0;
+        int klen = (value.length >> 3);
+        for(int k = 0; k < klen; k++){
+            v2 +=ib.get(k);
+            ib.put(k, ib.get(k));
         }
-        assertEquals(d1, d2);
+        assertFalse(ib.hasChanged());
+        assertEquals(v1, v2);
         exp = false;
         try {
-            db.get(value.length);
+            ib.get(klen);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertFalse(ib.hasChanged());
+        assertTrue(exp);
+        for(int k = 0; k < klen; k++){
+            ib.put(klen+ k, ib.get(klen - k- 1));
+        }
+        assertTrue(ib.hasChanged());
+        exp = false;
+        try {
+            ib.get(klen);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertFalse(exp);
+        long v3 = 0;
+        for(int k = klen; k > 0; k--){
+            v3 +=ib.get(klen + k - 1);
+        }
+        assertEquals(v1, v3);
+        try {
+            ib.get(1 << (off - 3));
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertTrue(exp);
+        exp = false;
+        try {
+            ib.put(1 << (off - 3), 0);
         } catch (BufferIndexOutOfBoundsException e) {
             exp = true;
         }

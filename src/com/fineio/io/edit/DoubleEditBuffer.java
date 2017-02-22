@@ -39,7 +39,7 @@ public final  class DoubleEditBuffer extends EditBuffer {
 
     private final void judeChange(int position, double b) {
         if(!changed) {
-            if(b != get(position)){
+            if(Double.compare(b, get(position)) != 0){
                 changed = true;
             }
         }
