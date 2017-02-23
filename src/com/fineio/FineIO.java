@@ -89,6 +89,13 @@ public final  class FineIO {
                 return WriteIOFile.createFineIO(connector, uri, WriteIOFile.DOUBLE);
             }
         };
+        MODEL<WriteIOFile<FloatBuffer>> WRITE_FLOAT = new MODEL<WriteIOFile<FloatBuffer>>() {
+
+            @Override
+            public WriteIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
+                return WriteIOFile.createFineIO(connector, uri, WriteIOFile.FLOAT);
+            }
+        };
         MODEL<WriteIOFile<IntBuffer>> WRITE_INT = new MODEL<WriteIOFile<IntBuffer>>() {
 
             @Override
@@ -131,6 +138,13 @@ public final  class FineIO {
             @Override
             public EditIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
                 return EditIOFile.createFineIO(connector, uri, EditIOFile.DOUBLE);
+            }
+        };
+        MODEL<EditIOFile<FloatBuffer>> EDIT_FLOAT = new MODEL<EditIOFile<FloatBuffer>>() {
+
+            @Override
+            public EditIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
+                return EditIOFile.createFineIO(connector, uri, EditIOFile.FLOAT);
             }
         };
         MODEL<EditIOFile<IntBuffer>> EDIT_INT = new MODEL<EditIOFile<IntBuffer>>() {
