@@ -33,6 +33,16 @@ public final class MemoryUtils {
         unsafe.copyMemory(src, arrayBaseOffset, null, address, size);
     }
 
+    /**
+     * 复制数组对象的值到堆外内存葱address开始的地址
+     * @param src
+     * @param address
+     * @param size
+     */
+    public static void copyMemory(byte[] src, long off, long address, long size) {
+        unsafe.copyMemory(src, arrayBaseOffset + off, null, address, size);
+    }
+
 
     /**
      * 复制数组对象的值到堆外内存葱address开始的地址
@@ -42,6 +52,35 @@ public final class MemoryUtils {
     public static void copyMemory(byte[] src, long address) {
         copyMemory(src, address, src.length);
     }
+
+    public static void readMemory(byte[] dest, long off, long address, long size) {
+        unsafe.copyMemory(null, address, dest, arrayBaseOffset + off , size);
+    }
+
+    public static void readMemory(byte[] dest, long address, long size) {
+        unsafe.copyMemory(null, address, dest, arrayBaseOffset, size);
+    }
+
+    public static void readMemory(byte[] src, long address) {
+        unsafe.copyMemory(null, address, src, arrayBaseOffset, src.length);
+    }
+
+    public static void arraycopy(byte[] src,  int  srcPos,
+                                 byte[] dest, int destPos,
+                                        int length) {
+        unsafe.copyMemory(src, arrayBaseOffset + srcPos, dest, arrayBaseOffset + destPos, length);
+    }
+
+    public static void copyMemory(byte[] src, byte[] dest) {
+        unsafe.copyMemory(src, arrayBaseOffset, dest, arrayBaseOffset, Math.min(dest.length, src.length));
+    }
+
+
+    public static void copyMemory(byte[] src, byte[] dest, int size) {
+        unsafe.copyMemory(src, arrayBaseOffset, dest, arrayBaseOffset, size);
+    }
+
+
 
     private static Unsafe getUnsafe() {
         return  unsafe;

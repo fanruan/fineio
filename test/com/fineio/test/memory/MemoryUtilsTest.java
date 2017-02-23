@@ -30,6 +30,53 @@ public class MemoryUtilsTest extends TestCase {
         }
     }
 
+    public void testReadMemory() {
+        byte[] bytes = createRandomByte();
+        int len = bytes.length;
+        long address = MemoryUtils.allocate(len);
+        MemoryUtils.copyMemory(bytes, address);
+
+        byte[] res = new byte[len];
+        MemoryUtils.readMemory(res, address, len);
+        for(int i = 0; i < len; i++) {
+            assertEquals(res[i], bytes[i]);
+        }
+        byte[] res2 = new byte[len];
+        MemoryUtils.copyMemory(res, res2);
+        for(int i = 0; i < len; i++) {
+            assertEquals(res2[i], bytes[i]);
+        }
+        byte[] res3 = new byte[len/2];
+        MemoryUtils.copyMemory(res2, res3);
+        for(int i = 0; i < res3.length; i++) {
+            assertEquals(res3[i], bytes[i]);
+        }
+
+        byte[] res4 = new byte[len*2];
+        MemoryUtils.copyMemory(res2, res4, len);
+        for(int i = 0; i < res2.length; i++) {
+            assertEquals(res4[i], bytes[i]);
+        }
+        for(int i = res2.length; i < res4.length; i++) {
+            assertEquals(res4[i], 0);
+        }
+    }
+
+    public void testArrayCopy() {
+        byte[] bytes = createRandomByte();
+        int len = bytes.length;
+        byte[] res = new byte[len];
+        MemoryUtils.arraycopy(bytes,  len/2, res, 0, len/2);
+        for(int i = 0; i< len/2; i++) {
+            assertEquals(bytes[len/2 +i], res[i]);
+        }
+
+        for(int i = len/2; i< len; i++) {
+            assertEquals(0, res[i]);
+        }
+
+    }
+
 
 
     public void testCopyMemory2() {

@@ -28,7 +28,7 @@ public class ZipConnector implements Connector {
     }
 
     @Override
-    public void write(FileBlock file, OutputStream outputStream) {
+    public void write(FileBlock file, InputStream inputStream) {
 
     }
 

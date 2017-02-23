@@ -21,9 +21,9 @@ public interface Connector {
     /**
      * 写整快的方法
      * @param file
-     * @param outputStream
+     * @param inputStream
      */
-    void write(FileBlock file, OutputStream outputStream);
+    void write(FileBlock file, InputStream inputStream);
 
     /**
      * 删除块
