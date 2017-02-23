@@ -95,6 +95,7 @@ public class SyncManagerTest extends TestCase {
         es.awaitTermination(1, TimeUnit.DAYS);
         assertTrue(jm.isEmpty());
         assertEquals(a.intValue(), 0);
+        assertTrue(fff.intValue() >= len);
         System.out.println(fff);
     }
 
