@@ -1,4 +1,4 @@
-package com.fineio.io;
+package com.fineio.io.base;
 
 import com.fineio.file.FileBlock;
 import com.fineio.storage.Connector;
@@ -6,7 +6,7 @@ import com.fineio.storage.Connector;
 /**
  * Created by daniel on 2017/2/15.
  */
-public abstract class AbstractBuffer implements Buffer{
+public abstract class AbstractBuffer implements BaseBuffer {
 
     /**
      * 不再重新赋值

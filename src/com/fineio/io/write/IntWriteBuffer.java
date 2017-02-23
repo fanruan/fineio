@@ -28,4 +28,9 @@ public final  class IntWriteBuffer extends WriteBuffer implements IntBuffer{
         ensureCapacity(position);
         MemoryUtils.put(address, position, b);
     }
+
+    public final int get(int p) {
+        checkIndex(p);
+        return MemoryUtils.getInt(address, p);
+    }
 }

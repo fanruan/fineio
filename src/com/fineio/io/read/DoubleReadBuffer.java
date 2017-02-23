@@ -23,4 +23,5 @@ public final  class DoubleReadBuffer extends ReadBuffer implements DoubleBuffer 
         checkIndex(p);
         return MemoryUtils.getDouble(address, p);
     }
+
 }

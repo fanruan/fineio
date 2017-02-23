@@ -28,4 +28,9 @@ public final  class DoubleWriteBuffer extends WriteBuffer implements DoubleBuffe
         ensureCapacity(position);
         MemoryUtils.put(address, position, b);
     }
+
+    public final double get(int p) {
+        checkIndex(p);
+        return MemoryUtils.getDouble(address, p);
+    }
 }

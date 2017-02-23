@@ -4,7 +4,7 @@ import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
 import com.fineio.file.ReadIOFile;
-import com.fineio.io.AbstractBuffer;
+import com.fineio.io.base.AbstractBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -17,6 +17,35 @@ import java.io.InputStream;
 public abstract class ReadBuffer extends AbstractBuffer implements Read {
     private volatile boolean load = false;
     protected int max_byte_len;
+
+
+    public void put(int position, byte b) {
+        throw new UnsupportedOperationException(this.getClass().getName());
+    }
+
+    public void put(int position, int b) {
+        throw new UnsupportedOperationException(this.getClass().getName());
+    }
+
+    public void put(int position, double b) {
+        throw new UnsupportedOperationException(this.getClass().getName());
+    }
+
+    public void put(int position, long b) {
+        throw new UnsupportedOperationException(this.getClass().getName());
+    }
+
+    public void put(int position, char b) {
+        throw new UnsupportedOperationException(this.getClass().getName());
+    }
+
+    public void put(int position, short b) {
+        throw new UnsupportedOperationException(this.getClass().getName());
+    }
+
+    public void put(int position, float b) {
+        throw new UnsupportedOperationException(this.getClass().getName());
+    }
 
     /**
      * max_offset 为什么要作为参数传进来而不是从connector里面读呢 是因为可能我上次写的cube的时候配置的4M 后来改成了64M这样的情况下读取connecter的值就会导致原来的值不对

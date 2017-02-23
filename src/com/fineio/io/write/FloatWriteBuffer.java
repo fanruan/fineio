@@ -26,4 +26,9 @@ public final  class FloatWriteBuffer extends WriteBuffer implements FloatBuffer 
         ensureCapacity(position);
         MemoryUtils.put(address, position, b);
     }
+
+    public final float get(int p) {
+        checkIndex(p);
+        return MemoryUtils.getFloat(address, p);
+    }
 }

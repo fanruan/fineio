@@ -26,4 +26,9 @@ public final  class ShortWriteBuffer extends WriteBuffer implements ShortBuffer{
         ensureCapacity(position);
         MemoryUtils.put(address, position, b);
     }
+
+    public final short get(int p) {
+        checkIndex(p);
+        return MemoryUtils.getShort(address, p);
+    }
 }

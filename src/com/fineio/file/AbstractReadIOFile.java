@@ -16,7 +16,7 @@ import java.net.URI;
 public abstract class AbstractReadIOFile<T extends Buffer> extends IOFile<T> {
     AbstractReadIOFile(Connector connector, URI uri, Class<T> clazz) {
         super(connector, uri, clazz);
-        readHeader(getOffset());
+        readHeader(getOffset(clazz));
     }
 
 

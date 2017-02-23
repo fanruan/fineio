@@ -6,7 +6,7 @@ import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
 import com.fineio.file.FileConstants;
 import com.fineio.file.IOFile;
-import com.fineio.io.AbstractBuffer;
+import com.fineio.io.base.AbstractBuffer;
 import com.fineio.io.read.*;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
@@ -89,7 +89,7 @@ public class BufferTest  extends TestCase {
 
     }
 
-    private static <T extends ReadBuffer> T getReadBuffer(IOFile<ReadBuffer> readIOFile, Class<T> clazz) {
+    private static <T extends ReadBuffer> T getReadBuffer(IOFile<?> readIOFile, Class<T> clazz) {
         try {
             Method method = IOFile.class.getDeclaredMethod("createBuffer", Class.class, int.class);
             method.setAccessible(true);

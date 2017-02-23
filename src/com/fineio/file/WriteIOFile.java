@@ -1,6 +1,6 @@
 package com.fineio.file;
 
-import com.fineio.io.write.*;
+import com.fineio.io.*;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
@@ -8,7 +8,7 @@ import java.net.URI;
 /**
  * Created by daniel on 2017/2/10.
  */
-public final class WriteIOFile<T extends Write> extends IOFile<T> {
+public final class WriteIOFile<T extends Buffer> extends IOFile<T> {
 
     WriteIOFile(Connector connector, URI uri, Class<T> clazz){
         super(connector, uri, clazz);
@@ -24,36 +24,9 @@ public final class WriteIOFile<T extends Write> extends IOFile<T> {
      * @param <E> 继承ReadBuffer的子类型
      * @return
      */
-    public static final <E extends Write> WriteIOFile<E> createFineIO(Connector connector, URI uri, Class<E> clazz){
+    public static final <E extends Buffer> WriteIOFile<E> createFineIO(Connector connector, URI uri, Class<E> clazz){
         return  new WriteIOFile<E>(connector, uri, clazz);
     }
 
-    public static void put(IOFile<DoubleWriteBuffer> file, long p, double d) {
-        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
-    }
-
-    public static void put(IOFile<ByteWriteBuffer> file, long p, byte d) {
-        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
-    }
-
-    public static void put(IOFile<CharWriteBuffer> file, long p, char d) {
-        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
-    }
-
-    public static void put(IOFile<FloatWriteBuffer> file, long p, float d) {
-        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
-    }
-
-    public static void put(IOFile<LongWriteBuffer> file, long p, long d) {
-        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
-    }
-
-    public static void put(IOFile<IntWriteBuffer> file, long p, int d) {
-        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
-    }
-
-    public static void put(IOFile<ShortWriteBuffer> file, long p, short d) {
-        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
-    }
 
 }

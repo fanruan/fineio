@@ -6,7 +6,7 @@ import com.fineio.file.EditIOFile;
 import com.fineio.file.IOFile;
 import com.fineio.file.ReadIOFile;
 import com.fineio.file.WriteIOFile;
-import com.fineio.io.Buffer;
+import com.fineio.io.*;
 import com.fineio.io.edit.*;
 import com.fineio.io.read.*;
 import com.fineio.io.write.*;
@@ -20,141 +20,141 @@ import java.net.URI;
  */
 public final  class FineIO {
 
-    public interface MODEL<T extends Buffer> {
-         MODEL<LongReadBuffer> READ_LONG = new MODEL<LongReadBuffer>() {
+    public interface MODEL<F> {
+         MODEL<ReadIOFile<LongBuffer>> READ_LONG = new MODEL<ReadIOFile<LongBuffer>>() {
 
              @Override
-             public ReadIOFile<LongReadBuffer> createIOFile(Connector connector, URI uri) {
-                 return ReadIOFile.createFineIO(connector, uri, LongReadBuffer.class);
+             public ReadIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
+                 return ReadIOFile.createFineIO(connector, uri, LongBuffer.class);
              }
          };
-        MODEL<DoubleReadBuffer> READ_DOUBLE = new MODEL<DoubleReadBuffer>() {
+        MODEL<ReadIOFile<DoubleBuffer>> READ_DOUBLE = new MODEL<ReadIOFile<DoubleBuffer>>() {
 
             @Override
-            public ReadIOFile<DoubleReadBuffer> createIOFile(Connector connector, URI uri) {
-                return ReadIOFile.createFineIO(connector, uri, DoubleReadBuffer.class);
+            public ReadIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
+                return ReadIOFile.createFineIO(connector, uri, DoubleBuffer.class);
             }
         };
-        MODEL<IntReadBuffer> READ_INT = new MODEL<IntReadBuffer>() {
+        MODEL<ReadIOFile<IntBuffer>> READ_INT = new MODEL<ReadIOFile<IntBuffer>>() {
 
             @Override
-            public ReadIOFile<IntReadBuffer> createIOFile(Connector connector, URI uri) {
-                return ReadIOFile.createFineIO(connector, uri, IntReadBuffer.class);
+            public ReadIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
+                return ReadIOFile.createFineIO(connector, uri, IntBuffer.class);
             }
         };
-        MODEL<CharReadBuffer> READ_CHAR = new MODEL<CharReadBuffer>() {
+        MODEL<ReadIOFile<CharBuffer> > READ_CHAR = new MODEL<ReadIOFile<CharBuffer> >() {
 
             @Override
-            public ReadIOFile<CharReadBuffer> createIOFile(Connector connector, URI uri) {
-                return ReadIOFile.createFineIO(connector, uri, CharReadBuffer.class);
+            public ReadIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
+                return ReadIOFile.createFineIO(connector, uri, CharBuffer.class);
             }
         };
-        MODEL<ByteReadBuffer> READ_BYTE = new MODEL<ByteReadBuffer>() {
+        MODEL<ReadIOFile<ByteBuffer> > READ_BYTE = new MODEL<ReadIOFile<ByteBuffer> >() {
 
             @Override
-            public ReadIOFile<ByteReadBuffer> createIOFile(Connector connector, URI uri) {
-                return ReadIOFile.createFineIO(connector, uri, ByteReadBuffer.class);
-            }
-        };
-
-        MODEL<ShortReadBuffer> READ_SHORT = new MODEL<ShortReadBuffer>() {
-
-            @Override
-            public ReadIOFile<ShortReadBuffer> createIOFile(Connector connector, URI uri) {
-                return ReadIOFile.createFineIO(connector, uri, ShortReadBuffer.class);
+            public ReadIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
+                return ReadIOFile.createFineIO(connector, uri, ByteBuffer.class);
             }
         };
 
-
-        MODEL<LongWriteBuffer> WRITE_LONG = new MODEL<LongWriteBuffer>() {
-
-            @Override
-            public WriteIOFile<LongWriteBuffer> createIOFile(Connector connector, URI uri) {
-                return WriteIOFile.createFineIO(connector, uri, LongWriteBuffer.class);
-            }
-        };
-        MODEL<DoubleWriteBuffer> WRITE_DOUBLE = new MODEL<DoubleWriteBuffer>() {
+        MODEL<ReadIOFile<ShortBuffer>> READ_SHORT = new MODEL<ReadIOFile<ShortBuffer>>() {
 
             @Override
-            public WriteIOFile<DoubleWriteBuffer> createIOFile(Connector connector, URI uri) {
-                return WriteIOFile.createFineIO(connector, uri, DoubleWriteBuffer.class);
-            }
-        };
-        MODEL<IntWriteBuffer> WRITE_INT = new MODEL<IntWriteBuffer>() {
-
-            @Override
-            public WriteIOFile<IntWriteBuffer> createIOFile(Connector connector, URI uri) {
-                return WriteIOFile.createFineIO(connector, uri, IntWriteBuffer.class);
-            }
-        };
-        MODEL<CharWriteBuffer> WRITE_CHAR = new MODEL<CharWriteBuffer>() {
-
-            @Override
-            public WriteIOFile<CharWriteBuffer> createIOFile(Connector connector, URI uri) {
-                return WriteIOFile.createFineIO(connector, uri, CharWriteBuffer.class);
-            }
-        };
-        MODEL<ByteWriteBuffer> WRITE_BYTE = new MODEL<ByteWriteBuffer>() {
-
-            @Override
-            public WriteIOFile<ByteWriteBuffer> createIOFile(Connector connector, URI uri) {
-                return WriteIOFile.createFineIO(connector, uri, ByteWriteBuffer.class);
+            public ReadIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
+                return ReadIOFile.createFineIO(connector, uri, ShortBuffer.class);
             }
         };
 
-        MODEL<ShortWriteBuffer> WRITE_SHORT = new MODEL<ShortWriteBuffer>() {
+
+        MODEL< WriteIOFile<LongBuffer>> WRITE_LONG = new MODEL< WriteIOFile<LongBuffer>>() {
 
             @Override
-            public WriteIOFile<ShortWriteBuffer> createIOFile(Connector connector, URI uri) {
-                return WriteIOFile.createFineIO(connector, uri, ShortWriteBuffer.class);
+            public WriteIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
+                return WriteIOFile.createFineIO(connector, uri, LongBuffer.class);
+            }
+        };
+        MODEL<WriteIOFile<DoubleBuffer>> WRITE_DOUBLE = new MODEL<WriteIOFile<DoubleBuffer>>() {
+
+            @Override
+            public WriteIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
+                return WriteIOFile.createFineIO(connector, uri, DoubleBuffer.class);
+            }
+        };
+        MODEL<WriteIOFile<IntBuffer>> WRITE_INT = new MODEL<WriteIOFile<IntBuffer>>() {
+
+            @Override
+            public WriteIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
+                return WriteIOFile.createFineIO(connector, uri, IntBuffer.class);
+            }
+        };
+        MODEL<WriteIOFile<CharBuffer> > WRITE_CHAR = new MODEL<WriteIOFile<CharBuffer> >() {
+
+            @Override
+            public WriteIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
+                return WriteIOFile.createFineIO(connector, uri, CharBuffer.class);
+            }
+        };
+        MODEL<WriteIOFile<ByteBuffer> > WRITE_BYTE = new MODEL<WriteIOFile<ByteBuffer> >() {
+
+            @Override
+            public WriteIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
+                return WriteIOFile.createFineIO(connector, uri, ByteBuffer.class);
             }
         };
 
-        MODEL<LongEditBuffer> EDIT_LONG = new MODEL<LongEditBuffer>() {
+        MODEL<WriteIOFile<ShortBuffer>> WRITE_SHORT = new MODEL<WriteIOFile<ShortBuffer>>() {
 
             @Override
-            public EditIOFile<LongEditBuffer> createIOFile(Connector connector, URI uri) {
-                return EditIOFile.createFineIO(connector, uri, LongEditBuffer.class);
-            }
-        };
-        MODEL<DoubleEditBuffer> EDIT_DOUBLE = new MODEL<DoubleEditBuffer>() {
-
-            @Override
-            public EditIOFile<DoubleEditBuffer> createIOFile(Connector connector, URI uri) {
-                return EditIOFile.createFineIO(connector, uri, DoubleEditBuffer.class);
-            }
-        };
-        MODEL<IntEditBuffer> EDIT_INT = new MODEL<IntEditBuffer>() {
-
-            @Override
-            public EditIOFile<IntEditBuffer> createIOFile(Connector connector, URI uri) {
-                return EditIOFile.createFineIO(connector, uri, IntEditBuffer.class);
-            }
-        };
-        MODEL<CharEditBuffer> EDIT_CHAR = new MODEL<CharEditBuffer>() {
-
-            @Override
-            public EditIOFile<CharEditBuffer> createIOFile(Connector connector, URI uri) {
-                return EditIOFile.createFineIO(connector, uri, CharEditBuffer.class);
-            }
-        };
-        MODEL<ByteEditBuffer> EDIT_BYTE = new MODEL<ByteEditBuffer>() {
-
-            @Override
-            public EditIOFile<ByteEditBuffer> createIOFile(Connector connector, URI uri) {
-                return EditIOFile.createFineIO(connector, uri, ByteEditBuffer.class);
+            public WriteIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
+                return WriteIOFile.createFineIO(connector, uri, ShortBuffer.class);
             }
         };
 
-        MODEL<ShortEditBuffer> EDIT_SHORT = new MODEL<ShortEditBuffer>() {
+        MODEL<EditIOFile<LongBuffer>> EDIT_LONG = new MODEL<EditIOFile<LongBuffer>>() {
 
             @Override
-            public EditIOFile<ShortEditBuffer> createIOFile(Connector connector, URI uri) {
-                return EditIOFile.createFineIO(connector, uri, ShortEditBuffer.class);
+            public EditIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
+                return EditIOFile.createFineIO(connector, uri, LongBuffer.class);
+            }
+        };
+        MODEL<EditIOFile<DoubleBuffer>> EDIT_DOUBLE = new MODEL<EditIOFile<DoubleBuffer>>() {
+
+            @Override
+            public EditIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
+                return EditIOFile.createFineIO(connector, uri, DoubleBuffer.class);
+            }
+        };
+        MODEL<EditIOFile<IntBuffer>> EDIT_INT = new MODEL<EditIOFile<IntBuffer>>() {
+
+            @Override
+            public EditIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
+                return EditIOFile.createFineIO(connector, uri, IntBuffer.class);
+            }
+        };
+        MODEL<EditIOFile<CharBuffer> > EDIT_CHAR = new MODEL<EditIOFile<CharBuffer> >() {
+
+            @Override
+            public EditIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
+                return EditIOFile.createFineIO(connector, uri, CharBuffer.class);
+            }
+        };
+        MODEL< EditIOFile<ByteBuffer> > EDIT_BYTE = new MODEL< EditIOFile<ByteBuffer> >() {
+
+            @Override
+            public EditIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
+                return EditIOFile.createFineIO(connector, uri, ByteBuffer.class);
             }
         };
 
-        IOFile<T> createIOFile(Connector connector, URI uri);
+        MODEL<EditIOFile<ShortBuffer>> EDIT_SHORT = new MODEL<EditIOFile<ShortBuffer>>() {
+
+            @Override
+            public EditIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
+                return EditIOFile.createFineIO(connector, uri, ShortBuffer.class);
+            }
+        };
+
+        F createIOFile(Connector connector, URI uri);
     }
 
     /**
@@ -162,10 +162,9 @@ public final  class FineIO {
      * @param connector 连接器
      * @param uri uri
      * @param model 模式
-     * @param <T>
      * @return
      */
-    public static <T extends Buffer> IOFile<T> createIOFile(Connector connector, URI uri , MODEL<T> model) {
+    public static <F> F createIOFile(Connector connector, URI uri , MODEL<F> model) {
         return model.createIOFile(connector, uri);
     }
 
@@ -203,126 +202,61 @@ public final  class FineIO {
         return MemoryConf.getMinMemSizeForSet();
     }
 
-
-    /**
-     * 保存的方法
-     * @param file
-     * @param p
-     * @param d
-     */
-    public static void put(EditIOFile<DoubleEditBuffer> file, long p, double d) {
-        EditIOFile.put(file, p, d);
+    public static void put(IOFile<DoubleBuffer> file, long p, double d) {
+        IOFile.put(file, p, d);
     }
 
-    public static void put(EditIOFile<ByteEditBuffer> file, long p, byte d) {
-        EditIOFile.put(file, p, d);
+    public static void put(IOFile<ByteBuffer> file, long p, byte d) {
+        IOFile.put(file, p, d);
     }
 
-    public static void put(EditIOFile<CharEditBuffer> file, long p, char d) {
-        EditIOFile.put(file, p, d);
+    public static void put(IOFile<CharBuffer> file, long p, char d) {
+        IOFile.put(file, p, d);
     }
 
-    public static void put(EditIOFile<FloatEditBuffer> file, long p, float d) {
-        EditIOFile.put(file, p, d);
+    public static void put(IOFile<FloatBuffer> file, long p, float d) {
+        IOFile.put(file, p, d);
     }
 
-    public static void put(EditIOFile<LongEditBuffer> file, long p, long d) {
-        EditIOFile.put(file, p, d);
+    public static void put(IOFile<LongBuffer> file, long p, long d) {
+        IOFile.put(file, p, d);
     }
 
-    public static void put(EditIOFile<IntEditBuffer> file, long p, int d) {
-        EditIOFile.put(file, p, d);
+    public static void put(IOFile<IntBuffer> file, long p, int d) {
+        IOFile.put(file, p, d);
     }
 
-    public static void put(EditIOFile<ShortEditBuffer> file, long p, short d) {
-        EditIOFile.put(file, p, d);
-    }
-
-    public final static long getLong(EditIOFile<LongEditBuffer> file, long p) {
-        return EditIOFile.getLong(file, p);
-    }
-
-    public final static int getInt(EditIOFile<IntEditBuffer> file, long p) {
-        return EditIOFile.getInt(file, p);
-    }
-
-    public final static int getChar(EditIOFile<CharEditBuffer> file, long p) {
-        return EditIOFile.getChar(file, p);
-    }
-
-    public final static double getDouble(EditIOFile<DoubleEditBuffer> file, long p) {
-        return EditIOFile.getDouble(file, p);
-    }
-
-    public final static float getFloat(EditIOFile<FloatEditBuffer> file, long p) {
-        return EditIOFile.getFloat(file, p);
-    }
-
-    public final static byte getByte(EditIOFile<ByteEditBuffer> file, long p) {
-        return EditIOFile.getByte(file, p);
-    }
-
-    public final static short getShort(EditIOFile<ShortEditBuffer> file, long p) {
-        return EditIOFile.getShort(file, p);
+    public static void put(IOFile<ShortBuffer> file, long p, short d) {
+        IOFile.put(file, p, d);
     }
 
 
-    public final static long getLong(IOFile<LongReadBuffer> file, long p) {
-        return ReadIOFile.getLong(file, p);
+    public final static long getLong(IOFile<LongBuffer> file, long p) {
+        return IOFile.getLong(file, p);
     }
 
-    public final static int getInt(IOFile<IntReadBuffer> file, long p) {
-        return ReadIOFile.getInt(file, p);
+    public final static int getInt(IOFile<IntBuffer> file, long p) {
+        return IOFile.getInt(file, p);
     }
 
-    public final static int getChar(IOFile<CharReadBuffer> file, long p) {
-        return ReadIOFile.getChar(file, p);
+    public final static int getChar(IOFile<CharBuffer> file, long p) {
+        return IOFile.getChar(file, p);
     }
 
-    public final static double getDouble(IOFile<DoubleReadBuffer> file, long p) {
-        return ReadIOFile.getDouble(file, p);
+    public final static double getDouble(IOFile<DoubleBuffer> file, long p) {
+        return IOFile.getDouble(file, p);
     }
 
-    public final static float getFloat(IOFile<FloatReadBuffer> file, long p) {
-        return ReadIOFile.getFloat(file, p);
+    public final static float getFloat(IOFile<FloatBuffer> file, long p) {
+        return IOFile.getFloat(file, p);
     }
 
-    public final static byte getByte(IOFile<ByteReadBuffer> file, long p) {
-        return ReadIOFile.getByte(file, p);
+    public final static byte getByte(IOFile<ByteBuffer> file, long p) {
+        return IOFile.getByte(file, p);
     }
 
-    public final static short getShort(IOFile<ShortReadBuffer> file, long p) {
-        return ReadIOFile.getShort(file, p);
-    }
-
-
-
-    public static void put(IOFile<DoubleWriteBuffer> file, long p, double d) {
-        WriteIOFile.put(file, p, d);
-    }
-
-    public static void put(IOFile<ByteWriteBuffer> file, long p, byte d) {
-        WriteIOFile.put(file, p, d);
-    }
-
-    public static void put(IOFile<CharWriteBuffer> file, long p, char d) {
-        WriteIOFile.put(file, p, d);
-    }
-
-    public static void put(IOFile<FloatWriteBuffer> file, long p, float d) {
-        WriteIOFile.put(file, p, d);
-    }
-
-    public static void put(IOFile<LongWriteBuffer> file, long p, long d) {
-        WriteIOFile.put(file, p, d);
-    }
-
-    public static void put(IOFile<IntWriteBuffer> file, long p, int d) {
-        WriteIOFile.put(file, p, d);
-    }
-
-    public static void put(IOFile<ShortWriteBuffer> file, long p, short d) {
-        WriteIOFile.put(file, p, d);
+    public final static short getShort(IOFile<ShortBuffer> file, long p) {
+        return IOFile.getShort(file, p);
     }
 
 }

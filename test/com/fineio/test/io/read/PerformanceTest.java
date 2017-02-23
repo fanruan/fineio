@@ -5,7 +5,8 @@ import com.fineio.base.Bits;
 import com.fineio.file.FileBlock;
 import com.fineio.file.FileConstants;
 import com.fineio.file.ReadIOFile;
-import com.fineio.io.AbstractBuffer;
+import com.fineio.io.DoubleBuffer;
+import com.fineio.io.base.AbstractBuffer;
 import com.fineio.io.read.ByteReadBuffer;
 import com.fineio.io.read.DoubleReadBuffer;
 import com.fineio.io.read.IntReadBuffer;
@@ -92,7 +93,7 @@ public class PerformanceTest {
             }).anyTimes();
         }
         control.replay();
-        ReadIOFile<DoubleReadBuffer> dfile = (ReadIOFile<DoubleReadBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.READ_DOUBLE);
+        ReadIOFile<DoubleBuffer> dfile = FineIO.createIOFile(connector , u, FineIO.MODEL.READ_DOUBLE);
         double d1 = 0;
         long t = System.currentTimeMillis();
         for(long i = 0, ilen = totalDoubleLen; i < ilen; i++){
@@ -179,7 +180,7 @@ public class PerformanceTest {
             }).anyTimes();
         }
         control.replay();
-        ReadIOFile<DoubleReadBuffer> dfile = (ReadIOFile<DoubleReadBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.READ_DOUBLE);
+        ReadIOFile<DoubleBuffer> dfile = FineIO.createIOFile(connector , u, FineIO.MODEL.READ_DOUBLE);
         double d1 = 0;
         long t = System.currentTimeMillis();
         for(long i = 0, ilen = totalDoubleLen; i < ilen; i++){

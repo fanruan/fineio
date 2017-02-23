@@ -77,10 +77,6 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
         lc(p);
     }
 
-    private final boolean ir(int p){
-        return p > -1 && p < current_max_size;
-    }
-
     private final void lc(int p) {
         synchronized (this) {
             if (load) {

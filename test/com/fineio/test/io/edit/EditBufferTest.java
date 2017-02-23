@@ -6,7 +6,7 @@ import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
 import com.fineio.file.FileConstants;
 import com.fineio.file.IOFile;
-import com.fineio.io.AbstractBuffer;
+import com.fineio.io.base.AbstractBuffer;
 import com.fineio.io.edit.*;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
@@ -101,7 +101,7 @@ public class EditBufferTest extends TestCase {
     }
 
 
-    private static <T extends EditBuffer> T getEditBuffer(IOFile<EditBuffer> EditIOFile, Class<T> clazz) {
+    private static <T extends EditBuffer> T getEditBuffer(IOFile<?> EditIOFile, Class<T> clazz) {
         try {
             Method method = IOFile.class.getDeclaredMethod("createBuffer", Class.class, int.class);
             method.setAccessible(true);

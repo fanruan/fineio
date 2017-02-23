@@ -6,7 +6,7 @@ import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
 import com.fineio.file.FileConstants;
 import com.fineio.file.IOFile;
-import com.fineio.io.AbstractBuffer;
+import com.fineio.io.base.AbstractBuffer;
 import com.fineio.io.write.*;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
@@ -90,7 +90,7 @@ public class WriteBufferTest extends TestCase {
 
     }
 
-    private static <T extends WriteBuffer> T getWriteBuffer(IOFile<WriteBuffer> writeIOFile, Class<T> clazz) {
+    private static <T extends WriteBuffer> T getWriteBuffer(IOFile<?> writeIOFile, Class<T> clazz) {
         try {
             Method method = IOFile.class.getDeclaredMethod("createBuffer", Class.class, int.class);
             method.setAccessible(true);

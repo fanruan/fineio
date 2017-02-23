@@ -1,9 +1,10 @@
 package com.fineio.file;
 
-import com.fineio.exception.*;
-import com.fineio.io.AbstractBuffer;
-import com.fineio.io.Buffer;
-import com.fineio.io.read.ByteReadBuffer;
+import com.fineio.exception.BufferConstructException;
+import com.fineio.exception.BufferIndexOutOfBoundsException;
+import com.fineio.exception.ClassDefException;
+import com.fineio.exception.IOSetException;
+import com.fineio.io.*;
 import com.fineio.storage.Connector;
 
 import java.lang.reflect.Constructor;
@@ -34,7 +35,7 @@ public abstract class IOFile<E extends Buffer> {
     /**
      * 读的类型
      */
-    protected Class<E> parameterClazz;
+    private Class<E> bufferClass;
     /**
      * 单个block的大小
      */
@@ -48,8 +49,10 @@ public abstract class IOFile<E extends Buffer> {
         }
         this.connector = connector;
         this.uri = uri;
-        parameterClazz = clazz;
+        bufferClass = getBufferClass(clazz);
     }
+
+    protected abstract Class<E> getBufferClass(Class<E> clazz);
 
     /**
      * 注意所有写方法并不支持多线程操作，仅读的方法支持
@@ -88,9 +91,9 @@ public abstract class IOFile<E extends Buffer> {
         return (int)(p & single_block_len);
     }
 
-    protected byte getOffset() {
+    protected static byte getOffset(Class clazz) {
         try {
-            Field field = parameterClazz.getInterfaces()[0].getDeclaredField(FileConstants.OFFSET_FIELD_NAME);
+            Field field = clazz.getDeclaredField(FileConstants.OFFSET_FIELD_NAME);
             return ((byte) ((Integer)field.get(null)).intValue());
         } catch (Exception e) {
             throw new ClassDefException(e);
@@ -112,14 +115,14 @@ public abstract class IOFile<E extends Buffer> {
     private E initBuffer(int index) {
         synchronized (this){
             if(buffers[index] == null) {
-                buffers[index] = createBuffer(parameterClazz, index);
+                buffers[index] = createBuffer(bufferClass, index);
             }
             return buffers[index];
         }
     }
 
 
-    protected  <T extends E> T createBuffer(Class<T> clazz, int index) {
+    protected   <T extends E> T createBuffer(Class<T> clazz, int index) {
         try {
             Constructor<T> constructor = clazz.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
             constructor.setAccessible(true);
@@ -127,6 +130,65 @@ public abstract class IOFile<E extends Buffer> {
         } catch (Exception e) {
             throw new BufferConstructException(e);
         }
+    }
+
+
+
+    public static void put(IOFile<DoubleBuffer> file, long p, double d) {
+        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
+    }
+
+    public static void put(IOFile<ByteBuffer> file, long p, byte d) {
+        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
+    }
+
+    public static void put(IOFile<CharBuffer> file, long p, char d) {
+        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
+    }
+
+    public static void put(IOFile<FloatBuffer> file, long p, float d) {
+        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
+    }
+
+    public static void put(IOFile<LongBuffer> file, long p, long d) {
+        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
+    }
+
+    public static void put(IOFile<IntBuffer> file, long p, int d) {
+        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
+    }
+
+    public static void put(IOFile<ShortBuffer> file, long p, short d) {
+        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
+    }
+
+    public final static long getLong(IOFile<LongBuffer> file, long p) {
+        return file.getBuffer(file.gi(p)).get(file.gp(p));
+    }
+
+    public final static int getInt(IOFile<IntBuffer> file, long p) {
+        return file.getBuffer(file.gi(p)).get(file.gp(p));
+    }
+
+
+    public final static int getChar(IOFile<CharBuffer> file, long p) {
+        return file.getBuffer(file.gi(p)).get(file.gp(p));
+    }
+
+    public final static double getDouble(IOFile<DoubleBuffer> file, long p) {
+        return file.getBuffer(file.gi(p)).get(file.gp(p));
+    }
+
+    public final static float getFloat(IOFile<FloatBuffer> file, long p) {
+        return file.getBuffer(file.gi(p)).get(file.gp(p));
+    }
+
+    public final static byte getByte(IOFile<ByteBuffer> file, long p) {
+        return file.getBuffer(file.gi(p)).get(file.gp(p));
+    }
+
+    public final static short getShort(IOFile<ShortBuffer> file, long p) {
+        return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
 }

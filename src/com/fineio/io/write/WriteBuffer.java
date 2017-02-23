@@ -2,7 +2,7 @@ package com.fineio.io.write;
 
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
-import com.fineio.io.AbstractBuffer;
+import com.fineio.io.base.AbstractBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -22,6 +22,17 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     protected int max_offset;
 
     protected int max_position = 0;
+
+    protected void checkIndex(int p) {
+        if (ir(p)){
+            return;
+        }
+        throw new BufferIndexOutOfBoundsException(p);
+    }
+
+    protected final boolean ir(int p){
+        return p > -1 && p < current_max_size;
+    }
 
     protected WriteBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block);

@@ -4,6 +4,8 @@ import com.fineio.FineIO;
 import com.fineio.base.Bits;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.*;
+import com.fineio.io.DoubleBuffer;
+import com.fineio.io.IntBuffer;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.edit.DoubleEditBuffer;
 import com.fineio.io.edit.Edit;
@@ -57,7 +59,7 @@ public class FineIOTest extends TestCase {
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
         URI u = new URI("");
-        IOFile<DoubleWriteBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_DOUBLE);
+        IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_DOUBLE);
         assertTrue(file instanceof WriteIOFile);
     }
 
@@ -81,7 +83,7 @@ public class FineIOTest extends TestCase {
             }
         }).anyTimes();
         control.replay();
-        IOFile<DoubleEditBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.EDIT_DOUBLE);
+        IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.EDIT_DOUBLE);
         assertTrue(file instanceof EditIOFile);
     }
 
@@ -149,7 +151,7 @@ public class FineIOTest extends TestCase {
             }
         }).anyTimes();
         control.replay();
-        EditIOFile<LongEditBuffer> file = (EditIOFile<LongEditBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.EDIT_LONG);
+        EditIOFile<LongBuffer> file =  FineIO.createIOFile(connector , u, FineIO.MODEL.EDIT_LONG);
         long v1 = 0;
         for(long i = 0, ilen = (totalLen >> 3); i < ilen; i++){
             v1 += FineIO.getLong(file, i);
@@ -180,7 +182,7 @@ public class FineIOTest extends TestCase {
             v3 += FineIO.getLong(file, i);
         }
         assertEquals(v2, v3);
-        EditIOFile<IntEditBuffer> ifile = (EditIOFile<IntEditBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.EDIT_INT);
+        EditIOFile<IntBuffer> ifile =   FineIO.createIOFile(connector , u, FineIO.MODEL.EDIT_INT);
         v1 = 0;
         for(long i = 0, ilen = (totalLen >> 2); i < ilen; i++){
             v1 += FineIO.getInt(ifile, i);
@@ -213,7 +215,7 @@ public class FineIOTest extends TestCase {
         assertEquals(v2, v3);
 
 
-        EditIOFile<DoubleEditBuffer> dfile = (EditIOFile<DoubleEditBuffer>) FineIO.createIOFile(connector , u, FineIO.MODEL.EDIT_DOUBLE);
+        EditIOFile<DoubleBuffer> dfile =  FineIO.createIOFile(connector , u, FineIO.MODEL.EDIT_DOUBLE);
         double d1 = 0;
         for(long i = 0, ilen = (totalLen >> 3); i < ilen; i++){
             d1 += FineIO.getDouble(dfile, i);
@@ -303,7 +305,7 @@ public class FineIOTest extends TestCase {
             }
         }).anyTimes();
         control.replay();
-        IOFile<LongReadBuffer> file = FineIO.createIOFile(connector , u, FineIO.MODEL.READ_LONG);
+        ReadIOFile<LongBuffer> file = FineIO.createIOFile(connector , u, FineIO.MODEL.READ_LONG);
         long v1 = 0;
         for(long i = 0, ilen = (totalLen >> 3); i < ilen; i++){
             v1 += FineIO.getLong(file, i);
@@ -318,7 +320,7 @@ public class FineIOTest extends TestCase {
             }
         }
         assertEquals(v1, v2);
-        IOFile<IntReadBuffer> ifile =  FineIO.createIOFile(connector , u, FineIO.MODEL.READ_INT);
+        ReadIOFile<IntBuffer> ifile =  FineIO.createIOFile(connector , u, FineIO.MODEL.READ_INT);
         v1 = 0;
         for(long i = 0, ilen = (totalLen >> 2); i < ilen; i++){
             v1 += FineIO.getInt(ifile, i);
@@ -333,7 +335,7 @@ public class FineIOTest extends TestCase {
             }
         }
         assertEquals(v1, v2);
-        IOFile<DoubleReadBuffer> dfile = FineIO.createIOFile(connector , u, FineIO.MODEL.READ_DOUBLE);
+        ReadIOFile<DoubleBuffer> dfile = FineIO.createIOFile(connector , u, FineIO.MODEL.READ_DOUBLE);
         double d1 = 0;
         for(long i = 0, ilen = (totalLen >> 3); i < ilen; i++){
             d1 += FineIO.getDouble(dfile, i);
@@ -356,7 +358,7 @@ public class FineIOTest extends TestCase {
         URI u = new URI("");
         EasyMock.expect(connector.getBlockOffset()).andReturn((byte)22).anyTimes();
         control.replay();
-        IOFile<DoubleWriteBuffer> dfile =  FineIO.createIOFile(connector , u, FineIO.MODEL.WRITE_DOUBLE);
+        WriteIOFile<DoubleBuffer> dfile =  FineIO.createIOFile(connector , u, FineIO.MODEL.WRITE_DOUBLE);
         for(long i = 0; i< 100000L; i++) {
             FineIO.put(dfile, i, Math.random() * i);
         }

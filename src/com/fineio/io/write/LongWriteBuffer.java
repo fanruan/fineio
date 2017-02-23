@@ -26,4 +26,9 @@ public  final class LongWriteBuffer extends WriteBuffer implements LongBuffer{
         ensureCapacity(position);
         MemoryUtils.put(address, position, b);
     }
+
+    public final long get(int p) {
+        checkIndex(p);
+        return MemoryUtils.getLong(address, p);
+    }
 }

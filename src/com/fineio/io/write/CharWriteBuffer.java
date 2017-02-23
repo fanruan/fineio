@@ -27,4 +27,9 @@ public final  class CharWriteBuffer extends WriteBuffer  implements CharBuffer{
         ensureCapacity(position);
         MemoryUtils.put(address, position, b);
     }
+
+    public final char get(int p) {
+        checkIndex(p);
+        return MemoryUtils.getChar(address, p);
+    }
 }

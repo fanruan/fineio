@@ -27,4 +27,9 @@ public final  class ByteWriteBuffer extends  WriteBuffer implements ByteBuffer {
         MemoryUtils.put(address, position, b);
     }
 
+    public final byte get(int p) {
+        checkIndex(p);
+        return MemoryUtils.getByte(address, p);
+    }
+
 }
