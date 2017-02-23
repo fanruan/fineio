@@ -28,6 +28,9 @@ public class DirectInputStream extends InputStream {
             return 0;
         }
         len = getLen(len);
+        if(len == 0){
+            return -1;
+        }
         MemoryUtils.readMemory(b, off, address + p, len);
         p+=len;
         return len;
