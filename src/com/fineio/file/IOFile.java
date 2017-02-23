@@ -16,6 +16,7 @@ import java.net.URI;
  */
 public abstract class IOFile<E extends Buffer> {
 
+
     /**
      * 内部路径 key
      */
@@ -35,7 +36,7 @@ public abstract class IOFile<E extends Buffer> {
     /**
      * 读的类型
      */
-    private Class<E> bufferClass;
+    private AbstractFileModel<E> model;
     /**
      * 单个block的大小
      */
@@ -43,16 +44,14 @@ public abstract class IOFile<E extends Buffer> {
     protected E[] buffers;
 
 
-    IOFile(Connector connector, URI uri, Class<E> clazz) {
-        if(uri == null || connector == null){
-            throw new IOSetException("uri  or connector can't be null");
+    IOFile(Connector connector, URI uri, AbstractFileModel<E> model) {
+        if(uri == null || connector == null|| model == null){
+            throw new IOSetException("uri  or connector or model can't be null");
         }
         this.connector = connector;
         this.uri = uri;
-        bufferClass = getBufferClass(clazz);
+        this.model = model;
     }
-
-    protected abstract Class<E> getBufferClass(Class<E> clazz);
 
     /**
      * 注意所有写方法并不支持多线程操作，仅读的方法支持
@@ -91,14 +90,6 @@ public abstract class IOFile<E extends Buffer> {
         return (int)(p & single_block_len);
     }
 
-    protected static byte getOffset(Class clazz) {
-        try {
-            Field field = clazz.getDeclaredField(FileConstants.OFFSET_FIELD_NAME);
-            return ((byte) ((Integer)field.get(null)).intValue());
-        } catch (Exception e) {
-            throw new ClassDefException(e);
-        }
-    }
 
     protected final E getBuffer(int index){
         return buffers[checkIndex(index)] != null ? buffers[index] : initBuffer(index);
@@ -115,21 +106,15 @@ public abstract class IOFile<E extends Buffer> {
     private E initBuffer(int index) {
         synchronized (this){
             if(buffers[index] == null) {
-                buffers[index] = createBuffer(bufferClass, index);
+                buffers[index] = createBuffer(index);
             }
             return buffers[index];
         }
     }
 
 
-    protected   <T extends E> T createBuffer(Class<T> clazz, int index) {
-        try {
-            Constructor<T> constructor = clazz.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
-            constructor.setAccessible(true);
-            return constructor.newInstance(connector, new FileBlock(uri, String.valueOf(index)), block_size_offset);
-        } catch (Exception e) {
-            throw new BufferConstructException(e);
-        }
+    private E createBuffer(int index) {
+        return model.createBuffer(connector, new FileBlock(uri, String.valueOf(index)), block_size_offset);
     }
 
 

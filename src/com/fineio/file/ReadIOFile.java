@@ -11,28 +11,36 @@ import java.net.URI;
  */
 public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
 
-    private ReadIOFile(Connector connector, URI uri, Class<T> clazz){
-        super(connector, uri, clazz);
+    public static final ReadModel<ByteBuffer> BYTE = ByteReadBuffer.MODEL;
+
+    public static final ReadModel<DoubleBuffer> DOUBLE = DoubleReadBuffer.MODEL;
+
+    public static final ReadModel<LongBuffer> LONG = LongReadBuffer.MODEL;
+
+    public static final ReadModel<IntBuffer> INT = IntReadBuffer.MODEL;
+
+    public static final ReadModel<FloatBuffer> FLOAT = FloatReadBuffer.MODEL;
+
+    public static final ReadModel<CharBuffer> CHAR = CharReadBuffer.MODEL;
+
+    public static final ReadModel<ShortBuffer> SHORT = ShortReadBuffer.MODEL;
+
+
+    private ReadIOFile(Connector connector, URI uri, ReadModel<T> model){
+        super(connector, uri, model);
     }
 
-    @Override
-    protected Class<T> getBufferClass(Class<T> clazz) {
-        if(clazz == ByteBuffer.class){
-            return (Class<T>) ByteReadBuffer.class;
-        }
-        return clazz;
-    }
 
     /**
      * 创建File方法
      * @param connector 连接器
      * @param uri 子路径
-     * @param clazz 子类型
+     * @param model 子类型
      * @param <E> 继承ReadBuffer的子类型
      * @return
      */
-    public static final <E extends Buffer> ReadIOFile<E> createFineIO(Connector connector, URI uri, Class<E> clazz){
-        return  new ReadIOFile<E>(connector, uri, clazz);
+    public static final <E extends Buffer> ReadIOFile<E> createFineIO(Connector connector, URI uri, ReadModel<E> model){
+        return  new ReadIOFile<E>(connector, uri, model);
     }
 
 

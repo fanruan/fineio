@@ -1,6 +1,8 @@
 package com.fineio.io.edit;
 
+import com.fineio.file.EditModel;
 import com.fineio.file.FileBlock;
+import com.fineio.io.ByteBuffer;
 import com.fineio.io.CharBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
@@ -9,6 +11,17 @@ import com.fineio.storage.Connector;
  * Created by daniel on 2017/2/14.
  */
 public final  class CharEditBuffer extends EditBuffer implements CharBuffer {
+
+    public static final EditModel MODEL = new EditModel<CharBuffer>() {
+
+        protected final CharEditBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
+            return new CharEditBuffer(connector, block, max_offset);
+        }
+
+        protected final byte offset() {
+            return OFFSET;
+        }
+    };
 
     private CharEditBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block, max_offset);

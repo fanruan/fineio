@@ -5,6 +5,8 @@ import com.fineio.exception.BlockNotFoundException;
 import com.fineio.file.FileBlock;
 import com.fineio.file.FileConstants;
 import com.fineio.file.ReadIOFile;
+import com.fineio.io.IntBuffer;
+import com.fineio.io.LongBuffer;
 import com.fineio.io.read.IntReadBuffer;
 import com.fineio.io.read.LongReadBuffer;
 import com.fineio.storage.Connector;
@@ -44,7 +46,7 @@ public class FineReadIOFileTest extends TestCase {
         control.replay();
         boolean exp = false;
         try {
-            ReadIOFile.createFineIO(connector, u, LongReadBuffer.class);
+            ReadIOFile.createFineIO(connector, u, ReadIOFile.LONG);
         } catch (BlockNotFoundException e){
             exp = true;
         }
@@ -72,7 +74,7 @@ public class FineReadIOFileTest extends TestCase {
             }
         }).anyTimes();
         control.replay();
-        ReadIOFile<LongReadBuffer> file = ReadIOFile.createFineIO(connector, u, LongReadBuffer.class);
+        ReadIOFile<LongBuffer> file = ReadIOFile.createFineIO(connector, u, ReadIOFile.LONG);
         Field lenField = ReadIOFile.class.getSuperclass().getSuperclass().getDeclaredField("blocks");
         Field blockSizeField =  ReadIOFile.class.getSuperclass().getSuperclass().getDeclaredField("block_size_offset");
         lenField.setAccessible(true);
@@ -80,7 +82,7 @@ public class FineReadIOFileTest extends TestCase {
         assertEquals(file.getPath(), u.getPath());
         assertEquals(len * 2, ((Integer)lenField.get(file)).intValue());
         assertEquals(len - LongReadBuffer.OFFSET, ((Byte)blockSizeField.get(file)).byteValue());
-        ReadIOFile<IntReadBuffer> ifile = ReadIOFile.createFineIO(connector, u, IntReadBuffer.class);
+        ReadIOFile<IntBuffer> ifile = ReadIOFile.createFineIO(connector, u, ReadIOFile.INT);
         lenField = ReadIOFile.class.getSuperclass().getSuperclass().getDeclaredField("blocks");
         blockSizeField =  ReadIOFile.class.getSuperclass().getSuperclass().getDeclaredField("block_size_offset");
         lenField.setAccessible(true);
