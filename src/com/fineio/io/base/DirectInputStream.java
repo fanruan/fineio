@@ -1,4 +1,4 @@
-package com.fineio.file.writer;
+package com.fineio.io.base;
 
 import com.fineio.memory.MemoryUtils;
 
@@ -14,7 +14,7 @@ public class DirectInputStream extends InputStream {
     private long address;
     private int size;
 
-    public DirectInputStream(long address, int size) {
+    DirectInputStream(long address, int size) {
         this.address = address;
         this.size = size;
     }

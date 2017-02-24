@@ -30,6 +30,14 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         throw new BufferIndexOutOfBoundsException(p);
     }
 
+    /**
+     *对于child edit来说 如果没改变是不用写文件的，就不会创建outputstream
+     * @return
+     */
+    protected final int getByteSize() {
+        return max_position << getLengthOffset();
+    }
+
     protected final boolean ir(int p){
         return p > -1 && p < current_max_size;
     }

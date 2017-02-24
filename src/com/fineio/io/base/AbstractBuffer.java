@@ -3,6 +3,8 @@ package com.fineio.io.base;
 import com.fineio.file.FileBlock;
 import com.fineio.storage.Connector;
 
+import java.io.InputStream;
+
 /**
  * Created by daniel on 2017/2/15.
  */
@@ -15,6 +17,22 @@ public abstract class AbstractBuffer implements BaseBuffer {
     protected final FileBlock block;
     protected volatile long address;
     protected volatile int max_size;
+
+
+    /**
+     * inputStream只有在close的情况下才会允许这边buffer的释放操作，否则会导致jvm崩溃
+     * @return
+     */
+    public final InputStream createInputStream() {
+        DirectInputStream inputStream =  new DirectInputStream(address, getByteSize());
+
+        return inputStream;
+    }
+
+    protected int getByteSize() {
+        return max_size << getLengthOffset();
+    }
+
 
     protected AbstractBuffer(Connector connector, FileBlock block) {
         this.connector = connector;

@@ -62,6 +62,37 @@ public class MemoryUtilsTest extends TestCase {
         }
     }
 
+    public void testReadMemory2() {
+        byte[] bytes = createRandomByte();
+        int len = bytes.length;
+        long address = MemoryUtils.allocate(len);
+        MemoryUtils.copyMemory(bytes, address);
+        byte[] res = new byte[300];
+        int minLen = Math.min(100, len);
+        MemoryUtils.readMemory(res, 100, address, minLen);
+        for(int i = 0; i< 100; i++) {
+            assertEquals(res[i], 0);
+        }
+        for(int i = 100; i< 100+minLen; i++) {
+            assertEquals(res[i], bytes[i - 100]);
+        }
+        for(int i =100+ minLen; i< 300; i++) {
+            assertEquals(res[i], 0);
+        }
+        res = new byte[300];
+        minLen = Math.min(100, len - 50);
+        MemoryUtils.readMemory(res, 100, address + 50, minLen);
+        for(int i = 0; i< 100; i++) {
+            assertEquals(res[i], 0);
+        }
+        for(int i = 100; i< 100+minLen; i++) {
+            assertEquals(res[i], bytes[i - 50]);
+        }
+        for(int i =100+ minLen; i< 300; i++) {
+            assertEquals(res[i], 0);
+        }
+    }
+
     public void testArrayCopy() {
         byte[] bytes = createRandomByte();
         int len = bytes.length;
