@@ -30,14 +30,15 @@ public final class MemoryUtils {
      * @param size
      */
     public static void copyMemory(byte[] src, long address, long size) {
-        unsafe.copyMemory(src, arrayBaseOffset, null, address, size);
+        copyMemory(src, 0, address, size);
     }
 
     /**
-     * 复制数组对象的值到堆外内存葱address开始的地址
-     * @param src
-     * @param address
-     * @param size
+     * 复制数组对象的值到堆外内存从address开始的地址
+     * @param src 源数组
+     * @param off 数字开始为止
+     * @param address 目标地址
+     * @param size 目标长度
      */
     public static void copyMemory(byte[] src, long off, long address, long size) {
         unsafe.copyMemory(src, arrayBaseOffset + off, null, address, size);
@@ -53,38 +54,70 @@ public final class MemoryUtils {
         copyMemory(src, address, src.length);
     }
 
+    /**
+     * 将从地址address开始的byte读size长度保存到dest从off开始的位置
+     * @param dest
+     * @param off
+     * @param address
+     * @param size
+     */
     public static void readMemory(byte[] dest, long off, long address, long size) {
         unsafe.copyMemory(null, address, dest, arrayBaseOffset + off , size);
     }
 
+    /**
+     * 将从地址address开始的byte读size长度保存到dest从0开始的位置
+     * @param dest
+     * @param address
+     * @param size
+     */
     public static void readMemory(byte[] dest, long address, long size) {
-        unsafe.copyMemory(null, address, dest, arrayBaseOffset, size);
+        readMemory(dest, 0, address, size);
     }
 
-    public static void readMemory(byte[] src, long address) {
-        unsafe.copyMemory(null, address, src, arrayBaseOffset, src.length);
+    /**
+     * 将从地址address开始的byte保存到dest
+     * @param dest
+     * @param address
+     */
+    public static void readMemory(byte[] dest, long address) {
+        readMemory(dest, address, dest.length);
     }
 
+    /**
+     * 同System.arraycopy 效率应该更高
+     * @param src
+     * @param srcPos
+     * @param dest
+     * @param destPos
+     * @param length
+     */
     public static void arraycopy(byte[] src,  int  srcPos,
                                  byte[] dest, int destPos,
                                         int length) {
         unsafe.copyMemory(src, arrayBaseOffset + srcPos, dest, arrayBaseOffset + destPos, length);
     }
 
+    /**
+     * 复制数组
+     * @param src
+     * @param dest
+     */
     public static void copyMemory(byte[] src, byte[] dest) {
-        unsafe.copyMemory(src, arrayBaseOffset, dest, arrayBaseOffset, Math.min(dest.length, src.length));
+        copyMemory(src, dest, Math.min(dest.length, src.length));
     }
 
 
+    /**
+     * 复制数组
+     * @param src
+     * @param dest
+     * @param size
+     */
     public static void copyMemory(byte[] src, byte[] dest, int size) {
         unsafe.copyMemory(src, arrayBaseOffset, dest, arrayBaseOffset, size);
     }
 
-
-
-    private static Unsafe getUnsafe() {
-        return  unsafe;
-    }
 
     /**
      * 分配指定大小的内存
@@ -107,6 +140,11 @@ public final class MemoryUtils {
         return unsafe.reallocateMemory(address, size);
     }
 
+    /**
+     * 从address位置开始置0
+     * @param address
+     * @param size
+     */
     public static void fill0(long address, long size) {
         unsafe.setMemory(address, size, (byte) 0);
     }
@@ -130,54 +168,120 @@ public final class MemoryUtils {
     }
 
 
+    /**
+     * get byte 方法
+     * @param s
+     * @param offset 连续不考虑长度
+     * @return
+     */
     public static byte getByte(long s, int offset){
         return unsafe.getByte(s + offset);
     }
-
+    /**
+     * get byte 方法
+     * @param s
+     * @param offset 连续不考虑长度
+     * @return
+     */
     public static int getInt(long s, long offset){
         return unsafe.getInt(s + (offset << MemoryConstants.OFFSET_INT));
     }
-
+    /**
+     * get byte 方法
+     * @param s
+     * @param offset 连续不考虑长度
+     * @return
+     */
     public static void put(long s, long offset, int v){
         unsafe.putInt(s + (offset << MemoryConstants.OFFSET_INT), v);
     }
-
+    /**
+     * get byte 方法
+     * @param s
+     * @param offset 连续不考虑长度
+     * @return
+     */
     public static long getLong(long s, long offset){
         return unsafe.getLong(s + (offset << MemoryConstants.OFFSET_LONG));
     }
-
+    /**
+     * get byte 方法
+     * @param s
+     * @param offset 连续不考虑长度
+     * @return
+     */
     public static void put(long s, long offset, long v){
         unsafe.putLong(s + (offset << MemoryConstants.OFFSET_LONG), v);
     }
-
+    /**
+     * get byte 方法
+     * @param s
+     * @param offset 连续不考虑长度
+     * @return
+     */
     public static char getChar(long s, long offset){
         return unsafe.getChar(s + (offset << MemoryConstants.OFFSET_CHAR));
     }
-
+    /**
+     * get byte 方法
+     * @param s
+     * @param offset 连续不考虑长度
+     * @return
+     */
     public static void put(long s, long offset, char v){
         unsafe.putChar(s + (offset << MemoryConstants.OFFSET_CHAR), v);
     }
-
+    /**
+     * get byte 方法
+     * @param s
+     * @param offset 连续不考虑长度
+     * @return
+     */
     public static short getShort(long s, long offset){
         return unsafe.getShort(s + (offset << MemoryConstants.OFFSET_SHORT));
     }
-
+    /**
+     * get byte 方法
+     * @param s
+     * @param offset 连续不考虑长度
+     * @return
+     */
     public static void put(long s, long offset, short v){
         unsafe.putShort(s + (offset << MemoryConstants.OFFSET_SHORT), v);
     }
-
+    /**
+     * get byte 方法
+     * @param s
+     * @param offset 连续不考虑长度
+     * @return
+     */
     public static float getFloat(long s, long offset){
         return unsafe.getFloat(s + (offset << MemoryConstants.OFFSET_FLOAT));
     }
-
+    /**
+     * get byte 方法
+     * @param s
+     * @param offset 连续不考虑长度
+     * @return
+     */
     public static void put(long s, long offset, float v){
         unsafe.putFloat(s + (offset << MemoryConstants.OFFSET_FLOAT), v);
     }
-
+    /**
+     * get byte 方法
+     * @param s
+     * @param offset 连续不考虑长度
+     * @return
+     */
     public final static double getDouble(long s, long offset){
         return unsafe.getDouble(s + (offset << MemoryConstants.OFFSET_DOUBLE));
     }
-
+    /**
+     * get byte 方法
+     * @param s
+     * @param offset 连续不考虑长度
+     * @return
+     */
     public static void put(long s, long offset, double v){
         unsafe.putDouble(s + (offset << MemoryConstants.OFFSET_DOUBLE), v);
     }
