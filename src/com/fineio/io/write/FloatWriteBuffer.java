@@ -30,6 +30,12 @@ public final  class FloatWriteBuffer extends WriteBuffer implements FloatBuffer 
     protected int getLengthOffset() {
         return OFFSET;
     }
+
+    public final void put(float b) {
+        ensureCapacity(max_position);
+        MemoryUtils.put(address, max_position++, b);
+    }
+
     /**
      *
      * @param position 位置

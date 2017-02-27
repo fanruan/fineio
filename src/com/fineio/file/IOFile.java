@@ -82,16 +82,26 @@ public abstract class IOFile<E extends Buffer> {
         return index;
     }
 
-    protected final int gi(long p) {
+    private final int gi(long p) {
         return (int)(p >> block_size_offset);
     }
 
-    protected final int gp(long p){
+    private final int gi() {
+        if(buffers == null || buffers.length == 0) {
+            return 0;
+        }
+        int len = buffers.length;
+        return buffers[len - 1].full() ? len : len - 1;
+    }
+
+
+
+    private final int gp(long p){
         return (int)(p & single_block_len);
     }
 
 
-    protected final E getBuffer(int index){
+    private final E getBuffer(int index){
         return buffers[checkIndex(index)] != null ? buffers[index] : initBuffer(index);
     }
 
@@ -117,61 +127,200 @@ public abstract class IOFile<E extends Buffer> {
         return model.createBuffer(connector, new FileBlock(uri, String.valueOf(index)), block_size_offset);
     }
 
+    /**
+     * 连续写的方法，从当前已知的最大位置开始写
+     * @param file
+     * @param d
+     */
+
+    public static void put(IOFile<DoubleBuffer> file, double d) {
+        file.getBuffer(file.checkBuffer(file.gi( ))).put(d);
+    }
+    /**
+     * 连续写的方法，从当前已知的最大位置开始写
+     * @param file
+     * @param d
+     */
+
+    public static void put(IOFile<ByteBuffer> file,   byte d) {
+        file.getBuffer(file.checkBuffer(file.gi( ))).put(d);
+    }
+    /**
+     * 连续写的方法，从当前已知的最大位置开始写
+     * @param file
+     * @param d
+     */
+
+    public static void put(IOFile<CharBuffer> file,  char d) {
+        file.getBuffer(file.checkBuffer(file.gi( ))).put(  d);
+    }
+    /**
+     * 连续写的方法，从当前已知的最大位置开始写
+     * @param file
+     * @param d
+     */
+
+    public static void put(IOFile<FloatBuffer> file,  float d) {
+        file.getBuffer(file.checkBuffer(file.gi( ))).put(  d);
+    }
+    /**
+     * 连续写的方法，从当前已知的最大位置开始写
+     * @param file
+     * @param d
+     */
+
+    public static void put(IOFile<LongBuffer> file,   long d) {
+        file.getBuffer(file.checkBuffer(file.gi( ))).put(d);
+    }
+    /**
+     * 连续写的方法，从当前已知的最大位置开始写
+     * @param file
+     * @param d
+     */
+
+    public static void put(IOFile<IntBuffer> file, int d) {
+        file.getBuffer(file.checkBuffer(file.gi( ))).put(  d);
+    }
+    /**
+     * 连续写的方法，从当前已知的最大位置开始写
+     * @param file
+     * @param d
+     */
+
+    public static void put(IOFile<ShortBuffer> file,  short d) {
+        file.getBuffer(file.checkBuffer(file.gi( ))).put(  d);
+    }
 
 
+    /**
+     * 随机写
+     * @param file
+     * @param p
+     * @param d
+     */
     public static void put(IOFile<DoubleBuffer> file, long p, double d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
-
+    /**
+     * 随机写
+     * @param file
+     * @param p
+     * @param d
+     */
     public static void put(IOFile<ByteBuffer> file, long p, byte d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
-
+    /**
+     * 随机写
+     * @param file
+     * @param p
+     * @param d
+     */
     public static void put(IOFile<CharBuffer> file, long p, char d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
-
+    /**
+     * 随机写
+     * @param file
+     * @param p
+     * @param d
+     */
     public static void put(IOFile<FloatBuffer> file, long p, float d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
-
+    /**
+     * 随机写
+     * @param file
+     * @param p
+     * @param d
+     */
     public static void put(IOFile<LongBuffer> file, long p, long d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
-
+    /**
+     * 随机写
+     * @param file
+     * @param p
+     * @param d
+     */
     public static void put(IOFile<IntBuffer> file, long p, int d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
-
+    /**
+     * 随机写
+     * @param file
+     * @param p
+     * @param d
+     */
     public static void put(IOFile<ShortBuffer> file, long p, short d) {
         file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
     }
 
+    /**
+     * 随机读
+     * @param file
+     * @param p
+     * @return
+     */
     public final static long getLong(IOFile<LongBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
+    /**
+     * 随机读
+     * @param file
+     * @param p
+     * @return
+     */
     public final static int getInt(IOFile<IntBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
-
+    /**
+     * 随机读
+     * @param file
+     * @param p
+     * @return
+     */
     public final static int getChar(IOFile<CharBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
+    /**
+     * 随机读
+     * @param file
+     * @param p
+     * @return
+     */
     public final static double getDouble(IOFile<DoubleBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
+    /**
+     * 随机读
+     * @param file
+     * @param p
+     * @return
+     */
     public final static float getFloat(IOFile<FloatBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
+    /**
+     * 随机读
+     * @param file
+     * @param p
+     * @return
+     */
     public final static byte getByte(IOFile<ByteBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
-
+    /**
+     * 随机读
+     * @param file
+     * @param p
+     * @return
+     */
     public final static short getShort(IOFile<ShortBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }

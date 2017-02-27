@@ -31,6 +31,12 @@ public final  class DoubleWriteBuffer extends WriteBuffer implements DoubleBuffe
     protected int getLengthOffset() {
         return OFFSET;
     }
+
+
+    public final void put(double b) {
+        ensureCapacity(max_position);
+        MemoryUtils.put(address, max_position++, b);
+    }
     /**
      *
      * @param position 位置

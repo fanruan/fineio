@@ -32,6 +32,11 @@ public final  class IntWriteBuffer extends WriteBuffer implements IntBuffer{
     }
 
 
+    public final void put(int b) {
+        ensureCapacity(max_position);
+        MemoryUtils.put(address, max_position++, b);
+    }
+
     /**
      *
      * @param position 位置

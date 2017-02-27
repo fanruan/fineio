@@ -67,10 +67,7 @@ public final class DirectInputStream extends InputStream {
     @Override
     public final int read() throws IOException {
         doCheck();
-        if(p == size) {
-           return EOF;
-        }
-        return MemoryUtils.getByte(address, p++);
+        return p == size ? EOF : MemoryUtils.getByte(address, p++);
     }
 
     private final void doCheck() {

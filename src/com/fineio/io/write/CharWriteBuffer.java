@@ -31,6 +31,13 @@ public final  class CharWriteBuffer extends WriteBuffer  implements CharBuffer{
         return OFFSET;
     }
 
+
+
+    public final void put(char b) {
+        ensureCapacity(max_position);
+        MemoryUtils.put(address, max_position++, b);
+    }
+
     /**
      *
      * @param position 位置

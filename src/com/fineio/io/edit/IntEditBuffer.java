@@ -37,6 +37,11 @@ public final  class IntEditBuffer extends EditBuffer implements IntBuffer {
         return MemoryUtils.getInt(address, p);
     }
 
+
+    public final void put(int b) {
+        ensureCapacity(max_position);
+        MemoryUtils.put(address, max_position++, b);
+    }
     /**
      *
      * @param position 位置

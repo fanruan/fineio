@@ -37,6 +37,12 @@ public final  class ShortEditBuffer extends EditBuffer implements ShortBuffer {
         return MemoryUtils.getShort(address, p);
     }
 
+
+    public final void put(short b) {
+        ensureCapacity(max_position);
+        MemoryUtils.put(address, max_position++, b);
+    }
+
     /**
      *
      * @param position 位置

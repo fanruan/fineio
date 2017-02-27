@@ -30,6 +30,12 @@ public final  class ShortWriteBuffer extends WriteBuffer implements ShortBuffer{
     protected int getLengthOffset() {
         return OFFSET;
     }
+
+
+    public final void put(short b) {
+        ensureCapacity(max_position);
+        MemoryUtils.put(address, max_position++, b);
+    }
     /**
      *
      * @param position 位置

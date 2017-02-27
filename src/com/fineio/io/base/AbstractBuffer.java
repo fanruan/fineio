@@ -2,6 +2,7 @@ package com.fineio.io.base;
 
 import com.fineio.exception.StreamCloseException;
 import com.fineio.file.FileBlock;
+import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
 import java.io.InputStream;
@@ -66,6 +67,14 @@ public abstract class AbstractBuffer implements BaseBuffer {
     protected AbstractBuffer(Connector connector, FileBlock block) {
         this.connector = connector;
         this.block = block;
+    }
+
+    public void clear() {
+        synchronized (this) {
+            beforeStatusChange();
+            MemoryUtils.free(address);
+            afterStatusChange();
+        }
     }
 
     /**

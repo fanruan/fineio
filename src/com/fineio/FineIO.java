@@ -225,59 +225,189 @@ public final  class FineIO {
         return MemoryConf.getMinMemSizeForSet();
     }
 
+    /**
+     * 随机写入
+     * @param file
+     * @param p
+     * @param d
+     */
     public static void put(IOFile<DoubleBuffer> file, long p, double d) {
         IOFile.put(file, p, d);
     }
-
+    /**
+     * 随机写入
+     * @param file
+     * @param p
+     * @param d
+     */
     public static void put(IOFile<ByteBuffer> file, long p, byte d) {
         IOFile.put(file, p, d);
     }
-
+    /**
+     * 随机写入
+     * @param file
+     * @param p
+     * @param d
+     */
     public static void put(IOFile<CharBuffer> file, long p, char d) {
         IOFile.put(file, p, d);
     }
-
+    /**
+     * 随机写入
+     * @param file
+     * @param p
+     * @param d
+     */
     public static void put(IOFile<FloatBuffer> file, long p, float d) {
         IOFile.put(file, p, d);
     }
-
+    /**
+     * 随机写入
+     * @param file
+     * @param p
+     * @param d
+     */
     public static void put(IOFile<LongBuffer> file, long p, long d) {
         IOFile.put(file, p, d);
     }
-
+    /**
+     * 随机写入
+     * @param file
+     * @param p
+     * @param d
+     */
     public static void put(IOFile<IntBuffer> file, long p, int d) {
         IOFile.put(file, p, d);
     }
-
+    /**
+     * 随机写入
+     * @param file
+     * @param p
+     * @param d
+     */
     public static void put(IOFile<ShortBuffer> file, long p, short d) {
         IOFile.put(file, p, d);
     }
 
 
+    /**
+     * 连续写入
+     * @param file
+     * @param d
+     */
+    public static void put(IOFile<DoubleBuffer> file,  double d) {
+        IOFile.put(file, d);
+    }
+    /**
+     * 连续写入
+     * @param file
+     * @param d
+     */
+    public static void put(IOFile<ByteBuffer> file, byte d) {
+        IOFile.put(file, d);
+    }
+    /**
+     * 连续写入
+     * @param file
+     * @param d
+     */
+    public static void put(IOFile<CharBuffer> file,  char d) {
+        IOFile.put(file,  d);
+    }
+    /**
+     * 连续写入
+     * @param file
+     * @param d
+     */
+    public static void put(IOFile<FloatBuffer> file, float d) {
+        IOFile.put(file,  d);
+    }
+    /**
+     * 连续写入
+     * @param file
+     * @param d
+     */
+    public static void put(IOFile<LongBuffer> file,  long d) {
+        IOFile.put(file, d);
+    }
+    /**
+     * 连续写入
+     * @param file
+     * @param d
+     */
+    public static void put(IOFile<IntBuffer> file, int d) {
+        IOFile.put(file,  d);
+    }
+    /**
+     * 连续写入
+     * @param file
+     * @param d
+     */
+    public static void put(IOFile<ShortBuffer> file, short d) {
+        IOFile.put(file, d);
+    }
+
+
+    /**
+     * 随机读取
+     * @param file
+     * @param p
+     * @return
+     */
     public final static long getLong(IOFile<LongBuffer> file, long p) {
         return IOFile.getLong(file, p);
     }
-
+    /**
+     * 随机读取
+     * @param file
+     * @param p
+     * @return
+     */
     public final static int getInt(IOFile<IntBuffer> file, long p) {
         return IOFile.getInt(file, p);
     }
-
+    /**
+     * 随机读取
+     * @param file
+     * @param p
+     * @return
+     */
     public final static int getChar(IOFile<CharBuffer> file, long p) {
         return IOFile.getChar(file, p);
     }
-
+    /**
+     * 随机读取
+     * @param file
+     * @param p
+     * @return
+     */
     public final static double getDouble(IOFile<DoubleBuffer> file, long p) {
         return IOFile.getDouble(file, p);
     }
-
+    /**
+     * 随机读取
+     * @param file
+     * @param p
+     * @return
+     */
     public final static float getFloat(IOFile<FloatBuffer> file, long p) {
         return IOFile.getFloat(file, p);
     }
-
+    /**
+     * 随机读取
+     * @param file
+     * @param p
+     * @return
+     */
     public final static byte getByte(IOFile<ByteBuffer> file, long p) {
         return IOFile.getByte(file, p);
     }
-
+    /**
+     * 随机读取
+     * @param file
+     * @param p
+     * @return
+     */
     public final static short getShort(IOFile<ShortBuffer> file, long p) {
         return IOFile.getShort(file, p);
     }

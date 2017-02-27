@@ -10,5 +10,7 @@ public  interface LongBuffer   extends Buffer{
 
     void put(int position, long b);
 
+    void put(long b);
+
     long get(int p);
 }

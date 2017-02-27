@@ -8,4 +8,6 @@ import java.io.InputStream;
 public interface Buffer {
 
     InputStream getInputStream();
+
+    boolean full();
 }

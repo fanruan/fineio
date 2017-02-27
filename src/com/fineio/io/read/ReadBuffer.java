@@ -20,31 +20,64 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
 
 
     public void put(int position, byte b) {
-        throw new UnsupportedOperationException(this.getClass().getName());
+        put(b);
     }
 
     public void put(int position, int b) {
-        throw new UnsupportedOperationException(this.getClass().getName());
+        put(b);
     }
 
     public void put(int position, double b) {
-        throw new UnsupportedOperationException(this.getClass().getName());
+        put(b);
     }
 
     public void put(int position, long b) {
-        throw new UnsupportedOperationException(this.getClass().getName());
+        put(b);
     }
 
     public void put(int position, char b) {
-        throw new UnsupportedOperationException(this.getClass().getName());
+        put(b);
     }
 
     public void put(int position, short b) {
-        throw new UnsupportedOperationException(this.getClass().getName());
+        put(b);
     }
 
     public void put(int position, float b) {
-        throw new UnsupportedOperationException(this.getClass().getName());
+        put(b);
+    }
+
+
+    public void put(byte b) {
+        unSupport();
+    }
+
+    private void unSupport() {
+        throw new UnsupportedOperationException(this.getClass().getName() + " put");
+    }
+
+    public void put(int b) {
+        unSupport();
+    }
+
+    public void put(double b) {
+        unSupport();
+    }
+
+    public void put(long b) {
+        unSupport();
+    }
+
+    public void put(char b) {
+        unSupport();
+    }
+
+    public void put(short b) {
+        unSupport();
+    }
+
+    public void put(float b) {
+        unSupport();
     }
 
     /**
@@ -91,6 +124,10 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
         }
     }
 
+    public boolean full() {
+        return (max_byte_len >> getLengthOffset()) == max_size;
+    }
+
     protected final void checkIndex(int p) {
         if (ir(p)){
             return;
@@ -120,16 +157,14 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
         checkIndex(p);
     }
 
-    public synchronized void clear() {
+    public void clear() {
         synchronized (this) {
             if (!load) {
                 return;
             }
             load = false;
             max_size = 0;
-            beforeStatusChange();
-            MemoryUtils.free(address);
-            afterStatusChange();
+            super.clear();
         }
     }
 }

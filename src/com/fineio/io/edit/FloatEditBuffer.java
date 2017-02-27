@@ -37,6 +37,10 @@ public final  class FloatEditBuffer extends EditBuffer implements FloatBuffer{
         return MemoryUtils.getFloat(address, p);
     }
 
+    public final void put(float b) {
+        ensureCapacity(max_position);
+        MemoryUtils.put(address, max_position++, b);
+    }
     /**
      *
      * @param position 位置

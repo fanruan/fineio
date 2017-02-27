@@ -11,6 +11,8 @@ public  interface ByteBuffer extends Buffer {
 
     void put(int position, byte b);
 
+    void put(byte b);
+
     byte get(int p);
 
 }

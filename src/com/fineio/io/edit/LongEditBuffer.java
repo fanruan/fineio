@@ -36,6 +36,11 @@ public  final class LongEditBuffer extends EditBuffer implements LongBuffer{
         return MemoryUtils.getLong(address, p);
     }
 
+    public final void put(long b) {
+        ensureCapacity(max_position);
+        MemoryUtils.put(address, max_position++, b);
+    }
+
     /**
      *
      * @param position 位置

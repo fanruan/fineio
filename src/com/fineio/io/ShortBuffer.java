@@ -11,6 +11,8 @@ public interface ShortBuffer extends Buffer {
 
     void put(int position, short b);
 
+    void put(short b);
+
     short get(int p);
 
 }

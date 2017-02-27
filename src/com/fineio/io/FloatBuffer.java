@@ -11,6 +11,8 @@ public interface FloatBuffer  extends Buffer {
 
      void put(int position, float b);
 
+     void put(float b);
+
      float get(int p);
 
 }

@@ -37,6 +37,12 @@ public final  class CharEditBuffer extends EditBuffer implements CharBuffer {
         return MemoryUtils.getChar(address, p);
     }
 
+
+    public final void put(char b) {
+        ensureCapacity(max_position);
+        MemoryUtils.put(address, max_position++, b);
+    }
+
     /**
      *
      * @param position 位置

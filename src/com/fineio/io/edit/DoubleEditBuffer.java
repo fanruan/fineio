@@ -36,6 +36,11 @@ public final  class DoubleEditBuffer extends EditBuffer implements DoubleBuffer 
         return MemoryUtils.getDouble(address, p);
     }
 
+    public final void put(double b) {
+        ensureCapacity(max_position);
+        MemoryUtils.put(address, max_position++, b);
+    }
+
     /**
      *
      * @param position 位置

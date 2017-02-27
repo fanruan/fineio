@@ -11,5 +11,7 @@ public interface CharBuffer extends Buffer {
 
     void put(int position, char b);
 
+    void put(char b);
+
     char get(int p);
 }

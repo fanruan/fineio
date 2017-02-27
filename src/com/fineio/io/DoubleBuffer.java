@@ -9,9 +9,9 @@ public interface DoubleBuffer extends Buffer {
 
      int OFFSET = MemoryConstants.OFFSET_DOUBLE;
 
-
      void put(int position, double b);
 
+     void put(double b);
 
      double get(int p);
 

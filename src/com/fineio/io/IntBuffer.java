@@ -11,6 +11,8 @@ public interface IntBuffer   extends Buffer {
 
     void put(int position, int b);
 
+    void put(int b);
+
     int get(int p);
 }
 
