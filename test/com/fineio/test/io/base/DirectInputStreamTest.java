@@ -1,5 +1,6 @@
 package com.fineio.test.io.base;
 
+import com.fineio.exception.StreamCloseException;
 import com.fineio.io.base.Checker;
 import com.fineio.io.base.DirectInputStream;
 import com.fineio.memory.MemoryUtils;
@@ -7,11 +8,45 @@ import junit.framework.TestCase;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by daniel on 2017/2/23.
  */
 public class DirectInputStreamTest extends TestCase{
+
+
+    public void testException() throws  Exception {
+
+        Constructor<DirectInputStream> c = DirectInputStream.class.getDeclaredConstructor(long.class, int.class, Checker.class);
+        c.setAccessible(true);
+        byte[] bytes = createRandomByte();
+        int len = bytes.length;
+        long s = MemoryUtils.allocate(len);
+        MemoryUtils.copyMemory(bytes, s);
+        final AtomicBoolean atomicBoolean = new AtomicBoolean(true);
+        DirectInputStream is = c.newInstance(s, len, new Checker() {
+            @Override
+            public boolean check() {
+                return atomicBoolean.get();
+            }
+        });
+        boolean exp = false;
+        try {
+            is.read();
+        } catch (StreamCloseException e){
+            exp = true;
+        }
+        assertFalse(exp);
+        atomicBoolean.set(false);
+        try {
+            is.read();
+        } catch (StreamCloseException e){
+            exp = true;
+        }
+        assertTrue(exp);
+
+    }
 
     public void testInputStream() throws Exception {
         Constructor<DirectInputStream> c = DirectInputStream.class.getDeclaredConstructor(long.class, int.class, Checker.class);
