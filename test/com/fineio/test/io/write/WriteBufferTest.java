@@ -1,28 +1,19 @@
 package com.fineio.test.io.write;
 
-import com.fineio.FineIO;
-import com.fineio.base.Bits;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
-import com.fineio.file.FileConstants;
 import com.fineio.file.IOFile;
 import com.fineio.io.base.AbstractBuffer;
 import com.fineio.io.write.*;
-import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
-import org.easymock.EasyMock;
-import org.easymock.IAnswer;
-import org.easymock.IMocksControl;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URI;
 
 /**
  * Created by daniel on 2017/2/20.
@@ -120,6 +111,7 @@ public class WriteBufferTest extends TestCase {
         for(int i = 0;i < bytes.length; i++){
             bb.put(i, bytes[i]);
         }
+
         Field field = AbstractBuffer.class.getDeclaredField("address");
         field.setAccessible(true);
         long address = (Long)field.get(bb);
@@ -132,6 +124,7 @@ public class WriteBufferTest extends TestCase {
         }catch (BufferIndexOutOfBoundsException exception) {
             exp = true;
         }
+        InputStream is = bb.getInputStream();
         assertTrue(exp);
     }
 

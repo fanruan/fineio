@@ -79,9 +79,11 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         int len = this.current_max_size << getLengthOffset();
         setCurrentCapacity(this.current_max_offset + 1);
         int newLen = this.current_max_size << getLengthOffset();
+        beforeStatusChange();
         //TODO memory control
         this.address = MemoryUtils.reallocate(address, newLen);
         MemoryUtils.fill0(this.address + len, newLen - len);
+        afterStatusChange();
     }
 
 

@@ -1,14 +1,12 @@
 package com.fineio.io.edit;
 
 import com.fineio.base.Maths;
-import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
 import com.fineio.io.write.WriteBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -54,12 +52,14 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
             }
             //TODO cache部分要做内存限制等处理  这部分与写共享内存，不考虑边写边释放问题
             len = 1 << offset << getLengthOffset();
+            beforeStatusChange();
             address = MemoryUtils.allocate(len);
             MemoryUtils.copyMemory(bytes, address, off);
             MemoryUtils.fill0(address + off, len - off);
             load = true;
             this.max_position = max_position;
             setCurrentCapacity(offset);
+            afterStatusChange();
         }
     }
 

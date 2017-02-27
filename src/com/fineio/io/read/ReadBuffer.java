@@ -78,11 +78,13 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
                 while ((len = is.read(bytes, off, max_byte_len - off)) > 0) {
                     off+=len;
                 }
+                beforeStatusChange();
                 //TODO cache部分要做内存限制等处理  还有预加载线程
                 address = MemoryUtils.allocate(off);
                 MemoryUtils.copyMemory(bytes, address, off);
                 load = true;
                 max_size = off >> getLengthOffset();
+                afterStatusChange();
             } catch (IOException e) {
                 throw new BlockNotFoundException("block:" + block.toString() + " not found!");
             }
@@ -125,12 +127,9 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
             }
             load = false;
             max_size = 0;
-            //释放方法要给时间允许get返回
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-            }
+            beforeStatusChange();
             MemoryUtils.free(address);
+            afterStatusChange();
         }
     }
 }

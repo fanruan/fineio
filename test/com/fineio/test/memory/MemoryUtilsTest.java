@@ -64,6 +64,9 @@ public class MemoryUtilsTest extends TestCase {
 
     public void testReadMemory2() {
         byte[] bytes = createRandomByte();
+        while (bytes.length < 50) {
+            bytes = createRandomByte();
+        }
         int len = bytes.length;
         long address = MemoryUtils.allocate(len);
         MemoryUtils.copyMemory(bytes, address);

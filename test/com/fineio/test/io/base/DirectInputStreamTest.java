@@ -1,5 +1,6 @@
 package com.fineio.test.io.base;
 
+import com.fineio.io.base.Checker;
 import com.fineio.io.base.DirectInputStream;
 import com.fineio.memory.MemoryUtils;
 import junit.framework.TestCase;
@@ -13,13 +14,13 @@ import java.lang.reflect.Constructor;
 public class DirectInputStreamTest extends TestCase{
 
     public void testInputStream() throws Exception {
-        Constructor<DirectInputStream> c = DirectInputStream.class.getDeclaredConstructor(long.class, int.class);
+        Constructor<DirectInputStream> c = DirectInputStream.class.getDeclaredConstructor(long.class, int.class, Checker.class);
         c.setAccessible(true);
         byte[] bytes = createRandomByte();
         int len = bytes.length;
         long s = MemoryUtils.allocate(len);
         MemoryUtils.copyMemory(bytes, s);
-        DirectInputStream inputStream = c.newInstance(s, len);
+        DirectInputStream inputStream = c.newInstance(s, len, null);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         byte[] temp = new byte[10];
@@ -33,7 +34,12 @@ public class DirectInputStreamTest extends TestCase{
             assertEquals(bytes[i], res[i]);
         }
 
-        inputStream = c.newInstance(s, len);
+        inputStream = c.newInstance(s, len, new Checker() {
+            @Override
+            public boolean check() {
+                return true;
+            }
+        });
         out = new ByteArrayOutputStream();
 
         temp = new byte[len];
@@ -46,7 +52,7 @@ public class DirectInputStreamTest extends TestCase{
         for (int i = 0; i < bytes.length; i++) {
             assertEquals(bytes[i], res[i]);
         }
-        inputStream = c.newInstance(s, len);
+        inputStream = c.newInstance(s, len, null);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         BufferedReader reader2 = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes)));
         while (true) {

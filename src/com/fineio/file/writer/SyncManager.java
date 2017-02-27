@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by daniel on 2017/2/23.
+ * 可控线程池，最多cpu数量的线程，相同的等待任务将被合并
  */
 public final class SyncManager {
 
@@ -43,7 +44,7 @@ public final class SyncManager {
     private Thread watch_thread = new Thread() {
         public void run() {
             while (true) {
-                while (map.isEmpty() || working_jobs.intValue() > ThreadsCount) {
+                while (map.isEmpty() || working_jobs.get() > ThreadsCount) {
                     synchronized (this) {
                         try {
                             this.wait();
@@ -51,7 +52,7 @@ public final class SyncManager {
                         }
                     }
                 }
-                while (working_jobs.intValue() < ThreadsCount && !map.isEmpty()) {
+                while (working_jobs.get() < ThreadsCount && !map.isEmpty()) {
                     final JobAssist jobAssist =  map.get();
                     if(jobAssist != null) {
                         //控制相同的任务不会同时执行，塞到屁股后面
