@@ -37,8 +37,7 @@ public  final class LongEditBuffer extends EditBuffer implements LongBuffer{
     }
 
     public final void put(long b) {
-        ensureCapacity(++max_position);
-        MemoryUtils.put(address, max_position, b);
+        put(++max_position, b);
     }
 
     /**

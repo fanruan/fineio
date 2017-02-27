@@ -39,8 +39,7 @@ public final  class CharEditBuffer extends EditBuffer implements CharBuffer {
 
 
     public final void put(char b) {
-        ensureCapacity(++max_position);
-        MemoryUtils.put(address, max_position, b);
+        put(++max_position, b);
     }
 
     /**

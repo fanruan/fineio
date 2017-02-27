@@ -32,8 +32,7 @@ public final  class FloatWriteBuffer extends WriteBuffer implements FloatBuffer 
     }
 
     public final void put(float b) {
-        ensureCapacity(++max_position);
-        MemoryUtils.put(address, max_position, b);
+        put(++max_position, b);
     }
 
     /**

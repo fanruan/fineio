@@ -16,15 +16,9 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
 
     private volatile boolean load = false;
 
-    protected volatile boolean changed = false;
-
 
     protected EditBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block, max_offset);
-    }
-
-    public boolean hasChanged() {
-        return changed;
     }
 
     private final  void loadData(){
@@ -67,7 +61,11 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
         if(!load) {
             loadData();
         }
-        super.ensureCapacity(position);
+        if(position < max_size) {
+            addCapacity(position);
+        } else {
+            throw new BufferIndexOutOfBoundsException(position);
+        }
     }
 
     protected final void checkIndex(int p) {

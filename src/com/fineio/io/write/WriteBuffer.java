@@ -23,6 +23,23 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
 
     protected int max_position = -1;
 
+    protected volatile boolean flushed = false;
+
+    protected volatile boolean changed = false;
+
+
+    public boolean hasChanged() {
+        return changed;
+    }
+
+    /**
+     * 如果没写过或者写过了又更改了都需要重新写
+     * @return
+     */
+    public boolean needFlush() {
+        return !flushed || !changed;
+    }
+
     protected void checkIndex(int p) {
         if (ir(p)){
             return;
@@ -61,6 +78,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     protected void ensureCapacity(int position){
         if(position < max_size) {
             addCapacity(position);
+            changed = false;
         } else {
             throw new BufferIndexOutOfBoundsException(position);
         }
@@ -72,7 +90,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         }
     }
 
-    private final void addCapacity(int position) {
+    protected final void addCapacity(int position) {
         while ( position >= current_max_size){
             addCapacity();
         }
