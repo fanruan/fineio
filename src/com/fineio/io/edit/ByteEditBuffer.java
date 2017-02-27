@@ -32,8 +32,8 @@ public final  class ByteEditBuffer extends  EditBuffer implements ByteBuffer {
 
 
     public final void put(byte b) {
-        ensureCapacity(max_position);
-        MemoryUtils.put(address, max_position++, b);
+        ensureCapacity(++max_position);
+        MemoryUtils.put(address, max_position, b);
     }
 
     /**

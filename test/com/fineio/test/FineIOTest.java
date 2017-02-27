@@ -352,6 +352,14 @@ public class FineIOTest extends TestCase {
         assertEquals(d1, d2);
     }
 
+    private double[] createRandomDouble(int len){
+        double[] arrays = new double[len];
+        for(int i = 0; i< len; i++){
+            arrays[i] =  (Math.random() * 100000000000d);
+        }
+        return arrays;
+    }
+
     public void testWrite() throws Exception {
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
@@ -359,9 +367,28 @@ public class FineIOTest extends TestCase {
         EasyMock.expect(connector.getBlockOffset()).andReturn((byte)22).anyTimes();
         control.replay();
         WriteIOFile<DoubleBuffer> dfile =  FineIO.createIOFile(connector , u, FineIO.MODEL.WRITE_DOUBLE);
-        for(long i = 0; i< 100000L; i++) {
-            FineIO.put(dfile, i, Math.random() * i);
+        int len = 1000000;
+        double[] doubles = createRandomDouble(len);
+        for(int i = 0; i< doubles.length; i++) {
+            FineIO.put(dfile, i, doubles[i]);
         }
+
+        WriteIOFile<DoubleBuffer> dfile2 =  FineIO.createIOFile(connector , u, FineIO.MODEL.WRITE_DOUBLE);
+        for(int i = 0; i< doubles.length; i++) {
+            FineIO.put(dfile2, doubles[i]);
+        }
+        WriteIOFile<DoubleBuffer> dfile3=  FineIO.createIOFile(connector , u, FineIO.MODEL.WRITE_DOUBLE);
+        FineIO.put(dfile3, 0, doubles[0]);
+        for(int i = 1; i< doubles.length; i++) {
+            FineIO.put(dfile3, doubles[i]);
+        }
+        for(int i = 0; i< doubles.length; i++) {
+            assertEquals(FineIO.getDouble(dfile, i), doubles[i]);
+            assertEquals(FineIO.getDouble(dfile2, i), doubles[i]);
+            assertEquals(FineIO.getDouble(dfile3, i), doubles[i]);
+        }
+
+
 
     }
 }

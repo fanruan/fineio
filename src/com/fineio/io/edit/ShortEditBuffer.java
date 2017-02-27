@@ -39,8 +39,8 @@ public final  class ShortEditBuffer extends EditBuffer implements ShortBuffer {
 
 
     public final void put(short b) {
-        ensureCapacity(max_position);
-        MemoryUtils.put(address, max_position++, b);
+        ensureCapacity(++max_position);
+        MemoryUtils.put(address, max_position, b);
     }
 
     /**

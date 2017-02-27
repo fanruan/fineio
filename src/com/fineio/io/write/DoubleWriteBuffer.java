@@ -34,8 +34,8 @@ public final  class DoubleWriteBuffer extends WriteBuffer implements DoubleBuffe
 
 
     public final void put(double b) {
-        ensureCapacity(max_position);
-        MemoryUtils.put(address, max_position++, b);
+        ensureCapacity(++max_position);
+        MemoryUtils.put(address, max_position, b);
     }
     /**
      *

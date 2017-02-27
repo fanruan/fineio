@@ -37,8 +37,8 @@ public final  class ByteWriteBuffer extends  WriteBuffer implements ByteBuffer {
 
 
     public final void put(byte b) {
-        ensureCapacity(max_position);
-        MemoryUtils.put(address, max_position++, b);
+        ensureCapacity(++max_position);
+        MemoryUtils.put(address, max_position, b);
     }
     /**
      *

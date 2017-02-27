@@ -21,7 +21,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
 
     protected int max_offset;
 
-    protected int max_position = 0;
+    protected int max_position = -1;
 
     protected void checkIndex(int p) {
         if (ir(p)){
@@ -31,7 +31,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     }
 
     public boolean full() {
-        return max_position == max_size;
+        return max_position  == max_size - 1;
     }
 
     /**
@@ -67,7 +67,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     }
 
     private final void setMaxPosition(int position) {
-        if(position > max_position){
+        if(position > max_position ){
             max_position = position;
         }
     }

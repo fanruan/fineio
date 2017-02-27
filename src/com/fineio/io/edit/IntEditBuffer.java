@@ -39,8 +39,8 @@ public final  class IntEditBuffer extends EditBuffer implements IntBuffer {
 
 
     public final void put(int b) {
-        ensureCapacity(max_position);
-        MemoryUtils.put(address, max_position++, b);
+        ensureCapacity(++max_position);
+        MemoryUtils.put(address, max_position, b);
     }
     /**
      *
