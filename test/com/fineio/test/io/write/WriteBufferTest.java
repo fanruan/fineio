@@ -9,6 +9,7 @@ import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -124,8 +125,30 @@ public class WriteBufferTest extends TestCase {
         }catch (BufferIndexOutOfBoundsException exception) {
             exp = true;
         }
-        InputStream is = bb.getInputStream();
         assertTrue(exp);
+
+        ByteWriteBuffer bb2 = constructor.newInstance(null, null, len);
+
+        for(int i = 0;i < bytes.length; i++){
+            bb2.put(bytes[i]);
+        }
+
+        for(int i = 0;i < bytes.length; i++){
+            assertEquals(bytes[i], bb2.get(i));
+        }
+
+        byte[] bytesRes1 = new byte[bytes.length];
+        byte[] bytesRes2 = new byte[bytes.length];
+        InputStream is = bb.getInputStream();
+        assertEquals(bytes.length, is.read(bytesRes1));
+        InputStream is2 = bb2.getInputStream();
+        assertEquals(bytes.length, is2.read(bytesRes2));
+
+        for(int i = 0;i < bytes.length; i++){
+            assertEquals(bytes[i], bytesRes1[i]);
+            assertEquals(bytes[i], bytesRes2[i]);
+        }
+
     }
 
 
@@ -151,6 +174,29 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
+
+
+
+        CharWriteBuffer bb2 = constructor.newInstance(null, null, len);
+
+        for(int i = 0;i < bytes.length; i++){
+            bb2.put(bytes[i]);
+        }
+
+        for(int i = 0;i < bytes.length; i++){
+            assertEquals(bytes[i], bb2.get(i));
+        }
+
+        byte[] bytesRes1 = new byte[bytes.length << 1];
+        byte[] bytesRes2 = new byte[bytes.length << 1];
+        InputStream is = bb.getInputStream();
+        assertEquals(bytes.length << 1, is.read(bytesRes1));
+        InputStream is2 = bb2.getInputStream();
+        assertEquals(bytes.length << 1, is2.read(bytesRes2));
+
+        for(int i = 0;i < (bytes.length << 1); i++){
+            assertEquals(bytesRes1[i], bytesRes2[i]);
+        }
     }
 
     public void testCharWriteDESC() throws  Exception {
@@ -175,6 +221,27 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
+
+        CharWriteBuffer bb2 = constructor.newInstance(null, null, len);
+
+        for(int i = 0;i < bytes.length; i++){
+            bb2.put(bytes[i]);
+        }
+
+        for(int i = 0;i < bytes.length; i++){
+            assertEquals(bytes[i], bb2.get(i));
+        }
+
+        byte[] bytesRes1 = new byte[bytes.length << 1];
+        byte[] bytesRes2 = new byte[bytes.length << 1];
+        InputStream is = bb.getInputStream();
+        assertEquals(bytes.length << 1, is.read(bytesRes1));
+        InputStream is2 = bb2.getInputStream();
+        assertEquals(bytes.length << 1, is2.read(bytesRes2));
+
+        for(int i = 0;i < (bytes.length << 1); i++){
+            assertEquals(bytesRes1[i], bytesRes2[i]);
+        }
     }
 
     public void testDoubleWriteDESC() throws  Exception {
@@ -199,6 +266,26 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
+        DoubleWriteBuffer bb2 = constructor.newInstance(null, null, len);
+
+        for(int i = 0;i < bytes.length; i++){
+            bb2.put(bytes[i]);
+        }
+
+        for(int i = 0;i < bytes.length; i++){
+            assertEquals(bytes[i], bb2.get(i));
+        }
+
+        byte[] bytesRes1 = new byte[bytes.length << 3];
+        byte[] bytesRes2 = new byte[bytes.length << 3];
+        InputStream is = bb.getInputStream();
+        assertEquals(bytes.length << 3, is.read(bytesRes1));
+        InputStream is2 = bb2.getInputStream();
+        assertEquals(bytes.length << 3, is2.read(bytesRes2));
+
+        for(int i = 0;i < (bytes.length << 3); i++){
+            assertEquals(bytesRes1[i], bytesRes2[i]);
+        }
     }
 
 
@@ -224,6 +311,26 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
+        DoubleWriteBuffer bb2 = constructor.newInstance(null, null, len);
+
+        for(int i = 0;i < bytes.length; i++){
+            bb2.put(bytes[i]);
+        }
+
+        for(int i = 0;i < bytes.length; i++){
+            assertEquals(bytes[i], bb2.get(i));
+        }
+
+        byte[] bytesRes1 = new byte[bytes.length << 3];
+        byte[] bytesRes2 = new byte[bytes.length << 3];
+        InputStream is = bb.getInputStream();
+        assertEquals(bytes.length << 3, is.read(bytesRes1));
+        InputStream is2 = bb2.getInputStream();
+        assertEquals(bytes.length << 3, is2.read(bytesRes2));
+
+        for(int i = 0;i < (bytes.length << 3); i++){
+            assertEquals(bytesRes1[i], bytesRes2[i]);
+        }
     }
 
 

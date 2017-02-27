@@ -39,7 +39,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
      * @return
      */
     protected final int getByteSize() {
-        return max_position << getLengthOffset();
+        return (max_position + 1) << getLengthOffset();
     }
 
     protected final boolean ir(int p){
