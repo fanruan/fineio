@@ -37,7 +37,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
      * @return
      */
     public boolean needFlush() {
-        return !flushed || !changed;
+        return !flushed || changed;
     }
 
     protected void checkIndex(int p) {
@@ -78,7 +78,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     protected void ensureCapacity(int position){
         if(position < max_size) {
             addCapacity(position);
-            changed = false;
+            changed = true;
         } else {
             throw new BufferIndexOutOfBoundsException(position);
         }
@@ -108,5 +108,12 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         afterStatusChange();
     }
 
+    private void write() {
+        synchronized (this) {
+            this.connector.write(block, getInputStream());
+            flushed = true;
+            changed = false;
+        }
+    }
 
 }
