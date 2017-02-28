@@ -86,7 +86,6 @@ public class PerformanceTest {
             FileBlock block_i = constructor.newInstance(u, String.valueOf(i));
             final int index = i;
             EasyMock.expect(connector.read(EasyMock.eq(block_i))).andAnswer(new IAnswer<InputStream>() {
-                @Override
                 public InputStream answer() throws Throwable {
                     return file.getInputStream(file.getEntry(String.valueOf(index)));
                 }

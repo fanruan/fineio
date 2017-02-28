@@ -29,14 +29,12 @@ public class JobContainerTest extends TestCase {
         control.replay();
         URI uri = new URI("");
         assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
-            @Override
             public void doJob() {
 
             }
         })));
 
         assertFalse(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
-            @Override
             public void doJob() {
 
             }
@@ -44,33 +42,28 @@ public class JobContainerTest extends TestCase {
         container.get();
         assertTrue(container.isEmpty());
         assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
-            @Override
             public void doJob() {
 
             }
         })));
         assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "2"), new Job() {
-            @Override
             public void doJob() {
 
             }
         })));
         assertTrue(container.put(new JobAssist(null, constructor.newInstance(uri, "1"), new Job() {
-            @Override
             public void doJob() {
 
             }
         })));
         container.get();
         assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
-            @Override
             public void doJob() {
 
             }
         })));
         container.get();
         assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "2"), new Job() {
-            @Override
             public void doJob() {
 
             }

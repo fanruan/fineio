@@ -41,6 +41,21 @@ public final class SyncManager {
         }
     }
 
+    public void force(JobAssist jobAssist) {
+        synchronized (runningThread) {
+            JobAssist assist =  runningThread.get(jobAssist.getKey());
+            if(assist != null) {
+                synchronized (assist){
+                    try {
+                        assist.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        }
+        map.waitJob(jobAssist);
+    }
+
     private Thread watch_thread = new Thread() {
         public void run() {
             while (true) {
@@ -60,16 +75,22 @@ public final class SyncManager {
                             triggerWork(jobAssist);
                             continue;
                         }
-                        runningThread.put(jobAssist.getKey(), jobAssist);
+                        synchronized (runningThread) {
+                            runningThread.put(jobAssist.getKey(), jobAssist);
+                        }
                         working_jobs.addAndGet(1);
                         executor.execute(new Runnable() {
-                            @Override
                             public void run() {
                                 try {
                                     jobAssist.doJob();
                                 } catch (Throwable e) {
                                 } finally {
-                                    runningThread.remove(jobAssist.getKey());
+                                    synchronized (runningThread){
+                                        JobAssist assist =  runningThread.remove(jobAssist.getKey());
+                                        synchronized (assist) {
+                                            assist.notifyAll();
+                                        }
+                                    }
                                     working_jobs.addAndGet(-1);
                                     synchronized (watch_thread) {
                                         watch_thread.notify();

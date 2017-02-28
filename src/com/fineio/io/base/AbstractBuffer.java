@@ -34,7 +34,6 @@ public abstract class AbstractBuffer implements BaseBuffer {
             throw new StreamCloseException();
         }
         DirectInputStream inputStream =  new DirectInputStream(address, getByteSize(), new StreamCloseChecker(status.get()) {
-            @Override
             public boolean check() {
                 return status.get() == getStatus() ;
             }

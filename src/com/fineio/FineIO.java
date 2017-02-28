@@ -7,9 +7,6 @@ import com.fineio.file.IOFile;
 import com.fineio.file.ReadIOFile;
 import com.fineio.file.WriteIOFile;
 import com.fineio.io.*;
-import com.fineio.io.edit.*;
-import com.fineio.io.read.*;
-import com.fineio.io.write.*;
 import com.fineio.memory.MemoryConf;
 import com.fineio.storage.Connector;
 
@@ -23,14 +20,12 @@ public final  class FineIO {
     public interface MODEL<F> {
          MODEL<ReadIOFile<LongBuffer>> READ_LONG = new MODEL<ReadIOFile<LongBuffer>>() {
 
-             @Override
              public ReadIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
                  return ReadIOFile.createFineIO(connector, uri, ReadIOFile.LONG);
              }
          };
         MODEL<ReadIOFile<DoubleBuffer>> READ_DOUBLE = new MODEL<ReadIOFile<DoubleBuffer>>() {
 
-            @Override
             public ReadIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
                 return ReadIOFile.createFineIO(connector, uri, ReadIOFile.DOUBLE);
             }
@@ -38,7 +33,6 @@ public final  class FineIO {
 
         MODEL<ReadIOFile<FloatBuffer>> READ_FLOAT = new MODEL<ReadIOFile<FloatBuffer>>() {
 
-            @Override
             public ReadIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
                 return ReadIOFile.createFineIO(connector, uri, ReadIOFile.FLOAT);
             }
@@ -46,21 +40,18 @@ public final  class FineIO {
 
         MODEL<ReadIOFile<IntBuffer>> READ_INT = new MODEL<ReadIOFile<IntBuffer>>() {
 
-            @Override
             public ReadIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
                 return ReadIOFile.createFineIO(connector, uri, ReadIOFile.INT);
             }
         };
         MODEL<ReadIOFile<CharBuffer> > READ_CHAR = new MODEL<ReadIOFile<CharBuffer> >() {
 
-            @Override
             public ReadIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
                 return ReadIOFile.createFineIO(connector, uri, ReadIOFile.CHAR);
             }
         };
         MODEL<ReadIOFile<ByteBuffer> > READ_BYTE = new MODEL<ReadIOFile<ByteBuffer> >() {
 
-            @Override
             public ReadIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
                 return ReadIOFile.createFineIO(connector, uri, ReadIOFile.BYTE);
             }
@@ -68,7 +59,6 @@ public final  class FineIO {
 
         MODEL<ReadIOFile<ShortBuffer>> READ_SHORT = new MODEL<ReadIOFile<ShortBuffer>>() {
 
-            @Override
             public ReadIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
                 return ReadIOFile.createFineIO(connector, uri, ReadIOFile.SHORT);
             }
@@ -77,42 +67,36 @@ public final  class FineIO {
 
         MODEL< WriteIOFile<LongBuffer>> WRITE_LONG = new MODEL< WriteIOFile<LongBuffer>>() {
 
-            @Override
             public WriteIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
                 return WriteIOFile.createFineIO(connector, uri, WriteIOFile.LONG);
             }
         };
         MODEL<WriteIOFile<DoubleBuffer>> WRITE_DOUBLE = new MODEL<WriteIOFile<DoubleBuffer>>() {
 
-            @Override
             public WriteIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
                 return WriteIOFile.createFineIO(connector, uri, WriteIOFile.DOUBLE);
             }
         };
         MODEL<WriteIOFile<FloatBuffer>> WRITE_FLOAT = new MODEL<WriteIOFile<FloatBuffer>>() {
 
-            @Override
             public WriteIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
                 return WriteIOFile.createFineIO(connector, uri, WriteIOFile.FLOAT);
             }
         };
         MODEL<WriteIOFile<IntBuffer>> WRITE_INT = new MODEL<WriteIOFile<IntBuffer>>() {
 
-            @Override
             public WriteIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
                 return WriteIOFile.createFineIO(connector, uri, WriteIOFile.INT);
             }
         };
         MODEL<WriteIOFile<CharBuffer> > WRITE_CHAR = new MODEL<WriteIOFile<CharBuffer> >() {
 
-            @Override
             public WriteIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
                 return WriteIOFile.createFineIO(connector, uri, WriteIOFile.CHAR);
             }
         };
         MODEL<WriteIOFile<ByteBuffer> > WRITE_BYTE = new MODEL<WriteIOFile<ByteBuffer> >() {
 
-            @Override
             public WriteIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
                 return WriteIOFile.createFineIO(connector, uri, WriteIOFile.BYTE);
             }
@@ -120,7 +104,6 @@ public final  class FineIO {
 
         MODEL<WriteIOFile<ShortBuffer>> WRITE_SHORT = new MODEL<WriteIOFile<ShortBuffer>>() {
 
-            @Override
             public WriteIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
                 return WriteIOFile.createFineIO(connector, uri, WriteIOFile.SHORT);
             }
@@ -128,42 +111,36 @@ public final  class FineIO {
 
         MODEL<EditIOFile<LongBuffer>> EDIT_LONG = new MODEL<EditIOFile<LongBuffer>>() {
 
-            @Override
             public EditIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
                 return EditIOFile.createFineIO(connector, uri, EditIOFile.LONG);
             }
         };
         MODEL<EditIOFile<DoubleBuffer>> EDIT_DOUBLE = new MODEL<EditIOFile<DoubleBuffer>>() {
 
-            @Override
             public EditIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
                 return EditIOFile.createFineIO(connector, uri, EditIOFile.DOUBLE);
             }
         };
         MODEL<EditIOFile<FloatBuffer>> EDIT_FLOAT = new MODEL<EditIOFile<FloatBuffer>>() {
 
-            @Override
             public EditIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
                 return EditIOFile.createFineIO(connector, uri, EditIOFile.FLOAT);
             }
         };
         MODEL<EditIOFile<IntBuffer>> EDIT_INT = new MODEL<EditIOFile<IntBuffer>>() {
 
-            @Override
             public EditIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
                 return EditIOFile.createFineIO(connector, uri, EditIOFile.INT);
             }
         };
         MODEL<EditIOFile<CharBuffer> > EDIT_CHAR = new MODEL<EditIOFile<CharBuffer> >() {
 
-            @Override
             public EditIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
                 return EditIOFile.createFineIO(connector, uri, EditIOFile.CHAR);
             }
         };
         MODEL< EditIOFile<ByteBuffer> > EDIT_BYTE = new MODEL< EditIOFile<ByteBuffer> >() {
 
-            @Override
             public EditIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
                 return EditIOFile.createFineIO(connector, uri, EditIOFile.BYTE);
             }
@@ -171,7 +148,6 @@ public final  class FineIO {
 
         MODEL<EditIOFile<ShortBuffer>> EDIT_SHORT = new MODEL<EditIOFile<ShortBuffer>>() {
 
-            @Override
             public EditIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
                 return EditIOFile.createFineIO(connector, uri, EditIOFile.SHORT);
             }

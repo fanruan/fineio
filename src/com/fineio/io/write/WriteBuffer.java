@@ -1,14 +1,20 @@
 package com.fineio.io.write;
 
 import com.fineio.exception.BufferIndexOutOfBoundsException;
+import com.fineio.exception.StreamCloseException;
 import com.fineio.file.FileBlock;
+import com.fineio.file.writer.Job;
+import com.fineio.file.writer.JobAssist;
+import com.fineio.file.writer.SyncManager;
 import com.fineio.io.base.AbstractBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
 /**
  * Created by daniel on 2017/2/15.
- * 注意 写是连续的并且不支持并发操作哦
+ * 注意 写是连续的并且不支持并发操作哦，写操作也是在byte全部被赋值的情况下才支持，目前writeBuffer仅支持到这样的程度
+ * writeBuffer虽然提供了随机写的接口，但是实际上只支持连续写入
+ * EditBuffer可以支持随机写入,并且写之后不再更改
  */
 public abstract class WriteBuffer extends AbstractBuffer implements Write {
 
@@ -108,11 +114,37 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         afterStatusChange();
     }
 
-    private void write() {
+    public void force() {
+        while (needFlush()) {
+            SyncManager.getInstance().force(createWriteJob());
+        }
+    }
+
+    private JobAssist createWriteJob() {
+        return new JobAssist(connector, block, new Job() {
+            public void doJob() {
+                try {
+                    write0();
+                } catch (StreamCloseException e){
+                    flushed = false;
+                    write();
+                }
+            }
+        });
+    }
+
+    public void write() {
+
+        SyncManager.getInstance().triggerWork(createWriteJob());
+
+    }
+
+    private void write0(){
         synchronized (this) {
+            changed = false;
             this.connector.write(block, getInputStream());
             flushed = true;
-            changed = false;
+            clear();
         }
     }
 

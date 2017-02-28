@@ -10,4 +10,8 @@ public interface Buffer {
     InputStream getInputStream();
 
     boolean full();
+
+    void write();
+
+    void force();
 }

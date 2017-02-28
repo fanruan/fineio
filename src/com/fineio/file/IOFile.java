@@ -4,6 +4,8 @@ import com.fineio.exception.BufferConstructException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.ClassDefException;
 import com.fineio.exception.IOSetException;
+import com.fineio.file.writer.JobAssist;
+import com.fineio.file.writer.SyncManager;
 import com.fineio.io.*;
 import com.fineio.storage.Connector;
 
@@ -90,8 +92,13 @@ public abstract class IOFile<E extends Buffer> {
         if(buffers == null || buffers.length == 0) {
             return 0;
         }
-        int len = buffers.length;
-        return buffers[len - 1].full() ? len : len - 1;
+        int len = buffers.length - 1;
+        return buffers[len].full() ? triggerWrite(len) : len;
+    }
+
+    private final int triggerWrite(int len) {
+        buffers[len].write();
+        return len + 1;
     }
 
 
@@ -325,4 +332,11 @@ public abstract class IOFile<E extends Buffer> {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
+    public void close() {
+        for(int i = 0; i < buffers.length; i++){
+            if(buffers[i] != null) {
+                buffers[i].force();
+            }
+        }
+    }
 }

@@ -40,5 +40,26 @@ public class JobContainer {
     }
 
 
-
+    public void waitJob(JobAssist jobAssist) {
+        synchronized (this){
+            JobAssist job =  watchMap.get(jobAssist.getKey());
+            if(job != null){
+                synchronized (job){
+                    try {
+                        job.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+            } else {
+                jobs.add(jobAssist);
+                watchMap.put(jobAssist.getKey(), jobAssist);
+                synchronized (jobAssist){
+                    try {
+                        jobAssist.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        }
+    }
 }
