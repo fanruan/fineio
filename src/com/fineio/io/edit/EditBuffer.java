@@ -3,6 +3,7 @@ package com.fineio.io.edit;
 import com.fineio.base.Maths;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
+import com.fineio.file.writer.SyncManager;
 import com.fineio.io.write.WriteBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
@@ -91,5 +92,21 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
     private final void ll(int p) {
         loadData();
         checkIndex(p);
+    }
+
+    protected void write0(){
+        synchronized (this) {
+            changed = false;
+            this.connector.write(block, getInputStream());
+            flushed = true;
+        }
+    }
+
+
+    public void force() {
+        while (needFlush()) {
+            SyncManager.getInstance().force(createWriteJob());
+        }
+        clear();
     }
 }

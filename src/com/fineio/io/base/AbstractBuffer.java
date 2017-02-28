@@ -29,7 +29,7 @@ public abstract class AbstractBuffer implements BaseBuffer {
      * 创建get方法
      * @return
      */
-    public final InputStream getInputStream() {
+    protected final InputStream getInputStream() {
         if(address == 0) {
             throw new StreamCloseException();
         }

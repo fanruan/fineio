@@ -120,7 +120,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         }
     }
 
-    private JobAssist createWriteJob() {
+    protected JobAssist createWriteJob() {
         return new JobAssist(connector, block, new Job() {
             public void doJob() {
                 try {
@@ -139,7 +139,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
 
     }
 
-    private void write0(){
+    protected void write0(){
         synchronized (this) {
             changed = false;
             this.connector.write(block, getInputStream());

@@ -4,6 +4,7 @@ import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
 import com.fineio.file.IOFile;
 import com.fineio.io.base.AbstractBuffer;
+import com.fineio.io.base.BaseBuffer;
 import com.fineio.io.write.*;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
@@ -139,9 +140,9 @@ public class WriteBufferTest extends TestCase {
 
         byte[] bytesRes1 = new byte[bytes.length];
         byte[] bytesRes2 = new byte[bytes.length];
-        InputStream is = bb.getInputStream();
+        InputStream is = getInputStream(bb);
         assertEquals(bytes.length, is.read(bytesRes1));
-        InputStream is2 = bb2.getInputStream();
+        InputStream is2 = getInputStream(bb2);
         assertEquals(bytes.length, is2.read(bytesRes2));
 
         for(int i = 0;i < bytes.length; i++){
@@ -149,6 +150,21 @@ public class WriteBufferTest extends TestCase {
             assertEquals(bytes[i], bytesRes2[i]);
         }
 
+    }
+
+    private InputStream getInputStream(BaseBuffer sb) {
+        try {
+            Method m =  AbstractBuffer.class.getDeclaredMethod("getInputStream");
+            m.setAccessible(true);
+            return (InputStream) m.invoke(sb);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return  null;
     }
 
 
@@ -189,9 +205,9 @@ public class WriteBufferTest extends TestCase {
 
         byte[] bytesRes1 = new byte[bytes.length << 1];
         byte[] bytesRes2 = new byte[bytes.length << 1];
-        InputStream is = bb.getInputStream();
+        InputStream is = getInputStream(bb);
         assertEquals(bytes.length << 1, is.read(bytesRes1));
-        InputStream is2 = bb2.getInputStream();
+        InputStream is2 = getInputStream(bb2);
         assertEquals(bytes.length << 1, is2.read(bytesRes2));
 
         for(int i = 0;i < (bytes.length << 1); i++){
@@ -234,9 +250,9 @@ public class WriteBufferTest extends TestCase {
 
         byte[] bytesRes1 = new byte[bytes.length << 1];
         byte[] bytesRes2 = new byte[bytes.length << 1];
-        InputStream is = bb.getInputStream();
+        InputStream is = getInputStream(bb);
         assertEquals(bytes.length << 1, is.read(bytesRes1));
-        InputStream is2 = bb2.getInputStream();
+        InputStream is2 = getInputStream(bb2);
         assertEquals(bytes.length << 1, is2.read(bytesRes2));
 
         for(int i = 0;i < (bytes.length << 1); i++){
@@ -278,9 +294,9 @@ public class WriteBufferTest extends TestCase {
 
         byte[] bytesRes1 = new byte[bytes.length << 3];
         byte[] bytesRes2 = new byte[bytes.length << 3];
-        InputStream is = bb.getInputStream();
+        InputStream is = getInputStream(bb);
         assertEquals(bytes.length << 3, is.read(bytesRes1));
-        InputStream is2 = bb2.getInputStream();
+        InputStream is2 = getInputStream(bb2);
         assertEquals(bytes.length << 3, is2.read(bytesRes2));
 
         for(int i = 0;i < (bytes.length << 3); i++){
@@ -323,9 +339,9 @@ public class WriteBufferTest extends TestCase {
 
         byte[] bytesRes1 = new byte[bytes.length << 3];
         byte[] bytesRes2 = new byte[bytes.length << 3];
-        InputStream is = bb.getInputStream();
+        InputStream is = getInputStream(bb);
         assertEquals(bytes.length << 3, is.read(bytesRes1));
-        InputStream is2 = bb2.getInputStream();
+        InputStream is2 = getInputStream(bb2);
         assertEquals(bytes.length << 3, is2.read(bytesRes2));
 
         for(int i = 0;i < (bytes.length << 3); i++){

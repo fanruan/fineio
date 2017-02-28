@@ -7,11 +7,19 @@ import java.io.InputStream;
  */
 public interface Buffer {
 
-    InputStream getInputStream();
-
+    /**
+     * 是否写全信息
+     * @return
+     */
     boolean full();
 
+    /**
+     * 写的接口
+     */
     void write();
 
+    /**
+     * 同步写文件并释放
+     */
     void force();
 }
