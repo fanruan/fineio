@@ -14,6 +14,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by daniel on 2017/2/23.
@@ -75,6 +76,71 @@ public class JobContainerTest extends TestCase {
         assertFalse(container.isEmpty());
         container.get();
         assertTrue(container.isEmpty());
+    }
+
+    public void testWait() throws Exception {
+
+        final Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        constructor.setAccessible(true);
+        final JobContainer container = new JobContainer();
+        IMocksControl control = EasyMock.createControl();
+        final Connector connector = control.createMock(Connector.class);
+        control.replay();
+        final URI uri = new URI("");
+        JobAssist jobAssist = new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
+            public void doJob() {
+
+            }
+        });
+        final JobAssist jobAssist3 = new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
+            public void doJob() {
+
+            }
+        });
+        assertTrue(container.put(jobAssist));
+        final AtomicInteger atomicInteger = new AtomicInteger(0);
+        new Thread(){
+
+            public void run() {
+                atomicInteger.addAndGet(1);
+                container.waitJob(jobAssist3);
+                atomicInteger.addAndGet(1);
+            }
+        }.start();
+        Thread.sleep(200);
+        assertEquals(atomicInteger.get(), 1);
+        synchronized (jobAssist3){
+            jobAssist3.notifyAll();
+        }
+        assertEquals(atomicInteger.get(), 1);
+        Thread.sleep(200);
+        assertEquals(atomicInteger.get(), 1);
+        synchronized (jobAssist){
+            jobAssist.notifyAll();
+        }
+        Thread.sleep(200);
+        assertEquals(atomicInteger.get(), 2);
+
+        final JobAssist jobAssist2 = new JobAssist(connector, constructor.newInstance(uri, "2"), new Job() {
+            public void doJob() {
+
+            }
+        });
+        new Thread(){
+            public void run() {
+                atomicInteger.addAndGet(1);
+                container.waitJob(jobAssist2);
+                atomicInteger.addAndGet(1);
+            }
+        }.start();
+        Thread.sleep(200);
+        assertEquals(atomicInteger.get(), 3);
+        synchronized (jobAssist2){
+            jobAssist2.notifyAll();
+        }
+        Thread.sleep(200);
+        assertEquals(atomicInteger.get(), 4);
+
     }
 
 

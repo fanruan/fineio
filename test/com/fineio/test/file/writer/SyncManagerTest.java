@@ -28,7 +28,6 @@ public class SyncManagerTest extends TestCase {
     public void  testMultiThread() throws Exception {
         final Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
         constructor.setAccessible(true);
-        final JobContainer container = new JobContainer();
         IMocksControl control = EasyMock.createControl();
         final URI uri = new URI("");
         final Connector connector = control.createMock(Connector.class);
@@ -66,7 +65,38 @@ public class SyncManagerTest extends TestCase {
                 }
             };
         }
+
+
+        Thread[] awaitThreads = new Thread[len];
         for(int i = 0; i < len; i++) {
+            final  int k = i;
+            awaitThreads[i] =  new Thread(){
+                public void run() {
+                    try {
+                        SyncManager.getInstance().force(new JobAssist(connector, constructor.newInstance(uri, String.valueOf(k)), new Job() {
+                            @Override
+                            public void doJob() {
+                                fff.addAndGet(1);
+                                try {
+                                    Thread.sleep(10);
+                                } catch (InterruptedException e) {
+                                }
+                            }
+                        }));
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            };
+        }
+
+        for(int i = 0; i < len; i++) {
+            awaitThreads[i].start();
             threads[i].start();
         }
         Field field = SyncManager.class.getDeclaredField("working_jobs");
@@ -78,13 +108,27 @@ public class SyncManagerTest extends TestCase {
         Thread watch = new Thread() {
             public void run() {
                 while(!end || !jm.isEmpty()) {
-                    assertTrue(a.intValue() < Runtime.getRuntime().availableProcessors() + 1);
+                    assertTrue(a.intValue() < Runtime.getRuntime().availableProcessors() + 2);
                 }
             }
         };
         watch.start();
+        Thread.sleep(100);
+        for(int i = 0; i < len; i++) {
+            SyncManager.getInstance().triggerWork(new JobAssist(connector, constructor.newInstance(uri, String.valueOf(i)), new Job() {
+                @Override
+                public void doJob() {
+                    fff.addAndGet(1);
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }));
+        }
         for(int i = 0; i < len; i++) {
             threads[i].join();
+            awaitThreads[i].join();
         }
         end = true;
         watch.join();

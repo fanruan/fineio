@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by daniel on 2017/2/23.
@@ -12,16 +14,20 @@ public class JobContainer {
     private Queue<JobAssist> jobs = new ConcurrentLinkedQueue<JobAssist>();
     private Map<SyncKey, JobAssist> watchMap = new ConcurrentHashMap<SyncKey, JobAssist>();
 
+    private Lock lock = new ReentrantLock();
+
 
     public boolean put(JobAssist job) {
-        synchronized (this){
-            if(!watchMap.containsKey(job.getKey())) {
-                jobs.add(job);
-                watchMap.put(job.getKey(), job);
+        try {
+            lock.lock();
+            if (!watchMap.containsKey(job.getKey())) {
+                addJob(job);
                 return true;
             }
+            return false;
+        } finally {
+            lock.unlock();
         }
-        return false;
     }
 
     public boolean isEmpty() {
@@ -32,34 +38,40 @@ public class JobContainer {
         if(isEmpty()){
             return null;
         }
-        synchronized (this){
+        try {
+            lock.lock();
             JobAssist jobAssist = jobs.poll();
             watchMap.remove(jobAssist.getKey());
-            return  jobAssist;
+            return jobAssist;
+        } finally {
+            lock.unlock();
         }
     }
 
 
     public void waitJob(JobAssist jobAssist) {
-        synchronized (this){
-            JobAssist job =  watchMap.get(jobAssist.getKey());
-            if(job != null){
-                synchronized (job){
-                    try {
-                        job.wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
-            } else {
-                jobs.add(jobAssist);
-                watchMap.put(jobAssist.getKey(), jobAssist);
-                synchronized (jobAssist){
-                    try {
-                        jobAssist.wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
+        if(jobAssist == null){
+            return;
+        }
+        JobAssist job = null;
+        lock.lock();
+        job =  watchMap.get(jobAssist.getKey());
+        if(job == null){
+            job = jobAssist;
+            addJob(job);
+        }
+        synchronized (job){
+            try {
+                //这里unlock是为了避免addJob之后直接被get方法夺走从而导致wait的对象已经被拿去执行
+                lock.unlock();
+                job.wait();
+            } catch (InterruptedException e) {
             }
         }
+    }
+
+    private void addJob(JobAssist job) {
+        jobs.add(job);
+        watchMap.put(job.getKey(), job);
     }
 }

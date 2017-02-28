@@ -5,14 +5,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by daniel on 2017/2/23.
- * 可控线程池，最多cpu数量的线程，相同的等待任务将被合并
+ * 可控线程池，最多cpu + 1数量的线程，相同的等待任务将被合并
  */
 public final class SyncManager {
 
-    private static final int ThreadsCount = Runtime.getRuntime().availableProcessors();
+    private static final int ThreadsCount = Runtime.getRuntime().availableProcessors() + 1;
 
     public static SyncManager instance = new SyncManager();
 
@@ -33,6 +35,8 @@ public final class SyncManager {
 
     private volatile Map<SyncKey, JobAssist> runningThread = new ConcurrentHashMap<SyncKey, JobAssist>();
 
+    private Lock runningLock = new ReentrantLock();
+
     public  void triggerWork(JobAssist jobAssist) {
         if(map.put(jobAssist)) {
             synchronized (watch_thread) {
@@ -42,16 +46,19 @@ public final class SyncManager {
     }
 
     public void force(JobAssist jobAssist) {
-        synchronized (runningThread) {
-            JobAssist assist =  runningThread.get(jobAssist.getKey());
-            if(assist != null) {
-                synchronized (assist){
-                    try {
-                        assist.wait();
-                    } catch (InterruptedException e) {
-                    }
+        runningLock.lock();
+        JobAssist assist  =  runningThread.get(jobAssist.getKey());
+        if(assist != null) {
+            synchronized (assist){
+                //这里使用lock而不是同步的目的是避免 assist中间被notify
+                runningLock.unlock();
+                try {
+                    assist.wait();
+                } catch (InterruptedException e) {
                 }
             }
+        } else {
+            runningLock.unlock();
         }
         map.waitJob(jobAssist);
     }
@@ -75,9 +82,9 @@ public final class SyncManager {
                             triggerWork(jobAssist);
                             continue;
                         }
-                        synchronized (runningThread) {
-                            runningThread.put(jobAssist.getKey(), jobAssist);
-                        }
+                        runningLock.lock();
+                        runningThread.put(jobAssist.getKey(), jobAssist);
+                        runningLock.unlock();
                         working_jobs.addAndGet(1);
                         executor.execute(new Runnable() {
                             public void run() {
@@ -85,12 +92,12 @@ public final class SyncManager {
                                     jobAssist.doJob();
                                 } catch (Throwable e) {
                                 } finally {
-                                    synchronized (runningThread){
-                                        JobAssist assist =  runningThread.remove(jobAssist.getKey());
-                                        synchronized (assist) {
-                                            assist.notifyAll();
-                                        }
+                                    runningLock.lock();
+                                    JobAssist assist =  runningThread.remove(jobAssist.getKey());
+                                    synchronized (assist) {
+                                        assist.notifyAll();
                                     }
+                                    runningLock.unlock();
                                     working_jobs.addAndGet(-1);
                                     synchronized (watch_thread) {
                                         watch_thread.notify();
