@@ -2,6 +2,7 @@ package com.fineio.io.edit;
 
 import com.fineio.base.Maths;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
+import com.fineio.exception.FileCloseException;
 import com.fineio.file.FileBlock;
 import com.fineio.file.writer.SyncManager;
 import com.fineio.io.write.WriteBuffer;
@@ -26,6 +27,9 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
         synchronized (this) {
             if (load) {
                 return;
+            }
+            if(close) {
+                throw  new FileCloseException();
             }
 
             int max_byte_len = max_size << getLengthOffset();

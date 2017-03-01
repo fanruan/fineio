@@ -141,6 +141,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
 
     public void clear(){
         synchronized (this) {
+            close = true;
             this.max_size = 0;
             this.current_max_size = 0;
             super.clear();

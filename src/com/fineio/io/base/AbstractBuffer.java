@@ -21,7 +21,8 @@ public abstract class AbstractBuffer implements BaseBuffer {
     protected final FileBlock block;
     protected volatile long address;
     protected volatile int max_size;
-    private AtomicInteger status = new AtomicInteger(0);
+    private volatile AtomicInteger status = new AtomicInteger(0);
+    protected volatile boolean close = false;
 
 
     /**

@@ -18,8 +18,6 @@ import java.io.InputStream;
 public abstract class ReadBuffer extends AbstractBuffer implements Read {
     private volatile boolean load = false;
     protected int max_byte_len;
-    private boolean close = false;
-
 
     public void put(int position, byte b) {
         put(b);
