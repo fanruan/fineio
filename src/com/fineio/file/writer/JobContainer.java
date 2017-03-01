@@ -50,6 +50,11 @@ public class JobContainer {
 
 
     public void waitJob(JobAssist jobAssist) {
+        waitJob(jobAssist, null);
+    }
+
+
+    public void waitJob(JobAssist jobAssist, Job callbackJob) {
         if(jobAssist == null){
             return;
         }
@@ -59,6 +64,9 @@ public class JobContainer {
         if(job == null){
             job = jobAssist;
             addJob(job);
+            if(callbackJob != null) {
+                callbackJob.doJob();
+            }
         }
         synchronized (job){
             try {

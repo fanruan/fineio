@@ -23,7 +23,7 @@ public abstract class AbstractReadIOFile<T extends Buffer> extends IOFile<T> {
 
 
     private void readHeader(byte offset) {
-        InputStream is  = this.connector.read(new FileBlock(uri, FileConstants.HEAD));
+        InputStream is  = this.connector.read(createHeadBlock());
         if(is == null){
             throw new BlockNotFoundException("block:" + uri.toString() +" not found!");
         }

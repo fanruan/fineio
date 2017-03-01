@@ -139,6 +139,14 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
 
     }
 
+    public void clear(){
+        synchronized (this) {
+            this.max_size = 0;
+            this.current_max_size = 0;
+            super.clear();
+        }
+    }
+
     protected void write0(){
         synchronized (this) {
             changed = false;

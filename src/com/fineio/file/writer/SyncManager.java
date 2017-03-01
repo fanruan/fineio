@@ -39,9 +39,13 @@ public final class SyncManager {
 
     public  void triggerWork(JobAssist jobAssist) {
         if(map.put(jobAssist)) {
-            synchronized (watch_thread) {
-                watch_thread.notify();
-            }
+            wakeUpWatchTread();
+        }
+    }
+
+    private void wakeUpWatchTread(){
+        synchronized (watch_thread) {
+            watch_thread.notify();
         }
     }
 
@@ -57,10 +61,16 @@ public final class SyncManager {
                 } catch (InterruptedException e) {
                 }
             }
+            return;
         } else {
             runningLock.unlock();
         }
-        map.waitJob(jobAssist);
+        map.waitJob(jobAssist, new Job() {
+            @Override
+            public void doJob() {
+                wakeUpWatchTread();
+            }
+        });
     }
 
     private Thread watch_thread = new Thread() {

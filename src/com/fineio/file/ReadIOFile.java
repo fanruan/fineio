@@ -49,4 +49,9 @@ public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
         return uri.getPath();
     }
 
+
+    protected void writeHeader() {
+        //doNothing
+    }
+
 }

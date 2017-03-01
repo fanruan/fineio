@@ -25,6 +25,11 @@ public interface Connector {
      */
     void write(FileBlock file, InputStream inputStream);
 
+    /*
+    输出byte[]
+     */
+    void write(FileBlock file, byte[] bytes);
+
     /**
      * 删除块
      * @param block

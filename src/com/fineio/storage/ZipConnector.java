@@ -11,7 +11,7 @@ import java.io.OutputStream;
 /**
  * Created by daniel on 2017/2/9.
  */
-public class ZipConnector implements Connector {
+public class ZipConnector extends AbstractConnector {
 
     private ZipFile file;
 

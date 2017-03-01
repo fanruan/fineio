@@ -1,5 +1,6 @@
 package com.fineio.file;
 
+import com.fineio.base.Bits;
 import com.fineio.exception.BufferConstructException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.ClassDefException;
@@ -7,8 +8,10 @@ import com.fineio.exception.IOSetException;
 import com.fineio.file.writer.JobAssist;
 import com.fineio.file.writer.SyncManager;
 import com.fineio.io.*;
+import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.URI;
@@ -43,7 +46,7 @@ public abstract class IOFile<E extends Buffer> {
      * 单个block的大小
      */
     protected long single_block_len;
-    protected E[] buffers;
+    protected volatile E[] buffers;
 
 
     IOFile(Connector connector, URI uri, AbstractFileModel<E> model) {
@@ -53,6 +56,10 @@ public abstract class IOFile<E extends Buffer> {
         this.connector = connector;
         this.uri = uri;
         this.model = model;
+    }
+
+    protected FileBlock createHeadBlock(){
+        return new FileBlock(uri, FileConstants.HEAD);
     }
 
     /**
@@ -332,7 +339,18 @@ public abstract class IOFile<E extends Buffer> {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
+    private final static int HEAD_LEN = MemoryConstants.STEP_LONG + 1;
+
+    protected void writeHeader() {
+        FileBlock block = createHeadBlock();
+        byte[] bytes = new byte[HEAD_LEN];
+        Bits.putInt(bytes, 0, buffers.length);
+        bytes[MemoryConstants.STEP_LONG] = (byte) (block_size_offset + model.offset());
+        connector.write(block, bytes);
+    }
+
     public void close() {
+        writeHeader();
         for(int i = 0; i < buffers.length; i++){
             if(buffers[i] != null) {
                 buffers[i].force();
