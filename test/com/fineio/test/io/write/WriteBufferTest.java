@@ -347,6 +347,21 @@ public class WriteBufferTest extends TestCase {
         for(int i = 0;i < (bytes.length << 3); i++){
             assertEquals(bytesRes1[i], bytesRes2[i]);
         }
+        bb.clear();
+        exp = false;
+        try {
+            bb.put(0, 1);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertTrue(exp);
+        exp = false;
+        try {
+            bb.get(0);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertTrue(exp);
     }
 
 

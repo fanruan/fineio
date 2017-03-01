@@ -140,6 +140,21 @@ public class EditBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
+        buffer.clear();
+        exp = false;
+        try {
+            buffer.put(0, (byte) 1);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertTrue(exp);
+        exp = false;
+        try {
+            buffer.get(0);
+        } catch (BufferIndexOutOfBoundsException e) {
+            exp = true;
+        }
+        assertTrue(exp);
     }
 
     private void intTest(byte[] value, Connector connector, FileBlock block, int off) {
