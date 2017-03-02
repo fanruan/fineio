@@ -24,7 +24,6 @@ public abstract class AbstractBuffer implements BaseBuffer {
     private volatile AtomicInteger status = new AtomicInteger(0);
     protected volatile boolean close = false;
 
-
     /**
      * 当释放之后会改变status check的状态变化不会再做get操作
      * 创建get方法

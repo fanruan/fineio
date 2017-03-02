@@ -36,14 +36,14 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
             byte[] bytes = new byte[max_byte_len];
             int off = 0;
             int len = 0;
-                try {
-                    InputStream is = connector.read(block);
-                    while ((len = is.read(bytes, off, max_byte_len - off)) > 0) {
-                        off += len;
-                    }
-                } catch (Throwable e) {
-                    //文件不存在新建一个不loaddata了
+            try {
+                InputStream is = connector.read(block);
+                while ((len = is.read(bytes, off, max_byte_len - off)) > 0) {
+                    off += len;
                 }
+            } catch (Throwable e) {
+                //文件不存在新建一个不loaddata了
+            }
             int max_position = off >> getLengthOffset();
             int offset = Maths.log2(max_position);
             if(max_position > (1 << offset)){
@@ -107,6 +107,9 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
     }
 
 
+    /**
+     * force关闭load入口不在加载
+     */
     public void force() {
         super.force();
         synchronized (this) {
@@ -126,6 +129,9 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
         //do nothing
     }
 
+    /**
+     * clear仅仅是clear而已，如果另个线程在写。clear是clear不掉的
+     */
     public void clear(){
         super.force();
         synchronized (this) {

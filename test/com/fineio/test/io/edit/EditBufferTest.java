@@ -6,6 +6,7 @@ import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.file.FileBlock;
 import com.fineio.file.FileConstants;
 import com.fineio.file.IOFile;
+import com.fineio.file.writer.SyncManager;
 import com.fineio.io.base.AbstractBuffer;
 import com.fineio.io.edit.*;
 import com.fineio.memory.MemoryConstants;
@@ -115,6 +116,7 @@ public class EditBufferTest extends TestCase {
             public void run(){
                 while (atomicBoolean.get()) {
                     buffer.clear();
+                    System.out.println("action");
                 }
             }
         };
