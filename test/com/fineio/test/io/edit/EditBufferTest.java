@@ -23,6 +23,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by daniel on 2017/2/21.
@@ -86,6 +88,8 @@ public class EditBufferTest extends TestCase {
         floatTest(value, connector, block, len+1);
         connector.write(block, value);
         testReloadData(value, connector, block, len+1);
+        connector.write(block, value);
+        testThreadReloadData(value, connector, block, len+1);
     }
 
     private void testReloadData(byte[] value, Connector connector, FileBlock block, int off) {
@@ -97,6 +101,42 @@ public class EditBufferTest extends TestCase {
             assertEquals(buffer.get(k), value[k]);
         }
 
+        for(int k = value.length/2; k < value.length; k++){
+            assertEquals(buffer.get(k), (byte)0);
+        }
+
+    }
+
+
+    private void testThreadReloadData(byte[] value, Connector connector, final FileBlock block, int off) {
+        final ByteEditBuffer buffer = createBuffer(ByteEditBuffer.class, connector, block, off);
+        final  AtomicBoolean atomicBoolean = new AtomicBoolean(true);
+        Thread thread = new Thread() {
+            public void run(){
+                while (atomicBoolean.get()) {
+                    buffer.clear();
+                }
+            }
+        };
+
+        thread.start();
+        for(int k = value.length/2; k < value.length; k++){
+            buffer.put(k, (byte) 0);
+        }
+        atomicBoolean.set(false);
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        for(int k = 0; k <  value.length/2; k++){
+            assertEquals(buffer.get(k), value[k]);
+        }
+        for(int k = value.length/2; k < value.length; k++){
+            assertEquals(buffer.get(k), 0);
+        }
+        buffer.clear();
     }
 
     private void byteTest(byte[] value, Connector connector, FileBlock block, int off) {
@@ -157,6 +197,7 @@ public class EditBufferTest extends TestCase {
             exp = true;
         }
         assertFalse(exp);
+        buffer.clear();
     }
 
     private void intTest(byte[] value, Connector connector, FileBlock block, int off) {
@@ -203,6 +244,7 @@ public class EditBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
+        ib.clear();
     }
 
 
@@ -257,6 +299,7 @@ public class EditBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
+        ib.clear();
     }
 
     private void doubleTest(byte[] value, Connector connector, FileBlock block, int off) {
@@ -310,6 +353,7 @@ public class EditBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
+        ib.clear();
     }
 
     private void charTest(byte[] value, Connector connector, FileBlock block, int off) {
@@ -363,6 +407,7 @@ public class EditBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
+        ib.clear();
     }
 
 
@@ -417,6 +462,7 @@ public class EditBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
+        ib.clear();
     }
 
 
@@ -471,5 +517,6 @@ public class EditBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
+        ib.clear();
     }
 }
