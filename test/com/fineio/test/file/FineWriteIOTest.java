@@ -112,7 +112,7 @@ public class FineWriteIOTest extends TestCase {
 
 
 
-    public class MemoryConnector extends AbstractConnector {
+    public static class MemoryConnector extends AbstractConnector {
 
         private Map<FileBlock, byte[]> map = new ConcurrentHashMap<FileBlock, byte[]>();
 

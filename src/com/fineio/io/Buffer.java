@@ -19,7 +19,7 @@ public interface Buffer {
     void write();
 
     /**
-     * 同步写文件并释放
+     * 同步写文件并关闭 force之后不允许访问
      */
     void force();
 }

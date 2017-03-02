@@ -16,7 +16,7 @@ public final class SyncManager {
 
     private static final int ThreadsCount = Runtime.getRuntime().availableProcessors() + 1;
 
-    public static SyncManager instance = new SyncManager();
+    public volatile static SyncManager instance ;
 
     private SyncManager() {
         watch_thread.start();
@@ -24,7 +24,26 @@ public final class SyncManager {
 
 
     public static SyncManager getInstance() {
+        if(instance == null) {
+            synchronized (SyncManager.class) {
+                if(instance == null){
+                    instance = new SyncManager();
+                }
+            }
+        }
         return instance;
+    }
+
+
+    public static void release() {
+        if(instance != null) {
+            synchronized (SyncManager.class) {
+                if (instance != null) {
+                    instance.executor.shutdown();
+                    instance = null;
+                }
+            }
+        }
     }
 
     private volatile AtomicInteger working_jobs = new AtomicInteger(0);

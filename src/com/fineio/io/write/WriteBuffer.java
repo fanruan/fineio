@@ -139,10 +139,17 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
 
     }
 
+    /**
+     * 在clear的时候关闭
+     */
+    protected void closeDuringClear(){
+        close = true;
+        this.max_size = 0;
+    }
+
     public void clear(){
         synchronized (this) {
-            close = true;
-            this.max_size = 0;
+            closeDuringClear();
             this.current_max_size = 0;
             super.clear();
         }

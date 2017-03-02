@@ -108,9 +108,32 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
 
 
     public void force() {
-        while (needFlush()) {
-            SyncManager.getInstance().force(createWriteJob());
+        super.force();
+        synchronized (this) {
+            if (!load) {
+                return;
+            }
+            load = false;
+            super.closeDuringClear();
+            super.clear();
         }
-        clear();
+    }
+
+    /**
+     * clear并不关闭 force才会关闭
+     */
+    protected void closeDuringClear(){
+        //do nothing
+    }
+
+    public void clear(){
+        super.force();
+        synchronized (this) {
+            if (!load) {
+                return;
+            }
+            load = false;
+            super.clear();
+        }
     }
 }

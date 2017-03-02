@@ -10,6 +10,7 @@ import com.fineio.io.base.AbstractBuffer;
 import com.fineio.io.edit.*;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
+import com.fineio.test.file.FineWriteIOTest;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -61,28 +62,29 @@ public class EditBufferTest extends TestCase {
 
 
     public void testBuffer() throws Exception {
+
+        Connector connector = new FineWriteIOTest.MemoryConnector();
+        URI u = new URI("test");
         int len = 10;
         final byte[] value = createRandomByte(len);
-        IMocksControl control = EasyMock.createControl();
-        Connector connector = control.createMock(Connector.class);
-        URI u = new URI("");
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, "0");
-        EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
-            @Override
-            public InputStream answer() throws Throwable {
-                return new ByteArrayInputStream(value);
-            }
-        }).anyTimes();
-        control.replay();
+        connector.write(block, value);
         byteTest(value, connector, block, len+1);
+        connector.write(block, value);
         intTest(value, connector, block, len+1);
+        connector.write(block, value);
         doubleTest(value, connector, block, len+1);
+        connector.write(block, value);
         charTest(value, connector, block, len+1);
+        connector.write(block, value);
         shortTest(value, connector, block, len+1);
+        connector.write(block, value);
         longTest(value, connector, block, len+1);
+        connector.write(block, value);
         floatTest(value, connector, block, len+1);
+        connector.write(block, value);
         testReloadData(value, connector, block, len+1);
     }
 
@@ -147,14 +149,14 @@ public class EditBufferTest extends TestCase {
         } catch (BufferIndexOutOfBoundsException e) {
             exp = true;
         }
-        assertTrue(exp);
+        assertFalse(exp);
         exp = false;
         try {
             buffer.get(0);
         } catch (BufferIndexOutOfBoundsException e) {
             exp = true;
         }
-        assertTrue(exp);
+        assertFalse(exp);
     }
 
     private void intTest(byte[] value, Connector connector, FileBlock block, int off) {

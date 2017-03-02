@@ -5,5 +5,13 @@ package com.fineio.cache;
  */
 public class CacheManager {
 
+    private static CacheManager instance = new CacheManager();
+
+    public static CacheManager getInstance(){
+        return instance;
+    }
+
+
+
 
 }

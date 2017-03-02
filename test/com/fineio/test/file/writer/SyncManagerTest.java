@@ -137,6 +137,7 @@ public class SyncManagerTest extends TestCase {
         ExecutorService es = (ExecutorService) executorField.get(SyncManager.getInstance());
         es.shutdown();
         es.awaitTermination(1, TimeUnit.DAYS);
+        SyncManager.release();
         assertTrue(jm.isEmpty());
         assertEquals(a.intValue(), 0);
         assertTrue(fff.intValue() >= len);
