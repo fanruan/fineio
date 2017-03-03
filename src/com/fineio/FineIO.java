@@ -1,6 +1,7 @@
 package com.fineio;
 
 
+import com.fineio.cache.CacheManager;
 import com.fineio.exception.MemorySetException;
 import com.fineio.file.EditIOFile;
 import com.fineio.file.IOFile;
@@ -199,6 +200,16 @@ public final  class FineIO {
      */
     public final static long getMinMemSizeForSet(){
         return MemoryConf.getMinMemSizeForSet();
+    }
+
+
+    /**
+     * 设置内存超时检查时间
+     * @param t
+     * @return
+     */
+    public final static void setMemoryCheckSchedule(long t) {
+        CacheManager.getInstance().resetTimer(t);
     }
 
     /**

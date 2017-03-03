@@ -24,7 +24,7 @@ public final class MemoryConf {
     //final值
     private final static long max_load_size = max_load_size_temp;
 
-    private static long max_size = max_load_size;
+    private static volatile long max_size = max_load_size;
 
     /**
      * 获取设置的可以用对外内存大小
@@ -58,7 +58,7 @@ public final class MemoryConf {
         if(size > getMinMemSizeForSet() && size < getMaxMemSizeForSet()) {
             MemoryConf.max_size = size;
         } else {
-            throw new MemorySetException("memory size must between: " + getMinMemSizeForSet() + " and " + getMaxMemSizeForSet());
+            throw new MemorySetException("memory size must between: " + getMinMemSizeForSet() + " and " + getMaxMemSizeForSet() + " current : " + max_size);
         }
     }
 

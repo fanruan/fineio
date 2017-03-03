@@ -15,9 +15,21 @@ public class CacheObject<T> {
         t = System.currentTimeMillis();
     }
 
-    public void CacheObject(T value, LEVEL level){
+    public CacheObject(T value, LEVEL level){
         this.value = value;
         this.level = level;
+    }
+
+    public T get() {
+        return value;
+    }
+
+    public long getIdle() {
+        return System.currentTimeMillis() - t;
+    }
+
+    public LEVEL getLevel(){
+        return level;
     }
 
 
