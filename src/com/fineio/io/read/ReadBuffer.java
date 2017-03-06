@@ -1,13 +1,16 @@
 package com.fineio.io.read;
 
+import com.fineio.cache.CacheManager;
 import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
 import com.fineio.file.FileBlock;
 import com.fineio.file.ReadIOFile;
 import com.fineio.io.base.AbstractBuffer;
+import com.fineio.memory.MemoryConf;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
+import com.sun.jna.Memory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -119,14 +122,15 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
                     off+=len;
                 }
                 beforeStatusChange();
-                //TODO cache部分要做内存限制等处理  还有预加载线程
-                address = MemoryUtils.allocate(off);
+                address = CacheManager.getInstance().allocateRead(off);
                 MemoryUtils.copyMemory(bytes, address, off);
                 load = true;
                 max_size = off >> getLengthOffset();
                 afterStatusChange();
             } catch (IOException e) {
                 throw new BlockNotFoundException("block:" + block.toString() + " not found!");
+            } catch (OutOfMemoryError error){
+                //todo 预防内存设置超大 赋值的时候发生溢出
             }
         }
     }

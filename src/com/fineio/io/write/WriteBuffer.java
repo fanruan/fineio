@@ -1,5 +1,6 @@
 package com.fineio.io.write;
 
+import com.fineio.cache.CacheManager;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.StreamCloseException;
 import com.fineio.file.FileBlock;
@@ -15,6 +16,7 @@ import com.fineio.storage.Connector;
  * 注意 写是连续的并且不支持并发操作哦，写操作也是在byte全部被赋值的情况下才支持，目前writeBuffer仅支持到这样的程度
  * writeBuffer虽然提供了随机写的接口，但是实际上只支持连续写入
  * EditBuffer可以支持随机写入,并且写之后不再更改
+ * 写入方法均不支持多线程
  */
 public abstract class WriteBuffer extends AbstractBuffer implements Write {
 
@@ -108,8 +110,8 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         setCurrentCapacity(this.current_max_offset + 1);
         int newLen = this.current_max_size << getLengthOffset();
         beforeStatusChange();
-        //TODO memory control
-        this.address = MemoryUtils.reallocate(address, newLen);
+        //todo 预防内存设置超大 fill的时候发生溢出
+        this.address = CacheManager.getInstance().allocateWrite(address, len, newLen);
         MemoryUtils.fill0(this.address + len, newLen - len);
         afterStatusChange();
     }

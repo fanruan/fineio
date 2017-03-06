@@ -116,7 +116,6 @@ public class EditBufferTest extends TestCase {
             public void run(){
                 while (atomicBoolean.get()) {
                     buffer.clear();
-                    System.out.println("action");
                 }
             }
         };

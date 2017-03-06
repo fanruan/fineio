@@ -1,6 +1,7 @@
 package com.fineio.io.edit;
 
 import com.fineio.base.Maths;
+import com.fineio.cache.CacheManager;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
 import com.fineio.file.FileBlock;
@@ -13,6 +14,7 @@ import java.io.InputStream;
 
 /**
  * Created by daniel on 2017/2/20.
+ *  写入方法均不支持多线程
  */
 public abstract class EditBuffer extends WriteBuffer implements Edit {
 
@@ -49,12 +51,15 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
             if(max_position > (1 << offset)){
                 offset++;
             }
-            //TODO cache部分要做内存限制等处理  这部分与写共享内存，不考虑边写边释放问题
             len = 1 << offset << getLengthOffset();
             beforeStatusChange();
-            address = MemoryUtils.allocate(len);
-            MemoryUtils.copyMemory(bytes, address, off);
-            MemoryUtils.fill0(address + off, len - off);
+            try {
+                address = CacheManager.getInstance().allocateRead(len);
+                MemoryUtils.copyMemory(bytes, address, off);
+                MemoryUtils.fill0(address + off, len - off);
+            } catch (OutOfMemoryError error){
+                //todo 预防内存设置超大 赋值的时候发生溢出需要抛出异常
+            }
             load = true;
             this.max_position = max_position;
             setCurrentCapacity(offset);
