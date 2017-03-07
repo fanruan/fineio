@@ -1,10 +1,8 @@
 package com.fineio.io.write;
 
-import com.fineio.file.FileBlock;
-import com.fineio.file.ReadModel;
-import com.fineio.file.WriteModel;
+import com.fineio.io.file.FileBlock;
+import com.fineio.io.file.WriteModel;
 import com.fineio.io.ByteBuffer;
-import com.fineio.io.read.ByteReadBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 

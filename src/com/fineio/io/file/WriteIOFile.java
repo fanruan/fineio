@@ -1,7 +1,6 @@
-package com.fineio.file;
+package com.fineio.io.file;
 
 import com.fineio.io.*;
-import com.fineio.io.read.*;
 import com.fineio.io.write.*;
 import com.fineio.storage.Connector;
 

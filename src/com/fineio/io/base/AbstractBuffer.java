@@ -1,7 +1,7 @@
 package com.fineio.io.base;
 
 import com.fineio.exception.StreamCloseException;
-import com.fineio.file.FileBlock;
+import com.fineio.io.file.FileBlock;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -17,8 +17,11 @@ public abstract class AbstractBuffer implements BaseBuffer {
     /**
      * 不再重新赋值
      */
-    protected final Connector connector;
-    protected final FileBlock block;
+
+
+    protected final BufferKey bufferKey;
+
+
     protected volatile long address;
     protected volatile int max_size;
     private volatile AtomicInteger status = new AtomicInteger(0);
@@ -64,8 +67,7 @@ public abstract class AbstractBuffer implements BaseBuffer {
 
 
     protected AbstractBuffer(Connector connector, FileBlock block) {
-        this.connector = connector;
-        this.block = block;
+        this.bufferKey = new BufferKey(connector, block);
     }
 
     public void clear() {

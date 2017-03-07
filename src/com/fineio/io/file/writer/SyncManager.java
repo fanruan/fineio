@@ -1,4 +1,8 @@
-package com.fineio.file.writer;
+package com.fineio.io.file.writer;
+
+import com.fineio.io.base.BufferKey;
+import com.fineio.io.base.Job;
+import com.fineio.io.base.JobAssist;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,7 +56,7 @@ public final class SyncManager {
 
     private volatile  JobContainer map = new JobContainer();
 
-    private volatile Map<SyncKey, JobAssist> runningThread = new ConcurrentHashMap<SyncKey, JobAssist>();
+    private volatile Map<BufferKey, JobAssist> runningThread = new ConcurrentHashMap<BufferKey, JobAssist>();
 
     private Lock runningLock = new ReentrantLock();
 
@@ -85,7 +89,6 @@ public final class SyncManager {
             runningLock.unlock();
         }
         map.waitJob(jobAssist, new Job() {
-            @Override
             public void doJob() {
                 wakeUpWatchTread();
             }

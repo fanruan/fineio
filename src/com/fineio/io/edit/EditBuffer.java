@@ -4,8 +4,7 @@ import com.fineio.base.Maths;
 import com.fineio.cache.CacheManager;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
-import com.fineio.file.FileBlock;
-import com.fineio.file.writer.SyncManager;
+import com.fineio.io.file.FileBlock;
 import com.fineio.io.write.WriteBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
@@ -39,7 +38,7 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
             int off = 0;
             int len = 0;
             try {
-                InputStream is = connector.read(block);
+                InputStream is = bufferKey.getConnector().read(bufferKey.getBlock());
                 while ((len = is.read(bytes, off, max_byte_len - off)) > 0) {
                     off += len;
                 }
@@ -106,7 +105,7 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
     protected void write0(){
         synchronized (this) {
             changed = false;
-            this.connector.write(block, getInputStream());
+            bufferKey.getConnector().write(bufferKey.getBlock(), getInputStream());
             flushed = true;
         }
     }

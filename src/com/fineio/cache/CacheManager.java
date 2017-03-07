@@ -3,10 +3,13 @@ package com.fineio.cache;
 
 import com.fineio.base.SingleWaitThread;
 import com.fineio.base.Worker;
+import com.fineio.io.file.FileBlock;
+import com.fineio.io.Buffer;
+import com.fineio.io.base.BufferCreator;
 import com.fineio.memory.MemoryConf;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.LockSupport;
@@ -50,6 +53,11 @@ public class CacheManager {
     //正在写的等待的数量
     private volatile AtomicInteger write_wait_count = new AtomicInteger(0);
 
+
+    private Map<FileBlock, Buffer> read = new ConcurrentHashMap<FileBlock, Buffer>();
+    private Map<FileBlock, Buffer> edit = new ConcurrentHashMap<FileBlock, Buffer>();
+    private Map<FileBlock, Buffer> write = new ConcurrentHashMap<FileBlock, Buffer>();
+
     public static CacheManager getInstance(){
         if(instance == null){
             synchronized (CacheManager.class){
@@ -59,6 +67,11 @@ public class CacheManager {
             }
         }
         return instance;
+    }
+
+    public Buffer createReadBuffer(BufferCreator creator){
+        Buffer buffer = creator.create();
+        return  buffer;
     }
 
     /**
@@ -77,6 +90,7 @@ public class CacheManager {
 
     /**
      * 读的观察者
+     * 读的线程优先唤醒读
      * @return
      */
     private Watcher createReadWatcher () {
@@ -95,6 +109,7 @@ public class CacheManager {
 
     /**
      * 更多的唤醒工作
+     * 优先唤醒读
      * 在分配内存之后的触发上执行
      */
     private void doMoreNotifyCheck() {
@@ -180,6 +195,7 @@ public class CacheManager {
 
     /**
      * 写的观察者
+     * 写的线程优先唤醒写
      * @return
      */
     private Watcher createWriteWatcher () {

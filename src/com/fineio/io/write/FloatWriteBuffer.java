@@ -1,8 +1,7 @@
 package com.fineio.io.write;
 
-import com.fineio.file.FileBlock;
-import com.fineio.file.WriteModel;
-import com.fineio.io.DoubleBuffer;
+import com.fineio.io.file.FileBlock;
+import com.fineio.io.file.WriteModel;
 import com.fineio.io.FloatBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;

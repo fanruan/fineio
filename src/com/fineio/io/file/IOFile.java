@@ -1,19 +1,12 @@
-package com.fineio.file;
+package com.fineio.io.file;
 
 import com.fineio.base.Bits;
-import com.fineio.exception.BufferConstructException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
-import com.fineio.exception.ClassDefException;
 import com.fineio.exception.IOSetException;
-import com.fineio.file.writer.JobAssist;
-import com.fineio.file.writer.SyncManager;
 import com.fineio.io.*;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 
-import java.io.ByteArrayInputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.net.URI;
 
 /**

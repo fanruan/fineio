@@ -3,10 +3,10 @@ package com.fineio;
 
 import com.fineio.cache.CacheManager;
 import com.fineio.exception.MemorySetException;
-import com.fineio.file.EditIOFile;
-import com.fineio.file.IOFile;
-import com.fineio.file.ReadIOFile;
-import com.fineio.file.WriteIOFile;
+import com.fineio.io.file.EditIOFile;
+import com.fineio.io.file.IOFile;
+import com.fineio.io.file.ReadIOFile;
+import com.fineio.io.file.WriteIOFile;
 import com.fineio.io.*;
 import com.fineio.memory.MemoryConf;
 import com.fineio.storage.Connector;

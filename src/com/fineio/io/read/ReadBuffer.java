@@ -4,13 +4,11 @@ import com.fineio.cache.CacheManager;
 import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
-import com.fineio.file.FileBlock;
-import com.fineio.file.ReadIOFile;
+import com.fineio.io.file.FileBlock;
+import com.fineio.io.file.ReadIOFile;
 import com.fineio.io.base.AbstractBuffer;
-import com.fineio.memory.MemoryConf;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
-import com.sun.jna.Memory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -110,9 +108,9 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
             if(close) {
                 throw new FileCloseException();
             }
-            InputStream is = connector.read(block);
+            InputStream is = bufferKey.getConnector().read(bufferKey.getBlock());
             if (is == null) {
-                throw new BlockNotFoundException("block:" + block.toString() + " not found!");
+                throw new BlockNotFoundException("block:" + bufferKey.getBlock().toString() + " not found!");
             }
             try {
                 byte[] bytes = new byte[max_byte_len];
@@ -128,7 +126,7 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
                 max_size = off >> getLengthOffset();
                 afterStatusChange();
             } catch (IOException e) {
-                throw new BlockNotFoundException("block:" + block.toString() + " not found!");
+                throw new BlockNotFoundException("block:" + bufferKey.getBlock().toString() + " not found!");
             } catch (OutOfMemoryError error){
                 //todo 预防内存设置超大 赋值的时候发生溢出
             }

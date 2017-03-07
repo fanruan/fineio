@@ -1,6 +1,6 @@
-package com.fineio.file.writer;
+package com.fineio.io.base;
 
-import com.fineio.file.FileBlock;
+import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 
 /**
@@ -9,15 +9,21 @@ import com.fineio.storage.Connector;
 public class JobAssist {
 
 
-    private SyncKey key;
+    private BufferKey key;
     private Job job;
 
-    public JobAssist(Connector connector, FileBlock block, Job job) {
-        this.key = new SyncKey(connector, block);
+    public JobAssist(BufferKey key, Job job) {
+        this.key = key;
         this.job = job;
     }
 
-    SyncKey getKey() {
+    //for test
+    public JobAssist(Connector connector, FileBlock block, Job job) {
+        this.key = new BufferKey(connector, block);
+        this.job = job;
+    }
+
+    public BufferKey getKey() {
         return key;
     }
 

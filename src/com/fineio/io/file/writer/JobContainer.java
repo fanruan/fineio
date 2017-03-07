@@ -1,4 +1,8 @@
-package com.fineio.file.writer;
+package com.fineio.io.file.writer;
+
+import com.fineio.io.base.BufferKey;
+import com.fineio.io.base.Job;
+import com.fineio.io.base.JobAssist;
 
 import java.util.Map;
 import java.util.Queue;
@@ -12,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class JobContainer {
     private Queue<JobAssist> jobs = new ConcurrentLinkedQueue<JobAssist>();
-    private Map<SyncKey, JobAssist> watchMap = new ConcurrentHashMap<SyncKey, JobAssist>();
+    private Map<BufferKey, JobAssist> watchMap = new ConcurrentHashMap<BufferKey, JobAssist>();
 
     private Lock lock = new ReentrantLock();
 

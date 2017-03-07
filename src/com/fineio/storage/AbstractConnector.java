@@ -1,6 +1,6 @@
 package com.fineio.storage;
 
-import com.fineio.file.FileBlock;
+import com.fineio.io.file.FileBlock;
 
 import java.io.ByteArrayInputStream;
 

@@ -1,7 +1,5 @@
 package com.fineio.io;
 
-import java.io.InputStream;
-
 /**
  * Created by daniel on 2017/2/20.
  */
@@ -22,4 +20,12 @@ public interface Buffer {
      * 同步写文件并关闭 force之后不允许访问
      */
     void force();
+
+
+    /**
+     * 释放的方法
+     * 注意 读和编辑可以随意调用clear
+     * 写如果clear那么就不能再访问了
+     */
+    void clear();
 }

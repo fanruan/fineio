@@ -1,7 +1,7 @@
 package com.fineio.io.read;
 
-import com.fineio.file.FileBlock;
-import com.fineio.file.ReadModel;
+import com.fineio.io.file.FileBlock;
+import com.fineio.io.file.ReadModel;
 import com.fineio.io.ByteBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;

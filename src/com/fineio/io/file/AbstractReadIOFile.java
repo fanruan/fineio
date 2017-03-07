@@ -1,4 +1,4 @@
-package com.fineio.file;
+package com.fineio.io.file;
 
 import com.fineio.base.Bits;
 import com.fineio.exception.BlockNotFoundException;

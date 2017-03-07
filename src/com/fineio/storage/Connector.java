@@ -1,9 +1,8 @@
 package com.fineio.storage;
 
-import com.fineio.file.FileBlock;
+import com.fineio.io.file.FileBlock;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * Created by daniel on 2017/2/9.

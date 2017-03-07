@@ -1,11 +1,10 @@
 package com.fineio.storage;
 
-import com.fineio.file.FileBlock;
+import com.fineio.io.file.FileBlock;
 import com.fineio.third.zip4j.core.ZipFile;
 import com.fineio.third.zip4j.exception.ZipException;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 
 
 /**

@@ -3,10 +3,10 @@ package com.fineio.io.write;
 import com.fineio.cache.CacheManager;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.StreamCloseException;
-import com.fineio.file.FileBlock;
-import com.fineio.file.writer.Job;
-import com.fineio.file.writer.JobAssist;
-import com.fineio.file.writer.SyncManager;
+import com.fineio.io.file.FileBlock;
+import com.fineio.io.base.Job;
+import com.fineio.io.base.JobAssist;
+import com.fineio.io.file.writer.SyncManager;
 import com.fineio.io.base.AbstractBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
@@ -123,7 +123,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     }
 
     protected JobAssist createWriteJob() {
-        return new JobAssist(connector, block, new Job() {
+        return new JobAssist(bufferKey, new Job() {
             public void doJob() {
                 try {
                     write0();
@@ -160,7 +160,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     protected void write0(){
         synchronized (this) {
             changed = false;
-            this.connector.write(block, getInputStream());
+            bufferKey.getConnector().write(bufferKey.getBlock(), getInputStream());
             flushed = true;
             clear();
         }

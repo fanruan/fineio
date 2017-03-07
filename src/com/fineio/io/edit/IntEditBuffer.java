@@ -1,8 +1,7 @@
 package com.fineio.io.edit;
 
-import com.fineio.file.EditModel;
-import com.fineio.file.FileBlock;
-import com.fineio.io.FloatBuffer;
+import com.fineio.io.file.EditModel;
+import com.fineio.io.file.FileBlock;
 import com.fineio.io.IntBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
