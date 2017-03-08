@@ -1,12 +1,11 @@
 package com.fineio.test.file;
 
 import com.fineio.FineIO;
-import com.fineio.file.FileBlock;
-import com.fineio.file.IOFile;
+import com.fineio.io.file.FileBlock;
+import com.fineio.io.file.IOFile;
 import com.fineio.io.*;
 import com.fineio.storage.AbstractConnector;
 import com.fineio.storage.Connector;
-import com.sun.mail.iap.ByteArray;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;

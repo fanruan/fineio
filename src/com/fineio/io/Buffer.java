@@ -1,5 +1,8 @@
 package com.fineio.io;
 
+import com.fineio.cache.LEVEL;
+import com.fineio.io.base.BufferKey;
+
 /**
  * Created by daniel on 2017/2/20.
  */
@@ -28,4 +31,29 @@ public interface Buffer {
      * 写如果clear那么就不能再访问了
      */
     void clear();
+
+
+    /**
+     * 获取Buffer占据的size
+     * @return
+     */
+    int getByteSize();
+
+    /**
+     * 获取LEVEL
+     * @return
+     */
+    LEVEL getLevel();
+
+
+    /**
+     * 是否被访问状态
+     * @return
+     */
+    boolean recentAccess();
+    /**
+     * 重置access
+     */
+    void resetAccess();
+
 }

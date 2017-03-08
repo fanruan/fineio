@@ -1,10 +1,10 @@
 package com.fineio.test.file.writer;
 
-import com.fineio.file.FileBlock;
-import com.fineio.file.writer.Job;
-import com.fineio.file.writer.JobAssist;
-import com.fineio.file.writer.JobContainer;
-import com.fineio.file.writer.SyncManager;
+import com.fineio.io.file.FileBlock;
+import com.fineio.io.base.Job;
+import com.fineio.io.base.JobAssist;
+import com.fineio.io.file.writer.JobContainer;
+import com.fineio.io.file.writer.SyncManager;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
@@ -44,7 +44,6 @@ public class SyncManagerTest extends TestCase {
                         final  int k = i;
                         try {
                             SyncManager.getInstance().triggerWork(new JobAssist(connector, constructor.newInstance(uri, String.valueOf(i)), new Job() {
-                                @Override
                                 public void doJob() {
                                     fff.addAndGet(1);
                                     try {
@@ -74,7 +73,6 @@ public class SyncManagerTest extends TestCase {
                 public void run() {
                     try {
                         SyncManager.getInstance().force(new JobAssist(connector, constructor.newInstance(uri, String.valueOf(k)), new Job() {
-                            @Override
                             public void doJob() {
                                 fff.addAndGet(1);
                                 try {
@@ -116,7 +114,6 @@ public class SyncManagerTest extends TestCase {
         Thread.sleep(100);
         for(int i = 0; i < len; i++) {
             SyncManager.getInstance().triggerWork(new JobAssist(connector, constructor.newInstance(uri, String.valueOf(i)), new Job() {
-                @Override
                 public void doJob() {
                     fff.addAndGet(1);
                     try {

@@ -1,6 +1,9 @@
 package com.fineio.io.base;
 
+import com.fineio.cache.CacheManager;
+import com.fineio.cache.LEVEL;
 import com.fineio.exception.StreamCloseException;
+import com.fineio.io.Buffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
@@ -26,6 +29,9 @@ public abstract class AbstractBuffer implements BaseBuffer {
     protected volatile int max_size;
     private volatile AtomicInteger status = new AtomicInteger(0);
     protected volatile boolean close = false;
+    private  volatile boolean access = false;
+
+
 
     /**
      * 当释放之后会改变status check的状态变化不会再做get操作
@@ -45,6 +51,27 @@ public abstract class AbstractBuffer implements BaseBuffer {
         return inputStream;
     }
 
+    protected final void access(){
+        if(!access){
+            access = true;
+        }
+    }
+
+    /**
+     * 是否刚被访问过
+     * @return
+     */
+    public boolean recentAccess(){
+        return access;
+    }
+
+    /**
+     * 重置access状态
+     */
+    public void resetAccess() {
+        access = false;
+    }
+
     /**
      * 这个方法前后都要做一次，否则会出现创建inputstream的时候已经变化 或者未响应变化
      */
@@ -61,7 +88,7 @@ public abstract class AbstractBuffer implements BaseBuffer {
         LockSupport.parkNanos(1000);
     }
 
-    protected int getByteSize() {
+    public int getByteSize() {
         return max_size << getLengthOffset();
     }
 
@@ -76,6 +103,7 @@ public abstract class AbstractBuffer implements BaseBuffer {
             MemoryUtils.free(address);
             afterStatusChange();
         }
+        CacheManager.getInstance().releaseBuffer((Buffer) this);
     }
 
     /**
@@ -85,4 +113,5 @@ public abstract class AbstractBuffer implements BaseBuffer {
      * @return
      */
     protected abstract int getLengthOffset();
+
 }

@@ -1,10 +1,9 @@
 package com.fineio.test.file.writer;
 
-import com.fineio.file.FileBlock;
-import com.fineio.file.writer.Job;
-import com.fineio.file.writer.JobAssist;
-import com.fineio.file.writer.JobContainer;
-import com.fineio.file.writer.SyncKey;
+import com.fineio.io.file.FileBlock;
+import com.fineio.io.base.Job;
+import com.fineio.io.base.JobAssist;
+import com.fineio.io.file.writer.JobContainer;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
@@ -165,7 +164,6 @@ public class JobContainerTest extends TestCase {
                             try {
                                 final int k = q;
                                 container.put(new JobAssist(connector, constructor.newInstance(uri, String.valueOf(q)), new Job() {
-                                    @Override
                                     public void doJob() {
                                         sign[k] = true;
                                     }

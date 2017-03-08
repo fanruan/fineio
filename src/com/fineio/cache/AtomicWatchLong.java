@@ -23,8 +23,9 @@ public class AtomicWatchLong {
     }
 
     private long watchAndAdd(long v) {
+        long r = value.addAndGet(v);
         triggerWatch(v);
-        return value.addAndGet(v);
+        return r;
     }
 
     /**

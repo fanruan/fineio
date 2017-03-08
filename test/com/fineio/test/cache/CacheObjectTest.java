@@ -10,11 +10,10 @@ import junit.framework.TestCase;
 public class CacheObjectTest extends TestCase {
 
     public void testObject() {
-        CacheObject<String> co = new CacheObject<String>("SSS", LEVEL.EDIT);
+        CacheObject<String> co = new CacheObject<String>("SSS");
         long t = System.currentTimeMillis();
         co.updateTime();
         assertEquals(co.get(), "SSS");
-        assertEquals(co.getLevel(), LEVEL.EDIT);
         assertTrue(co.getIdle() <= (System.currentTimeMillis() - t));
 
 

@@ -1,6 +1,7 @@
 package com.fineio.io.file;
 
 import com.fineio.base.Bits;
+import com.fineio.cache.CacheManager;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.IOSetException;
 import com.fineio.io.*;
@@ -109,9 +110,8 @@ public abstract class IOFile<E extends Buffer> {
 
 
     private final E getBuffer(int index){
-        return buffers[checkIndex(index)] != null ? buffers[index] : initBuffer(index);
+        return buffers[checkIndex(index)] != null ?  buffers[index] : initBuffer(index);
     }
-
 
     private int checkIndex(int index){
         if(index > -1 && index < blocks){
@@ -124,6 +124,7 @@ public abstract class IOFile<E extends Buffer> {
         synchronized (this){
             if(buffers[index] == null) {
                 buffers[index] = createBuffer(index);
+                CacheManager.getInstance().registerBuffer(buffers[index]);
             }
             return buffers[index];
         }

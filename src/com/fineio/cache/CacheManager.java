@@ -3,13 +3,15 @@ package com.fineio.cache;
 
 import com.fineio.base.SingleWaitThread;
 import com.fineio.base.Worker;
-import com.fineio.io.file.FileBlock;
+import com.fineio.exception.FileCloseException;
 import com.fineio.io.Buffer;
-import com.fineio.io.base.BufferCreator;
 import com.fineio.memory.MemoryConf;
+import com.fr.third.org.apache.poi.hssf.record.formula.functions.Exec;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.LockSupport;
@@ -36,14 +38,18 @@ public class CacheManager {
      * 默认10分钟清理超时buffer
      */
     private static final long DEFAULT_TIMER_TIME = 600000;
+    private static final int ACTIVE_PERCENT = 10;
     private static final int LEVEL_LINE = 2;
     private static final int MIN_WRITE_OFFSET = 3;
+    private volatile long timeout = DEFAULT_TIMER_TIME;
     //内存分配锁
     private Lock memoryLock = new ReentrantLock();
     //GC的线程
     private SingleWaitThread gcThread;
     //超时的timer
     private Timer timer = new Timer();
+    //activeTimer
+    private Timer activeTimer = new Timer();
     //正在读的内存大小
     private volatile AtomicWatchLong read_size = new AtomicWatchLong();
     //正在读的等待的数量
@@ -54,9 +60,9 @@ public class CacheManager {
     private volatile AtomicInteger write_wait_count = new AtomicInteger(0);
 
 
-    private Map<FileBlock, Buffer> read = new ConcurrentHashMap<FileBlock, Buffer>();
-    private Map<FileBlock, Buffer> edit = new ConcurrentHashMap<FileBlock, Buffer>();
-    private Map<FileBlock, Buffer> write = new ConcurrentHashMap<FileBlock, Buffer>();
+    private CacheLinkedMap<Buffer> read = new CacheLinkedMap<Buffer>();
+    private CacheLinkedMap<Buffer> edit = new CacheLinkedMap<Buffer>();
+    private CacheLinkedMap<Buffer> write = new CacheLinkedMap<Buffer>();
 
     public static CacheManager getInstance(){
         if(instance == null){
@@ -69,16 +75,73 @@ public class CacheManager {
         return instance;
     }
 
-    public Buffer createReadBuffer(BufferCreator creator){
-        Buffer buffer = creator.create();
+    public Buffer registerBuffer(Buffer buffer){
+        switch (buffer.getLevel()){
+            case READ: {
+                read.put(buffer);
+                break;
+            }
+            case EDIT: {
+                edit.put(buffer);
+                break;
+            }
+            case WRITE: {
+                write.put(buffer);
+                break;
+            }
+        }
         return  buffer;
+    }
+
+    private Buffer updateBuffer( Buffer buffer){
+        boolean update = false;
+        switch (buffer.getLevel()){
+            case READ: {
+                update = read.update(buffer);
+                break;
+            }
+            case EDIT: {
+                update = edit.update(buffer);
+                break;
+            }
+            case WRITE: {
+                update = write.update(buffer);
+                break;
+            }
+        }
+        if(!update){
+            throw new FileCloseException();
+        }
+        return buffer;
+    }
+
+    public void releaseBuffer(Buffer buffer) {
+        int reduce_size = 0 - buffer.getByteSize();
+        switch (buffer.getLevel()){
+            case READ: {
+                read.remove(buffer);
+                read_size.add(reduce_size);
+                break;
+            }
+            case EDIT: {
+                edit.remove(buffer);
+                read_size.add(reduce_size);
+                break;
+            }
+            case WRITE: {
+                write.remove(buffer);
+                write_size.add(reduce_size);
+                break;
+            }
+        }
     }
 
     /**
      * 构造函数
      */
     private CacheManager(){
-        timer.schedule(createTask(), DEFAULT_TIMER_TIME, DEFAULT_TIMER_TIME);
+        timer.schedule(createTimeoutTask(), timeout, timeout);
+        activeTimer.schedule(createBufferActiveTask(), timeout/ACTIVE_PERCENT, timeout/ACTIVE_PERCENT);
         read_size.addListener(createReadWatcher());
         write_size.addListener(createWriteWatcher());
         gcThread = new SingleWaitThread(new Worker() {
@@ -247,11 +310,17 @@ public class CacheManager {
      * @param t
      */
     public synchronized void resetTimer(long t) {
+        timeout = t;
         if(timer != null) {
             timer.cancel();
         }
         timer = new Timer();
-        timer.schedule(createTask(), t, t);
+        timer.schedule(createTimeoutTask(), timeout, timeout);
+        if(activeTimer != null){
+            activeTimer.cancel();
+        }
+        activeTimer = new Timer();
+        activeTimer.schedule(createBufferActiveTask(), timeout/ACTIVE_PERCENT, timeout/ACTIVE_PERCENT);
     }
 
 
@@ -267,6 +336,13 @@ public class CacheManager {
 
     private void  gc() {
         while (read_wait_count.get() != 0 && write_wait_count.get() != 0) {
+            Buffer buffer = read.poll();
+            if(buffer != null){
+                buffer.clear();
+            } else {
+                buffer = write.poll();
+                buffer.clear();
+            }
             //TODO releaseList
             //stop 1微妙
             LockSupport.parkNanos(1000);
@@ -286,14 +362,68 @@ public class CacheManager {
                 && getReadSize() > (getWriteSize() >> MIN_WRITE_OFFSET  - getWriteSize());
     }
 
-    //定时任务的task
-    private TimerTask createTask() {
+    //定时清超时任务的task
+    private TimerTask createTimeoutTask() {
         return new TimerTask() {
             @Override
             public void run() {
+                removeTimeout(read);
+                removeTimeout(edit);
+            }
+
+            private void removeTimeout(CacheLinkedMap<Buffer> map) {
+                Iterator<Buffer> iterator = map.iterator();
+                while (iterator.hasNext()) {
+                    Buffer buffer = iterator.next();
+                    if(buffer != null){
+                        if(map.getIdle(buffer) > timeout){
+                            buffer.clear();
+                        }
+                    }
+                }
+            }
+        };
+    }
 
 
+    //定时激活buffer的task
+    private TimerTask createBufferActiveTask() {
+        return new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    resetAccess(read);
+                    resetAccess(edit);
+                    activeAccess(read);
+                    activeAccess(edit);
+                } catch (Throwable e){
+                    //doNothing
+                }
+            }
 
+
+            private void activeAccess(CacheLinkedMap<Buffer> map) {
+                Iterator<Buffer> iterator = map.iterator();
+                while (iterator.hasNext()) {
+                    Buffer buffer = iterator.next();
+                    if(buffer != null && buffer.recentAccess()){
+                        try {
+                            updateBuffer(buffer);
+                        } catch (FileCloseException e) {
+                            //file closed
+                        }
+                    }
+                }
+            }
+
+            private void resetAccess(CacheLinkedMap<Buffer> map) {
+                Iterator<Buffer> iterator = map.iterator();
+                while (iterator.hasNext()) {
+                    Buffer buffer = iterator.next();
+                    if(buffer != null){
+                        buffer.resetAccess();
+                    }
+                }
             }
         };
     }

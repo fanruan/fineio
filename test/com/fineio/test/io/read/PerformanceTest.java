@@ -2,9 +2,9 @@ package com.fineio.test.io.read;
 
 import com.fineio.FineIO;
 import com.fineio.base.Bits;
-import com.fineio.file.FileBlock;
-import com.fineio.file.FileConstants;
-import com.fineio.file.ReadIOFile;
+import com.fineio.io.file.FileBlock;
+import com.fineio.io.file.FileConstants;
+import com.fineio.io.file.ReadIOFile;
 import com.fineio.io.DoubleBuffer;
 import com.fineio.io.base.AbstractBuffer;
 import com.fineio.io.read.ByteReadBuffer;

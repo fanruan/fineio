@@ -1,6 +1,7 @@
 package com.fineio.io.write;
 
 import com.fineio.cache.CacheManager;
+import com.fineio.cache.LEVEL;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.StreamCloseException;
 import com.fineio.io.file.FileBlock;
@@ -63,7 +64,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
      *对于child edit来说 如果没改变是不用写文件的，就不会创建outputstream
      * @return
      */
-    protected final int getByteSize() {
+    public final int getByteSize() {
         return (max_position + 1) << getLengthOffset();
     }
 
@@ -93,6 +94,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     }
 
     private final void setMaxPosition(int position) {
+        access();
         if(position > max_position ){
             max_position = position;
         }
@@ -164,6 +166,11 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
             flushed = true;
             clear();
         }
+    }
+
+
+    public LEVEL getLevel() {
+        return LEVEL.WRITE;
     }
 
 }

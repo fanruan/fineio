@@ -2,6 +2,7 @@ package com.fineio.io.edit;
 
 import com.fineio.base.Maths;
 import com.fineio.cache.CacheManager;
+import com.fineio.cache.LEVEL;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
 import com.fineio.io.file.FileBlock;
@@ -79,6 +80,7 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
 
     protected final void checkIndex(int p) {
         if (ir(p)){
+            access();
             return;
         }
         lc(p);
@@ -124,6 +126,10 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
             super.closeDuringClear();
             super.clear();
         }
+    }
+
+    public LEVEL getLevel() {
+        return LEVEL.EDIT;
     }
 
     /**

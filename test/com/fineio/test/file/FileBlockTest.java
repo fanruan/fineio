@@ -1,6 +1,6 @@
 package com.fineio.test.file;
 
-import com.fineio.file.FileBlock;
+import com.fineio.io.file.FileBlock;
 import junit.framework.TestCase;
 
 import java.io.File;

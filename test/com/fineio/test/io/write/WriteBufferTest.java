@@ -1,8 +1,8 @@
 package com.fineio.test.io.write;
 
 import com.fineio.exception.BufferIndexOutOfBoundsException;
-import com.fineio.file.FileBlock;
-import com.fineio.file.IOFile;
+import com.fineio.io.file.FileBlock;
+import com.fineio.io.file.IOFile;
 import com.fineio.io.base.AbstractBuffer;
 import com.fineio.io.base.BaseBuffer;
 import com.fineio.io.write.*;
@@ -10,7 +10,6 @@ import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
 
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

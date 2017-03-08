@@ -2,9 +2,9 @@ package com.fineio.test.file;
 
 import com.fineio.base.Bits;
 import com.fineio.exception.BlockNotFoundException;
-import com.fineio.file.FileBlock;
-import com.fineio.file.FileConstants;
-import com.fineio.file.ReadIOFile;
+import com.fineio.io.file.FileBlock;
+import com.fineio.io.file.FileConstants;
+import com.fineio.io.file.ReadIOFile;
 import com.fineio.io.IntBuffer;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.read.IntReadBuffer;
