@@ -61,6 +61,7 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
                 MemoryUtils.fill0(address + off, len - off);
             } catch (OutOfMemoryError error){
                 //todo 预防内存设置超大 赋值的时候发生溢出需要抛出异常
+                error.printStackTrace();
             }
             load = true;
             this.max_position = max_position;

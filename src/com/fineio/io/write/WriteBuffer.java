@@ -1,8 +1,10 @@
 package com.fineio.io.write;
 
+import com.fineio.base.Worker;
 import com.fineio.cache.CacheManager;
 import com.fineio.cache.LEVEL;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
+import com.fineio.exception.MemorySetException;
 import com.fineio.exception.StreamCloseException;
 import com.fineio.io.Buffer;
 import com.fineio.io.file.FileBlock;
@@ -10,7 +12,9 @@ import com.fineio.io.base.Job;
 import com.fineio.io.base.JobAssist;
 import com.fineio.io.file.writer.SyncManager;
 import com.fineio.io.base.AbstractBuffer;
+import com.fineio.memory.MemoryConf;
 import com.fineio.memory.MemoryUtils;
+import com.fineio.monitor.MonitorUtils;
 import com.fineio.storage.Connector;
 
 /**
@@ -114,9 +118,28 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         int newLen = this.current_max_size << getLengthOffset();
         beforeStatusChange();
         //todo 预防内存设置超大 fill的时候发生溢出
-        this.address = CacheManager.getInstance().allocateWrite((Buffer) this, address, len, newLen);
-        allocateSize = newLen;
-        MemoryUtils.fill0(this.address + len, newLen - len);
+        try {
+            this.address = CacheManager.getInstance().allocateWrite((Buffer) this, address, len, newLen);
+            allocateSize = newLen;
+            MemoryUtils.fill0(this.address + len, newLen - len);
+
+        } catch (OutOfMemoryError error){
+            //todo 预防内存设置超大 赋值的时候发生溢出
+            error.printStackTrace();
+//            final long add = this.address;
+//            final long changeLen = newLen - len;
+//            final long offset = len;
+//            try {
+//                MonitorUtils.resetMemory(new Worker() {
+//                    public void work() {
+//                        CacheManager.getInstance().forceGC();
+//                        MemoryUtils.fill0(add + offset, changeLen);
+//                    }
+//                }, newLen - len);
+//            } catch (MemorySetException e) {
+//                e.printStackTrace();
+//            }
+        }
         afterStatusChange();
     }
 

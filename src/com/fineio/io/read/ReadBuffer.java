@@ -137,6 +137,7 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
                 throw new BlockNotFoundException("block:" + bufferKey.getBlock().toString() + " not found!");
             } catch (OutOfMemoryError error){
                 //todo 预防内存设置超大 赋值的时候发生溢出
+                error.printStackTrace();
             }
         }
     }

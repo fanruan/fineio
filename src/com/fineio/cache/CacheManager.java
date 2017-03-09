@@ -345,17 +345,25 @@ public class CacheManager {
 
     private void  gc() {
         while (read_wait_count.get() != 0 || write_wait_count.get() != 0) {
-            Buffer buffer = read.poll();
-            if(buffer != null){
-                buffer.clear();
-            } else {
-                buffer = write.poll();
-                buffer.clear();
-            }
-            //TODO releaseList
-            //stop 1微妙
-            LockSupport.parkNanos(1000);
+            forceGC();
         }
+        //stop 1微妙
+        LockSupport.parkNanos(1000);
+    }
+
+    public boolean  forceGC(){
+        Buffer buffer = read.poll();
+        if(buffer != null){
+            buffer.clear();
+            return true;
+        } else {
+            buffer = write.poll();
+            if(buffer != null) {
+                buffer.clear();
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
