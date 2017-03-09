@@ -65,7 +65,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
      *对于child edit来说 如果没改变是不用写文件的，就不会创建outputstream
      * @return
      */
-    public final int getByteSize() {
+    protected final int getByteSize() {
         return (max_position + 1) << getLengthOffset();
     }
 
@@ -115,6 +115,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         beforeStatusChange();
         //todo 预防内存设置超大 fill的时候发生溢出
         this.address = CacheManager.getInstance().allocateWrite((Buffer) this, address, len, newLen);
+        allocateSize = newLen;
         MemoryUtils.fill0(this.address + len, newLen - len);
         afterStatusChange();
     }

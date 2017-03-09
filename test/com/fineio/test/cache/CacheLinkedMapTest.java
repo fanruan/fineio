@@ -50,12 +50,28 @@ public class CacheLinkedMapTest extends TestCase{
         map.put("a");
         assertEquals(map.poll(), "a");
         assertEquals(map.poll(), null);
-        map.remove("a");
+        map.remove("a", true);
         assertEquals(map.poll(), null);
         Iterator<String> iter = map.iterator();
         assertTrue(iter.hasNext());
         while(iter.hasNext()){
             assertFalse("a".equals(iter.next()));
         }
+    }
+
+    public void testCycle() {
+        CacheLinkedMap<String> map = new CacheLinkedMap<String>();
+        map.put("a");
+        map.put("b");
+        map.put("c");
+        map.put("a");
+        map.put("b");
+        map.put("c");
+        map.remove("c", false);
+        assertTrue(map.update("c"));
+        assertEquals(map.poll(), "a");
+        assertEquals(map.poll(), "b");
+        assertEquals(map.poll(), "c");
+        assertEquals(map.poll(), null);
     }
 }

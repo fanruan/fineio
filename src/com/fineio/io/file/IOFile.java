@@ -124,7 +124,6 @@ public abstract class IOFile<E extends Buffer> {
         synchronized (this){
             if(buffers[index] == null) {
                 buffers[index] = createBuffer(index);
-                CacheManager.getInstance().registerBuffer(buffers[index]);
             }
             return buffers[index];
         }

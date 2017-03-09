@@ -34,12 +34,6 @@ public interface Buffer {
 
 
     /**
-     * 获取Buffer占据的size
-     * @return
-     */
-    int getByteSize();
-
-    /**
      * 获取LEVEL
      * @return
      */
@@ -56,4 +50,9 @@ public interface Buffer {
      */
     void resetAccess();
 
+    /**
+     * 获取分配的内存大小
+     * @return
+     */
+    int getAllocateSize();
 }

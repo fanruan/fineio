@@ -129,6 +129,7 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
                 beforeStatusChange();
                 address = CacheManager.getInstance().allocateRead((Buffer) this, off);
                 MemoryUtils.copyMemory(bytes, address, off);
+                allocateSize = off;
                 load = true;
                 max_size = off >> getLengthOffset();
                 afterStatusChange();
@@ -186,7 +187,9 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
     }
 
     public void force() {
-        close = true;
-        clear();
+        synchronized (this) {
+            close = true;
+            clear();
+        }
     }
 }

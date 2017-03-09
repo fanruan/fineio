@@ -56,6 +56,7 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
             beforeStatusChange();
             try {
                 address = CacheManager.getInstance().allocateRead((Buffer) this, len);
+                allocateSize = len;
                 MemoryUtils.copyMemory(bytes, address, off);
                 MemoryUtils.fill0(address + off, len - off);
             } catch (OutOfMemoryError error){

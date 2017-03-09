@@ -117,21 +117,26 @@ public class CacheManager {
         return buffer;
     }
 
-    public void releaseBuffer(Buffer buffer) {
-        int reduce_size = 0 - buffer.getByteSize();
+    /**
+     * 释放buffer的方法
+     * @param buffer buffer
+     * @param remove 是否彻底删除
+     */
+    public void releaseBuffer(Buffer buffer, boolean remove) {
+        int reduce_size = 0 - buffer.getAllocateSize();
         switch (buffer.getLevel()){
             case READ: {
-                read.remove(buffer);
+                read.remove(buffer, remove);
                 read_size.add(reduce_size);
                 break;
             }
             case EDIT: {
-                edit.remove(buffer);
+                edit.remove(buffer, remove);
                 read_size.add(reduce_size);
                 break;
             }
             case WRITE: {
-                write.remove(buffer);
+                write.remove(buffer, remove);
                 write_size.add(reduce_size);
                 break;
             }

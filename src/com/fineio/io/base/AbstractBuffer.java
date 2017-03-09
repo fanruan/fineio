@@ -30,7 +30,13 @@ public abstract class AbstractBuffer implements BaseBuffer {
     private volatile AtomicInteger status = new AtomicInteger(0);
     protected volatile boolean close = false;
     private  volatile boolean access = false;
+    protected volatile int allocateSize = 0;
 
+
+
+    public  int getAllocateSize() {
+        return  allocateSize;
+    }
 
 
     /**
@@ -88,13 +94,18 @@ public abstract class AbstractBuffer implements BaseBuffer {
         LockSupport.parkNanos(1000);
     }
 
-    public int getByteSize() {
+    /**
+     * 这个大小在clear前后是不一样的，释放内存的时候需要在clear之前获取一下大小
+     * @return
+     */
+    protected int getByteSize() {
         return max_size << getLengthOffset();
     }
 
 
     protected AbstractBuffer(Connector connector, FileBlock block) {
         this.bufferKey = new BufferKey(connector, block);
+        CacheManager.getInstance().registerBuffer((Buffer) this);
     }
 
     public void clear() {
@@ -102,8 +113,9 @@ public abstract class AbstractBuffer implements BaseBuffer {
             beforeStatusChange();
             MemoryUtils.free(address);
             afterStatusChange();
+            //close true才需要remove掉
+            CacheManager.getInstance().releaseBuffer((Buffer) this, close);
         }
-        CacheManager.getInstance().releaseBuffer((Buffer) this);
     }
 
     /**

@@ -45,20 +45,33 @@ public class CacheLinkedMap<T> {
         if(co.getLast() == null && co.getNext() == null){
             if(co != head) {
                 co.setNext(head);
-                head = co;
+                setHead(co);
                 if (foot == null) {
-                    foot = co;
+                    setFoot(co);
                 }
             }
         } else if(head != co) {
             //此情况下不存在co.getLast为null的情况如果getLast是null 那么必然head == co
             co.getLast().setNext(co.getNext());
             if(co  == foot) {
-                foot = co.getLast();
+                setFoot(co.getLast());
             }
             co.setNext(head);
-            co.setLast(null);
-            head = co;
+            setHead(co);
+        }
+    }
+
+    private void setHead(CacheObject<T> v){
+        head = v;
+        if(v != null) {
+            head.setLast(null);
+        }
+    }
+
+    private void setFoot(CacheObject<T> v){
+        foot = v;
+        if(v != null){
+            foot.setNext(null);
         }
     }
 
@@ -76,7 +89,7 @@ public class CacheLinkedMap<T> {
     }
 
 
-    public void remove(T t){
+    public void remove(T t, boolean remove){
         synchronized (this){
             CacheObject<T> co = indexMap.get(t);
             if(co == null){
@@ -85,20 +98,27 @@ public class CacheLinkedMap<T> {
             if(co.getNext() == null && co.getLast() == null ){
                 //如果是head 那么该情况下foot也是 co
                 if( head == co ){
-                    head = null;
-                    foot = null;
+                    setFoot(null);
+                    setHead(null);
                 }
-            } else if(head == co) {
-                //该情况getNext肯定非空
-                head = co.getNext();
             } else {
-                //head 不是 co的情况 last肯定非空
-                co.getLast().setNext(co.getNext());
-                if (co  == foot) {
-                    foot = co.getLast();
+                if(head == co) {
+                    //该情况getNext肯定非空
+                    setHead(co.getNext());
+                } else {
+                    //head 不是 co的情况 last肯定非空
+                    co.getLast().setNext(co.getNext());
+                    if (co  == foot) {
+                        setFoot(co.getLast());
+                    }
                 }
+                co.setLast(null);
+                co.setNext(null);
             }
-            indexMap.remove(t);
+            //是否彻底删除掉
+            if(remove) {
+                indexMap.remove(t);
+            }
         }
     }
 
@@ -115,9 +135,9 @@ public class CacheLinkedMap<T> {
                 if(foot.getLast() != null) {
                     foot.getLast().setNext(null);
                 } else {
-                    head = null;
+                    setHead(null);
                 }
-                foot = foot.getLast();
+                setFoot(foot.getLast());
                 res.setLast(null);
                 res.setNext(null);
                 return res.get();
