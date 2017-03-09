@@ -2,6 +2,7 @@ package com.fineio.test.io.read;
 
 import com.fineio.FineIO;
 import com.fineio.base.Bits;
+import com.fineio.cache.CacheManager;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.FileConstants;
 import com.fineio.io.file.ReadIOFile;
@@ -59,6 +60,7 @@ public class PerformanceTest {
 //        while (true) {
 //            Thread.sleep(10000);
 //        }
+        CacheManager.clear();
     }
 
     private static void doubleSumFileTest() throws Exception {

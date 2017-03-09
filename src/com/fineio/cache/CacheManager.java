@@ -462,6 +462,12 @@ public class CacheManager {
             if(instance.gcThread != null) {
                 instance.gcThread.clear();
             }
+            if(instance.timer != null) {
+                instance.timer.cancel();
+            }
+            if(instance.activeTimer != null) {
+                instance.activeTimer.cancel();
+            }
             instance = null;
         }
     }
