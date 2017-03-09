@@ -9,8 +9,6 @@ import com.fineio.io.Buffer;
 import com.fineio.memory.MemoryConf;
 import com.fineio.memory.MemoryUtils;
 import junit.framework.TestCase;
-import org.easymock.EasyMock;
-import org.easymock.IMocksControl;
 
 import java.lang.reflect.Field;
 
@@ -24,6 +22,7 @@ public class CacheManagerTest extends TestCase {
         private volatile boolean access = false;
         final int cap = 1024;
         protected long address = 0;
+        private volatile boolean close = false;
 
         TestBuffer(){
             CacheManager.getInstance().registerBuffer(this);
@@ -34,7 +33,9 @@ public class CacheManagerTest extends TestCase {
         }
 
         public void write() {
-            address =  CacheManager.getInstance().allocateRead(this, cap);
+            synchronized (this) {
+                address = CacheManager.getInstance().allocateRead(this, cap);
+            }
         }
 
         public void force() {
@@ -42,8 +43,14 @@ public class CacheManagerTest extends TestCase {
         }
 
         public void clear() {
-            MemoryUtils.free(address);
-            CacheManager.getInstance().releaseBuffer(this, true);
+            synchronized (this) {
+                if (close) {
+                    return;
+                }
+                MemoryUtils.free(address);
+                CacheManager.getInstance().releaseBuffer(this, true);
+                close = true;
+            }
         }
 
 
@@ -71,15 +78,11 @@ public class CacheManagerTest extends TestCase {
         }
     }
 
+
+
+
     public void testCache(){
-        CacheManager.clear();
-        try {
-            Field f = MemoryConf.class.getDeclaredField("max_size");
-            f.setAccessible(true);
-            f.set(null, 1030);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        setMemory(1030);
         TestBuffer buffer = new TestBuffer();
         assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 0);
         buffer.write();
@@ -121,11 +124,25 @@ public class CacheManagerTest extends TestCase {
         assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 1024);
         b3.write();
         assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 1024);
+        b3.clear();
+        assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 0);
+
         try {
             MemoryConf.setTotalMemSize(FineIO.getMaxMemSizeForSet() - 1);
         } catch (MemorySetException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private void setMemory(int size) {
+        CacheManager.clear();
+        try {
+            Field f = MemoryConf.class.getDeclaredField("max_size");
+            f.setAccessible(true);
+            f.set(null, size);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

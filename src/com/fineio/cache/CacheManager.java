@@ -95,6 +95,28 @@ public class CacheManager {
         return  buffer;
     }
 
+    private Buffer checkBuffer( Buffer buffer){
+        boolean update = false;
+        switch (buffer.getLevel()){
+            case READ: {
+                update = read.contains(buffer);
+                break;
+            }
+            case EDIT: {
+                update = edit.contains(buffer);
+                break;
+            }
+            case WRITE: {
+                update = write.contains(buffer);
+                break;
+            }
+        }
+        if(!update){
+            throw new FileCloseException();
+        }
+        return buffer;
+    }
+
     private Buffer updateBuffer( Buffer buffer){
         boolean update = false;
         switch (buffer.getLevel()){
@@ -198,15 +220,17 @@ public class CacheManager {
     public long allocateRead(Buffer buffer, long size) {
         try {
             read_wait_count.addAndGet(1);
+            checkBuffer(buffer);
+            long address = allocateRW(read_size, new NewAllocator(size));
             updateBuffer(buffer);
-            return allocateRW(read_size, new NewAllocator(size));
+            return address;
         } finally {
             read_wait_count.addAndGet(-1);
         }
     }
 
     /**
-     * 分配写内存
+     * 分配写内存 同一个对象只有在被分配之后才有可能被释放 注册的时候并不加入释放队列
      * @param address 旧地址 没有为0
      * @param oldSize 旧大小 没有为0
      * @param newSize 新大小
@@ -215,8 +239,10 @@ public class CacheManager {
     public long allocateWrite(Buffer buffer, long address, long oldSize, long newSize) {
         try {
             write_wait_count.addAndGet(1);
+            checkBuffer(buffer);
+            address =  allocateRW(write_size, new ReAllocator(address, oldSize, newSize));
             updateBuffer(buffer);
-            return allocateRW(write_size, new ReAllocator(address, oldSize, newSize));
+            return address;
         } finally {
             write_wait_count.addAndGet(-1);
         }
@@ -300,8 +326,10 @@ public class CacheManager {
      * 唤醒一个读
      */
     private void  notifyRead() {
-        synchronized (read_size){
-            read_size.notify();
+        if(read_wait_count.get() > 0) {
+            synchronized (read_size) {
+                read_size.notify();
+            }
         }
     }
 
@@ -309,8 +337,10 @@ public class CacheManager {
      * 唤醒一个写
      */
     private void  notifyWrite() {
-        synchronized (write_size) {
-            write_size.notify();
+        if(write_wait_count.get() > 0) {
+            synchronized (write_size) {
+                write_size.notify();
+            }
         }
     }
 
@@ -345,7 +375,9 @@ public class CacheManager {
 
     private void  gc() {
         while (read_wait_count.get() != 0 || write_wait_count.get() != 0) {
-            forceGC();
+            if(!forceGC()){
+                break;
+            }
         }
         //stop 1微妙
         LockSupport.parkNanos(1000);

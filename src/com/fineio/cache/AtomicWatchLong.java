@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class AtomicWatchLong {
     private List<Watcher> listener = new ArrayList<Watcher>();
 
-    private AtomicLong value = new AtomicLong(0);
+    private volatile AtomicLong value = new AtomicLong(0);
 
     public void addListener(Watcher watcher){
         listener.add(watcher);

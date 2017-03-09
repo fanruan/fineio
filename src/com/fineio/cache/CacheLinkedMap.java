@@ -2,6 +2,8 @@ package com.fineio.cache;
 
 
 
+import com.fineio.io.Buffer;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -41,6 +43,10 @@ public class CacheLinkedMap<T> {
         return indexMap.keySet().iterator();
     }
 
+    /**
+     * update只有在已经分配内存的情况下会进行执行
+     * @param co
+     */
     private void doChange(CacheObject<T> co) {
         if(co.getLast() == null && co.getNext() == null){
             if(co != head) {
@@ -75,6 +81,10 @@ public class CacheLinkedMap<T> {
         }
     }
 
+    /**
+     * put在注册的时候使用并不会将对象放到已经申请内存的队列
+     * @param t
+     */
     public void put(T t){
         synchronized (this){
             CacheObject<T> co = indexMap.get(t);
@@ -84,7 +94,6 @@ public class CacheLinkedMap<T> {
             } else {
                 co.updateTime();
             }
-            doChange(co);
         }
     }
 
@@ -146,4 +155,7 @@ public class CacheLinkedMap<T> {
         }
     }
 
+    public boolean contains(T buffer) {
+        return  indexMap.containsKey(buffer);
+    }
 }
