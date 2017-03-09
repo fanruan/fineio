@@ -39,7 +39,6 @@ public class FineIOTest extends TestCase {
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, head.get(null));
         EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
-            @Override
             public InputStream answer() throws Throwable {
                 return  new ByteArrayInputStream(res);
             }
@@ -71,7 +70,7 @@ public class FineIOTest extends TestCase {
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, head.get(null));
         EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
-            @Override
+            
             public InputStream answer() throws Throwable {
                 return  new ByteArrayInputStream(res);
             }
@@ -111,35 +110,35 @@ public class FineIOTest extends TestCase {
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, fieldHead.get(null));
         EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
-            @Override
+            
             public InputStream answer() throws Throwable {
                 return new ByteArrayInputStream(head);
             }
         }).anyTimes();
         FileBlock block_0 = constructor.newInstance(u, String.valueOf(0));
         EasyMock.expect(connector.read(EasyMock.eq(block_0))).andAnswer(new IAnswer<InputStream>() {
-            @Override
+            
             public InputStream answer() throws Throwable {
                 return new ByteArrayInputStream(block0);
             }
         }).anyTimes();
         FileBlock block_1 = constructor.newInstance(u, String.valueOf(1));
         EasyMock.expect(connector.read(EasyMock.eq(block_1))).andAnswer(new IAnswer<InputStream>() {
-            @Override
+            
             public InputStream answer() throws Throwable {
                 return new ByteArrayInputStream(block1);
             }
         }).anyTimes();
         FileBlock block_2 = constructor.newInstance(u, String.valueOf(2));
         EasyMock.expect(connector.read(EasyMock.eq(block_2))).andAnswer(new IAnswer<InputStream>() {
-            @Override
+            
             public InputStream answer() throws Throwable {
                 return new ByteArrayInputStream(block2);
             }
         }).anyTimes();
         FileBlock block_3 = constructor.newInstance(u, String.valueOf(3));
         EasyMock.expect(connector.read(EasyMock.eq(block_3))).andAnswer(new IAnswer<InputStream>() {
-            @Override
+            
             public InputStream answer() throws Throwable {
                 return new ByteArrayInputStream(block3);
             }
@@ -265,35 +264,30 @@ public class FineIOTest extends TestCase {
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, fieldHead.get(null));
         EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
-            @Override
             public InputStream answer() throws Throwable {
                 return new ByteArrayInputStream(head);
             }
         }).anyTimes();
         FileBlock block_0 = constructor.newInstance(u, String.valueOf(0));
         EasyMock.expect(connector.read(EasyMock.eq(block_0))).andAnswer(new IAnswer<InputStream>() {
-            @Override
             public InputStream answer() throws Throwable {
                 return new ByteArrayInputStream(block0);
             }
         }).anyTimes();
         FileBlock block_1 = constructor.newInstance(u, String.valueOf(1));
         EasyMock.expect(connector.read(EasyMock.eq(block_1))).andAnswer(new IAnswer<InputStream>() {
-            @Override
             public InputStream answer() throws Throwable {
                 return new ByteArrayInputStream(block1);
             }
         }).anyTimes();
         FileBlock block_2 = constructor.newInstance(u, String.valueOf(2));
         EasyMock.expect(connector.read(EasyMock.eq(block_2))).andAnswer(new IAnswer<InputStream>() {
-            @Override
             public InputStream answer() throws Throwable {
                 return new ByteArrayInputStream(block2);
             }
         }).anyTimes();
         FileBlock block_3 = constructor.newInstance(u, String.valueOf(3));
         EasyMock.expect(connector.read(EasyMock.eq(block_3))).andAnswer(new IAnswer<InputStream>() {
-            @Override
             public InputStream answer() throws Throwable {
                 return new ByteArrayInputStream(block3);
             }

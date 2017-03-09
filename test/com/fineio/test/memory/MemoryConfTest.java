@@ -1,5 +1,6 @@
 package com.fineio.test.memory;
 
+import com.fineio.FineIO;
 import com.fineio.exception.MemorySetException;
 import com.fineio.memory.MemoryConf;
 import junit.framework.TestCase;
@@ -11,18 +12,18 @@ public class MemoryConfTest extends TestCase {
 
     public void testGetAndSet(){
         assertEquals(MemoryConf.getMinMemSizeForSet(), 1L<<30);
-        long s = MemoryConf.getTotalMemSize();
-        assertTrue(s >= MemoryConf.getMinMemSizeForSet());
+        long s = FineIO.getTotalMemSize();
+        assertTrue(s >= FineIO.getMinMemSizeForSet());
         boolean exp = false;
         try {
-            MemoryConf.setTotalMemSize(100);
+            FineIO.setTotalMemSize(100);
         } catch (MemorySetException e) {
             exp = true;
         }
         assertTrue(exp);
         exp = false;
         try {
-            MemoryConf.setTotalMemSize(Long.MAX_VALUE);
+            FineIO.setTotalMemSize(Long.MAX_VALUE);
         } catch (MemorySetException e) {
             exp = true;
         }

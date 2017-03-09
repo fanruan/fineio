@@ -238,7 +238,7 @@ public class BufferTest  extends TestCase {
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, "0");
         EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
-            @Override
+            
             public InputStream answer() throws Throwable {
                 return new ByteArrayInputStream(value);
             }

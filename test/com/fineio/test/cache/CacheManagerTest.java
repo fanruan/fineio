@@ -1,5 +1,6 @@
 package com.fineio.test.cache;
 
+import com.fineio.FineIO;
 import com.fineio.cache.CacheManager;
 import com.fineio.cache.LEVEL;
 import com.fineio.exception.FileCloseException;
@@ -121,7 +122,7 @@ public class CacheManagerTest extends TestCase {
         b3.write();
         assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 1024);
         try {
-            MemoryConf.setTotalMemSize(MemoryConf.getMaxMemSizeForSet() - 1);
+            MemoryConf.setTotalMemSize(FineIO.getMaxMemSizeForSet() - 1);
         } catch (MemorySetException e) {
             e.printStackTrace();
         }
