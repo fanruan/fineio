@@ -22,7 +22,7 @@ public class CacheManagerTest extends TestCase {
     private class TestBuffer implements Buffer {
         private volatile boolean access = false;
         final int cap = 1024;
-        private long address = 0;
+        protected long address = 0;
 
         TestBuffer(){
             CacheManager.getInstance().registerBuffer(this);
@@ -63,9 +63,15 @@ public class CacheManagerTest extends TestCase {
         }
     }
 
+    public class TestBuffer2 extends TestBuffer {
+        public void clear() {
+            MemoryUtils.free(address);
+            CacheManager.getInstance().releaseBuffer(this, false);
+        }
+    }
+
     public void testCache(){
         CacheManager.clear();
-        TestBuffer buffer = new TestBuffer();
         try {
             Field f = MemoryConf.class.getDeclaredField("max_size");
             f.setAccessible(true);
@@ -73,6 +79,7 @@ public class CacheManagerTest extends TestCase {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        TestBuffer buffer = new TestBuffer();
         assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 0);
         buffer.write();
         assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 1024);
@@ -85,6 +92,34 @@ public class CacheManagerTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
+        TestBuffer buffer2 = new TestBuffer();
+        buffer2.write();
+        assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 1024);
+        TestBuffer buffer3 = new TestBuffer();
+        buffer3.write();
+        assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 1024);
+
+        exp = false;
+        try {
+            buffer2.write();
+        } catch (FileCloseException e){
+            exp = true;
+        }
+        assertTrue(exp);
+
+
+
+
+        TestBuffer2 b2 = new TestBuffer2();
+        b2.write();
+        assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 1024);
+        TestBuffer2 b3= new TestBuffer2();
+        b3.write();
+        assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 1024);
+        b2.write();
+        assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 1024);
+        b3.write();
+        assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 1024);
         try {
             MemoryConf.setTotalMemSize(MemoryConf.getMaxMemSizeForSet() - 1);
         } catch (MemorySetException e) {

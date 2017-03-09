@@ -197,8 +197,8 @@ public class CacheManager {
      */
     public long allocateRead(Buffer buffer, long size) {
         try {
-            updateBuffer(buffer);
             read_wait_count.addAndGet(1);
+            updateBuffer(buffer);
             return allocateRW(read_size, new NewAllocator(size));
         } finally {
             read_wait_count.addAndGet(-1);
@@ -214,8 +214,8 @@ public class CacheManager {
      */
     public long allocateWrite(Buffer buffer, long address, long oldSize, long newSize) {
         try {
-            updateBuffer(buffer);
             write_wait_count.addAndGet(1);
+            updateBuffer(buffer);
             return allocateRW(write_size, new ReAllocator(address, oldSize, newSize));
         } finally {
             write_wait_count.addAndGet(-1);
@@ -344,7 +344,7 @@ public class CacheManager {
     }
 
     private void  gc() {
-        while (read_wait_count.get() != 0 && write_wait_count.get() != 0) {
+        while (read_wait_count.get() != 0 || write_wait_count.get() != 0) {
             Buffer buffer = read.poll();
             if(buffer != null){
                 buffer.clear();
