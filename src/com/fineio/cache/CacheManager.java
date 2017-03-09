@@ -50,7 +50,7 @@ public class CacheManager {
     private Timer timer = new Timer();
     //activeTimer
     private Timer activeTimer = new Timer();
-    //正在读的内存大小
+    //正在读的内存大小+正在编辑的缓存大小
     private volatile AtomicWatchLong read_size = new AtomicWatchLong();
     //正在读的等待的数量
     private volatile AtomicInteger read_wait_count = new AtomicInteger(0);
@@ -59,9 +59,11 @@ public class CacheManager {
     //正在写的等待的数量
     private volatile AtomicInteger write_wait_count = new AtomicInteger(0);
 
-
+    //读缓存
     private CacheLinkedMap<Buffer> read = new CacheLinkedMap<Buffer>();
+    //编辑缓存
     private CacheLinkedMap<Buffer> edit = new CacheLinkedMap<Buffer>();
+    //写缓存
     private CacheLinkedMap<Buffer> write = new CacheLinkedMap<Buffer>();
 
     public static CacheManager getInstance(){
@@ -188,8 +190,9 @@ public class CacheManager {
      * @param size
      * @return
      */
-    public long allocateRead(long size) {
+    public long allocateRead(Buffer buffer, long size) {
         try {
+            updateBuffer(buffer);
             read_wait_count.addAndGet(1);
             return allocateRW(read_size, new NewAllocator(size));
         } finally {
@@ -204,8 +207,9 @@ public class CacheManager {
      * @param newSize 新大小
      * @return
      */
-    public long allocateWrite(long address, long oldSize, long newSize) {
+    public long allocateWrite(Buffer buffer, long address, long oldSize, long newSize) {
         try {
+            updateBuffer(buffer);
             write_wait_count.addAndGet(1);
             return allocateRW(write_size, new ReAllocator(address, oldSize, newSize));
         } finally {

@@ -77,7 +77,6 @@ public class PerformanceTest {
         FileBlock block = constructor.newInstance(u, fieldHead.get(null));
         final java.util.zip.ZipFile file = new java.util.zip.ZipFile("D:/fine2.cube");
         EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
-            @Override
             public InputStream answer() throws Throwable {
                 return file.getInputStream(file.getEntry("head"));
             }
@@ -159,7 +158,6 @@ public class PerformanceTest {
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, fieldHead.get(null));
         EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
-            @Override
             public InputStream answer() throws Throwable {
                 return new ByteArrayInputStream(head);
             }
@@ -172,7 +170,6 @@ public class PerformanceTest {
             final byte[] bytes = createRandomByte((int)len);
             FileBlock block_i = constructor.newInstance(u, String.valueOf(i));
             EasyMock.expect(connector.read(EasyMock.eq(block_i))).andAnswer(new IAnswer<InputStream>() {
-                @Override
                 public InputStream answer() throws Throwable {
                     return new ByteArrayInputStream(bytes);
                 }

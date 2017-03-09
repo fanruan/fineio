@@ -5,6 +5,7 @@ import com.fineio.cache.CacheManager;
 import com.fineio.cache.LEVEL;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
+import com.fineio.io.Buffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.write.WriteBuffer;
 import com.fineio.memory.MemoryUtils;
@@ -54,7 +55,7 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
             len = 1 << offset << getLengthOffset();
             beforeStatusChange();
             try {
-                address = CacheManager.getInstance().allocateRead(len);
+                address = CacheManager.getInstance().allocateRead((Buffer) this, len);
                 MemoryUtils.copyMemory(bytes, address, off);
                 MemoryUtils.fill0(address + off, len - off);
             } catch (OutOfMemoryError error){

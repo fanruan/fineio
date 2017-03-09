@@ -48,6 +48,7 @@ public class SingleWaitThread extends Thread {
 
     public void clear () {
         stop = true;
+        waiter = true;
         this.interrupt();
     }
 

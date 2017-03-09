@@ -5,6 +5,7 @@ import com.fineio.cache.LEVEL;
 import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
+import com.fineio.io.Buffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.ReadIOFile;
 import com.fineio.io.base.AbstractBuffer;
@@ -126,7 +127,7 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
                     off+=len;
                 }
                 beforeStatusChange();
-                address = CacheManager.getInstance().allocateRead(off);
+                address = CacheManager.getInstance().allocateRead((Buffer) this, off);
                 MemoryUtils.copyMemory(bytes, address, off);
                 load = true;
                 max_size = off >> getLengthOffset();
