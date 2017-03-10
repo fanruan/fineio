@@ -26,7 +26,6 @@ public class DirectInputStreamTest extends TestCase{
         MemoryUtils.copyMemory(bytes, s);
         final AtomicBoolean atomicBoolean = new AtomicBoolean(true);
         DirectInputStream is = c.newInstance(s, len, new Checker() {
-            @Override
             public boolean check() {
                 return atomicBoolean.get();
             }
@@ -70,7 +69,6 @@ public class DirectInputStreamTest extends TestCase{
         }
 
         inputStream = c.newInstance(s, len, new Checker() {
-            @Override
             public boolean check() {
                 return true;
             }
@@ -88,6 +86,7 @@ public class DirectInputStreamTest extends TestCase{
             assertEquals(bytes[i], res[i]);
         }
         inputStream = c.newInstance(s, len, null);
+        assertEquals(inputStream.size(), bytes.length);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         BufferedReader reader2 = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bytes)));
         while (true) {

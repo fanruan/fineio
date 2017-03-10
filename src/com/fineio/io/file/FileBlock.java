@@ -27,6 +27,14 @@ public final class FileBlock {
         return (uri == null ? "":uri.toString()) + File.separator + (fileName == null ? "": fileName);
     }
 
+    public URI getUri() {
+        return  uri;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -23,6 +23,14 @@ public final class DirectInputStream extends InputStream {
         this.checker = checker;
     }
 
+    /**
+     * 流长度
+     * @return
+     */
+    public long size(){
+        return size;
+    }
+
     public final int read(byte b[], int off, int len) throws IOException {
         if (doLenCheck(b, off, len)){
             return 0;
