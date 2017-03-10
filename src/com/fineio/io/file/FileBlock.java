@@ -13,6 +13,11 @@ public final class FileBlock {
 
     private String fileName;
 
+    /**
+     * 空就代表文件夹把
+     * @param uri
+     * @param fileName
+     */
     FileBlock(URI uri, String fileName){
         this.uri = uri;
         this.fileName = fileName;

@@ -7,6 +7,7 @@ import com.fineio.exception.IOSetException;
 import com.fineio.io.*;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
+import com.taobao.api.domain.File;
 
 import java.net.URI;
 
@@ -52,7 +53,7 @@ public abstract class IOFile<E extends Buffer> {
         this.model = model;
     }
 
-    protected FileBlock createHeadBlock(){
+    protected final FileBlock createHeadBlock(){
         return new FileBlock(uri, FileConstants.HEAD);
     }
 
@@ -130,8 +131,34 @@ public abstract class IOFile<E extends Buffer> {
     }
 
 
+    /**
+     * 删除操作
+     * @return
+     */
+    public boolean delete(){
+        boolean delete = connector.delete(createHeadBlock());
+        if(buffers != null){
+           for(int i = 0; i < buffers.length; i++){
+               boolean v = connector.delete(createIndexBlock(i));
+               if(delete){
+                  delete = v;
+               }
+           }
+        }
+        boolean v = connector.delete(new FileBlock(uri, ""));
+        if(delete){
+            delete = v;
+        }
+        return  delete;
+    }
+
+    private final FileBlock createIndexBlock(int index){
+        return new FileBlock(uri, String.valueOf(index));
+    }
+
+
     private E createBuffer(int index) {
-        return model.createBuffer(connector, new FileBlock(uri, String.valueOf(index)), block_size_offset);
+        return model.createBuffer(connector, createIndexBlock(index), block_size_offset);
     }
 
     /**

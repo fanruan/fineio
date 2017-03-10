@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.util.Arrays;
 
 /**
  * Created by daniel on 2017/2/9.
@@ -143,6 +144,60 @@ public class FineIOTest extends TestCase {
                 return new ByteArrayInputStream(block3);
             }
         }).anyTimes();
+
+        final boolean[] deleteArray = new boolean[6];
+        Arrays.fill(deleteArray, false);
+        EasyMock.expect(connector.delete(EasyMock.eq(block))).andAnswer(new IAnswer<Boolean>() {
+
+            public Boolean answer() throws Throwable {
+                deleteArray[5] = true;
+                return true;
+            }
+        }).anyTimes();
+        EasyMock.expect(connector.delete(EasyMock.eq(block_0))).andAnswer(new IAnswer<Boolean>() {
+
+            public Boolean answer() throws Throwable {
+                deleteArray[0] = true;
+                return  true;
+            }
+        }).anyTimes();
+        EasyMock.expect(connector.delete(EasyMock.eq(block_1))).andAnswer(new IAnswer<Boolean>() {
+
+            public Boolean answer() throws Throwable {
+                deleteArray[1] = true;
+                return true;
+            }
+        }).anyTimes();
+        EasyMock.expect(connector.delete(EasyMock.eq(block_2))).andAnswer(new IAnswer<Boolean>() {
+
+            public Boolean answer() throws Throwable {
+                deleteArray[2] = true;
+                return false;
+            }
+        }).anyTimes();
+        EasyMock.expect(connector.delete(EasyMock.eq(block_3))).andAnswer(new IAnswer<Boolean>() {
+
+            public Boolean answer() throws Throwable {
+                deleteArray[3] = true;
+                return true;
+            }
+        }).anyTimes();
+        FileBlock block_folder = constructor.newInstance(u, "");
+        EasyMock.expect(connector.delete(EasyMock.eq(block_folder))).andAnswer(new IAnswer<Boolean>() {
+
+            public Boolean answer() throws Throwable {
+                deleteArray[4] = true;
+                return true;
+            }
+        }).anyTimes();
+
+
+        EasyMock.expect(connector.delete((FileBlock) EasyMock.anyObject())).andAnswer(new IAnswer<Boolean>() {
+
+            public Boolean answer() throws Throwable {
+                return true;
+            }
+        }).anyTimes();
         control.replay();
         EditIOFile<LongBuffer> file =  FineIO.createIOFile(connector , u, FineIO.MODEL.EDIT_LONG);
         long v1 = 0;
@@ -239,7 +294,16 @@ public class FineIOTest extends TestCase {
         for(long i = currentLen, ilen = currentLen*2; i < ilen; i++){
             d3 += FineIO.getDouble(dfile, i);
         }
+        for(boolean b : deleteArray){
+            assertFalse(b);
+        }
+
         assertEquals(d2, d3);
+        assertFalse(dfile.delete());
+        for(boolean b : deleteArray){
+            assertTrue(b);
+        }
+
     }
 
 

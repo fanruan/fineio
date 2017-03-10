@@ -68,7 +68,6 @@ public class FineReadIOFileTest extends TestCase {
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, head.get(null));
         EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
-            @Override
             public InputStream answer() throws Throwable {
                 return new ByteArrayInputStream(res);
             }
