@@ -19,4 +19,14 @@ public final class MemoryHelper {
            return Runtime.getRuntime().maxMemory();
         }
     }
+
+    static long getFreeMemory() {
+        try {
+            OperatingSystemMXBean mb = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+            return mb.getFreePhysicalMemorySize();
+        } catch (Throwable e){
+            //如果发生异常则使用xmx值
+            return Runtime.getRuntime().maxMemory();
+        }
+    }
 }

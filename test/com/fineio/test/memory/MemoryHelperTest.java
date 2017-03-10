@@ -16,7 +16,17 @@ public class MemoryHelperTest extends TestCase {
             method.setAccessible(true);
             long res = (Long)method.invoke(null);
             assertTrue(res > 0);
-            System.out.println((res >> 20) + "MB");
+            System.out.println((res >> 20) + "MB max");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Method method = MemoryHelper.class.getDeclaredMethod("getFreeMemory");
+            method.setAccessible(true);
+            long res = (Long)method.invoke(null);
+            assertTrue(res > 0);
+            System.out.println((res >> 20) + "MB free");
         } catch (Exception e) {
             e.printStackTrace();
         }

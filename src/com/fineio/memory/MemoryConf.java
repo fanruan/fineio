@@ -14,7 +14,7 @@ public final class MemoryConf {
     private static final long min_load_size = 1L << 30;
     static {
         try {
-            max_load_size_temp = MemoryHelper.getMaxMemory();
+            max_load_size_temp =  Math.min(MemoryHelper.getMaxMemory(), MemoryHelper.getFreeMemory());
         } catch (Throwable e){
             //这里是防止MemoryHelper加载不到sun的jdk
             max_load_size_temp = Runtime.getRuntime().maxMemory();
@@ -34,10 +34,11 @@ public final class MemoryConf {
      * 默认为物理内存减去Xmx的值
      * 如果获取不到物理内存则使用Xmx的值
      * 配置方法@see setTotalMemSize();
+     * 取系统可用内存与max_size的最小值
      * @return
      */
     public final static long getTotalMemSize(){
-        return max_size;
+        return Math.min(max_size, MemoryHelper.getFreeMemory());
     }
 
     public final static long getMaxMemSizeForSet(){
