@@ -107,24 +107,25 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
     }
 
 
-    private final  void loadData(){
+    private final  void loadData() {
         synchronized (this) {
             if (load) {
                 return;
             }
-            if(close) {
+            if (close) {
                 throw new FileCloseException();
             }
-            InputStream is = bufferKey.getConnector().read(bufferKey.getBlock());
-            if (is == null) {
-                throw new BlockNotFoundException("block:" + bufferKey.getBlock().toString() + " not found!");
-            }
+            InputStream is = null;
             try {
+                is = bufferKey.getConnector().read(bufferKey.getBlock());
+                if (is == null) {
+                    throw new BlockNotFoundException("block:" + bufferKey.getBlock().toString() + " not found!");
+                }
                 byte[] bytes = new byte[max_byte_len];
                 int off = 0;
                 int len = 0;
                 while ((len = is.read(bytes, off, max_byte_len - off)) > 0) {
-                    off+=len;
+                    off += len;
                 }
                 beforeStatusChange();
                 address = CacheManager.getInstance().allocateRead((Buffer) this, off);
@@ -135,9 +136,16 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
                 afterStatusChange();
             } catch (IOException e) {
                 throw new BlockNotFoundException("block:" + bufferKey.getBlock().toString() + " not found!");
-            } catch (OutOfMemoryError error){
+            } catch (OutOfMemoryError error) {
                 //todo 预防内存设置超大 赋值的时候发生溢出
                 error.printStackTrace();
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                    }
+                }
             }
         }
     }

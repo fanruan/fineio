@@ -11,6 +11,7 @@ import com.fineio.io.write.WriteBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -39,13 +40,21 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
             byte[] bytes = new byte[max_byte_len];
             int off = 0;
             int len = 0;
+            InputStream is = null;
             try {
-                InputStream is = bufferKey.getConnector().read(bufferKey.getBlock());
+                is = bufferKey.getConnector().read(bufferKey.getBlock());
                 while ((len = is.read(bytes, off, max_byte_len - off)) > 0) {
                     off += len;
                 }
             } catch (Throwable e) {
                 //文件不存在新建一个不loaddata了
+            } finally {
+                if(is != null){
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                    }
+                }
             }
             int max_position = off >> getLengthOffset();
             int offset = Maths.log2(max_position);
