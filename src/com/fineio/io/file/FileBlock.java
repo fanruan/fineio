@@ -18,7 +18,7 @@ public final class FileBlock {
      * @param uri
      * @param fileName
      */
-    FileBlock(URI uri, String fileName){
+    public FileBlock(URI uri, String fileName){
         this.uri = uri;
         this.fileName = fileName;
     }
