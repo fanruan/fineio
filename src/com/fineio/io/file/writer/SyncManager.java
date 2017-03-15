@@ -52,7 +52,7 @@ public final class SyncManager {
 
     private volatile AtomicInteger working_jobs = new AtomicInteger(0);
 
-    private ExecutorService executor = Executors.newFixedThreadPool(ThreadsCount);
+    private ExecutorService executor = Executors.newCachedThreadPool();
 
     private volatile  JobContainer map = new JobContainer();
 
@@ -111,6 +111,7 @@ public final class SyncManager {
                     if(jobAssist != null) {
                         //控制相同的任务不会同时执行，塞到屁股后面
                         if(runningThread.containsKey(jobAssist.getKey())) {
+                            //怎么解呢 trigger的work不一定执行但是有对象在wait
                             triggerWork(jobAssist);
                             continue;
                         }
@@ -123,11 +124,13 @@ public final class SyncManager {
                                 try {
                                     jobAssist.doJob();
                                 } catch (Throwable e) {
+                                    //TODO对与失败的处理//比如磁盘满啊 之类
+                                    e.printStackTrace();
                                 } finally {
                                     runningLock.lock();
                                     JobAssist assist =  runningThread.remove(jobAssist.getKey());
                                     synchronized (assist) {
-                                        assist.notifyAll();
+                                        assist.notifyJobs();
                                     }
                                     runningLock.unlock();
                                     working_jobs.addAndGet(-1);

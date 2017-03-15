@@ -18,7 +18,7 @@ public interface Connector {
     InputStream read(FileBlock file);
 
     /**
-     * 写整快的方法
+     * 写整快的方法，可以保证通一个块不被同时写
      * @param file
      * @param inputStream
      */

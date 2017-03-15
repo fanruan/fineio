@@ -154,7 +154,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
             public void doJob() {
                 try {
                     write0();
-                } catch (StreamCloseException e){
+                } catch (Exception e){
                     flushed = false;
                     write();
                 }

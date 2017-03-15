@@ -27,12 +27,24 @@ public final class FileBlock {
         return (uri == null ? "":uri.toString()) + File.separator + (fileName == null ? "": fileName);
     }
 
-    public URI getUri() {
+    /**
+     * parent的URI
+     * @return
+     */
+    public URI getParentUri() {
         return  uri;
     }
 
     public String getFileName() {
         return fileName;
+    }
+
+    /**
+     * 实际URI
+     * @return
+     */
+    public URI getBlockURI(){
+        return uri.resolve(fileName);
     }
 
     @Override

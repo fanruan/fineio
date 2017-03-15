@@ -24,7 +24,10 @@ public class JobContainer {
     public boolean put(JobAssist job) {
         try {
             lock.lock();
-            if (!watchMap.containsKey(job.getKey())) {
+            JobAssist jobAssist = watchMap.get(job.getKey());
+            if(jobAssist != null) {
+                jobAssist.registerLinkJob(job);
+            } else {
                 addJob(job);
                 return true;
             }
@@ -35,15 +38,20 @@ public class JobContainer {
     }
 
     public boolean isEmpty() {
-        return jobs.isEmpty();
+        try {
+            lock.lock();
+            return jobs.isEmpty();
+        } finally {
+            lock.unlock();
+        }
     }
 
     public JobAssist get() {
-        if(isEmpty()){
-            return null;
-        }
         try {
             lock.lock();
+            if(isEmpty()){
+                return null;
+            }
             JobAssist jobAssist = jobs.poll();
             watchMap.remove(jobAssist.getKey());
             return jobAssist;
@@ -62,9 +70,8 @@ public class JobContainer {
         if(jobAssist == null){
             return;
         }
-        JobAssist job = null;
         lock.lock();
-        job =  watchMap.get(jobAssist.getKey());
+        JobAssist job =  watchMap.get(jobAssist.getKey());
         if(job == null){
             job = jobAssist;
             addJob(job);

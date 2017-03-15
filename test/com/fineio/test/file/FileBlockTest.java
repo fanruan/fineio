@@ -21,8 +21,8 @@ public class FileBlockTest extends TestCase {
         assertEquals(constructor.newInstance(a, "test"), constructor.newInstance(b, "test"));
         assertNotSame(constructor.newInstance(a, "test"), constructor.newInstance(b, "test1"));
         assertNotSame(constructor.newInstance(a, "test"), constructor.newInstance(c, "test"));
-        assertEquals(constructor.newInstance(a, "test").getUri(), a);
-        assertEquals(constructor.newInstance(b, "test").getUri(), b);
+        assertEquals(constructor.newInstance(a, "test").getParentUri(), a);
+        assertEquals(constructor.newInstance(b, "test").getParentUri(), b);
         assertEquals(constructor.newInstance(c, "test").getFileName(), "test");
     }
 
