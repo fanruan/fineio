@@ -111,7 +111,6 @@ public final class SyncManager {
                     if(jobAssist != null) {
                         //控制相同的任务不会同时执行，塞到屁股后面
                         if(runningThread.containsKey(jobAssist.getKey())) {
-                            //怎么解呢 trigger的work不一定执行但是有对象在wait
                             triggerWork(jobAssist);
                             continue;
                         }

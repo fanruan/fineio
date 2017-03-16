@@ -26,6 +26,7 @@ public class JobContainer {
             lock.lock();
             JobAssist jobAssist = watchMap.get(job.getKey());
             if(jobAssist != null) {
+                //如果非空那么也要激活相同的请求
                 jobAssist.registerLinkJob(job);
             } else {
                 addJob(job);
