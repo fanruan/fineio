@@ -2,6 +2,7 @@ package com.fineio.storage;
 
 import com.fineio.io.file.FileBlock;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -15,19 +16,19 @@ public interface Connector {
      * @param file
      * @return
      */
-    InputStream read(FileBlock file);
+    InputStream read(FileBlock file) throws IOException;
 
     /**
      * 写整快的方法，可以保证通一个块不被同时写
      * @param file
      * @param inputStream
      */
-    void write(FileBlock file, InputStream inputStream);
+    void write(FileBlock file, InputStream inputStream)  throws IOException;
 
     /*
     输出byte[]
      */
-    void write(FileBlock file, byte[] bytes);
+    void write(FileBlock file, byte[] bytes)  throws IOException;
 
     /**
      * 删除块

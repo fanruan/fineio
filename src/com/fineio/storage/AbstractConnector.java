@@ -3,6 +3,7 @@ package com.fineio.storage;
 import com.fineio.io.file.FileBlock;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 /**
  * Created by daniel on 2017/3/1.
@@ -17,7 +18,7 @@ public abstract class AbstractConnector implements Connector {
      * @param file
      * @param bytes
      */
-    public void write(FileBlock file, byte[] bytes) {
+    public void write(FileBlock file, byte[] bytes) throws IOException {
         write(file, new ByteArrayInputStream(bytes));
     }
 

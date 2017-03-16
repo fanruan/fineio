@@ -119,8 +119,12 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
     protected void write0(){
         synchronized (this) {
             changed = false;
-            bufferKey.getConnector().write(bufferKey.getBlock(), getInputStream());
-            flushed = true;
+            try {
+                bufferKey.getConnector().write(bufferKey.getBlock(), getInputStream());
+                flushed = true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

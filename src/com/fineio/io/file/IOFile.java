@@ -9,6 +9,7 @@ import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 import com.taobao.api.domain.File;
 
+import java.io.IOException;
 import java.net.URI;
 
 /**
@@ -366,7 +367,11 @@ public abstract class IOFile<E extends Buffer> {
         byte[] bytes = new byte[HEAD_LEN];
         Bits.putInt(bytes, 0, buffers.length);
         bytes[MemoryConstants.STEP_LONG] = (byte) (block_size_offset + model.offset());
-        connector.write(block, bytes);
+        try {
+            connector.write(block, bytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void close() {

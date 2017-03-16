@@ -17,6 +17,8 @@ import com.fineio.memory.MemoryUtils;
 import com.fineio.monitor.MonitorUtils;
 import com.fineio.storage.Connector;
 
+import java.io.IOException;
+
 /**
  * Created by daniel on 2017/2/15.
  * 注意 写是连续的并且不支持并发操作哦，写操作也是在byte全部被赋值的情况下才支持，目前writeBuffer仅支持到这样的程度
@@ -187,9 +189,13 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     protected void write0(){
         synchronized (this) {
             changed = false;
-            bufferKey.getConnector().write(bufferKey.getBlock(), getInputStream());
-            flushed = true;
-            clear();
+            try {
+                bufferKey.getConnector().write(bufferKey.getBlock(), getInputStream());
+                flushed = true;
+                clear();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
