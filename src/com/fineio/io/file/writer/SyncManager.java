@@ -98,13 +98,11 @@ public final class SyncManager {
     private Thread watch_thread = new Thread() {
         public void run() {
             while (true) {
-                while (isWait()) {
+                while (map.isEmpty() || working_jobs.get() > ThreadsCount) {
                     synchronized (this) {
-                        if(isWait()) {
-                            try {
-                                this.wait();
-                            } catch (InterruptedException e) {
-                            }
+                        try {
+                            this.wait();
+                        } catch (InterruptedException e) {
                         }
                     }
                 }
@@ -145,10 +143,6 @@ public final class SyncManager {
                     }
                 }
             }
-        }
-
-        private boolean isWait() {
-            return map.isEmpty() || working_jobs.get() > ThreadsCount;
         }
     };
 
