@@ -14,6 +14,7 @@ import java.net.URI;
 
 /**
  * Created by daniel on 2017/2/10.
+ *
  */
 public abstract class IOFile<E extends Buffer> {
 
@@ -88,20 +89,35 @@ public abstract class IOFile<E extends Buffer> {
     }
 
     private final int gi(long p) {
-        return (int)(p >> block_size_offset);
+        int len =  (int)(p >> block_size_offset);
+        if(len > 0){
+            checkWrite(len);
+        }
+        return len;
     }
+
+    private  void checkWrite(int len) {
+        if(bufferWriteIndex != len) {
+            if(bufferWriteIndex != -1){
+                buffers[bufferWriteIndex].write();
+            }
+            bufferWriteIndex = len;
+        }
+    }
+
+    private volatile int bufferWriteIndex = -1;
 
     private final int gi() {
         if(buffers == null || buffers.length == 0) {
             return 0;
         }
         int len = buffers.length - 1;
-        return buffers[len].full() ? triggerWrite(len) : len;
+        return buffers[len].full() ? triggerWrite(len + 1) : len;
     }
 
     private final int triggerWrite(int len) {
-        buffers[len].write();
-        return len + 1;
+        checkWrite(len);
+        return len;
     }
 
 

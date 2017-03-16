@@ -388,12 +388,6 @@ public class CacheManager {
         if(buffer != null){
             buffer.clear();
             return true;
-        } else {
-            buffer = write.poll();
-            if(buffer != null) {
-                buffer.clear();
-                return true;
-            }
         }
         return false;
     }
