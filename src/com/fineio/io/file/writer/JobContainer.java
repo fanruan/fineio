@@ -40,10 +40,10 @@ public class JobContainer {
 
     public boolean isEmpty() {
         try {
-            lock.lock();
+//            lock.lock();
             return jobs.isEmpty();
         } finally {
-            lock.unlock();
+//            lock.unlock();
         }
     }
 

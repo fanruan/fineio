@@ -98,18 +98,21 @@ public final class SyncManager {
     private Thread watch_thread = new Thread() {
         public void run() {
             while (true) {
-                while (map.isEmpty() || working_jobs.get() > ThreadsCount) {
+                while (isWait()) {
                     synchronized (this) {
-                        try {
-                            this.wait();
-                        } catch (InterruptedException e) {
+                        if(isWait()) {
+                            try {
+                                this.wait();
+                            } catch (InterruptedException e) {
+                            }
                         }
                     }
                 }
                 while (working_jobs.get() < ThreadsCount && !map.isEmpty()) {
                     final JobAssist jobAssist =  map.get();
                     if(jobAssist != null) {
-                        //控制相同的任务不会同时执行，塞到屁股后面
+                        //控制相同的任务不会同时执行，塞到屁股后面，这里可以不需要加锁，添加元素是单线程操作，remove是多线程的结果
+                        //最多出现contains的情况那么会丢到任务末尾重新执行，如果已经被remove那么判断也没有问题
                         if(runningThread.containsKey(jobAssist.getKey())) {
                             triggerWork(jobAssist);
                             continue;
@@ -133,9 +136,7 @@ public final class SyncManager {
                                     }
                                     runningLock.unlock();
                                     working_jobs.addAndGet(-1);
-                                    synchronized (watch_thread) {
-                                        watch_thread.notify();
-                                    }
+                                    wakeUpWatchTread();
                                 }
                             }
                         });
@@ -143,6 +144,10 @@ public final class SyncManager {
                     }
                 }
             }
+        }
+
+        private boolean isWait() {
+            return map.isEmpty() || working_jobs.get() > ThreadsCount;
         }
     };
 
