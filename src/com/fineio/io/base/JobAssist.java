@@ -40,9 +40,7 @@ public class JobAssist {
     public void registerLinkJob(JobAssist jobAssist) {
         synchronized (this) {
             if(finished){
-                synchronized (jobAssist) {
-                    jobAssist.notifyAll();
-                }
+                jobAssist.notifyJobs();
             }
             if (linkedJob == null) {
                 linkedJob = new ArrayList<JobAssist>();
@@ -56,9 +54,7 @@ public class JobAssist {
             this.notifyAll();
             if(linkedJob != null){
                 for(JobAssist assist : linkedJob){
-                    synchronized (assist){
-                        assist.notifyAll();
-                    }
+                    assist.notifyJobs();
                 }
             }
             finished = true;
