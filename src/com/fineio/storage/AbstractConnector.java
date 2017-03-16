@@ -10,7 +10,7 @@ import java.io.IOException;
  */
 public abstract class AbstractConnector implements Connector {
 
-    private final static byte DEFAULT_OFFSET = 22;
+    protected final static byte DEFAULT_OFFSET = 22;
 
 
     /**
