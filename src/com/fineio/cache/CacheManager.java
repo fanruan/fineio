@@ -388,6 +388,12 @@ public class CacheManager {
         if(buffer != null){
             buffer.clear();
             return true;
+        } else {
+            buffer = edit.poll();
+            if(buffer != null) {
+                buffer.clear();
+                return true;
+            }
         }
         return false;
     }
