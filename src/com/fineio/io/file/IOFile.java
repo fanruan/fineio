@@ -1,13 +1,11 @@
 package com.fineio.io.file;
 
 import com.fineio.base.Bits;
-import com.fineio.cache.CacheManager;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.IOSetException;
 import com.fineio.io.*;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
-import com.taobao.api.domain.File;
 
 import java.io.IOException;
 import java.net.URI;
