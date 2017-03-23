@@ -443,6 +443,8 @@ public class CacheManager {
                 try {
                     resetAccess(read);
                     resetAccess(edit);
+                    //10秒内有访问全部命中
+                    Thread.sleep(10000);
                     activeAccess(read);
                     activeAccess(edit);
                 } catch (Throwable e){
