@@ -331,7 +331,7 @@ public abstract class IOFile<E extends Buffer> {
      * @param p
      * @return
      */
-    public final static int getChar(IOFile<CharBuffer> file, long p) {
+    public final static char getChar(IOFile<CharBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 

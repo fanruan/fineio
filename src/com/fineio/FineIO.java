@@ -359,7 +359,7 @@ public final  class FineIO {
      * @param p
      * @return
      */
-    public final static int getChar(IOFile<CharBuffer> file, long p) {
+    public final static char getChar(IOFile<CharBuffer> file, long p) {
         return IOFile.getChar(file, p);
     }
     /**
