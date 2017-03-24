@@ -142,6 +142,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
                 try {
                     write0();
                 } catch (Exception e){
+                    e.printStackTrace();
                     flushed = false;
                     write();
                 }

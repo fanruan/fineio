@@ -60,7 +60,7 @@ public class PerformanceTest {
 //        while (true) {
 //            Thread.sleep(10000);
 //        }
-        CacheManager.clear();
+
     }
 
     private static void doubleSumFileTest() throws Exception {

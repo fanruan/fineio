@@ -174,7 +174,16 @@ public class FineWriteIOTest extends TestCase {
         edit.close();
         read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_DOUBLE);
         assertEquals(FineIO.getDouble(read, change),  doubles[change]);
+
+        assertTrue(FineIO.getCurrentMemorySize()>0);
+        assertTrue(FineIO.getCurrentReadMemorySize()> 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize() , 0);
         read.close();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
 
@@ -205,7 +214,15 @@ public class FineWriteIOTest extends TestCase {
         edit.close();
         read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_LONG);
         assertEquals(FineIO.getLong(read, change),  values[change]);
+        assertTrue(FineIO.getCurrentMemorySize()>0);
+        assertTrue(FineIO.getCurrentReadMemorySize()> 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize() , 0);
         read.close();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
 
@@ -236,7 +253,15 @@ public class FineWriteIOTest extends TestCase {
         edit.close();
         read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_CHAR);
         assertEquals(FineIO.getChar(read, change),  values[change]);
+        assertTrue(FineIO.getCurrentMemorySize()>0);
+        assertTrue(FineIO.getCurrentReadMemorySize()> 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize() , 0);
         read.close();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
 
@@ -267,7 +292,15 @@ public class FineWriteIOTest extends TestCase {
         edit.close();
         read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_INT);
         assertEquals(FineIO.getInt(read, change),  values[change]);
+        assertTrue(FineIO.getCurrentMemorySize()>0);
+        assertTrue(FineIO.getCurrentReadMemorySize()> 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize() , 0);
         read.close();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
 
@@ -299,7 +332,15 @@ public class FineWriteIOTest extends TestCase {
         edit.close();
         read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_FLOAT);
         assertEquals(FineIO.getFloat(read, change),  values[change]);
+        assertTrue(FineIO.getCurrentMemorySize()>0);
+        assertTrue(FineIO.getCurrentReadMemorySize()> 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize() , 0);
         read.close();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
 
@@ -331,7 +372,15 @@ public class FineWriteIOTest extends TestCase {
         edit.close();
         read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_SHORT);
         assertEquals(FineIO.getShort(read, change),  values[change]);
+        assertTrue(FineIO.getCurrentMemorySize()>0);
+        assertTrue(FineIO.getCurrentReadMemorySize()> 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize() , 0);
         read.close();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
 
@@ -362,6 +411,14 @@ public class FineWriteIOTest extends TestCase {
         edit.close();
         read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_BYTE);
         assertEquals(FineIO.getByte(read, change),  values[change]);
+        assertTrue(FineIO.getCurrentMemorySize()>0);
+        assertTrue(FineIO.getCurrentReadMemorySize()> 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize() , 0);
         read.close();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 }
