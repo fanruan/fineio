@@ -79,6 +79,23 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
         }
     }
 
+
+    protected void addCapacity() {
+        int len = this.current_max_size << getLengthOffset();
+        setCurrentCapacity(this.current_max_offset + 1);
+        int newLen = this.current_max_size << getLengthOffset();
+        beforeStatusChange();
+        try {
+            this.address = CacheManager.getInstance().allocateEdit((Buffer) this, address, len, newLen);
+            allocateSize = newLen;
+            MemoryUtils.fill0(this.address + len, newLen - len);
+
+        } catch (OutOfMemoryError error){
+            error.printStackTrace();
+        }
+        afterStatusChange();
+    }
+
     protected void ensureCapacity(int position){
         if(!load) {
             loadData();

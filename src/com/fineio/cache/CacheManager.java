@@ -236,6 +236,25 @@ public class CacheManager {
      * @param newSize 新大小
      * @return
      */
+    public long allocateEdit(Buffer buffer, long address, long oldSize, long newSize) {
+        try {
+            read_wait_count.addAndGet(1);
+            checkBuffer(buffer);
+            address =  allocateRW(read_size, new ReAllocator(address, oldSize, newSize));
+            updateBuffer(buffer);
+            return address;
+        } finally {
+            read_wait_count.addAndGet(-1);
+        }
+    }
+
+    /**
+     * 分配写内存 同一个对象只有在被分配之后才有可能被释放 注册的时候并不加入释放队列
+     * @param address 旧地址 没有为0
+     * @param oldSize 旧大小 没有为0
+     * @param newSize 新大小
+     * @return
+     */
     public long allocateWrite(Buffer buffer, long address, long oldSize, long newSize) {
         try {
             write_wait_count.addAndGet(1);

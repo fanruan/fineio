@@ -114,33 +114,18 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         setMaxPosition(position);
     }
 
-    private final void addCapacity() {
+    protected void addCapacity() {
         int len = this.current_max_size << getLengthOffset();
         setCurrentCapacity(this.current_max_offset + 1);
         int newLen = this.current_max_size << getLengthOffset();
         beforeStatusChange();
-        //todo 预防内存设置超大 fill的时候发生溢出
         try {
             this.address = CacheManager.getInstance().allocateWrite((Buffer) this, address, len, newLen);
             allocateSize = newLen;
             MemoryUtils.fill0(this.address + len, newLen - len);
 
         } catch (OutOfMemoryError error){
-            //todo 预防内存设置超大 赋值的时候发生溢出
             error.printStackTrace();
-//            final long add = this.address;
-//            final long changeLen = newLen - len;
-//            final long offset = len;
-//            try {
-//                MonitorUtils.resetMemory(new Worker() {
-//                    public void work() {
-//                        CacheManager.getInstance().forceGC();
-//                        MemoryUtils.fill0(add + offset, changeLen);
-//                    }
-//                }, newLen - len);
-//            } catch (MemorySetException e) {
-//                e.printStackTrace();
-//            }
         }
         afterStatusChange();
     }

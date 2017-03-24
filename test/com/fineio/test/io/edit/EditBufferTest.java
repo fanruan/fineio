@@ -1,6 +1,7 @@
 package com.fineio.test.io.edit;
 
 import com.fineio.base.Bits;
+import com.fineio.cache.CacheManager;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.base.AbstractBuffer;
@@ -91,7 +92,8 @@ public class EditBufferTest extends TestCase {
         for(int k = value.length/2; k < value.length; k++){
             assertEquals(buffer.get(k), (byte)0);
         }
-
+        buffer.force();
+        CacheManager.clear();
     }
 
 
@@ -124,6 +126,8 @@ public class EditBufferTest extends TestCase {
             assertEquals(buffer.get(k), 0);
         }
         buffer.clear();
+        buffer.force();
+        CacheManager.clear();
     }
 
     private void byteTest(byte[] value, Connector connector, FileBlock block, int off) {
@@ -185,6 +189,8 @@ public class EditBufferTest extends TestCase {
         }
         assertFalse(exp);
         buffer.clear();
+        buffer.force();
+        CacheManager.clear();
     }
 
     private void intTest(byte[] value, Connector connector, FileBlock block, int off) {
@@ -232,6 +238,8 @@ public class EditBufferTest extends TestCase {
         }
         assertTrue(exp);
         ib.clear();
+        ib.force();
+        CacheManager.clear();
     }
 
 
@@ -287,6 +295,8 @@ public class EditBufferTest extends TestCase {
         }
         assertTrue(exp);
         ib.clear();
+        ib.force();
+        CacheManager.clear();
     }
 
     private void doubleTest(byte[] value, Connector connector, FileBlock block, int off) {
@@ -341,6 +351,8 @@ public class EditBufferTest extends TestCase {
         }
         assertTrue(exp);
         ib.clear();
+        ib.force();
+        CacheManager.clear();
     }
 
     private void charTest(byte[] value, Connector connector, FileBlock block, int off) {
@@ -395,6 +407,8 @@ public class EditBufferTest extends TestCase {
         }
         assertTrue(exp);
         ib.clear();
+        ib.force();
+        CacheManager.clear();
     }
 
 
@@ -450,6 +464,8 @@ public class EditBufferTest extends TestCase {
         }
         assertTrue(exp);
         ib.clear();
+        ib.force();
+        CacheManager.clear();
     }
 
 
@@ -505,5 +521,7 @@ public class EditBufferTest extends TestCase {
         }
         assertTrue(exp);
         ib.clear();
+        ib.force();
+        CacheManager.clear();
     }
 }

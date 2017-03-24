@@ -329,11 +329,22 @@ public class FineIOTest extends TestCase {
         }
 
         assertEquals(d2, d3);
-        dfile.close();
+
         assertFalse(dfile.delete());
         for(boolean b : deleteArray){
             assertTrue(b);
         }
+        assertTrue(FineIO.getCurrentMemorySize()>0);
+        assertTrue(FineIO.getCurrentReadMemorySize() > 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        file.close();
+        ifile.close();
+        dfile.close();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
 
     }
 
@@ -433,6 +444,17 @@ public class FineIOTest extends TestCase {
             }
         }
         assertEquals(d1, d2);
+        assertTrue(FineIO.getCurrentMemorySize()>0);
+        assertTrue(FineIO.getCurrentReadMemorySize() > 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        file.close();
+        ifile.close();
+        dfile.close();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
     private double[] createRandomDouble(int len){
@@ -449,6 +471,8 @@ public class FineIOTest extends TestCase {
         URI u = new URI("");
         EasyMock.expect(connector.getBlockOffset()).andReturn((byte)22).anyTimes();
         connector.write(EasyMock.anyObject(FileBlock.class), EasyMock.anyObject(InputStream.class));
+        EasyMock.expectLastCall().anyTimes();
+        connector.write(EasyMock.anyObject(FileBlock.class), EasyMock.anyObject(byte[].class));
         EasyMock.expectLastCall().anyTimes();
         control.replay();
         WriteIOFile<DoubleBuffer> dfile =  FineIO.createIOFile(connector , u, FineIO.MODEL.WRITE_DOUBLE);
@@ -467,9 +491,18 @@ public class FineIOTest extends TestCase {
         for(int i = 1; i< doubles.length; i++) {
             FineIO.put(dfile3, doubles[i]);
         }
+        assertTrue(FineIO.getCurrentMemorySize()>0);
+        assertEquals(FineIO.getCurrentReadMemorySize() , 0);
+        assertTrue(FineIO.getCurrentWriteMemorySize() > 0);
 
-
-
+        dfile.close();
+        dfile2.close();
+        dfile3.close();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
 
