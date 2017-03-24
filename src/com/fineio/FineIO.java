@@ -8,6 +8,7 @@ import com.fineio.io.file.IOFile;
 import com.fineio.io.file.ReadIOFile;
 import com.fineio.io.file.WriteIOFile;
 import com.fineio.io.*;
+import com.fineio.io.file.writer.SyncManager;
 import com.fineio.memory.MemoryConf;
 import com.fineio.storage.Connector;
 
@@ -210,6 +211,24 @@ public final  class FineIO {
      */
     public final static void setMemoryCheckSchedule(long t) {
         CacheManager.getInstance().resetTimer(t);
+    }
+
+
+
+    /**
+     * 设置写线程数量
+     * @param threads
+     */
+    public static void setSyncThreads(int threads){
+        SyncManager.getInstance().setThreads(threads);
+    }
+
+    /**
+     * 获取写线程数量
+     * @return
+     */
+    public static int getSyncThreads(){
+        return  SyncManager.getInstance().getThreads();
     }
 
     /**

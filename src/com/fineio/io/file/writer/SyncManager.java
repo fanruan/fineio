@@ -18,12 +18,30 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public final class SyncManager {
 
-    private static final int ThreadsCount = Runtime.getRuntime().availableProcessors() + 1;
+    private static final int DEFAULT_THREAD_COUNT = Runtime.getRuntime().availableProcessors() + 1;
+
+    private volatile int threads = DEFAULT_THREAD_COUNT;
 
     public volatile static SyncManager instance ;
 
     private SyncManager() {
         watch_thread.start();
+    }
+
+    /**
+     * 设置写线程数量
+     * @param threads
+     */
+    public void setThreads(int threads){
+        this.threads = threads;
+    }
+
+    /**
+     * 获取写线程数量
+     * @return
+     */
+    public int getThreads(){
+        return threads;
     }
 
 
@@ -108,7 +126,7 @@ public final class SyncManager {
                         }
                     }
                 }
-                while (working_jobs.get() < ThreadsCount && !map.isEmpty()) {
+                while (working_jobs.get() < threads && !map.isEmpty()) {
                     final JobAssist jobAssist =  map.get();
                     if(jobAssist != null) {
                         //控制相同的任务不会同时执行，塞到屁股后面，这里可以不需要加锁，添加元素是单线程操作，remove是多线程的结果
@@ -147,7 +165,7 @@ public final class SyncManager {
         }
 
         private boolean isWait() {
-            return map.isEmpty() || working_jobs.get() > ThreadsCount;
+            return map.isEmpty() || working_jobs.get() > threads;
         }
     };
 

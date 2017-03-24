@@ -25,6 +25,14 @@ import java.util.Arrays;
  */
 public class FineIOTest extends TestCase {
 
+
+    public void testThreads() {
+        int counts = Runtime.getRuntime().availableProcessors() + 1;
+        assertEquals(counts, FineIO.getSyncThreads());
+        FineIO.setSyncThreads(30);
+        assertEquals(30, FineIO.getSyncThreads());
+    }
+
     public void testCreateReadIOFile() throws Exception {
 
         byte len = (byte) (Math.random() * 100d);
