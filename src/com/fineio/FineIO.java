@@ -241,11 +241,43 @@ public final  class FineIO {
     }
 
     /**
-     *
+     *获取当前内存使用量
      */
-    public static long getTotalMemorySize(){
+    public static long getCurrentMemorySize(){
         return CacheManager.getInstance().getCurrentMemorySize();
     }
+
+    /**
+     *获取当前读内存使用量
+     */
+    public static long getCurrentReadMemorySize(){
+        return CacheManager.getInstance().getReadSize();
+    }
+
+
+    /**
+     *获取当前写内存使用量
+     */
+    public static long getCurrentWriteMemorySize(){
+        return CacheManager.getInstance().getWriteSize();
+    }
+
+
+    /**
+     *获取当前等待读的句柄数
+     */
+    public static long getReadWaitCount(){
+        return CacheManager.getInstance().getReadWaitCount();
+    }
+
+
+    /**
+     *获取当前写文件等待读的句柄数
+     */
+    public static long getWriteWaitCount(){
+        return CacheManager.getInstance().getWriteWaitCount();
+    }
+
 
     /**
      * 随机写入

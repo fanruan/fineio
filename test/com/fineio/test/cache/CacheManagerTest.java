@@ -82,6 +82,11 @@ public class CacheManagerTest extends TestCase {
 
 
     public void testCache(){
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
         setMemory(1030);
         TestBuffer buffer = new TestBuffer();
         assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 0);
@@ -126,12 +131,18 @@ public class CacheManagerTest extends TestCase {
         assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 1024);
         b3.clear();
         assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 0);
-
+        exp = false;
         try {
             MemoryConf.setTotalMemSize(FineIO.getMaxMemSizeForSet() - 1);
         } catch (MemorySetException e) {
-            e.printStackTrace();
+            exp = true;
         }
+        assertFalse(exp);
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
 
     }
 

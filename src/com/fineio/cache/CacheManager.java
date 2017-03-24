@@ -286,8 +286,8 @@ public class CacheManager {
      * @return
      */
     private boolean checkNotifyWrite() {
-        return read_wait_count.get() == 0
-                || (read_wait_count.get() + LEVEL_LINE) < write_wait_count.get()
+        return getReadWaitCount() == 0
+                || (getReadWaitCount() + LEVEL_LINE) < getWriteWaitCount()
                 || checkWriteLow();
     }
 
@@ -317,8 +317,8 @@ public class CacheManager {
      * @return
      */
     private boolean checkNotifyRead() {
-        return write_wait_count.get() == 0
-                ||((write_wait_count.get() + LEVEL_LINE) < read_wait_count.get()
+        return getWriteWaitCount() == 0
+                ||((getWriteWaitCount() + LEVEL_LINE) < getReadWaitCount()
                 && !checkWriteLow());
     }
 
@@ -326,7 +326,7 @@ public class CacheManager {
      * 唤醒一个读
      */
     private void  notifyRead() {
-        if(read_wait_count.get() > 0) {
+        if(getReadWaitCount() > 0) {
             synchronized (read_size) {
                 read_size.notify();
             }
@@ -334,10 +334,18 @@ public class CacheManager {
     }
 
     /**
+     * 读等待的句柄数
+     * @return
+     */
+    public int getReadWaitCount() {
+        return read_wait_count.get();
+    }
+
+    /**
      * 唤醒一个写
      */
     private void  notifyWrite() {
-        if(write_wait_count.get() > 0) {
+        if(getWriteWaitCount() > 0) {
             synchronized (write_size) {
                 write_size.notify();
             }
@@ -374,13 +382,21 @@ public class CacheManager {
     }
 
     private void  gc() {
-        while (read_wait_count.get() != 0 || write_wait_count.get() != 0) {
+        while (getReadWaitCount() != 0 || getWriteWaitCount() != 0) {
             if(!forceGC()){
                 break;
             }
         }
         //stop 1微妙
         LockSupport.parkNanos(1000);
+    }
+
+    /**
+     * 写等待的句柄数量
+     * @return
+     */
+    public int getWriteWaitCount() {
+        return write_wait_count.get();
     }
 
     public boolean  forceGC(){
@@ -404,7 +420,7 @@ public class CacheManager {
      */
     private boolean checkWriteLow() {
         //有写的等待线程
-        return  write_wait_count.get() > 0
+        return  getWriteWaitCount() > 0
                 //写的空间小于总内存的1/8
                 && getWriteSize() < ( MemoryConf.getFreeMemory() << MIN_WRITE_OFFSET)
                 //读的空间大于写内存的7倍

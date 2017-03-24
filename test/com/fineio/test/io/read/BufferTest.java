@@ -1,5 +1,6 @@
 package com.fineio.test.io.read;
 
+import com.fineio.FineIO;
 import com.fineio.base.Bits;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.io.file.FileBlock;
@@ -91,6 +92,11 @@ public class BufferTest  extends TestCase {
         }
         assertTrue(exp);
         buffer.clear();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
     private void intTest(byte[] value, Connector connector, FileBlock block, int off) {
@@ -112,6 +118,11 @@ public class BufferTest  extends TestCase {
         }
         assertTrue(exp);
         ib.clear();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
 
@@ -134,6 +145,11 @@ public class BufferTest  extends TestCase {
         }
         assertTrue(exp);
         ib.clear();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
     private void doubleTest(byte[] value, Connector connector, FileBlock block, int off) {
@@ -155,6 +171,11 @@ public class BufferTest  extends TestCase {
         }
         assertTrue(exp);
         db.clear();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
     private void charTest(byte[] value, Connector connector, FileBlock block, int off) {
@@ -176,6 +197,11 @@ public class BufferTest  extends TestCase {
         }
         assertTrue(exp);
         cb.clear();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
 
@@ -198,6 +224,11 @@ public class BufferTest  extends TestCase {
         }
         assertTrue(exp);
         cb.clear();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
 
@@ -220,6 +251,11 @@ public class BufferTest  extends TestCase {
         }
         assertTrue(exp);
         db.clear();
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
     public void testThread() throws Exception{
@@ -272,6 +308,14 @@ public class BufferTest  extends TestCase {
         for(int i = 0; i < t.length; i++){
             t[i].join();
         }
+        for(int k = 0; k < value.length; k++){
+            buffer.force();
+        }
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
 
     }
 

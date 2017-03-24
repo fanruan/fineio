@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 public class MemoryConfTest extends TestCase {
 
     public void testGetAndSet(){
-        assertEquals(MemoryConf.getMinMemSizeForSet(), 1L<<30);
+        assertEquals(FineIO.getMinMemSizeForSet(), 1L<<30);
         long s = FineIO.getTotalMemSize();
         assertTrue(s >= FineIO.getMinMemSizeForSet());
         boolean exp = false;
@@ -28,6 +28,12 @@ public class MemoryConfTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
-        assertTrue(s >= MemoryConf.getMinMemSizeForSet());
+        assertTrue(s >= FineIO.getMinMemSizeForSet());
+        assertTrue(s >= FineIO.getFreeMemory());
+        assertEquals(FineIO.getCurrentMemorySize(), 0);
+        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+        assertEquals(FineIO.getReadWaitCount(), 0);
+        assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 }
