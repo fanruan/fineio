@@ -523,6 +523,7 @@ public class CacheManager {
             forceClear(cm.read);
             forceClear(cm.edit);
             forceClear(cm.write);
+            cm = null;
         }
     }
 
