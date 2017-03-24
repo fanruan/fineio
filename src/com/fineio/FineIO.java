@@ -231,6 +231,22 @@ public final  class FineIO {
         return  SyncManager.getInstance().getThreads();
     }
 
+
+    /**
+     * 获取总的可用空闲内存大小
+     * @return
+     */
+    public static long getFreeMemory() {
+        return MemoryConf.getFreeMemory();
+    }
+
+    /**
+     *
+     */
+    public static long getTotalMemorySize(){
+        return CacheManager.getInstance().getCurrentMemorySize();
+    }
+
     /**
      * 随机写入
      * @param file

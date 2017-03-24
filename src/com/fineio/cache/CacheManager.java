@@ -504,18 +504,33 @@ public class CacheManager {
         return write_size.get();
     }
 
-    public static synchronized void clear() {
-        if(instance != null) {
-            if(instance.gcThread != null) {
-                instance.gcThread.clear();
-            }
-            if(instance.timer != null) {
-                instance.timer.cancel();
-            }
-            if(instance.activeTimer != null) {
-                instance.activeTimer.cancel();
-            }
+    public static  void clear() {
+        CacheManager cm = null;
+        synchronized (CacheManager.class) {
+            cm = instance;
             instance = null;
+        }
+        if(cm != null) {
+            if(cm.gcThread != null) {
+                cm.gcThread.clear();
+            }
+            if(cm.timer != null) {
+                cm.timer.cancel();
+            }
+            if(cm.activeTimer != null) {
+                cm.activeTimer.cancel();
+            }
+            forceClear(cm.read);
+            forceClear(cm.edit);
+            forceClear(cm.write);
+        }
+    }
+
+    private static void forceClear(CacheLinkedMap<Buffer> map) {
+        Iterator<Buffer> iterator = map.iterator();
+        while (iterator.hasNext()) {
+            Buffer buffer = iterator.next();
+            buffer.force();
         }
     }
 
