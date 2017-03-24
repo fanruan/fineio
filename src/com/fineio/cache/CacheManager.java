@@ -370,7 +370,7 @@ public class CacheManager {
      * @return
      */
     private boolean cs(long size) {
-        return  getCurrentMemorySize() + size < MemoryConf.getTotalMemSize();
+        return  getCurrentMemorySize() + size < MemoryConf.getFreeMemory();
     }
 
     private void  gc() {
@@ -406,7 +406,7 @@ public class CacheManager {
         //有写的等待线程
         return  write_wait_count.get() > 0
                 //写的空间小于总内存的1/8
-                && getWriteSize() < ( MemoryConf.getTotalMemSize() << MIN_WRITE_OFFSET)
+                && getWriteSize() < ( MemoryConf.getFreeMemory() << MIN_WRITE_OFFSET)
                 //读的空间大于写内存的7倍
                 && getReadSize() > (getWriteSize() >> MIN_WRITE_OFFSET  - getWriteSize());
     }
