@@ -14,6 +14,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,6 +37,8 @@ public class SyncManagerTest extends TestCase {
         final int len = 1000;
         Thread[] threads = new Thread[len];
         final AtomicInteger fff = new AtomicInteger();
+        final Map<Integer, Object> runningCheck = new ConcurrentHashMap<Integer, Object>();
+
         for(int i = 0; i < len; i++) {
             threads[i] = new Thread(){
 
@@ -45,11 +49,14 @@ public class SyncManagerTest extends TestCase {
                         try {
                             SyncManager.getInstance().triggerWork(new JobAssist(connector, constructor.newInstance(uri, String.valueOf(i)), new Job() {
                                 public void doJob() {
+                                    assertFalse(runningCheck.containsKey(k));
+                                    runningCheck.put(k, this);
                                     fff.addAndGet(1);
                                     try {
                                         Thread.sleep(10);
                                     } catch (InterruptedException e) {
                                     }
+                                    runningCheck.remove(k);
                                 }
                             }));
                         } catch (InstantiationException e) {
@@ -74,11 +81,14 @@ public class SyncManagerTest extends TestCase {
                     try {
                         SyncManager.getInstance().force(new JobAssist(connector, constructor.newInstance(uri, String.valueOf(k)), new Job() {
                             public void doJob() {
+                                assertFalse(runningCheck.containsKey(k));
+                                runningCheck.put(k, this);
                                 fff.addAndGet(1);
                                 try {
                                     Thread.sleep(10);
                                 } catch (InterruptedException e) {
                                 }
+                                runningCheck.remove(k);
                             }
                         }));
                     } catch (InstantiationException e) {
@@ -97,6 +107,7 @@ public class SyncManagerTest extends TestCase {
             awaitThreads[i].start();
             threads[i].start();
         }
+        SyncManager.getInstance().setThreads(SyncManager.getInstance().getThreads()*2);
         Field field = SyncManager.class.getDeclaredField("working_jobs");
         field.setAccessible(true);
         final AtomicInteger a = (AtomicInteger) field.get(SyncManager.getInstance());
@@ -106,7 +117,7 @@ public class SyncManagerTest extends TestCase {
         Thread watch = new Thread() {
             public void run() {
                 while(!end || !jm.isEmpty()) {
-                    assertTrue(a.intValue() < Runtime.getRuntime().availableProcessors() + 2);
+                    assertTrue(a.intValue() < SyncManager.getInstance().getThreads() + 1);
                 }
             }
         };
