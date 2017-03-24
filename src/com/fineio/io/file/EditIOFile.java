@@ -41,4 +41,12 @@ public final class EditIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
         return  new EditIOFile<E>(connector, uri, model);
     }
 
+    protected int gi(long p) {
+        int len =  (int)(p >> block_size_offset);
+        if(len > 0){
+            checkWrite(len);
+        }
+        return len;
+    }
+
 }

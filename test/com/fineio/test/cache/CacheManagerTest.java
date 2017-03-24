@@ -82,6 +82,7 @@ public class CacheManagerTest extends TestCase {
 
 
     public void testCache(){
+        CacheManager.clear();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);

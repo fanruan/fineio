@@ -31,6 +31,14 @@ public final class WriteIOFile<T extends Buffer> extends IOFile<T> {
         single_block_len = (1L << block_size_offset) - 1;
     }
 
+    protected int gi(long p) {
+        int len =  (int)(p >> block_size_offset);
+        if(len > 0){
+            checkWrite(len);
+        }
+        return len;
+    }
+
     /**
      * 创建File方法
      * @param connector 连接器

@@ -86,15 +86,11 @@ public abstract class IOFile<E extends Buffer> {
         return index;
     }
 
-    private final int gi(long p) {
-        int len =  (int)(p >> block_size_offset);
-        if(len > 0){
-            checkWrite(len);
-        }
-        return len;
+    protected  int gi(long p) {
+        return   (int)(p >> block_size_offset);
     }
 
-    private  void checkWrite(int len) {
+    protected   void checkWrite(int len) {
         if(bufferWriteIndex != len) {
             if(bufferWriteIndex != -1){
                 buffers[bufferWriteIndex].write();
