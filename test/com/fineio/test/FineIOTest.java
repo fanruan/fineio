@@ -223,6 +223,11 @@ public class FineIOTest extends TestCase {
                 return true;
             }
         }).anyTimes();
+
+        connector.write(EasyMock.anyObject(FileBlock.class), EasyMock.anyObject(byte[].class));
+        EasyMock.expectLastCall().anyTimes();
+        connector.write(EasyMock.anyObject(FileBlock.class), EasyMock.anyObject(InputStream.class));
+        EasyMock.expectLastCall().anyTimes();
         control.replay();
         EditIOFile<LongBuffer> file =  FineIO.createIOFile(connector , u, FineIO.MODEL.EDIT_LONG);
         long v1 = 0;
@@ -324,6 +329,7 @@ public class FineIOTest extends TestCase {
         }
 
         assertEquals(d2, d3);
+        dfile.close();
         assertFalse(dfile.delete());
         for(boolean b : deleteArray){
             assertTrue(b);

@@ -150,6 +150,11 @@ public abstract class IOFile<E extends Buffer> {
         boolean delete = connector.delete(createHeadBlock());
         if(buffers != null){
            for(int i = 0; i < buffers.length; i++){
+               //内存泄露
+               if(buffers[i] != null){
+                   buffers[i].force();
+                   buffers[i] = null;
+               }
                boolean v = connector.delete(createIndexBlock(i));
                if(delete){
                   delete = v;

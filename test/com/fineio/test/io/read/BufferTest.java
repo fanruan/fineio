@@ -92,6 +92,7 @@ public class BufferTest  extends TestCase {
         }
         assertTrue(exp);
         buffer.clear();
+        buffer.force();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -118,6 +119,7 @@ public class BufferTest  extends TestCase {
         }
         assertTrue(exp);
         ib.clear();
+        ib.force();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -145,6 +147,7 @@ public class BufferTest  extends TestCase {
         }
         assertTrue(exp);
         ib.clear();
+        ib.force();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -171,6 +174,7 @@ public class BufferTest  extends TestCase {
         }
         assertTrue(exp);
         db.clear();
+        db.force();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -197,6 +201,7 @@ public class BufferTest  extends TestCase {
         }
         assertTrue(exp);
         cb.clear();
+        cb.force();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -224,6 +229,7 @@ public class BufferTest  extends TestCase {
         }
         assertTrue(exp);
         cb.clear();
+        cb.force();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -251,6 +257,7 @@ public class BufferTest  extends TestCase {
         }
         assertTrue(exp);
         db.clear();
+        db.force();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
