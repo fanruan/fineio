@@ -3,6 +3,7 @@ package com.fineio.test;
 import com.fineio.FineIO;
 import com.fineio.base.Bits;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
+import com.fineio.exception.IOSetException;
 import com.fineio.io.file.*;
 import com.fineio.io.DoubleBuffer;
 import com.fineio.io.IntBuffer;
@@ -30,6 +31,22 @@ public class FineIOTest extends TestCase {
         int counts = Runtime.getRuntime().availableProcessors() + 1;
         assertEquals(counts, FineIO.getSyncThreads());
         FineIO.setSyncThreads(30);
+        assertEquals(30, FineIO.getSyncThreads());
+        boolean exp =false;
+        try {
+            FineIO.setSyncThreads(0);
+        }catch (IOSetException e){
+            exp = true;
+        }
+        assertTrue(exp);
+        assertEquals(30, FineIO.getSyncThreads());
+        exp =false;
+        try {
+            FineIO.setSyncThreads(-1);
+        }catch (IOSetException e){
+            exp = true;
+        }
+        assertTrue(exp);
         assertEquals(30, FineIO.getSyncThreads());
     }
 

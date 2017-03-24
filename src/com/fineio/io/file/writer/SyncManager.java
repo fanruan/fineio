@@ -1,5 +1,6 @@
 package com.fineio.io.file.writer;
 
+import com.fineio.exception.IOSetException;
 import com.fineio.io.base.BufferKey;
 import com.fineio.io.base.Job;
 import com.fineio.io.base.JobAssist;
@@ -33,7 +34,11 @@ public final class SyncManager {
      * @param threads
      */
     public void setThreads(int threads){
-        this.threads = threads;
+        if(threads > 0) {
+            this.threads = threads;
+        } else {
+            throw new IOSetException("thread counts must max than zero : " + threads);
+        }
     }
 
     /**
