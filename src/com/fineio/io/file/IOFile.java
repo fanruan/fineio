@@ -43,6 +43,8 @@ public abstract class IOFile<E extends Buffer> {
     protected long single_block_len;
     protected volatile E[] buffers;
 
+    private volatile boolean released = false;
+
 
     IOFile(Connector connector, URI uri, AbstractFileModel<E> model) {
         if(uri == null || connector == null|| model == null){
@@ -389,12 +391,23 @@ public abstract class IOFile<E extends Buffer> {
         }
     }
 
+    protected void finalize() {
+        //防止没有执行close导致内存泄露
+        close();
+    }
+
     public void close() {
-        writeHeader();
-        for(int i = 0; i < buffers.length; i++){
-            if(buffers[i] != null) {
-                buffers[i].force();
+        synchronized (this) {
+            if(released){
+                return;
             }
+            writeHeader();
+            for (int i = 0; i < buffers.length; i++) {
+                if (buffers[i] != null) {
+                    buffers[i].force();
+                }
+            }
+            released = true;
         }
     }
 }
