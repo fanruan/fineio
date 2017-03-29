@@ -386,7 +386,7 @@ public abstract class IOFile<E extends Buffer> {
         bytes[MemoryConstants.STEP_LONG] = (byte) (block_size_offset + model.offset());
         try {
             connector.write(block, bytes);
-        } catch (IOException e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }

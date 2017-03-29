@@ -131,8 +131,15 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     }
 
     public void force() {
+        int i = 0;
         while (needFlush()) {
+            i++;
             SyncManager.getInstance().force(createWriteJob());
+            //尝试10次依然抛错就不写了 强制释放内存
+            if(i > 10) {
+                this.clear();
+                break;
+            }
         }
     }
 
@@ -141,8 +148,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
             public void doJob() {
                 try {
                     write0();
-                } catch (Exception e){
-                    e.printStackTrace();
+                } catch (StreamCloseException e){
                     flushed = false;
                     write();
                 }
