@@ -198,6 +198,9 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
 
     public void force() {
         synchronized (this) {
+            if(close){
+                return;
+            }
             close = true;
             clear();
         }

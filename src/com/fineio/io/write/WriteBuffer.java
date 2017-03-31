@@ -152,7 +152,11 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
                     write0();
                 } catch (StreamCloseException e){
                     flushed = false;
-                    write();
+                    //stream close这种还是直接触发写把，否则force的时候如果有三次那么就会出现写不成功的bug
+                    //理论讲写方法都是单线程，所以force的时候肯定也不会再写了，但是不怕一万就怕万一
+                    //这样执行下去job会唤醒force的while循环会执行一次会导致写次数++
+                    //所以不trigger了直接循环执行把
+                    doJob();
                 }
             }
         });

@@ -140,6 +140,9 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
     public void force() {
         forceWrite();
         synchronized (this) {
+            if(close){
+                return;
+            }
             close();
             cleanMemory();
             releaseBuffer();

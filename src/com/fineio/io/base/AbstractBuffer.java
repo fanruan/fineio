@@ -102,10 +102,12 @@ public abstract class AbstractBuffer implements BaseBuffer {
         return max_size << getLengthOffset();
     }
 
+    private transient CacheManager manager;
 
     protected AbstractBuffer(Connector connector, FileBlock block) {
         this.bufferKey = new BufferKey(connector, block);
-        CacheManager.getInstance().registerBuffer((Buffer) this);
+        manager = CacheManager.getInstance();
+        manager.registerBuffer((Buffer) this);
     }
 
     protected final void clearMemory() {
@@ -113,12 +115,12 @@ public abstract class AbstractBuffer implements BaseBuffer {
             beforeStatusChange();
             MemoryUtils.free(address);
             afterStatusChange();
-            CacheManager.getInstance().clearBufferMemory((Buffer)this);
+            manager.clearBufferMemory((Buffer)this);
         }
     }
 
     protected final void releaseBuffer(){
-        CacheManager.getInstance().releaseBuffer((Buffer) this, close);
+        manager.releaseBuffer((Buffer) this, close);
     }
 
     /**
