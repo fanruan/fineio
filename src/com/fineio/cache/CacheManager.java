@@ -145,20 +145,39 @@ public class CacheManager {
      * @param remove 是否彻底删除
      */
     public void releaseBuffer(Buffer buffer, boolean remove) {
-        int reduce_size = 0 - buffer.getAllocateSize();
         switch (buffer.getLevel()){
             case READ: {
                 read.remove(buffer, remove);
-                read_size.add(reduce_size);
                 break;
             }
             case EDIT: {
                 edit.remove(buffer, remove);
-                read_size.add(reduce_size);
                 break;
             }
             case WRITE: {
                 write.remove(buffer, remove);
+                break;
+            }
+        }
+    }
+
+
+    /**
+     * 释放buffer的方法
+     * @param buffer buffer
+     */
+    public void clearBufferMemory(Buffer buffer) {
+        int reduce_size = 0 - buffer.getAllocateSize();
+        switch (buffer.getLevel()){
+            case READ: {
+                read_size.add(reduce_size);
+                break;
+            }
+            case EDIT: {
+                read_size.add(reduce_size);
+                break;
+            }
+            case WRITE: {
                 write_size.add(reduce_size);
                 break;
             }

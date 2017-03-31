@@ -13,6 +13,7 @@ import com.fineio.storage.Connector;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * Created by daniel on 2017/2/20.
@@ -133,31 +134,15 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
         checkIndex(p);
     }
 
-    protected void write0(){
-        synchronized (this) {
-            changed = false;
-            try {
-                bufferKey.getConnector().write(bufferKey.getBlock(), getInputStream());
-                flushed = true;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
     /**
-     * force关闭load入口不在加载
+     * force关闭load入口不在加载,force与写也不支持多线程
      */
     public void force() {
-        super.force();
+        forceWrite();
         synchronized (this) {
-            if (!load) {
-                return;
-            }
-            load = false;
-            super.closeDuringClear();
-            super.clear();
+            close();
+            cleanMemory();
+            releaseBuffer();
         }
     }
 
@@ -165,24 +150,45 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
         return LEVEL.EDIT;
     }
 
-    /**
-     * clear并不关闭 force才会关闭
-     */
-    protected void closeDuringClear(){
-        //do nothing
-    }
 
     /**
      * clear仅仅是clear而已，如果另个线程在写。clear是clear不掉的
      */
     public void clear(){
-        super.force();
+        forceWrite();
+        clearAfterWrite();
+    }
+
+    private void cleanMemory(){
         synchronized (this) {
             if (!load) {
                 return;
             }
             load = false;
-            super.clear();
+            this.current_max_size = 0;
+            clearMemory();
         }
     }
+
+    protected void clearAfterWrite() {
+        synchronized (this) {
+            if (!load) {
+                releaseBuffer();
+                return;
+            }
+            load = false;
+            //等待1微秒让写的写完
+            LockSupport.parkNanos(1000);
+            //如果被写入值了 返回把
+            if(needFlush()){
+                //状态还是load
+                load = true;
+                return;
+            }
+            this.current_max_size = 0;
+            clearMemory();
+            releaseBuffer();
+        }
+    }
+
 }

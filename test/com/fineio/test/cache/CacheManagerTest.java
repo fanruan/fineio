@@ -8,6 +8,7 @@ import com.fineio.exception.MemorySetException;
 import com.fineio.io.Buffer;
 import com.fineio.memory.MemoryConf;
 import com.fineio.memory.MemoryUtils;
+import com.fineio.test.io.MemoryLeakTest;
 import junit.framework.TestCase;
 
 import java.lang.reflect.Field;
@@ -22,7 +23,7 @@ public class CacheManagerTest extends TestCase {
         private volatile boolean access = false;
         final int cap = 1024;
         protected long address = 0;
-        private volatile boolean close = false;
+        protected volatile boolean close = false;
 
         TestBuffer(){
             CacheManager.getInstance().registerBuffer(this);
@@ -48,6 +49,7 @@ public class CacheManagerTest extends TestCase {
                     return;
                 }
                 MemoryUtils.free(address);
+                CacheManager.getInstance().clearBufferMemory((Buffer)this);
                 CacheManager.getInstance().releaseBuffer(this, true);
                 close = true;
             }
@@ -72,9 +74,24 @@ public class CacheManagerTest extends TestCase {
     }
 
     public class TestBuffer2 extends TestBuffer {
+
+        private volatile  boolean load = false;
+
+        public void write() {
+            super.write();
+            load = true;
+        }
+
         public void clear() {
-            MemoryUtils.free(address);
-            CacheManager.getInstance().releaseBuffer(this, false);
+            synchronized (this) {
+                if (!load) {
+                    return;
+                }
+                MemoryUtils.free(address);
+                CacheManager.getInstance().clearBufferMemory((Buffer)this);
+                load = false;
+                CacheManager.getInstance().releaseBuffer(this, false);
+            }
         }
     }
 
@@ -144,7 +161,8 @@ public class CacheManagerTest extends TestCase {
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
         assertEquals(FineIO.getReadWaitCount(), 0);
         assertEquals(FineIO.getWriteWaitCount(), 0);
-
+        CacheManager.clear();
+        MemoryLeakTest.assertZeroMemory();
     }
 
     private void setMemory(int size) {

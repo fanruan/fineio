@@ -108,14 +108,17 @@ public abstract class AbstractBuffer implements BaseBuffer {
         CacheManager.getInstance().registerBuffer((Buffer) this);
     }
 
-    public void clear() {
+    protected final void clearMemory() {
         synchronized (this) {
             beforeStatusChange();
             MemoryUtils.free(address);
             afterStatusChange();
-            //close true才需要remove掉
-            CacheManager.getInstance().releaseBuffer((Buffer) this, close);
+            CacheManager.getInstance().clearBufferMemory((Buffer)this);
         }
+    }
+
+    protected final void releaseBuffer(){
+        CacheManager.getInstance().releaseBuffer((Buffer) this, close);
     }
 
     /**

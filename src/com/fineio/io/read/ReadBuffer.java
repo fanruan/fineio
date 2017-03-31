@@ -191,7 +191,8 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
             }
             load = false;
             max_size = 0;
-            super.clear();
+            clearMemory();
+            releaseBuffer();
         }
     }
 

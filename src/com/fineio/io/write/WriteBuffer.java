@@ -1,10 +1,8 @@
 package com.fineio.io.write;
 
-import com.fineio.base.Worker;
 import com.fineio.cache.CacheManager;
 import com.fineio.cache.LEVEL;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
-import com.fineio.exception.MemorySetException;
 import com.fineio.exception.StreamCloseException;
 import com.fineio.io.Buffer;
 import com.fineio.io.file.FileBlock;
@@ -12,9 +10,7 @@ import com.fineio.io.base.Job;
 import com.fineio.io.base.JobAssist;
 import com.fineio.io.file.writer.SyncManager;
 import com.fineio.io.base.AbstractBuffer;
-import com.fineio.memory.MemoryConf;
 import com.fineio.memory.MemoryUtils;
-import com.fineio.monitor.MonitorUtils;
 import com.fineio.storage.Connector;
 
 import java.io.IOException;
@@ -131,17 +127,23 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     }
 
     public void force() {
+        forceWrite();
+        this.clear();
+    }
+
+    protected final void forceWrite() {
         int i = 0;
         while (needFlush()) {
             i++;
             SyncManager.getInstance().force(createWriteJob());
-            //尝试10次依然抛错就不写了 强制释放内存
-            if(i > 10) {
-                this.clear();
+            //尝试3次依然抛错就不写了 强制释放内存 TODO后续考虑对异常未保存文件处理
+            if(i > 3) {
+                flushed = true;
                 break;
             }
         }
     }
+
 
     protected JobAssist createWriteJob() {
         return new JobAssist(bufferKey, new Job() {
@@ -156,26 +158,43 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         });
     }
 
+    private transient long lastWriteTime;
+    //20秒内响应一次写
+    private static volatile long PERIOD = 20000;
+
     public void write() {
 
-        SyncManager.getInstance().triggerWork(createWriteJob());
+        long t =  System.currentTimeMillis();
+        if(t - lastWriteTime > PERIOD) {
+            lastWriteTime = t;
+            SyncManager.getInstance().triggerWork(createWriteJob());
+        }
 
     }
 
     /**
      * 在clear的时候关闭
      */
-    protected void closeDuringClear(){
+    protected void close(){
         close = true;
         this.max_size = 0;
     }
 
     public void clear(){
         synchronized (this) {
-            closeDuringClear();
+            if(close){
+                return;
+            }
+            close();
             this.current_max_size = 0;
-            super.clear();
+            clearMemory();
+            releaseBuffer();
         }
+    }
+
+
+    protected void clearAfterWrite() {
+        clear();
     }
 
     protected void write0(){
@@ -184,7 +203,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
             try {
                 bufferKey.getConnector().write(bufferKey.getBlock(), getInputStream());
                 flushed = true;
-                clear();
+                clearAfterWrite();
             } catch (IOException e) {
                 e.printStackTrace();
             }

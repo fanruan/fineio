@@ -36,8 +36,8 @@ public abstract class AbstractReadIOFile<T extends Buffer> extends IOFile<T> {
             p += MemoryConstants.STEP_LONG;
             block_size_offset = (byte) (header[p] - offset);
             single_block_len = (1L << block_size_offset) - 1;
-        } catch (IOException e) {
-            throw new BlockNotFoundException("block:" + uri.toString() +" not found!");
+        } catch (Throwable e) {
+           // throw new BlockNotFoundException("block:" + uri.toString() +" not found!");
         }
     }
 }

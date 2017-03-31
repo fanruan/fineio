@@ -88,8 +88,18 @@ public abstract class IOFile<E extends Buffer> {
         return index;
     }
 
+    //读
     protected  int gi(long p) {
         return   (int)(p >> block_size_offset);
+    }
+
+    //触发写
+    protected int giw(long p) {
+        int len =  (int)(p >> block_size_offset);
+        if(len > 0){
+            checkWrite(len);
+        }
+        return len;
     }
 
     protected   void checkWrite(int len) {
@@ -251,7 +261,7 @@ public abstract class IOFile<E extends Buffer> {
      * @param d
      */
     public static void put(IOFile<DoubleBuffer> file, long p, double d) {
-        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
+        file.getBuffer(file.checkBuffer(file.giw(p))).put(file.gp(p), d);
     }
     /**
      * 随机写
@@ -260,7 +270,7 @@ public abstract class IOFile<E extends Buffer> {
      * @param d
      */
     public static void put(IOFile<ByteBuffer> file, long p, byte d) {
-        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
+        file.getBuffer(file.checkBuffer(file.giw(p))).put(file.gp(p), d);
     }
     /**
      * 随机写
@@ -269,7 +279,7 @@ public abstract class IOFile<E extends Buffer> {
      * @param d
      */
     public static void put(IOFile<CharBuffer> file, long p, char d) {
-        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
+        file.getBuffer(file.checkBuffer(file.giw(p))).put(file.gp(p), d);
     }
     /**
      * 随机写
@@ -278,7 +288,7 @@ public abstract class IOFile<E extends Buffer> {
      * @param d
      */
     public static void put(IOFile<FloatBuffer> file, long p, float d) {
-        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
+        file.getBuffer(file.checkBuffer(file.giw(p))).put(file.gp(p), d);
     }
     /**
      * 随机写
@@ -287,7 +297,7 @@ public abstract class IOFile<E extends Buffer> {
      * @param d
      */
     public static void put(IOFile<LongBuffer> file, long p, long d) {
-        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
+        file.getBuffer(file.checkBuffer(file.giw(p))).put(file.gp(p), d);
     }
     /**
      * 随机写
@@ -296,7 +306,7 @@ public abstract class IOFile<E extends Buffer> {
      * @param d
      */
     public static void put(IOFile<IntBuffer> file, long p, int d) {
-        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
+        file.getBuffer(file.checkBuffer(file.giw(p))).put(file.gp(p), d);
     }
     /**
      * 随机写
@@ -305,7 +315,7 @@ public abstract class IOFile<E extends Buffer> {
      * @param d
      */
     public static void put(IOFile<ShortBuffer> file, long p, short d) {
-        file.getBuffer(file.checkBuffer(file.gi(p))).put(file.gp(p), d);
+        file.getBuffer(file.checkBuffer(file.giw(p))).put(file.gp(p), d);
     }
 
     /**

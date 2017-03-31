@@ -2,6 +2,7 @@ package com.fineio.test.base;
 
 import com.fineio.base.SingleWaitThread;
 import com.fineio.base.Worker;
+import com.fineio.test.io.MemoryLeakTest;
 import junit.framework.TestCase;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -68,6 +69,7 @@ public class SingleWaitThreadTest  extends TestCase {
         assertEquals(trigger.get(), threadLen * threadLen);
         assertTrue(trigger.get() > running.get());
         assertTrue(running.get() > 1);
+        MemoryLeakTest.assertZeroMemory();
     }
 
 }

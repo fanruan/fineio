@@ -9,12 +9,15 @@ import com.fineio.io.DoubleBuffer;
 import com.fineio.io.IntBuffer;
 import com.fineio.io.LongBuffer;
 import com.fineio.storage.Connector;
+import com.fineio.test.file.FineWriteIOTest;
+import com.fineio.test.io.MemoryLeakTest;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.easymock.IMocksControl;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -48,6 +51,7 @@ public class FineIOTest extends TestCase {
         }
         assertTrue(exp);
         assertEquals(30, FineIO.getSyncThreads());
+        MemoryLeakTest.assertZeroMemory();
     }
 
     public void testCreateReadIOFile() throws Exception {
@@ -72,6 +76,7 @@ public class FineIOTest extends TestCase {
         control.replay();
         IOFile file = FineIO.createIOFile(connector , u, FineIO.MODEL.READ_LONG);
         assertTrue(file instanceof ReadIOFile);
+        MemoryLeakTest.assertZeroMemory();
     }
 
     public void testCreateWriteIOFile() throws Exception {
@@ -80,6 +85,7 @@ public class FineIOTest extends TestCase {
         URI u = new URI("");
         IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_DOUBLE);
         assertTrue(file instanceof WriteIOFile);
+        MemoryLeakTest.assertZeroMemory();
     }
 
     public void testCreateEditIOFile() throws Exception {
@@ -101,9 +107,13 @@ public class FineIOTest extends TestCase {
                 return  new ByteArrayInputStream(res);
             }
         }).anyTimes();
+        connector.write(EasyMock.anyObject(FileBlock.class), EasyMock.anyObject(byte[].class));
+        EasyMock.expectLastCall().anyTimes();
+
         control.replay();
         IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.EDIT_DOUBLE);
         assertTrue(file instanceof EditIOFile);
+        MemoryLeakTest.assertZeroMemory();
     }
 
 
@@ -127,108 +137,9 @@ public class FineIOTest extends TestCase {
         final byte[] head = new byte[16];
         Bits.putInt(head, 0, blocks);
         head[8] = (byte) block_off_set;
-        IMocksControl control = EasyMock.createControl();
-        Connector connector = control.createMock(Connector.class);
         URI u = new URI("");
-        Field fieldHead = FileConstants.class.getDeclaredField("HEAD");
-        fieldHead.setAccessible(true);
-        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
-        constructor.setAccessible(true);
-        FileBlock block = constructor.newInstance(u, fieldHead.get(null));
-        EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
-            
-            public InputStream answer() throws Throwable {
-                return new ByteArrayInputStream(head);
-            }
-        }).anyTimes();
-        FileBlock block_0 = constructor.newInstance(u, String.valueOf(0));
-        EasyMock.expect(connector.read(EasyMock.eq(block_0))).andAnswer(new IAnswer<InputStream>() {
-            
-            public InputStream answer() throws Throwable {
-                return new ByteArrayInputStream(block0);
-            }
-        }).anyTimes();
-        FileBlock block_1 = constructor.newInstance(u, String.valueOf(1));
-        EasyMock.expect(connector.read(EasyMock.eq(block_1))).andAnswer(new IAnswer<InputStream>() {
-            
-            public InputStream answer() throws Throwable {
-                return new ByteArrayInputStream(block1);
-            }
-        }).anyTimes();
-        FileBlock block_2 = constructor.newInstance(u, String.valueOf(2));
-        EasyMock.expect(connector.read(EasyMock.eq(block_2))).andAnswer(new IAnswer<InputStream>() {
-            
-            public InputStream answer() throws Throwable {
-                return new ByteArrayInputStream(block2);
-            }
-        }).anyTimes();
-        FileBlock block_3 = constructor.newInstance(u, String.valueOf(3));
-        EasyMock.expect(connector.read(EasyMock.eq(block_3))).andAnswer(new IAnswer<InputStream>() {
-            
-            public InputStream answer() throws Throwable {
-                return new ByteArrayInputStream(block3);
-            }
-        }).anyTimes();
+        Connector connector = getConnector(block0, block1, block2, block3, head, u);
 
-        final boolean[] deleteArray = new boolean[6];
-        Arrays.fill(deleteArray, false);
-        EasyMock.expect(connector.delete(EasyMock.eq(block))).andAnswer(new IAnswer<Boolean>() {
-
-            public Boolean answer() throws Throwable {
-                deleteArray[5] = true;
-                return true;
-            }
-        }).anyTimes();
-        EasyMock.expect(connector.delete(EasyMock.eq(block_0))).andAnswer(new IAnswer<Boolean>() {
-
-            public Boolean answer() throws Throwable {
-                deleteArray[0] = true;
-                return  true;
-            }
-        }).anyTimes();
-        EasyMock.expect(connector.delete(EasyMock.eq(block_1))).andAnswer(new IAnswer<Boolean>() {
-
-            public Boolean answer() throws Throwable {
-                deleteArray[1] = true;
-                return true;
-            }
-        }).anyTimes();
-        EasyMock.expect(connector.delete(EasyMock.eq(block_2))).andAnswer(new IAnswer<Boolean>() {
-
-            public Boolean answer() throws Throwable {
-                deleteArray[2] = true;
-                return false;
-            }
-        }).anyTimes();
-        EasyMock.expect(connector.delete(EasyMock.eq(block_3))).andAnswer(new IAnswer<Boolean>() {
-
-            public Boolean answer() throws Throwable {
-                deleteArray[3] = true;
-                return true;
-            }
-        }).anyTimes();
-        FileBlock block_folder = constructor.newInstance(u, "");
-        EasyMock.expect(connector.delete(EasyMock.eq(block_folder))).andAnswer(new IAnswer<Boolean>() {
-
-            public Boolean answer() throws Throwable {
-                deleteArray[4] = true;
-                return true;
-            }
-        }).anyTimes();
-
-
-        EasyMock.expect(connector.delete((FileBlock) EasyMock.anyObject())).andAnswer(new IAnswer<Boolean>() {
-
-            public Boolean answer() throws Throwable {
-                return true;
-            }
-        }).anyTimes();
-
-        connector.write(EasyMock.anyObject(FileBlock.class), EasyMock.anyObject(byte[].class));
-        EasyMock.expectLastCall().anyTimes();
-        connector.write(EasyMock.anyObject(FileBlock.class), EasyMock.anyObject(InputStream.class));
-        EasyMock.expectLastCall().anyTimes();
-        control.replay();
         EditIOFile<LongBuffer> file =  FineIO.createIOFile(connector , u, FineIO.MODEL.EDIT_LONG);
         long v1 = 0;
         for(long i = 0, ilen = (totalLen >> 3); i < ilen; i++){
@@ -260,6 +171,8 @@ public class FineIOTest extends TestCase {
             v3 += FineIO.getLong(file, i);
         }
         assertEquals(v2, v3);
+        file.close();
+        connector = getConnector(block0, block1, block2, block3, head, u);
         EditIOFile<IntBuffer> ifile =   FineIO.createIOFile(connector , u, FineIO.MODEL.EDIT_INT);
         v1 = 0;
         for(long i = 0, ilen = (totalLen >> 2); i < ilen; i++){
@@ -292,7 +205,7 @@ public class FineIOTest extends TestCase {
         }
         assertEquals(v2, v3);
 
-
+        connector = getConnector(block0, block1, block2, block3, head, u);
         EditIOFile<DoubleBuffer> dfile =  FineIO.createIOFile(connector , u, FineIO.MODEL.EDIT_DOUBLE);
         double d1 = 0;
         for(long i = 0, ilen = (totalLen >> 3); i < ilen; i++){
@@ -324,16 +237,12 @@ public class FineIOTest extends TestCase {
         for(long i = currentLen, ilen = currentLen*2; i < ilen; i++){
             d3 += FineIO.getDouble(dfile, i);
         }
-        for(boolean b : deleteArray){
-            assertFalse(b);
-        }
+
 
         assertEquals(d2, d3);
 
-        assertFalse(dfile.delete());
-        for(boolean b : deleteArray){
-            assertTrue(b);
-        }
+        assertTrue(dfile.delete());
+
         assertTrue(FineIO.getCurrentMemorySize()>0);
         assertTrue(FineIO.getCurrentReadMemorySize() > 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -345,7 +254,30 @@ public class FineIOTest extends TestCase {
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
         assertEquals(FineIO.getReadWaitCount(), 0);
         assertEquals(FineIO.getWriteWaitCount(), 0);
+        MemoryLeakTest.assertZeroMemory();
+    }
 
+    protected Connector getConnector(byte[] block0, byte[] block1, byte[] block2, byte[] block3, byte[] head, URI u) throws NoSuchFieldException, NoSuchMethodException, InstantiationException, IllegalAccessException, java.lang.reflect.InvocationTargetException, IOException {
+        Connector connector = new FineWriteIOTest.MemoryConnector();
+        Field fieldHead = FileConstants.class.getDeclaredField("HEAD");
+        fieldHead.setAccessible(true);
+        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        constructor.setAccessible(true);
+        FileBlock block = constructor.newInstance(u, fieldHead.get(null));
+        connector.write(block, new ByteArrayInputStream(head));
+
+        FileBlock block_0 = constructor.newInstance(u, String.valueOf(0));
+        connector.write(block_0, new ByteArrayInputStream(block0));
+
+        FileBlock block_1 = constructor.newInstance(u, String.valueOf(1));
+        connector.write(block_1, new ByteArrayInputStream(block1));
+
+        FileBlock block_2 = constructor.newInstance(u, String.valueOf(2));
+        connector.write(block_2, new ByteArrayInputStream(block2));
+
+        FileBlock block_3 = constructor.newInstance(u, String.valueOf(3));
+        connector.write(block_3, new ByteArrayInputStream(block3));
+        return connector;
     }
 
 

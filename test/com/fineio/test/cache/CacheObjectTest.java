@@ -2,6 +2,7 @@ package com.fineio.test.cache;
 
 import com.fineio.cache.CacheObject;
 import com.fineio.cache.LEVEL;
+import com.fineio.test.io.MemoryLeakTest;
 import junit.framework.TestCase;
 
 /**
@@ -15,7 +16,7 @@ public class CacheObjectTest extends TestCase {
         co.updateTime();
         assertEquals(co.get(), "SSS");
         assertTrue(co.getIdle() <= (System.currentTimeMillis() - t));
-
+        MemoryLeakTest.assertZeroMemory();
 
 
     }

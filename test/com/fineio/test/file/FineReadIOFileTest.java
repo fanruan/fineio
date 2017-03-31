@@ -10,6 +10,7 @@ import com.fineio.io.LongBuffer;
 import com.fineio.io.read.IntReadBuffer;
 import com.fineio.io.read.LongReadBuffer;
 import com.fineio.storage.Connector;
+import com.fineio.test.io.MemoryLeakTest;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -31,6 +32,7 @@ public class FineReadIOFileTest extends TestCase {
         for(int i = 0 ;i < 100; i++){
             constructTest();
         }
+        MemoryLeakTest.assertZeroMemory();
     }
 
     public void testException() throws Exception{
@@ -50,8 +52,8 @@ public class FineReadIOFileTest extends TestCase {
         } catch (BlockNotFoundException e){
             exp = true;
         }
-        assertTrue(exp);
-
+        assertFalse(exp);
+        MemoryLeakTest.assertZeroMemory();
     }
 
     public void constructTest() throws Exception {

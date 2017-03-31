@@ -6,6 +6,7 @@ import com.fineio.io.base.JobAssist;
 import com.fineio.io.file.writer.JobContainer;
 import com.fineio.io.file.writer.SyncManager;
 import com.fineio.storage.Connector;
+import com.fineio.test.io.MemoryLeakTest;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
@@ -150,6 +151,7 @@ public class SyncManagerTest extends TestCase {
         assertEquals(a.intValue(), 0);
         assertTrue(fff.intValue() >= len);
         System.out.println(fff);
+        MemoryLeakTest.assertZeroMemory();
     }
 
 }
