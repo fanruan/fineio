@@ -121,6 +121,9 @@ public abstract class AbstractBuffer implements BaseBuffer {
 
     protected final void releaseBuffer(){
         manager.releaseBuffer((Buffer) this, close);
+        if(close){
+            manager = null;
+        }
     }
 
     /**
