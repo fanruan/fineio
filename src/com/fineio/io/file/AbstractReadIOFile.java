@@ -26,7 +26,7 @@ public abstract class AbstractReadIOFile<T extends Buffer> extends IOFile<T> {
         try {
             InputStream is  = this.connector.read(createHeadBlock());
             if(is == null){
-                throw new BlockNotFoundException("block:" + uri.toString() +" not found!");
+                //throw new BlockNotFoundException("block:" + uri.toString() +" not found!");
             }
             byte[] header = new byte[9];
             is.read(header);
@@ -35,9 +35,10 @@ public abstract class AbstractReadIOFile<T extends Buffer> extends IOFile<T> {
             //先空个long的位置
             p += MemoryConstants.STEP_LONG;
             block_size_offset = (byte) (header[p] - offset);
-            single_block_len = (1L << block_size_offset) - 1;
         } catch (Throwable e) {
            // throw new BlockNotFoundException("block:" + uri.toString() +" not found!");
+            this.block_size_offset = (byte) (connector.getBlockOffset() - offset);
         }
+        single_block_len = (1L << block_size_offset) - 1;
     }
 }
