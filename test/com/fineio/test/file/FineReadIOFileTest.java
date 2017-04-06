@@ -45,6 +45,7 @@ public class FineReadIOFileTest extends TestCase {
         constructor.setAccessible(true);
         FileBlock block = constructor.newInstance(u, head.get(null));
         EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(null).anyTimes();
+        EasyMock.expect(connector.getBlockOffset()).andReturn((byte)22).anyTimes();
         control.replay();
         boolean exp = false;
         try {
