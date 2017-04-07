@@ -25,6 +25,20 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FineWriteIOTest extends TestCase {
 
 
+    public void testEmptyFile() throws Exception {
+        IMocksControl control = EasyMock.createControl();
+        Connector connector = control.createMock(Connector.class);
+        URI u = new URI("");
+        byte size = 26;
+        connector.getBlockOffset();
+        EasyMock.expectLastCall().andReturn(size).anyTimes();
+        connector.write(EasyMock.anyObject(FileBlock.class), EasyMock.anyObject(byte[].class));
+        EasyMock.expectLastCall().anyTimes();
+        control.replay();
+        IOFile file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_BYTE);
+        file.close();
+    }
+
     public void testConstruct() throws Exception {
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
