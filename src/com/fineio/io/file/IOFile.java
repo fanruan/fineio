@@ -392,7 +392,7 @@ public abstract class IOFile<E extends Buffer> {
     protected void writeHeader() {
         FileBlock block = createHeadBlock();
         byte[] bytes = new byte[HEAD_LEN];
-        Bits.putInt(bytes, 0, buffers.length);
+        Bits.putInt(bytes, 0, buffers == null ? 0 : buffers.length);
         bytes[MemoryConstants.STEP_LONG] = (byte) (block_size_offset + model.offset());
         try {
             connector.write(block, bytes);
@@ -412,9 +412,11 @@ public abstract class IOFile<E extends Buffer> {
                 return;
             }
             writeHeader();
-            for (int i = 0; i < buffers.length; i++) {
-                if (buffers[i] != null) {
-                    buffers[i].force();
+            if(buffers != null) {
+                for (int i = 0; i < buffers.length; i++) {
+                    if (buffers[i] != null) {
+                        buffers[i].force();
+                    }
                 }
             }
             released = true;
