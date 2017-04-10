@@ -11,38 +11,39 @@ Connector接口介绍
     
     public static class MemoryConnector extends AbstractConnector {
  
-    private Map<FileBlock, byte[]> map = new ConcurrentHashMap<FileBlock, byte[]>();
- 
+        private Map<FileBlock, byte[]> map = new ConcurrentHashMap<FileBlock, byte[]>();
      
-    public InputStream read(FileBlock file) {
-        byte[] b = map.get(file);
-        if(b != null){
-            return new ByteArrayInputStream(b);
-        }
-        return null;
-    }
- 
-     
-    public void write(FileBlock file, InputStream inputStream) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byte[] temp = new byte[1024];
-        int len = 0;
-        try {
-            while((len = inputStream.read(temp) )> 0) {
-                byteArrayOutputStream.write(temp, 0, len);
+         
+        public InputStream read(FileBlock file) {
+            byte[] b = map.get(file);
+            if(b != null){
+                return new ByteArrayInputStream(b);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            return null;
         }
-        map.put(file, byteArrayOutputStream.toByteArray());
-    }
- 
      
-    public boolean delete(FileBlock block) {
-        map.remove(block);
-        return true;
+         
+        public void write(FileBlock file, InputStream inputStream) {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            byte[] temp = new byte[1024];
+            int len = 0;
+            try {
+                while((len = inputStream.read(temp) )> 0) {
+                    byteArrayOutputStream.write(temp, 0, len);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            map.put(file, byteArrayOutputStream.toByteArray());
+        }
+     
+         
+        public boolean delete(FileBlock block) {
+            map.remove(block);
+            return true;
+        }
     }
-}
+
 这是一个MemoryConnector的实现,实际实现的是存储到内存中，继承AbstractConnector必须要实现的是三个接口方法：
     
         /**
