@@ -64,7 +64,7 @@ public class FineReadIOFileTest extends TestCase {
         res[8] =  (byte) len;
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
-        URI u = new URI("");
+        URI u = new URI("/");
         Field head = FileConstants.class.getDeclaredField("HEAD");
         head.setAccessible(true);
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
@@ -76,12 +76,13 @@ public class FineReadIOFileTest extends TestCase {
             }
         }).anyTimes();
         control.replay();
+        u = new URI("");
         ReadIOFile<LongBuffer> file = ReadIOFile.createFineIO(connector, u, ReadIOFile.LONG);
         Field lenField = ReadIOFile.class.getSuperclass().getSuperclass().getDeclaredField("blocks");
         Field blockSizeField =  ReadIOFile.class.getSuperclass().getSuperclass().getDeclaredField("block_size_offset");
         lenField.setAccessible(true);
         blockSizeField.setAccessible(true);
-        assertEquals(file.getPath(), u.getPath());
+        assertEquals(file.getPath(), "/");
         assertEquals(len * 2, ((Integer)lenField.get(file)).intValue());
         assertEquals(len - LongReadBuffer.OFFSET, ((Byte)blockSizeField.get(file)).byteValue());
         ReadIOFile<IntBuffer> ifile = ReadIOFile.createFineIO(connector, u, ReadIOFile.INT);
@@ -89,7 +90,7 @@ public class FineReadIOFileTest extends TestCase {
         blockSizeField =  ReadIOFile.class.getSuperclass().getSuperclass().getDeclaredField("block_size_offset");
         lenField.setAccessible(true);
         blockSizeField.setAccessible(true);
-        assertEquals(ifile.getPath(), u.getPath());
+        assertEquals(ifile.getPath(), "/");
         assertEquals(len * 2, ((Integer)lenField.get(ifile)).intValue());
         assertEquals(len - IntReadBuffer.OFFSET, ((Byte)blockSizeField.get(ifile)).byteValue());
     }

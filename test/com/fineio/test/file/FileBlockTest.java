@@ -32,7 +32,7 @@ public class FileBlockTest extends TestCase {
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
         constructor.setAccessible(true);
         URI a = new URI("a");
-        assertEquals(constructor.newInstance(a, "test").toString(), "a" + File.separator + "test");
+        assertEquals(constructor.newInstance(a, "test").toString(), "a" + "test");
         MemoryLeakTest.assertZeroMemory();
     }
 }

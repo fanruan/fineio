@@ -73,18 +73,20 @@ public class FineIOTest extends TestCase {
                 return  new ByteArrayInputStream(res);
             }
         }).anyTimes();
+        EasyMock.expect(connector.getBlockOffset()).andReturn((byte)22);
         control.replay();
         IOFile file = FineIO.createIOFile(connector , u, FineIO.MODEL.READ_LONG);
         assertTrue(file instanceof ReadIOFile);
+        file.close();
         MemoryLeakTest.assertZeroMemory();
     }
 
     public void testCreateWriteIOFile() throws Exception {
-        IMocksControl control = EasyMock.createControl();
-        Connector connector = control.createMock(Connector.class);
+        Connector connector = new FineWriteIOTest.MemoryConnector();
         URI u = new URI("");
         IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_DOUBLE);
         assertTrue(file instanceof WriteIOFile);
+        file.close();
         MemoryLeakTest.assertZeroMemory();
     }
 
@@ -109,10 +111,11 @@ public class FineIOTest extends TestCase {
         }).anyTimes();
         connector.write(EasyMock.anyObject(FileBlock.class), EasyMock.anyObject(byte[].class));
         EasyMock.expectLastCall().anyTimes();
-
+        EasyMock.expect(connector.getBlockOffset()).andReturn((byte)22);
         control.replay();
         IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.EDIT_DOUBLE);
         assertTrue(file instanceof EditIOFile);
+        file.close();
         MemoryLeakTest.assertZeroMemory();
     }
 
@@ -137,9 +140,9 @@ public class FineIOTest extends TestCase {
         final byte[] head = new byte[16];
         Bits.putInt(head, 0, blocks);
         head[8] = (byte) block_off_set;
-        URI u = new URI("");
+        URI u = new URI("/");
         Connector connector = getConnector(block0, block1, block2, block3, head, u);
-
+        u = new URI("");
         EditIOFile<LongBuffer> file =  FineIO.createIOFile(connector , u, FineIO.MODEL.EDIT_LONG);
         long v1 = 0;
         for(long i = 0, ilen = (totalLen >> 3); i < ilen; i++){
@@ -172,7 +175,7 @@ public class FineIOTest extends TestCase {
         }
         assertEquals(v2, v3);
         file.close();
-        connector = getConnector(block0, block1, block2, block3, head, u);
+        connector = getConnector(block0, block1, block2, block3, head, new URI("/"));
         EditIOFile<IntBuffer> ifile =   FineIO.createIOFile(connector , u, FineIO.MODEL.EDIT_INT);
         v1 = 0;
         for(long i = 0, ilen = (totalLen >> 2); i < ilen; i++){
@@ -205,7 +208,7 @@ public class FineIOTest extends TestCase {
         }
         assertEquals(v2, v3);
 
-        connector = getConnector(block0, block1, block2, block3, head, u);
+        connector = getConnector(block0, block1, block2, block3, head, new URI("/"));
         EditIOFile<DoubleBuffer> dfile =  FineIO.createIOFile(connector , u, FineIO.MODEL.EDIT_DOUBLE);
         double d1 = 0;
         for(long i = 0, ilen = (totalLen >> 3); i < ilen; i++){
@@ -295,7 +298,7 @@ public class FineIOTest extends TestCase {
         head[8] = (byte) block_off_set;
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
-        URI u = new URI("");
+        URI u = new URI("/");
         Field fieldHead = FileConstants.class.getDeclaredField("HEAD");
         fieldHead.setAccessible(true);
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
@@ -331,6 +334,7 @@ public class FineIOTest extends TestCase {
             }
         }).anyTimes();
         control.replay();
+        u = new URI("");
         ReadIOFile<LongBuffer> file = FineIO.createIOFile(connector , u, FineIO.MODEL.READ_LONG);
         long v1 = 0;
         for(long i = 0, ilen = (totalLen >> 3); i < ilen; i++){

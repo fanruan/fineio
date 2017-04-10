@@ -40,17 +40,18 @@ public class FineWriteIOTest extends TestCase {
     }
 
     public void testConstruct() throws Exception {
-        IMocksControl control = EasyMock.createControl();
-        Connector connector = control.createMock(Connector.class);
+        final byte size = 26;
+        Connector connector = new MemoryConnector() {
+            public byte getBlockOffset() {
+                return size;
+            }
+        };
         URI u = new URI("");
-        byte size = 26;
-        connector.getBlockOffset();
-        EasyMock.expectLastCall().andReturn(size).anyTimes();
-        control.replay();
         IOFile file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_BYTE);
         Field field = IOFile.class.getDeclaredField("block_size_offset");
         field.setAccessible(true);
         assertEquals(size, ((Byte)field.get(file)).byteValue());
+        file.close();
     }
 
 
