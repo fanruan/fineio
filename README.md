@@ -1,6 +1,6 @@
 # FineIO
 
 
-FineIOÓÉÁ½²¿·Ö×é³É
-  - Virtual File System £¨VFS£©  ĞéÄâÎÄ¼ş·Ö¿é
-  - DirectMemory (DM)  »ùÓÚUnsafeÊµÏÖµÄ¶ÑÍâÄÚ´æ·ÃÎÊ
+FineIOç”±ä¸¤éƒ¨åˆ†ç»„æˆ
+  - Virtual File System ï¼ˆVFSï¼‰  è™šæ‹Ÿæ–‡ä»¶åˆ†å—
+  - DirectMemory (DM)  åŸºäºUnsafeå®ç°çš„å †å¤–å†…å­˜è®¿é—®
