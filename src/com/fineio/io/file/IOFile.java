@@ -51,7 +51,7 @@ public abstract class IOFile<E extends Buffer> {
             throw new IOSetException("uri  or connector or model can't be null");
         }
         this.connector = connector;
-        this.uri = uri;
+        this.uri = URI.create(uri.getPath() + "/");
         this.model = model;
     }
 

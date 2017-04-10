@@ -24,7 +24,7 @@ public final class FileBlock {
     }
 
     public String toString() {
-        return (uri == null ? "":uri.toString()) + File.separator + (fileName == null ? "": fileName);
+        return (uri == null ? "":uri.toString())+ (fileName == null ? "": fileName);
     }
 
     /**
