@@ -8,6 +8,7 @@ import java.net.URI;
  * Created by daniel on 2017/2/9.
  */
 public final class FileBlock {
+    private final static String EMPTY = "";
 
     private URI uri;
 
@@ -21,6 +22,15 @@ public final class FileBlock {
     public FileBlock(URI uri, String fileName){
         this.uri = uri;
         this.fileName = fileName;
+    }
+
+    /**
+     * 空就代表文件夹把
+     * @param uri
+     */
+    public FileBlock(URI uri){
+        this.uri = uri;
+        this.fileName = EMPTY;
     }
 
     public String toString() {

@@ -55,6 +55,13 @@ public abstract class IOFile<E extends Buffer> {
         this.model = model;
     }
 
+    /**
+     * 获取设置的path
+     */
+    public String getPath(){
+        return uri.getPath();
+    }
+
     protected final FileBlock createHeadBlock(){
         return new FileBlock(uri, FileConstants.HEAD);
     }

@@ -14,6 +14,7 @@ import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
 import java.io.IOException;
+import java.net.URI;
 
 /**
  * Created by daniel on 2017/2/15.
@@ -38,6 +39,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     protected volatile boolean flushed = false;
 
     protected volatile boolean changed = false;
+
 
 
     public boolean hasChanged() {
@@ -79,7 +81,17 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         super(connector, block);
         this.max_offset = max_offset;
         this.max_size = 1 << max_offset;
+        this.directAccess = false;
     }
+
+    protected WriteBuffer(Connector connector, URI uri) {
+        super(connector, new FileBlock(uri));
+        //不支持超过2G的文件
+        this.max_offset = 31;
+        this.max_size = Integer.MAX_VALUE;
+        this.directAccess = true;
+    }
+
 
     protected final void setCurrentCapacity(int offset) {
         this.current_max_offset = offset;

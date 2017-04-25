@@ -14,6 +14,7 @@ import com.fineio.storage.Connector;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 
 /**
  * Created by daniel on 2017/2/9.
@@ -104,6 +105,12 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
     protected ReadBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block);
         this.max_byte_len = 1 << (max_offset + getLengthOffset());
+        this.directAccess = false;
+    }
+
+    protected ReadBuffer(Connector connector, URI uri) {
+        super(connector, new FileBlock(uri));
+        this.directAccess = true;
     }
 
 

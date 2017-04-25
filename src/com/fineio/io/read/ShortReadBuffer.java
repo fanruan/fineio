@@ -6,6 +6,8 @@ import com.fineio.io.ShortBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.net.URI;
+
 /**
  * Created by daniel on 2017/2/14.
  */
@@ -19,6 +21,11 @@ public final  class ShortReadBuffer extends ReadBuffer implements ShortBuffer{
             return new ShortReadBuffer(connector, block, max_offset);
         }
 
+        @Override
+        public final ShortReadBuffer createBuffer(Connector connector, URI uri) {
+            return new ShortReadBuffer(connector, uri);
+        }
+
         protected final byte offset() {
             return OFFSET;
         }
@@ -27,6 +34,10 @@ public final  class ShortReadBuffer extends ReadBuffer implements ShortBuffer{
 
     private ShortReadBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block, max_offset);
+    }
+
+    public ShortReadBuffer(Connector connector, URI uri) {
+        super(connector, uri);
     }
 
     protected int getLengthOffset() {

@@ -1,15 +1,17 @@
-package com.fineio.io.file;
+package com.fineio.directio;
 
 import com.fineio.io.*;
+import com.fineio.io.file.ReadIOFile;
+import com.fineio.io.file.ReadModel;
 import com.fineio.io.read.*;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
 
 /**
- * Created by daniel on 2017/2/9.
+ * Created by daniel on 2017/4/25.
  */
-public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
+public class DirectReadIOFile<T extends Buffer> extends DirectIOFile<T> {
 
     public static final ReadModel<ByteBuffer> BYTE = ByteReadBuffer.MODEL;
 
@@ -25,10 +27,10 @@ public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
 
     public static final ReadModel<ShortBuffer> SHORT = ShortReadBuffer.MODEL;
 
-
-    private ReadIOFile(Connector connector, URI uri, ReadModel<T> model){
+    private DirectReadIOFile(Connector connector, URI uri, ReadModel<T> model) {
         super(connector, uri, model);
     }
+
 
 
     /**
@@ -39,12 +41,10 @@ public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
      * @param <E> 继承ReadBuffer的子类型
      * @return
      */
-    public static final <E extends Buffer> ReadIOFile<E> createFineIO(Connector connector, URI uri, ReadModel<E> model){
-        return  new ReadIOFile<E>(connector, uri, model);
+    public static final <E extends Buffer> DirectReadIOFile<E> createFineIO(Connector connector, URI uri, ReadModel<E> model){
+        return  new DirectReadIOFile<E>(connector, uri, model);
     }
 
-    protected void writeHeader() {
-        //doNothing
-    }
+
 
 }

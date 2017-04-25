@@ -6,6 +6,8 @@ import com.fineio.io.DoubleBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.net.URI;
+
 /**
  * Created by daniel on 2017/2/14.
  */
@@ -17,6 +19,10 @@ public final  class DoubleEditBuffer extends EditBuffer implements DoubleBuffer 
             return new DoubleEditBuffer(connector, block, max_offset);
         }
 
+        public final DoubleEditBuffer createBuffer(Connector connector, URI uri) {
+            return new DoubleEditBuffer(connector, uri);
+        }
+
         protected final byte offset() {
             return OFFSET;
         }
@@ -24,6 +30,10 @@ public final  class DoubleEditBuffer extends EditBuffer implements DoubleBuffer 
 
     private DoubleEditBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block, max_offset);
+    }
+
+    private DoubleEditBuffer(Connector connector, URI uri) {
+        super(connector, uri);
     }
 
     protected int getLengthOffset() {

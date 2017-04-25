@@ -6,6 +6,8 @@ import com.fineio.io.DoubleBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.net.URI;
+
 /**
  * Created by daniel on 2017/2/14.
  */
@@ -19,6 +21,11 @@ public final  class DoubleReadBuffer extends ReadBuffer implements DoubleBuffer 
             return new DoubleReadBuffer(connector, block, max_offset);
         }
 
+        @Override
+        public final DoubleReadBuffer  createBuffer(Connector connector, URI uri) {
+            return new DoubleReadBuffer(connector, uri);
+        }
+
         protected final byte offset() {
             return OFFSET;
         }
@@ -27,6 +34,10 @@ public final  class DoubleReadBuffer extends ReadBuffer implements DoubleBuffer 
 
     private DoubleReadBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block, max_offset);
+    }
+
+    private DoubleReadBuffer(Connector connector, URI uri) {
+        super(connector, uri);
     }
 
     protected int getLengthOffset() {

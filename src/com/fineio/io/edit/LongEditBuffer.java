@@ -6,6 +6,8 @@ import com.fineio.io.LongBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.net.URI;
+
 /**
  * Created by daniel on 2017/2/14.
  */
@@ -17,6 +19,11 @@ public  final class LongEditBuffer extends EditBuffer implements LongBuffer{
             return new LongEditBuffer(connector, block, max_offset);
         }
 
+        @Override
+        public final LongEditBuffer  createBuffer(Connector connector, URI uri) {
+            return new LongEditBuffer(connector, uri);
+        }
+
         protected final byte offset() {
             return OFFSET;
         }
@@ -24,6 +31,10 @@ public  final class LongEditBuffer extends EditBuffer implements LongBuffer{
 
     private LongEditBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block, max_offset);
+    }
+
+    private LongEditBuffer(Connector connector, URI uri) {
+        super(connector, uri);
     }
 
     protected int getLengthOffset() {

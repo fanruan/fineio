@@ -6,6 +6,8 @@ import com.fineio.io.IntBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.net.URI;
+
 /**
  * Created by daniel on 2017/2/14.
  */
@@ -17,6 +19,11 @@ public final  class IntWriteBuffer extends WriteBuffer implements IntBuffer{
             return new IntWriteBuffer(connector, block, max_offset);
         }
 
+        @Override
+        public final IntWriteBuffer createBuffer(Connector connector, URI uri) {
+            return new IntWriteBuffer(connector, uri);
+        }
+
         protected final byte offset() {
             return OFFSET;
         }
@@ -24,6 +31,10 @@ public final  class IntWriteBuffer extends WriteBuffer implements IntBuffer{
 
     private IntWriteBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block, max_offset);
+    }
+
+    private IntWriteBuffer(Connector connector, URI uri) {
+        super(connector, uri);
     }
 
     protected int getLengthOffset() {

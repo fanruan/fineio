@@ -6,6 +6,8 @@ import com.fineio.io.FloatBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.net.URI;
+
 /**
  * Created by daniel on 2017/2/14.
  */
@@ -17,6 +19,11 @@ public final  class FloatWriteBuffer extends WriteBuffer implements FloatBuffer 
             return new FloatWriteBuffer(connector, block, max_offset);
         }
 
+        @Override
+        public final FloatWriteBuffer  createBuffer(Connector connector, URI uri) {
+            return new FloatWriteBuffer(connector, uri);
+        }
+
         protected final byte offset() {
             return OFFSET;
         }
@@ -24,6 +31,10 @@ public final  class FloatWriteBuffer extends WriteBuffer implements FloatBuffer 
 
     private FloatWriteBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block, max_offset);
+    }
+
+    private FloatWriteBuffer(Connector connector, URI uri) {
+        super(connector, uri);
     }
 
     protected int getLengthOffset() {

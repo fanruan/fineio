@@ -6,6 +6,8 @@ import com.fineio.io.ByteBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.net.URI;
+
 /**
  * Created by daniel on 2017/2/9.
  */
@@ -17,6 +19,11 @@ public final  class ByteEditBuffer extends  EditBuffer implements ByteBuffer {
             return new ByteEditBuffer(connector, block, max_offset);
         }
 
+        @Override
+        public final ByteEditBuffer  createBuffer(Connector connector, URI uri) {
+            return new ByteEditBuffer(connector, uri);
+        }
+
         protected final byte offset() {
             return OFFSET;
         }
@@ -24,6 +31,10 @@ public final  class ByteEditBuffer extends  EditBuffer implements ByteBuffer {
 
     private ByteEditBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block, max_offset);
+    }
+
+    private ByteEditBuffer(Connector connector, URI uri) {
+        super(connector, uri);
     }
 
     protected int getLengthOffset() {

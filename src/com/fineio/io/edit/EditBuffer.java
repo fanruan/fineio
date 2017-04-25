@@ -13,6 +13,7 @@ import com.fineio.storage.Connector;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.concurrent.locks.LockSupport;
 
 /**
@@ -26,6 +27,10 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
 
     protected EditBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block, max_offset);
+    }
+
+    protected EditBuffer(Connector connector, URI uri) {
+        super(connector, uri);
     }
 
     private final  void loadData(){

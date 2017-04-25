@@ -31,6 +31,7 @@ public abstract class AbstractBuffer implements BaseBuffer {
     protected volatile boolean close = false;
     private  volatile boolean access = false;
     protected volatile int allocateSize = 0;
+    protected volatile boolean directAccess = false;
 
 
 
