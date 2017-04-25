@@ -24,6 +24,11 @@ public abstract class AbstractFileModel<T> {
          */
         public abstract <F extends T>  F createBuffer(Connector connector, URI uri);
 
+
+        /**
+         * 便宜值
+         * @return
+         */
         protected abstract byte offset();
 
 }

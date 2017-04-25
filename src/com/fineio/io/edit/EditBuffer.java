@@ -11,6 +11,7 @@ import com.fineio.io.write.WriteBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -41,33 +42,21 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
             if(close) {
                 throw  new FileCloseException();
             }
-
-            int max_byte_len = max_size << getLengthOffset();
-            byte[] bytes = new byte[max_byte_len];
-            int off = 0;
-            int len = 0;
-            InputStream is = null;
-            try {
-                is = bufferKey.getConnector().read(bufferKey.getBlock());
-                while ((len = is.read(bytes, off, max_byte_len - off)) > 0) {
-                    off += len;
-                }
-            } catch (Throwable e) {
-                //文件不存在新建一个不loaddata了
-            } finally {
-                if(is != null){
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                    }
-                }
+            Accessor accessor = null;
+            if(directAccess) {
+                accessor = new DirectAccessor();
+            } else {
+                accessor = new VirtualAccessor();
             }
+            accessor.invoke();
+            int off = accessor.getOff();
+            byte[] bytes = accessor.getBytes();
             int max_position = off >> getLengthOffset();
             int offset = Maths.log2(max_position);
             if(max_position > (1 << offset)){
                 offset++;
             }
-            len = 1 << offset << getLengthOffset();
+            int len = 1 << offset << getLengthOffset();
             beforeStatusChange();
             try {
                 address = CacheManager.getInstance().allocateRead((Buffer) this, len);
@@ -199,4 +188,76 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
         }
     }
 
+    private abstract class Accessor {
+        protected byte[] bytes;
+        protected int off;
+
+        public byte[] getBytes() {
+            return bytes;
+        }
+
+        public int getOff() {
+            return off;
+        }
+
+        public abstract void invoke();
+    }
+
+    private class VirtualAccessor extends Accessor {
+
+
+
+        public void invoke() {
+            int max_byte_len = max_size << getLengthOffset();
+            bytes = new byte[max_byte_len];
+            off = 0;
+            int len = 0;
+            InputStream is = null;
+            try {
+                is = bufferKey.getConnector().read(bufferKey.getBlock());
+                while ((len = is.read(bytes, off, max_byte_len - off)) > 0) {
+                    off += len;
+                }
+            } catch (Throwable e) {
+                //文件不存在新建一个不loaddata了
+            } finally {
+                if(is != null){
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
+    }
+
+
+    private class DirectAccessor extends Accessor {
+
+
+
+        public void invoke() {
+            byte[] b = new byte[1024];
+            int len = 0;
+            InputStream is = null;
+            ByteArrayOutputStream ba = new ByteArrayOutputStream();
+            try {
+                is = bufferKey.getConnector().read(bufferKey.getBlock());
+                while ((len = is.read(b, 0, b.length)) > 0) {
+                    ba.write(b, 0, len);
+                }
+                bytes = ba.toByteArray();
+                off = bytes.length;
+            } catch (Throwable e) {
+                //文件不存在新建一个不loaddata了
+            } finally {
+                if(is != null){
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
+    }
 }

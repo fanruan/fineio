@@ -11,7 +11,9 @@ import com.fineio.io.file.ReadIOFile;
 import com.fineio.io.base.AbstractBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
+import com.sun.mail.iap.ByteArray;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -122,36 +124,79 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
             if (close) {
                 throw new FileCloseException();
             }
-            InputStream is = null;
-            try {
-                is = bufferKey.getConnector().read(bufferKey.getBlock());
-                if (is == null) {
-                    throw new BlockNotFoundException("block:" + bufferKey.getBlock().toString() + " not found!");
-                }
-                byte[] bytes = new byte[max_byte_len];
-                int off = 0;
-                int len = 0;
-                while ((len = is.read(bytes, off, max_byte_len - off)) > 0) {
-                    off += len;
-                }
-                beforeStatusChange();
-                address = CacheManager.getInstance().allocateRead((Buffer) this, off);
-                MemoryUtils.copyMemory(bytes, address, off);
-                allocateSize = off;
-                load = true;
-                max_size = off >> getLengthOffset();
-                afterStatusChange();
-            } catch (IOException e) {
+            if(directAccess) {
+                DirectAccess();
+            } else {
+                VirtualAccess();
+            }
+        }
+    }
+
+    private void DirectAccess() {
+        InputStream is = null;
+        try {
+            is = bufferKey.getConnector().read(bufferKey.getBlock());
+            if (is == null) {
                 throw new BlockNotFoundException("block:" + bufferKey.getBlock().toString() + " not found!");
-            } catch (OutOfMemoryError error) {
-                //todo 预防内存设置超大 赋值的时候发生溢出
-                error.printStackTrace();
-            } finally {
-                if (is != null) {
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                    }
+            }
+            byte[] bytes = new byte[1024];
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            int len = 0;
+            while ((len = is.read(bytes, 0, bytes.length)) > 0) {
+                byteArrayOutputStream.write(bytes, 0, len);
+            }
+            bytes = byteArrayOutputStream.toByteArray();
+            int off = bytes.length;
+            allocateMemory(bytes, off);
+        } catch (IOException e) {
+            throw new BlockNotFoundException("block:" + bufferKey.getBlock().toString() + " not found!");
+        } catch (OutOfMemoryError error) {
+            //todo 预防内存设置超大 赋值的时候发生溢出
+            error.printStackTrace();
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+    }
+
+    private void allocateMemory(byte[] bytes, int off) {
+        beforeStatusChange();
+        address = CacheManager.getInstance().allocateRead((Buffer) this, off);
+        MemoryUtils.copyMemory(bytes, address, off);
+        allocateSize = off;
+        load = true;
+        max_size = off >> getLengthOffset();
+        afterStatusChange();
+    }
+
+    private void VirtualAccess() {
+        InputStream is = null;
+        try {
+            is = bufferKey.getConnector().read(bufferKey.getBlock());
+            if (is == null) {
+                throw new BlockNotFoundException("block:" + bufferKey.getBlock().toString() + " not found!");
+            }
+            byte[] bytes = new byte[max_byte_len];
+            int off = 0;
+            int len = 0;
+            while ((len = is.read(bytes, off, max_byte_len - off)) > 0) {
+                off += len;
+            }
+            allocateMemory(bytes, off);
+        } catch (IOException e) {
+            throw new BlockNotFoundException("block:" + bufferKey.getBlock().toString() + " not found!");
+        } catch (OutOfMemoryError error) {
+            //todo 预防内存设置超大 赋值的时候发生溢出
+            error.printStackTrace();
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
                 }
             }
         }
