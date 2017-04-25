@@ -71,6 +71,11 @@ public class CacheManagerTest extends TestCase {
         public int getAllocateSize() {
             return cap;
         }
+
+        @Override
+        public int getByteSize() {
+            return cap;
+        }
     }
 
     public class TestBuffer2 extends TestBuffer {

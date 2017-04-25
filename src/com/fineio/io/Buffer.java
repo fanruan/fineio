@@ -55,4 +55,10 @@ public interface Buffer {
      * @return
      */
     int getAllocateSize();
+
+    /**
+     * 获取byte大小
+     * @return
+     */
+    int getByteSize();
 }

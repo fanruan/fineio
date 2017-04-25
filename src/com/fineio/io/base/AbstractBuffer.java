@@ -46,6 +46,7 @@ public abstract class AbstractBuffer implements BaseBuffer {
      * @return
      */
     protected final InputStream getInputStream() {
+        loadContent();
         if(address == 0) {
             throw new StreamCloseException();
         }
@@ -57,6 +58,8 @@ public abstract class AbstractBuffer implements BaseBuffer {
 
         return inputStream;
     }
+
+    protected abstract void loadContent();
 
     protected final void access(){
         if(!access){
@@ -99,7 +102,8 @@ public abstract class AbstractBuffer implements BaseBuffer {
      * 这个大小在clear前后是不一样的，释放内存的时候需要在clear之前获取一下大小
      * @return
      */
-    protected int getByteSize() {
+    public int getByteSize() {
+        loadContent();
         return max_size << getLengthOffset();
     }
 

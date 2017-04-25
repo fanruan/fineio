@@ -69,8 +69,12 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
      *对于child edit来说 如果没改变是不用写文件的，就不会创建outputstream
      * @return
      */
-    protected final int getByteSize() {
+    public final int getByteSize() {
         return (max_position + 1) << getLengthOffset();
+    }
+
+    protected void loadContent() {
+        //doNothing
     }
 
     protected final boolean ir(int p){

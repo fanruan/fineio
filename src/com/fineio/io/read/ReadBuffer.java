@@ -115,6 +115,10 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
         this.directAccess = true;
     }
 
+    protected void loadContent() {
+        loadData();
+    }
+
 
     private final  void loadData() {
         synchronized (this) {

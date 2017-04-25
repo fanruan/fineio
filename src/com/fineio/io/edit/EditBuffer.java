@@ -74,6 +74,10 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
         }
     }
 
+    protected void loadContent() {
+        loadData();
+    }
+
 
     protected void addCapacity() {
         int len = this.current_max_size << getLengthOffset();

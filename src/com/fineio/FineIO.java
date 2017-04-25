@@ -10,8 +10,8 @@ import com.fineio.exception.MemorySetException;
 import com.fineio.io.file.EditIOFile;
 import com.fineio.io.file.IOFile;
 import com.fineio.io.file.ReadIOFile;
-import com.fineio.io.file.WriteIOFile;
 import com.fineio.io.*;
+import com.fineio.io.file.WriteIOFile;
 import com.fineio.io.file.writer.SyncManager;
 import com.fineio.memory.MemoryConf;
 import com.fineio.storage.Connector;
@@ -71,7 +71,7 @@ public final  class FineIO {
         };
 
 
-        MODEL< WriteIOFile<LongBuffer>> WRITE_LONG = new MODEL< WriteIOFile<LongBuffer>>() {
+        MODEL<WriteIOFile<LongBuffer>> WRITE_LONG = new MODEL< WriteIOFile<LongBuffer>>() {
 
             public WriteIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
                 return WriteIOFile.createFineIO(connector, uri, WriteIOFile.LONG);

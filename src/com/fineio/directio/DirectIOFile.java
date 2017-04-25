@@ -230,8 +230,12 @@ public abstract class DirectIOFile<E extends Buffer> {
     }
 
 
-    public E getBuffer() {
+    private E getBuffer() {
         return buffer != null? buffer : initBuffer();
+    }
+
+    public int length() {
+        return getBuffer().getByteSize();
     }
 
     protected E initBuffer() {
