@@ -61,4 +61,11 @@ public interface Buffer {
      * @return
      */
     int getByteSize();
+
+
+    /**
+     * 获取类型可用长度
+     * @return
+     */
+    int getLength();
 }

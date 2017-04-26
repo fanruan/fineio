@@ -234,7 +234,20 @@ public abstract class DirectIOFile<E extends Buffer> {
         return buffer != null? buffer : initBuffer();
     }
 
+    /**
+     * 获取文件指定类型的长度
+     * @return
+     */
     public int length() {
+        return getBuffer().getLength();
+    }
+
+
+    /**
+     * 获取文件指byte的长度
+     * @return
+     */
+    public int byteLength() {
         return getBuffer().getByteSize();
     }
 

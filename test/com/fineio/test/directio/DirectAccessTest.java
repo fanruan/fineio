@@ -2,6 +2,7 @@ package com.fineio.test.directio;
 
 import com.fineio.FineIO;
 import com.fineio.directio.DirectIOFile;
+import com.fineio.io.IntBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.test.file.FineWriteIOTest;
 import com.fineio.test.io.MemoryLeakTest;
@@ -59,5 +60,37 @@ public class DirectAccessTest extends TestCase {
         System.out.println(System.currentTimeMillis() - t);
         MemoryLeakTest.assertZeroMemory();
 
+        for(int i = 0; i < len; i++) {
+            DirectIOFile<IntBuffer> file = FineIO.createIOFile(connector, URI.create(String.valueOf(i)), FineIO.MODEL.WRITE_INT_DIRECT);
+            for(int k = 0; k < i; k++) {
+                FineIO.put(file, k, i);
+            }
+            file.close();
+        }
+        for(int i = 0; i < len; i++) {
+            DirectIOFile<IntBuffer> file = FineIO.createIOFile(connector, URI.create(String.valueOf(i)), FineIO.MODEL.READ_INT_DIRECT);
+            assertEquals(file.length(), i);
+            for( int k = 0; k < i; k++) {
+                assertEquals(i, FineIO.getInt(file, k));
+            }
+            file.close();
+        }
+        MemoryLeakTest.assertZeroMemory();
+        for(int i = 0; i < len; i++) {
+            DirectIOFile<IntBuffer> file = FineIO.createIOFile(connector, URI.create(String.valueOf(i)), FineIO.MODEL.EDIT_INT_DIRECT);
+            for(int k = 0; k < i; k++) {
+                FineIO.put(file, k, FineIO.getInt(file, k) * 2);
+            }
+            file.close();
+        }
+        for(int i = 0; i < len; i++) {
+            DirectIOFile<IntBuffer> file = FineIO.createIOFile(connector, URI.create(String.valueOf(i)), FineIO.MODEL.READ_INT_DIRECT);
+            assertEquals(file.length(), i);
+            for( int k = 0; k < i; k++) {
+                assertEquals(i * 2, FineIO.getInt(file, k));
+            }
+            file.close();
+        }
+        MemoryLeakTest.assertZeroMemory();
     }
 }

@@ -68,7 +68,7 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
                 error.printStackTrace();
             }
             load = true;
-            this.max_position = max_position;
+            this.max_position = max_position - 1;
             setCurrentCapacity(offset);
             afterStatusChange();
         }

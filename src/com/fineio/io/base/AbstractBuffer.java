@@ -108,8 +108,16 @@ public abstract class AbstractBuffer implements BaseBuffer {
      * @return
      */
     public int getByteSize() {
+        return getLength() << getLengthOffset();
+    }
+
+    /**
+     * 获取该类型下的长度
+     * @return
+     */
+    public int getLength() {
         loadContent();
-        return max_size << getLengthOffset();
+        return max_size;
     }
 
     private transient CacheManager manager;

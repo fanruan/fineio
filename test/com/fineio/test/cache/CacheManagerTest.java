@@ -76,6 +76,11 @@ public class CacheManagerTest extends TestCase {
         public int getByteSize() {
             return cap;
         }
+
+        @Override
+        public int getLength() {
+            return cap;
+        }
     }
 
     public class TestBuffer2 extends TestBuffer {

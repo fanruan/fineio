@@ -70,7 +70,11 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
      * @return
      */
     public final int getByteSize() {
-        return (max_position + 1) << getLengthOffset();
+        return getLength() << getLengthOffset();
+    }
+
+    public int getLength() {
+        return (max_position + 1) ;
     }
 
     protected void loadContent() {
