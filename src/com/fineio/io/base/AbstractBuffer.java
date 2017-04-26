@@ -90,13 +90,14 @@ public abstract class AbstractBuffer implements BaseBuffer {
     }
 
     private volatile int waitHelper = 0;
+    private final static int MAX_COUNT = 1024;
     /**
      * 这个方法前后都要做一次，否则会出现创建inputstream的时候已经变化 或者未响应变化
      */
     protected void beforeStatusChange() {
         status.addAndGet(1);
-        //等待1024计算
-        int count = waitHelper + 1024;
+        //等待1024计算更加危险的状态控制
+        int count = waitHelper + MAX_COUNT;
         while (waitHelper++ < count){
         }
         waitHelper = 0;
