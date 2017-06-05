@@ -43,6 +43,10 @@ public class CacheManagerTest extends TestCase {
             clear();
         }
 
+        public void closeWithOutSync() {
+            clear();
+        }
+
         public void clear() {
             synchronized (this) {
                 if (close) {
