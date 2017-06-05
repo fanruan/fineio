@@ -161,7 +161,6 @@ FineIO使用
     file.delete();
 
 注意：删除文件需要创建一个读或者编辑的文件，写文件的方法不能正确删除
-此外：FineIO仅支持读取FineIO创建和写入的文件
 OK FineIO 用法就是这么简单，还想咋地
 此外写文件写完需要close文件，读文件则在完全不需要读的情况下close，不需要每次创建，读文件方法支持多线程访问
 实现不同的Connector即可对接不同的存储，想怎么存都可以，实现HDFS就存到HDFS，实现redis就存到redis
