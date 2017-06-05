@@ -2,6 +2,7 @@ package com.fineio.directio;
 
 import com.fineio.io.*;
 import com.fineio.io.file.AbstractFileModel;
+import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
@@ -277,5 +278,9 @@ public abstract class DirectIOFile<E extends Buffer> {
             }
             released = true;
         }
+    }
+
+    public boolean delete() {
+        return connector.delete(new FileBlock(uri));
     }
 }
