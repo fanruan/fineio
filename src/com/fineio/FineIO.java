@@ -163,46 +163,46 @@ public final  class FineIO {
         MODEL<DirectReadIOFile<LongBuffer>> READ_LONG_DIRECT = new MODEL<DirectReadIOFile<LongBuffer>>() {
 
             public DirectReadIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectReadIOFile.createFineIO(connector, uri, ReadIOFile.LONG);
+                return DirectReadIOFile.createFineIO(connector, uri, DirectReadIOFile.LONG);
             }
         };
         MODEL<DirectReadIOFile<DoubleBuffer>> READ_DOUBLE_DIRECT = new MODEL<DirectReadIOFile<DoubleBuffer>>() {
 
             public DirectReadIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectReadIOFile.createFineIO(connector, uri, ReadIOFile.DOUBLE);
+                return DirectReadIOFile.createFineIO(connector, uri, DirectReadIOFile.DOUBLE);
             }
         };
 
         MODEL<DirectReadIOFile<FloatBuffer>> READ_FLOAT_DIRECT = new MODEL<DirectReadIOFile<FloatBuffer>>() {
 
             public DirectReadIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectReadIOFile.createFineIO(connector, uri, ReadIOFile.FLOAT);
+                return DirectReadIOFile.createFineIO(connector, uri, DirectReadIOFile.FLOAT);
             }
         };
 
         MODEL<DirectReadIOFile<IntBuffer>> READ_INT_DIRECT = new MODEL<DirectReadIOFile<IntBuffer>>() {
 
             public DirectReadIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectReadIOFile.createFineIO(connector, uri, ReadIOFile.INT);
+                return DirectReadIOFile.createFineIO(connector, uri, DirectReadIOFile.INT);
             }
         };
         MODEL<DirectReadIOFile<CharBuffer> > READ_CHAR_DIRECT = new MODEL<DirectReadIOFile<CharBuffer> >() {
 
             public DirectReadIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectReadIOFile.createFineIO(connector, uri, ReadIOFile.CHAR);
+                return DirectReadIOFile.createFineIO(connector, uri, DirectReadIOFile.CHAR);
             }
         };
         MODEL<DirectReadIOFile<ByteBuffer> > READ_BYTE_DIRECT = new MODEL<DirectReadIOFile<ByteBuffer> >() {
 
             public DirectReadIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectReadIOFile.createFineIO(connector, uri, ReadIOFile.BYTE);
+                return DirectReadIOFile.createFineIO(connector, uri, DirectReadIOFile.BYTE);
             }
         };
 
         MODEL<DirectReadIOFile<ShortBuffer>> READ_SHORT_DIRECT = new MODEL<DirectReadIOFile<ShortBuffer>>() {
 
             public DirectReadIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectReadIOFile.createFineIO(connector, uri, ReadIOFile.SHORT);
+                return DirectReadIOFile.createFineIO(connector, uri, DirectReadIOFile.SHORT);
             }
         };
 
@@ -210,88 +210,88 @@ public final  class FineIO {
         MODEL<DirectWriteIOFile<LongBuffer>> WRITE_LONG_DIRECT = new MODEL< DirectWriteIOFile<LongBuffer>>() {
 
             public DirectWriteIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectWriteIOFile.createFineIO(connector, uri, WriteIOFile.LONG);
+                return DirectWriteIOFile.createFineIO(connector, uri, DirectWriteIOFile.LONG);
             }
         };
         MODEL<DirectWriteIOFile<DoubleBuffer>> WRITE_DOUBLE_DIRECT = new MODEL<DirectWriteIOFile<DoubleBuffer>>() {
 
             public DirectWriteIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectWriteIOFile.createFineIO(connector, uri, WriteIOFile.DOUBLE);
+                return DirectWriteIOFile.createFineIO(connector, uri, DirectWriteIOFile.DOUBLE);
             }
         };
         MODEL<DirectWriteIOFile<FloatBuffer>> WRITE_FLOAT_DIRECT = new MODEL<DirectWriteIOFile<FloatBuffer>>() {
 
             public DirectWriteIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectWriteIOFile.createFineIO(connector, uri, WriteIOFile.FLOAT);
+                return DirectWriteIOFile.createFineIO(connector, uri, DirectWriteIOFile.FLOAT);
             }
         };
         MODEL<DirectWriteIOFile<IntBuffer>> WRITE_INT_DIRECT = new MODEL<DirectWriteIOFile<IntBuffer>>() {
 
             public DirectWriteIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectWriteIOFile.createFineIO(connector, uri, WriteIOFile.INT);
+                return DirectWriteIOFile.createFineIO(connector, uri, DirectWriteIOFile.INT);
             }
         };
         MODEL<DirectWriteIOFile<CharBuffer> > WRITE_CHAR_DIRECT = new MODEL<DirectWriteIOFile<CharBuffer> >() {
 
             public DirectWriteIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectWriteIOFile.createFineIO(connector, uri, WriteIOFile.CHAR);
+                return DirectWriteIOFile.createFineIO(connector, uri, DirectWriteIOFile.CHAR);
             }
         };
         MODEL<DirectWriteIOFile<ByteBuffer> > WRITE_BYTE_DIRECT = new MODEL<DirectWriteIOFile<ByteBuffer> >() {
 
             public DirectWriteIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectWriteIOFile.createFineIO(connector, uri, WriteIOFile.BYTE);
+                return DirectWriteIOFile.createFineIO(connector, uri, DirectWriteIOFile.BYTE);
             }
         };
 
         MODEL<DirectWriteIOFile<ShortBuffer>> WRITE_SHORT_DIRECT = new MODEL<DirectWriteIOFile<ShortBuffer>>() {
 
             public DirectWriteIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectWriteIOFile.createFineIO(connector, uri, WriteIOFile.SHORT);
+                return DirectWriteIOFile.createFineIO(connector, uri, DirectWriteIOFile.SHORT);
             }
         };
 
         MODEL<DirectEditIOFile<LongBuffer>> EDIT_LONG_DIRECT = new MODEL<DirectEditIOFile<LongBuffer>>() {
 
             public DirectEditIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectEditIOFile.createFineIO(connector, uri, EditIOFile.LONG);
+                return DirectEditIOFile.createFineIO(connector, uri, DirectEditIOFile.LONG);
             }
         };
         MODEL<DirectEditIOFile<DoubleBuffer>> EDIT_DOUBLE_DIRECT = new MODEL<DirectEditIOFile<DoubleBuffer>>() {
 
             public DirectEditIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectEditIOFile.createFineIO(connector, uri, EditIOFile.DOUBLE);
+                return DirectEditIOFile.createFineIO(connector, uri, DirectEditIOFile.DOUBLE);
             }
         };
         MODEL<DirectEditIOFile<FloatBuffer>> EDIT_FLOAT_DIRECT = new MODEL<DirectEditIOFile<FloatBuffer>>() {
 
             public DirectEditIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectEditIOFile.createFineIO(connector, uri, EditIOFile.FLOAT);
+                return DirectEditIOFile.createFineIO(connector, uri, DirectEditIOFile.FLOAT);
             }
         };
         MODEL<DirectEditIOFile<IntBuffer>> EDIT_INT_DIRECT = new MODEL<DirectEditIOFile<IntBuffer>>() {
 
             public DirectEditIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectEditIOFile.createFineIO(connector, uri, EditIOFile.INT);
+                return DirectEditIOFile.createFineIO(connector, uri, DirectEditIOFile.INT);
             }
         };
         MODEL<DirectEditIOFile<CharBuffer> > EDIT_CHAR_DIRECT = new MODEL<DirectEditIOFile<CharBuffer> >() {
 
             public DirectEditIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectEditIOFile.createFineIO(connector, uri, EditIOFile.CHAR);
+                return DirectEditIOFile.createFineIO(connector, uri, DirectEditIOFile.CHAR);
             }
         };
         MODEL< DirectEditIOFile<ByteBuffer> > EDIT_BYTE_DIRECT = new MODEL< DirectEditIOFile<ByteBuffer> >() {
 
             public DirectEditIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectEditIOFile.createFineIO(connector, uri, EditIOFile.BYTE);
+                return DirectEditIOFile.createFineIO(connector, uri, DirectEditIOFile.BYTE);
             }
         };
 
         MODEL<DirectEditIOFile<ShortBuffer>> EDIT_SHORT_DIRECT = new MODEL<DirectEditIOFile<ShortBuffer>>() {
 
             public DirectEditIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectEditIOFile.createFineIO(connector, uri, EditIOFile.SHORT);
+                return DirectEditIOFile.createFineIO(connector, uri, DirectEditIOFile.SHORT);
             }
         };
 
