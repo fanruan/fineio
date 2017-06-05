@@ -253,6 +253,10 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
     }
 
     public void force() {
+        closeWithOutSync();
+    }
+
+    public void closeWithOutSync() {
         synchronized (this) {
             if(close){
                 return;

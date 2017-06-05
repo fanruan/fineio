@@ -166,25 +166,28 @@ public abstract class IOFile<E extends Buffer> {
      * @return
      */
     public boolean delete(){
-        boolean delete = connector.delete(createHeadBlock());
-        if(buffers != null){
-           for(int i = 0; i < buffers.length; i++){
-               //内存泄露
-               if(buffers[i] != null){
-                   buffers[i].force();
-                   buffers[i] = null;
-               }
-               boolean v = connector.delete(createIndexBlock(i));
-               if(delete){
-                  delete = v;
-               }
-           }
+        synchronized (this) {
+            boolean delete = connector.delete(createHeadBlock());
+            if (buffers != null) {
+                for (int i = 0; i < buffers.length; i++) {
+                    //内存泄露
+                    if (!released && buffers[i] != null) {
+                        buffers[i].closeWithOutSync();
+                        buffers[i] = null;
+                    }
+                    boolean v = connector.delete(createIndexBlock(i));
+                    if (delete) {
+                        delete = v;
+                    }
+                }
+            }
+            boolean v = connector.delete(new FileBlock(uri));
+            if (delete) {
+                delete = v;
+            }
+            released = true;
+            return  delete;
         }
-        boolean v = connector.delete(new FileBlock(uri, ""));
-        if(delete){
-            delete = v;
-        }
-        return  delete;
     }
 
     private final FileBlock createIndexBlock(int index){
@@ -423,6 +426,7 @@ public abstract class IOFile<E extends Buffer> {
                 for (int i = 0; i < buffers.length; i++) {
                     if (buffers[i] != null) {
                         buffers[i].force();
+                        buffers[i] = null;
                     }
                 }
             }

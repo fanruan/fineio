@@ -24,6 +24,11 @@ public interface Buffer {
      */
     void force();
 
+    /*
+    * 直接抛弃内存不写文件
+     */
+    void closeWithOutSync();
+
 
     /**
      * 释放的方法

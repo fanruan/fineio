@@ -148,6 +148,11 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
 
     public void force() {
         forceWrite();
+        closeWithOutSync();
+    }
+
+
+    public void closeWithOutSync() {
         this.clear();
     }
 

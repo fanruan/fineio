@@ -281,6 +281,15 @@ public abstract class DirectIOFile<E extends Buffer> {
     }
 
     public boolean delete() {
+        synchronized (this) {
+            if(!released) {
+                if (buffer != null) {
+                    buffer.closeWithOutSync();
+                    buffer = null;
+                }
+                released = true;
+            }
+        }
         return connector.delete(new FileBlock(uri));
     }
 }
