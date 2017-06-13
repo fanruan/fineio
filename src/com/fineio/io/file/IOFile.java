@@ -45,6 +45,10 @@ public abstract class IOFile<E extends Buffer> {
 
     private volatile boolean released = false;
 
+    /*
+    * 文件长度
+     */
+//    public abstract long length();
 
     IOFile(Connector connector, URI uri, AbstractFileModel<E> model) {
         if(uri == null || connector == null|| model == null){
