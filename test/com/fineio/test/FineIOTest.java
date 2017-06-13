@@ -2,12 +2,14 @@ package com.fineio.test;
 
 import com.fineio.FineIO;
 import com.fineio.base.Bits;
+import com.fineio.directio.DirectEditIOFile;
+import com.fineio.directio.DirectIOFile;
+import com.fineio.directio.DirectReadIOFile;
+import com.fineio.directio.DirectWriteIOFile;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.IOSetException;
+import com.fineio.io.*;
 import com.fineio.io.file.*;
-import com.fineio.io.DoubleBuffer;
-import com.fineio.io.IntBuffer;
-import com.fineio.io.LongBuffer;
 import com.fineio.storage.Connector;
 import com.fineio.test.file.FineWriteIOTest;
 import com.fineio.test.io.MemoryLeakTest;
@@ -439,7 +441,206 @@ public class FineIOTest extends TestCase {
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
         assertEquals(FineIO.getReadWaitCount(), 0);
         assertEquals(FineIO.getWriteWaitCount(), 0);
+        MemoryLeakTest.assertZeroMemory();
     }
 
 
+    public void testDirectAccess() {
+        Connector connector = new FineWriteIOTest.MemoryConnector();
+        URI uri = URI.create("A");
+        DirectWriteIOFile<DoubleBuffer> dw = FineIO.createIOFile(connector, uri, FineIO.MODEL.WRITE_DOUBLE_DIRECT);
+        int len = 1000000;
+        double[] doubles = createRandomDouble(len);
+        for(int i = 0; i < len; i++) {
+            FineIO.put(dw, i, doubles[i]);
+        }
+        dw.close();
+        MemoryLeakTest.assertZeroMemory();
+        DirectReadIOFile<DoubleBuffer> dr = FineIO.createIOFile(connector, uri, FineIO.MODEL.READ_DOUBLE_DIRECT);
+        for(int i = len; i > 0; i--) {
+            assertEquals(doubles[i - 1], FineIO.getDouble(dr, i -1 ));
+        }
+        dr.close();
+        MemoryLeakTest.assertZeroMemory();
+        DirectEditIOFile<DoubleBuffer> de = FineIO.createIOFile(connector, uri, FineIO.MODEL.EDIT_DOUBLE_DIRECT);
+        for(int i = len; i > 0; i--) {
+            assertEquals(doubles[i - 1], FineIO.getDouble(de, i -1 ));
+        }
+        FineIO.put(de, len/2, (double) 100);
+        assertEquals((double)100, FineIO.getDouble(de, len/2 ));
+        de.close();
+        dr = FineIO.createIOFile(connector, uri, FineIO.MODEL.READ_DOUBLE_DIRECT);
+        assertEquals((double)100, FineIO.getDouble(dr, len/2 ));
+        dr.close();
+        MemoryLeakTest.assertZeroMemory();
+
+
+
+
+        DirectWriteIOFile<CharBuffer> cw = FineIO.createIOFile(connector, uri, FineIO.MODEL.WRITE_CHAR_DIRECT);
+        for(int i = 0; i < len; i++) {
+            FineIO.put(cw, i, (char)doubles[i]);
+        }
+        cw.close();
+        MemoryLeakTest.assertZeroMemory();
+        DirectReadIOFile<CharBuffer> cr = FineIO.createIOFile(connector, uri, FineIO.MODEL.READ_CHAR_DIRECT);
+        for(int i = len; i > 0; i--) {
+            assertEquals((char)doubles[i - 1], FineIO.getChar(cr, i -1 ));
+        }
+        cr.close();
+        MemoryLeakTest.assertZeroMemory();
+        DirectEditIOFile<CharBuffer> ce = FineIO.createIOFile(connector, uri, FineIO.MODEL.EDIT_CHAR_DIRECT);
+        for(int i = len; i > 0; i--) {
+            assertEquals((char)doubles[i - 1], FineIO.getChar(ce, i -1 ));
+        }
+        FineIO.put(ce, len/2, (char)100);
+        assertEquals((char)100, FineIO.getChar(ce, len/2 ));
+        ce.close();
+        cr = FineIO.createIOFile(connector, uri, FineIO.MODEL.READ_CHAR_DIRECT);
+        assertEquals((char)100, FineIO.getChar(cr, len/2 ));
+        cr.close();
+        MemoryLeakTest.assertZeroMemory();
+
+
+
+
+
+        DirectWriteIOFile<LongBuffer> lw = FineIO.createIOFile(connector, uri, FineIO.MODEL.WRITE_LONG_DIRECT);
+        for(int i = 0; i < len; i++) {
+            FineIO.put(lw, i, (long)doubles[i]);
+        }
+        lw.close();
+        MemoryLeakTest.assertZeroMemory();
+        DirectReadIOFile<LongBuffer> lr = FineIO.createIOFile(connector, uri, FineIO.MODEL.READ_LONG_DIRECT);
+        for(int i = len; i > 0; i--) {
+            assertEquals((long)doubles[i - 1], FineIO.getLong(lr, i -1 ));
+        }
+        lr.close();
+        MemoryLeakTest.assertZeroMemory();
+        DirectEditIOFile<LongBuffer> le = FineIO.createIOFile(connector, uri, FineIO.MODEL.EDIT_LONG_DIRECT);
+        for(int i = len; i > 0; i--) {
+            assertEquals((long)doubles[i - 1], FineIO.getLong(le, i -1 ));
+        }
+        FineIO.put(le, len/2, (long)100);
+        assertEquals((long)100, FineIO.getLong(le, len/2 ));
+        le.close();
+        lr = FineIO.createIOFile(connector, uri, FineIO.MODEL.READ_LONG_DIRECT);
+        assertEquals((long)100, FineIO.getLong(lr, len/2 ));
+        lr.close();
+        MemoryLeakTest.assertZeroMemory();
+
+
+
+
+
+        DirectWriteIOFile<IntBuffer> iw = FineIO.createIOFile(connector, uri, FineIO.MODEL.WRITE_INT_DIRECT);
+        for(int i = 0; i < len; i++) {
+            FineIO.put(iw, i, (int)doubles[i]);
+        }
+        iw.close();
+        MemoryLeakTest.assertZeroMemory();
+        DirectReadIOFile<IntBuffer> ir = FineIO.createIOFile(connector, uri, FineIO.MODEL.READ_INT_DIRECT);
+        for(int i = len; i > 0; i--) {
+            assertEquals((int)doubles[i - 1], FineIO.getInt(ir, i -1 ));
+        }
+        ir.close();
+        MemoryLeakTest.assertZeroMemory();
+
+        DirectEditIOFile<IntBuffer> ie = FineIO.createIOFile(connector, uri, FineIO.MODEL.EDIT_INT_DIRECT);
+        for(int i = len; i > 0; i--) {
+            assertEquals((int)doubles[i - 1], FineIO.getInt(ie, i -1 ));
+        }
+        FineIO.put(ie, len/2, (int)100);
+        assertEquals((int)100, FineIO.getInt(ie, len/2 ));
+        ie.close();
+        ir = FineIO.createIOFile(connector, uri, FineIO.MODEL.READ_INT_DIRECT);
+        assertEquals((int)100, FineIO.getInt(ir, len/2 ));
+        ir.close();
+        MemoryLeakTest.assertZeroMemory();
+
+
+
+
+
+        DirectWriteIOFile<ByteBuffer> bw = FineIO.createIOFile(connector, uri, FineIO.MODEL.WRITE_BYTE_DIRECT);
+        for(int i = 0; i < len; i++) {
+            FineIO.put(bw, i, (byte)doubles[i]);
+        }
+        bw.close();
+        MemoryLeakTest.assertZeroMemory();
+        DirectReadIOFile<ByteBuffer> br = FineIO.createIOFile(connector, uri, FineIO.MODEL.READ_BYTE_DIRECT);
+        for(int i = len; i > 0; i--) {
+            assertEquals((byte)doubles[i - 1], FineIO.getByte(br, i -1 ));
+        }
+        br.close();
+        MemoryLeakTest.assertZeroMemory();
+        DirectEditIOFile<ByteBuffer> be = FineIO.createIOFile(connector, uri, FineIO.MODEL.EDIT_BYTE_DIRECT);
+        for(int i = len; i > 0; i--) {
+            assertEquals((byte)doubles[i - 1], FineIO.getByte(be, i -1 ));
+        }
+        FineIO.put(be, len/2, (byte)100);
+        assertEquals((byte)100, FineIO.getByte(be, len/2 ));
+        be.close();
+        br = FineIO.createIOFile(connector, uri, FineIO.MODEL.READ_BYTE_DIRECT);
+        assertEquals((byte)100, FineIO.getByte(br, len/2 ));
+        br.close();
+        MemoryLeakTest.assertZeroMemory();
+
+
+
+
+
+        DirectWriteIOFile<ShortBuffer> sw = FineIO.createIOFile(connector, uri, FineIO.MODEL.WRITE_SHORT_DIRECT);
+        for(int i = 0; i < len; i++) {
+            FineIO.put(sw, i, (short)doubles[i]);
+        }
+        sw.close();
+        MemoryLeakTest.assertZeroMemory();
+        DirectReadIOFile<ShortBuffer> sr = FineIO.createIOFile(connector, uri, FineIO.MODEL.READ_SHORT_DIRECT);
+        for(int i = len; i > 0; i--) {
+            assertEquals((short)doubles[i - 1], FineIO.getShort(sr, i -1 ));
+        }
+        sr.close();
+        MemoryLeakTest.assertZeroMemory();
+        DirectEditIOFile<ShortBuffer> se = FineIO.createIOFile(connector, uri, FineIO.MODEL.EDIT_SHORT_DIRECT);
+        for(int i = len; i > 0; i--) {
+            assertEquals((short)doubles[i - 1], FineIO.getShort(se, i -1 ));
+        }
+        FineIO.put(se, len/2, (short)100);
+        assertEquals((short)100, FineIO.getShort(se, len/2 ));
+        se.close();
+        sr = FineIO.createIOFile(connector, uri, FineIO.MODEL.READ_SHORT_DIRECT);
+        assertEquals((short)100, FineIO.getShort(sr, len/2 ));
+        sr.close();
+        MemoryLeakTest.assertZeroMemory();
+
+
+
+
+
+
+        DirectWriteIOFile<FloatBuffer> fw = FineIO.createIOFile(connector, uri, FineIO.MODEL.WRITE_FLOAT_DIRECT);
+        for(int i = 0; i < len; i++) {
+            FineIO.put(fw, i, (float)doubles[i]);
+        }
+        fw.close();
+        MemoryLeakTest.assertZeroMemory();
+        DirectReadIOFile<FloatBuffer> fr = FineIO.createIOFile(connector, uri, FineIO.MODEL.READ_FLOAT_DIRECT);
+        for(int i = len; i > 0; i--) {
+            assertEquals((float)doubles[i - 1], FineIO.getFloat(fr, i -1 ));
+        }
+        fr.close();
+        MemoryLeakTest.assertZeroMemory();
+        DirectEditIOFile<FloatBuffer> fe = FineIO.createIOFile(connector, uri, FineIO.MODEL.EDIT_FLOAT_DIRECT);
+        for(int i = len; i > 0; i--) {
+            assertEquals((float)doubles[i - 1], FineIO.getFloat(fe, i -1 ));
+        }
+        FineIO.put(fe, len/2, 100);
+        assertEquals((float)100, FineIO.getFloat(fe, len/2 ));
+        fe.close();
+        fr = FineIO.createIOFile(connector, uri, FineIO.MODEL.READ_FLOAT_DIRECT);
+        assertEquals((float)100, FineIO.getFloat(fr, len/2 ));
+        fr.close();
+        MemoryLeakTest.assertZeroMemory();
+    }
 }
