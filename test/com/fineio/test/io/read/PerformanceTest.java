@@ -71,7 +71,7 @@ public class PerformanceTest {
         int blocks =  (int)(byteLen>>block_off_set) + 1;
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
-        URI u = new URI("");
+        URI u = new URI("/");
         Field fieldHead = FileConstants.class.getDeclaredField("HEAD");
         fieldHead.setAccessible(true);
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
@@ -93,6 +93,7 @@ public class PerformanceTest {
             }).anyTimes();
         }
         control.replay();
+        u = URI.create("");
         ReadIOFile<DoubleBuffer> dfile = FineIO.createIOFile(connector , u, FineIO.MODEL.READ_DOUBLE);
         double d1 = 0;
         long t = System.currentTimeMillis();
