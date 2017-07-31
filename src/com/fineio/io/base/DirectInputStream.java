@@ -65,9 +65,12 @@ public final class DirectInputStream extends InputStream {
     }
 
     private final int getLen(int len) {
-        int left = size - p;
+        int left = size - p - off;
         if(left < len) {
             len = left;
+        }
+        if(len < 0){
+            len = 0;
         }
         return len;
     }
@@ -75,7 +78,7 @@ public final class DirectInputStream extends InputStream {
     @Override
     public final int read() throws IOException {
         doCheck();
-        return p == size ? EOF : MemoryUtils.getByte(address, p++);
+        return p == size ? EOF : (MemoryUtils.getByte(address, p++)&0xff);
     }
 
     private final void doCheck() {
