@@ -39,7 +39,7 @@ public final class DirectInputStream extends InputStream {
     }
 
     private  final int readMemory(byte[] b, int off, int len) {
-        return readInner(b, off, getLen(len));
+        return readInner(b, off, getLen(len,off));
     }
 
     private final int readInner(byte[] b, int off, int len) {
@@ -64,7 +64,7 @@ public final class DirectInputStream extends InputStream {
         return false;
     }
 
-    private final int getLen(int len) {
+    private final int getLen(int len,int off) {
         int left = size - p - off;
         if(left < len) {
             len = left;
