@@ -47,4 +47,10 @@ public interface Connector {
      */
     byte getBlockOffset();
 
+    /**
+     * 文件是否存在
+     * @param block
+     * @return
+     */
+    boolean exists(FileBlock block);
 }
