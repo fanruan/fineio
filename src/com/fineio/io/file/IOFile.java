@@ -194,6 +194,22 @@ public abstract class IOFile<E extends Buffer> {
         }
     }
 
+    /**
+     * 判断是否存在
+     * @return
+     */
+    public boolean exists() {
+        synchronized (this) {
+            boolean exists = connector.exists(createHeadBlock());
+            boolean v = connector.exists(createIndexBlock(0));
+            if (exists) {
+                exists = v;
+            }
+            released = true;
+            return  exists;
+        }
+    }
+
     private final FileBlock createIndexBlock(int index){
         return new FileBlock(uri, String.valueOf(index));
     }
