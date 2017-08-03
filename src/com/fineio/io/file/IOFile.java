@@ -201,20 +201,7 @@ public abstract class IOFile<E extends Buffer> {
     public boolean exists() {
         synchronized (this) {
             boolean exists = connector.exists(createHeadBlock());
-            if (buffers != null) {
-                for (int i = 0; i < buffers.length; i++) {
-                    //内存泄露
-                    if (!released && buffers[i] != null) {
-                        buffers[i].closeWithOutSync();
-                        buffers[i] = null;
-                    }
-                    boolean v = connector.exists(createIndexBlock(i));
-                    if (exists) {
-                        exists = v;
-                    }
-                }
-            }
-            boolean v = connector.exists(new FileBlock(uri));
+            boolean v = connector.exists(createIndexBlock(0));
             if (exists) {
                 exists = v;
             }
