@@ -18,7 +18,7 @@ repositories {
 def baseDir='.'
 def jarname='fineio.jar'
 //获取什么分支名
-FileTree files =fileTree(dir:'./',include:'build.*.gradle')
+FileTree files =fileTree(dir:'./',include:'build.gradle')
 
 def libDir = "lib"
 jar{
@@ -92,16 +92,56 @@ task copyFile(type:Copy,dependsOn:compileJava){
 //添加打包时间
 task addTime(dependsOn:'copyFile'){
 	ant.delete(file:"build.txt")
+	ant.delete(file:"fineiobuild.txt")
 	def date = new Date()
 	def formattedDate = date.format('yyyy.MM.dd.HH.mm.ss.S')
-	File file =file(new File('build.txt'))
+	File file =file(new File('fineiobuild.txt'))
 	FileWriter fw=new FileWriter(file)
 	fw.write(formattedDate)
 	fw.close()
 	ant.copy(todir:"build/classes/main/"){
-		fileset(file:"build.txt")
+		fileset(file:"fineiobuild.txt")
 	}			
 }
+
+
+//混淆代码
+task obfuse(dependsOn:'build')<<{
+	ant.delete(dir:"JAR/tmp/1.8")
+	ant.mkdir(dir:"JAR/tmp/1.8")
+	ant.taskdef(name:'yguard',classname:'com.yworks.yguard.YGuardTask',classpath:"${BI_HOME}/lib4build/yguard.jar")
+	ant.yguard(){
+		inoutpair(in:"build/libs/${jarname}",out:"JAR/tmp/1.8/${jarname}")
+		rename(){
+		keep{
+			method(name:'void main(String[])'){
+				patternset(id:'datapatternset'){
+					include (name:'**.*')
+				}
+			}
+			method(name:'void readObject(java.io.ObjectInputStream)'){
+				patternset(refid:'datapatternset')
+			}
+			method(name:'void writeObject(java.io.ObjectOutputStream)'){
+				patternset(refid:'datapatternset')				
+			}
+			field(name:'serialVersionUID'){
+				patternset(refid:'datapatternset')				
+			}
+			'class'(methods:'private',fields:'private'){
+				patternset{
+					include(name:'**.*')
+					exclude(name:'com.fr.report.core.cal.**.*')
+					exclude(name:'com.fr.base.core.util.vt.**.*')
+					exclude(name:'com.fr.web.core.service.**.*')
+				}
+			}
+		}
+		}
+	}
+	ant.delete(file:'yguardlog.xml')
+}
+
 
 ant{
 	taskdef(name: 'ftp',
@@ -115,7 +155,7 @@ ant{
 
 }
 
-task copyjar(dependsOn:'build')<<{
+task copyjar(dependsOn:'obfuse')<<{
 	ant{
 		delete(file:"${baseDir}/JAR/CN/${jarname}")
 		mkdir(dir:"${baseDir}/JAR/tmp/1.8")
