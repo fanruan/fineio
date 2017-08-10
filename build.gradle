@@ -149,7 +149,7 @@ ant{
                classpath: configurations.ftpAntTask.asPath)
 	echo('ftp target is 192.168.5.86')
 	//jar包上传到ftp
-	fileset(id:'ftp.upload.fileset.jar',dir:'bi_jar_zip'){
+	fileset(id:'ftp.upload.fileset.jar',dir:'bi_jar/fineio.jar'){
 		include(name:'**/**')
 	}
 
