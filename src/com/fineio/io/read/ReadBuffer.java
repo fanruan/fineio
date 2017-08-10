@@ -6,12 +6,11 @@ import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
 import com.fineio.io.Buffer;
+import com.fineio.io.base.AbstractBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.ReadIOFile;
-import com.fineio.io.base.AbstractBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
-import com.sun.mail.iap.ByteArray;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
