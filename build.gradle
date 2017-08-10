@@ -23,7 +23,7 @@ FileTree files =fileTree(dir:'./',include:'build.gradle')
 def libDir = "lib"
 jar{
 //指定生成jar包的名称
-	baseName='fr-bi-server'
+	baseName='fineio'
 }
 def list=[
 		"src"
