@@ -1,15 +1,18 @@
 package com.fineio.cache;
 
 
+import com.fineio.base.QueueWorkerThread;
 import com.fineio.base.SingleWaitThread;
 import com.fineio.base.Worker;
 import com.fineio.exception.FileCloseException;
 import com.fineio.io.Buffer;
 import com.fineio.memory.MemoryConf;
 
-import java.util.Iterator;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.LockSupport;
@@ -40,10 +43,13 @@ public class CacheManager {
     private static final int LEVEL_LINE = 2;
     private static final int MIN_WRITE_OFFSET = 3;
     private volatile long timeout = DEFAULT_TIMER_TIME;
+    private static final long TRIGGER_TIME = 30000;
     //内存分配锁
     private Lock memoryLock = new ReentrantLock();
     //GC的线程
-    private SingleWaitThread gcThread;
+    private QueueWorkerThread gcThread;
+    //GC线程30秒触发器，每隔30秒调用一次gcThread.triggerWork()
+    private ScheduledExecutorService gcThreadTrigger;
     //超时的timer
     private Timer timer = new Timer();
     //activeTimer
@@ -190,11 +196,21 @@ public class CacheManager {
         activeTimer.schedule(createBufferActiveTask(), timeout/ACTIVE_PERCENT, timeout/ACTIVE_PERCENT);
         read_size.addListener(createReadWatcher());
         write_size.addListener(createWriteWatcher());
-        gcThread = new SingleWaitThread(new Worker() {
+        gcThread = new QueueWorkerThread(new Worker() {
             public void work() {
                 gc();
             }
         });
+
+        gcThreadTrigger = Executors.newScheduledThreadPool(1);
+        gcThreadTrigger.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                if (getReadWaitCount() != 0 || getWriteWaitCount() != 0) {
+                    gcThread.triggerWork();
+                }
+            }
+        }, 0, TRIGGER_TIME, TimeUnit.MILLISECONDS);
     }
 
     /**
