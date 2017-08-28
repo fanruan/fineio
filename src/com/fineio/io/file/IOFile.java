@@ -193,6 +193,27 @@ public abstract class IOFile<E extends Buffer> {
             return  delete;
         }
     }
+    /**
+     * 复制
+     * @return
+     */
+    public  boolean copyTo(URI destUri){
+        synchronized(this) {
+            try {
+                if (buffers != null) {
+                    URI destURI = URI.create(destUri.getPath() + "/");
+                    connector.copy(createHeadBlock(), new FileBlock(destURI, FileConstants.HEAD));
+                    for (int i = 0; i < buffers.length; i++) {
+                        connector.copy(createIndexBlock(i), new FileBlock(destURI, String.valueOf(i)));
+                    }
+                    return true;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+    }
 
     /**
      * 判断是否存在

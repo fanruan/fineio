@@ -53,4 +53,12 @@ public interface Connector {
      * @return
      */
     boolean exists(FileBlock block);
+
+    /**
+     * 复制文件
+     * @param srcBlock
+     * @param destBlock
+     * @return
+     */
+    boolean copy(FileBlock srcBlock, FileBlock destBlock) throws IOException;
 }
