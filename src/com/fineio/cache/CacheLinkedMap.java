@@ -2,9 +2,6 @@ package com.fineio.cache;
 
 
 
-import com.fineio.io.Buffer;
-
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -157,5 +154,17 @@ public class CacheLinkedMap<T> {
 
     public boolean contains(T buffer) {
         return  indexMap.containsKey(buffer);
+    }
+
+    public synchronized boolean isEmpty() {
+        return indexMap.isEmpty();
+    }
+
+    public T get(T task) {
+        CacheObject<T> co = indexMap.get(task);
+        if (null != co) {
+            return co.get();
+        }
+        return null;
     }
 }

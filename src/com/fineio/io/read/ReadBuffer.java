@@ -7,8 +7,13 @@ import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
 import com.fineio.io.Buffer;
 import com.fineio.io.base.AbstractBuffer;
+import com.fineio.io.base.BufferKey;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.ReadIOFile;
+import com.fineio.io.file.writer.ForceManager;
+import com.fineio.io.file.writer.SyncTask;
+import com.fineio.io.mem.MemBean;
+import com.fineio.io.mem.MemBeanContainer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -16,13 +21,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Observable;
+import java.util.Observer;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by daniel on 2017/2/9.
  */
-public abstract class ReadBuffer extends AbstractBuffer implements Read {
-    private volatile boolean load = false;
+public abstract class ReadBuffer extends AbstractBuffer implements Read, Observer {
+    private volatile AtomicBoolean load = new AtomicBoolean(false);
     protected int max_byte_len;
+    protected volatile AtomicBoolean useProxy = new AtomicBoolean(false);
 
     public void put(int position, byte b) {
         put(b);
@@ -98,20 +108,34 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
      * max_offset 为什么要作为参数传进来而不是从connector里面读呢 是因为可能我上次写的cube的时候配置的4M 后来改成了64M这样的情况下读取connecter的值就会导致原来的值不对
      * 因为File里面获取到的offset是去掉类型偏移量的值，所以这里的offset需要加上偏移量，纯粹是比较2，不过这里都是不对外公开的，无所谓拉
      * 所以这个max_offset是传进来的，并且是当前文件的offset的值
-     * @see ReadIOFile
+     *
      * @param connector
      * @param block
      * @param max_offset
+     * @see ReadIOFile
      */
     protected ReadBuffer(Connector connector, FileBlock block, int max_offset) {
         super(connector, block);
         this.max_byte_len = 1 << (max_offset + getLengthOffset());
         this.directAccess = false;
+        setMemBean();
     }
 
     protected ReadBuffer(Connector connector, URI uri) {
         super(connector, new FileBlock(uri));
         this.directAccess = true;
+        setMemBean();
+    }
+
+    private void setMemBean() {
+        MemBean bean = MemBeanContainer.getContainer().get(getUri());
+        if (null != bean && !bean.isClose()) {
+            useProxy.set(true);
+            bean.addObserver(this);
+            load.set(bean.isLoad());
+            max_size = bean.getMaxSize();
+            address = bean.getAddress();
+        }
     }
 
     protected void loadContent() {
@@ -119,15 +143,15 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
     }
 
 
-    private final  void loadData() {
+    private final void loadData() {
         synchronized (this) {
-            if (load) {
+            if (load.get()) {
                 return;
             }
             if (close) {
                 throw new FileCloseException();
             }
-            if(directAccess) {
+            if (directAccess) {
                 DirectAccess();
             } else {
                 VirtualAccess();
@@ -171,7 +195,7 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
         address = CacheManager.getInstance().allocateRead((Buffer) this, off);
         MemoryUtils.copyMemory(bytes, address, off);
         allocateSize = off;
-        load = true;
+        load.set(true);
         max_size = off >> getLengthOffset();
         afterStatusChange();
     }
@@ -210,21 +234,34 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
     }
 
     protected final void checkIndex(int p) {
-        if (ir(p)){
+        if (ir(p)) {
             access();
+//            if (useProxy) {
+//                ForceManager.getInstance().accessTask(SyncTask.taskKey(bufferKey));
+//            }
             return;
         }
         lc(p);
     }
 
-    private final boolean ir(int p){
+    private final boolean ir(int p) {
+        if (useProxy.get()) {
+            MemBean bean = MemBeanContainer.getContainer().get(getUri());
+            if (null == bean || bean.isClose() || bean.getMaxSize() == 0) {
+                synchronized (this) {
+                    useProxy.set(false);
+                    load.set(false);
+                    return false;
+                }
+            }
+        }
         return p > -1 && p < max_size;
     }
 
     private final void lc(int p) {
         synchronized (this) {
-            if (load) {
-                if (ir(p)){
+            if (load.get()) {
+                if (ir(p)) {
                     return;
                 }
                 throw new BufferIndexOutOfBoundsException(p);
@@ -241,14 +278,25 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
 
     public void clear() {
         synchronized (this) {
-            if (!load) {
-                return;
+            if (useProxy.get()) {
+                if (!ForceManager.getInstance().isFlushed(bufferKey)) {
+//                    doClear();
+                    ForceManager.getInstance().doSync(SyncTask.taskKey(bufferKey));
+                }
+            } else {
+                doClear();
             }
-            load = false;
-            max_size = 0;
-            clearMemory();
-            releaseBuffer();
         }
+    }
+
+    private void doClear() {
+        if (!load.get()) {
+            return;
+        }
+        load.set(false);
+        max_size = 0;
+        clearMemory();
+        releaseBuffer();
     }
 
     public void force() {
@@ -257,11 +305,39 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
 
     public void closeWithOutSync() {
         synchronized (this) {
-            if(close){
+            if (close) {
                 return;
             }
             close = true;
             clear();
+        }
+    }
+
+    public BufferKey getBufferKey() {
+        return bufferKey;
+    }
+
+    public void setMaxSize(int maxSize) {
+        max_size = maxSize;
+    }
+
+    public void setAddress(long address) {
+        this.address = address;
+    }
+
+
+    @Override
+    public void update(Observable o, Object arg) {
+        if (o instanceof MemBean) {
+            synchronized (this) {
+                MemBean bean = (MemBean) o;
+                if (useProxy.get() && getUri().equals(bean.getUri())) {
+                    max_size = bean.getMaxSize();
+                    load.set(bean.isLoad());
+                    address = bean.getAddress();
+                    useProxy.set(false);
+                }
+            }
         }
     }
 }

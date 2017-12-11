@@ -17,12 +17,12 @@ public final  class LongReadBuffer extends ReadBuffer implements LongBuffer{
     public static final ReadModel MODEL = new ReadModel<LongBuffer>() {
 
         @Override
-        protected final LongReadBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
+        protected final LongBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
             return new LongReadBuffer(connector, block, max_offset);
         }
 
         @Override
-        public final LongReadBuffer  createBuffer(Connector connector, URI uri) {
+        public final LongBuffer  createBuffer(Connector connector, URI uri) {
             return new LongReadBuffer(connector, uri);
         }
 

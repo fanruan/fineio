@@ -17,12 +17,12 @@ public final  class ShortReadBuffer extends ReadBuffer implements ShortBuffer{
     public static final ReadModel MODEL = new ReadModel<ShortBuffer>() {
 
         @Override
-        protected final ShortReadBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
+        protected final ShortBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
             return new ShortReadBuffer(connector, block, max_offset);
         }
 
         @Override
-        public final ShortReadBuffer createBuffer(Connector connector, URI uri) {
+        public final ShortBuffer createBuffer(Connector connector, URI uri) {
             return new ShortReadBuffer(connector, uri);
         }
 

@@ -189,6 +189,8 @@ public abstract class IOFile<E extends Buffer> {
             if (delete) {
                 delete = v;
             }
+            URI parentURI = uri;
+            while (null != (parentURI = connector.deleteParent(new FileBlock(parentURI))));
             released = true;
             return  delete;
         }
@@ -222,10 +224,10 @@ public abstract class IOFile<E extends Buffer> {
     public boolean exists() {
         synchronized (this) {
             boolean exists = connector.exists(createHeadBlock());
-            boolean v = connector.exists(createIndexBlock(0));
-            if (exists) {
-                exists = v;
-            }
+//            boolean v = connector.exists(createIndexBlock(0));
+//            if (exists) {
+//                exists = v;
+//            }
             released = true;
             return  exists;
         }
