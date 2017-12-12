@@ -15,12 +15,12 @@ public final class ByteReadBuffer extends  ReadBuffer implements ByteBuffer {
 
     public static final ReadModel MODEL = new ReadModel<ByteBuffer>() {
 
-        protected final ByteReadBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
+        protected final ByteBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
             return new ByteReadBuffer(connector, block, max_offset);
         }
 
         @Override
-        public final ByteReadBuffer createBuffer(Connector connector, URI uri) {
+        public final ByteBuffer createBuffer(Connector connector, URI uri) {
             return new ByteReadBuffer(connector, uri);
         }
 

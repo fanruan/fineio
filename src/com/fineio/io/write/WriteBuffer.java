@@ -8,8 +8,12 @@ import com.fineio.io.Buffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.base.Job;
 import com.fineio.io.base.JobAssist;
+import com.fineio.io.file.writer.ForceManager;
 import com.fineio.io.file.writer.SyncManager;
 import com.fineio.io.base.AbstractBuffer;
+import com.fineio.io.file.writer.SyncTask;
+import com.fineio.io.mem.MemBean;
+import com.fineio.io.mem.MemBeanContainer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -147,8 +151,19 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     }
 
     public void force() {
-        forceWrite();
-        closeWithOutSync();
+        ForceManager.getInstance().registerBuffer(new SyncTask(bufferKey) {
+            @Override
+            public void work() {
+                forceWrite();
+                closeWithOutSync();
+            }
+        });
+        MemBean bean = new MemBean(getUri());
+        bean.setAddress(address);
+        bean.setMaxSize(current_max_size);
+        bean.setClose(false);
+        bean.setLoad(true);
+        MemBeanContainer.getContainer().registerMemBean(bean);
     }
 
 
@@ -214,6 +229,13 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
             if(close){
                 return;
             }
+            MemBean bean = MemBeanContainer.getContainer().get(getUri());
+            if (null != bean) {
+                bean.reset();
+//                MemBeanContainer.getContainer().updateMemBean(bean);
+                MemBeanContainer.getContainer().remove(getUri());
+            }
+            ForceManager.getInstance().flushed(bufferKey);
             close();
             this.current_max_size = 0;
             clearMemory();

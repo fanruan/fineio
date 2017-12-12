@@ -16,12 +16,12 @@ public final  class CharReadBuffer extends ReadBuffer implements CharBuffer {
     public static final ReadModel MODEL = new ReadModel<CharBuffer>() {
 
         @Override
-        protected final CharReadBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
+        protected final CharBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
             return new CharReadBuffer(connector, block, max_offset);
         }
 
         @Override
-        public final CharReadBuffer createBuffer(Connector connector, URI uri) {
+        public final CharBuffer createBuffer(Connector connector, URI uri) {
             return new CharReadBuffer(connector, uri);
         }
 
