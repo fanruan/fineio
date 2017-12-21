@@ -17,12 +17,12 @@ public final  class FloatReadBuffer extends ReadBuffer implements FloatBuffer {
     public static final ReadModel MODEL = new ReadModel<FloatBuffer>() {
 
         @Override
-        protected final FloatBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
+        protected final FloatReadBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
             return new FloatReadBuffer(connector, block, max_offset);
         }
 
         @Override
-        public final FloatBuffer createBuffer(Connector connector, URI uri) {
+        public final FloatReadBuffer createBuffer(Connector connector, URI uri) {
             return new FloatReadBuffer(connector, uri);
         }
 

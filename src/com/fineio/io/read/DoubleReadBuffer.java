@@ -17,12 +17,12 @@ public final  class DoubleReadBuffer extends ReadBuffer implements DoubleBuffer 
     public static final ReadModel MODEL = new ReadModel<DoubleBuffer>() {
 
         @Override
-        protected final DoubleBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
+        protected final DoubleReadBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
             return new DoubleReadBuffer(connector, block, max_offset);
         }
 
         @Override
-        public final DoubleBuffer  createBuffer(Connector connector, URI uri) {
+        public final DoubleReadBuffer  createBuffer(Connector connector, URI uri) {
             return new DoubleReadBuffer(connector, uri);
         }
 

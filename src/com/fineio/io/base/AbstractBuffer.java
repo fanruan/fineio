@@ -9,7 +9,6 @@ import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
 import java.io.InputStream;
-import java.net.URI;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
@@ -33,7 +32,6 @@ public abstract class AbstractBuffer implements BaseBuffer {
     private  volatile boolean access = false;
     protected volatile int allocateSize = 0;
     protected volatile boolean directAccess = false;
-    private volatile URI uri;
 
 
 
@@ -126,7 +124,6 @@ public abstract class AbstractBuffer implements BaseBuffer {
 
     protected AbstractBuffer(Connector connector, FileBlock block) {
         this.bufferKey = new BufferKey(connector, block);
-        this.uri = block.getBlockURI();
         manager = CacheManager.getInstance();
         manager.registerBuffer((Buffer) this);
     }
@@ -155,7 +152,4 @@ public abstract class AbstractBuffer implements BaseBuffer {
      */
     protected abstract int getLengthOffset();
 
-    public URI getUri() {
-        return null != uri ? uri : bufferKey.getBlock().getBlockURI();
-    }
 }

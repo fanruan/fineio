@@ -16,12 +16,12 @@ public  final class IntReadBuffer extends ReadBuffer implements IntBuffer {
     public static final ReadModel MODEL = new ReadModel<IntBuffer>() {
 
         @Override
-        protected final IntBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
+        protected final IntReadBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
             return new IntReadBuffer(connector, block, max_offset);
         }
 
         @Override
-        public final IntBuffer createBuffer(Connector connector, URI uri) {
+        public final IntReadBuffer createBuffer(Connector connector, URI uri) {
             return new IntReadBuffer(connector, uri);
         }
 
