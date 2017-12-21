@@ -236,6 +236,11 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
                 MemBeanContainer.getContainer().remove(getUri());
             }
             ForceManager.getInstance().flushed(bufferKey);
+            try {
+                // 清除内存前暂停1毫秒，防止清除后还有的buffer没读完
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+            }
             close();
             this.current_max_size = 0;
             clearMemory();
