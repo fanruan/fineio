@@ -1,10 +1,5 @@
 package com.fineio.cache;
 
-
-
-import com.fineio.io.Buffer;
-
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

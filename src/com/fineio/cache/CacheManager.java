@@ -2,14 +2,14 @@ package com.fineio.cache;
 
 
 import com.fineio.base.QueueWorkerThread;
-import com.fineio.base.SingleWaitThread;
 import com.fineio.base.Worker;
 import com.fineio.exception.FileCloseException;
 import com.fineio.io.Buffer;
 import com.fineio.memory.MemoryConf;
 
-import java.util.*;
-import java.util.concurrent.ExecutorService;
+import java.util.Iterator;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
