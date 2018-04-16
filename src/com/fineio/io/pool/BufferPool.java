@@ -72,7 +72,8 @@ public class BufferPool {
         current.put(uri, observable);
     }
 
-    public void cleanOne() {
+    public boolean cleanOne() {
+        boolean clean = false;
         for (int i = 0; i < size; i++) {
             List<BufferObservable> list = new ArrayList<BufferObservable>(observableMaps[i].values());
             if (!list.isEmpty()) {
@@ -80,8 +81,10 @@ public class BufferPool {
                 BufferObservable observable = list.get(0);
                 observableMaps[i].remove(observable.getUri());
                 observable.bufferCleaned();
+                clean = true;
             }
         }
+        return clean;
     }
 
     public void cleanAll() {
@@ -108,5 +111,23 @@ public class BufferPool {
     private int getIndex(URI uri) {
         int hash = Math.abs(uri.hashCode());
         return hash % size;
+    }
+
+    public static boolean cleanOneEachMode() {
+        Iterator<Map.Entry<PoolMode, BufferPool>> iterator = poolMap.entrySet().iterator();
+        boolean clean = false;
+        while (iterator.hasNext()) {
+            if (iterator.next().getValue().cleanOne()) {
+                clean = true;
+            }
+        }
+        return clean;
+    }
+
+    public static void cleanAllEachMode() {
+        Iterator<Map.Entry<PoolMode, BufferPool>> iterator = poolMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            iterator.next().getValue().cleanAll();
+        }
     }
 }
