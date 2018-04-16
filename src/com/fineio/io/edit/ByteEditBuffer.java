@@ -3,15 +3,19 @@ package com.fineio.io.edit;
 import com.fineio.io.file.EditModel;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.ByteBuffer;
+import com.fineio.io.pool.BufferPool;
+import com.fineio.io.pool.PoolMode;
+import com.fineio.io.read.ByteReadBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.lang.reflect.Constructor;
 import java.net.URI;
 
 /**
  * Created by daniel on 2017/2/9.
  */
-public final  class ByteEditBuffer extends  EditBuffer implements ByteBuffer {
+public final class ByteEditBuffer extends EditBuffer implements ByteBuffer {
 
     public static final EditModel MODEL = new EditModel<ByteBuffer>() {
 
@@ -20,7 +24,7 @@ public final  class ByteEditBuffer extends  EditBuffer implements ByteBuffer {
         }
 
         @Override
-        public final ByteEditBuffer  createBuffer(Connector connector, URI uri) {
+        public final ByteEditBuffer createBuffer(Connector connector, URI uri) {
             return new ByteEditBuffer(connector, uri);
         }
 
@@ -47,19 +51,18 @@ public final  class ByteEditBuffer extends  EditBuffer implements ByteBuffer {
     }
 
     /**
-     *
      * @param position 位置
-     * @param b 值
+     * @param b        值
      */
-    public  final  void put(int position, byte b) {
+    public final void put(int position, byte b) {
         ensureCapacity(position);
         judeChange(position, b);
         MemoryUtils.put(address, position, b);
     }
 
     private void judeChange(int position, byte b) {
-        if(!changed) {
-            if(b != get(position)){
+        if (!changed) {
+            if (b != get(position)) {
                 changed = true;
             }
         }
@@ -70,4 +73,20 @@ public final  class ByteEditBuffer extends  EditBuffer implements ByteBuffer {
         return MemoryUtils.getByte(address, p);
     }
 
+    @Override
+    protected void registerForRead() {
+        try {
+            ByteReadBuffer buffer = null;
+            final Constructor<ByteReadBuffer> constructor = ByteReadBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
+            constructorAccess(constructor);
+            buffer = constructor.newInstance(bufferKey.getConnector(), bufferKey.getBlock(), current_max_offset);
+            buffer.setAddress(address);
+            buffer.setMaxSize(current_max_size);
+            buffer.setAllocateSize(allocateSize);
+            buffer.setLoad(true);
+            BufferPool.getInstance(PoolMode.BYTE).registerFromBuffer(buffer, true);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

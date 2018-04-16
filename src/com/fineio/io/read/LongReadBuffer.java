@@ -3,6 +3,7 @@ package com.fineio.io.read;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.ReadModel;
 import com.fineio.io.LongBuffer;
+import com.fineio.io.pool.PoolMode;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -16,8 +17,12 @@ public final  class LongReadBuffer extends ReadBuffer implements LongBuffer{
 
     public static final ReadModel MODEL = new ReadModel<LongBuffer>() {
 
+        public PoolMode getPoolMode() {
+            return PoolMode.LONG;
+        }
+
         @Override
-        protected final LongReadBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
+        protected final LongReadBuffer newBlockBuffer(Connector connector, FileBlock block, int max_offset) {
             return new LongReadBuffer(connector, block, max_offset);
         }
 

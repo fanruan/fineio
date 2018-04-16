@@ -3,6 +3,7 @@ package com.fineio.io.read;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.ReadModel;
 import com.fineio.io.IntBuffer;
+import com.fineio.io.pool.PoolMode;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -15,8 +16,12 @@ public  final class IntReadBuffer extends ReadBuffer implements IntBuffer {
 
     public static final ReadModel MODEL = new ReadModel<IntBuffer>() {
 
+        public PoolMode getPoolMode() {
+            return PoolMode.INT;
+        }
+
         @Override
-        protected final IntReadBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
+        protected final IntReadBuffer newBlockBuffer(Connector connector, FileBlock block, int max_offset) {
             return new IntReadBuffer(connector, block, max_offset);
         }
 

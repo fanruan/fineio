@@ -9,6 +9,8 @@ import com.fineio.storage.Connector;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Created by daniel on 2017/2/10.
@@ -16,7 +18,7 @@ import java.net.URI;
  */
 public abstract class IOFile<E extends Buffer> {
 
-
+    protected ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
     /**
      * 内部路径 key
      */
@@ -145,7 +147,13 @@ public abstract class IOFile<E extends Buffer> {
 
 
     private final E getBuffer(int index){
-        return buffers[checkIndex(index)] != null ?  buffers[index] : initBuffer(index);
+        Lock lock = readWriteLock.readLock();
+        lock.lock();
+        try {
+            return buffers[checkIndex(index)] != null ? buffers[index] : initBuffer(index);
+        } finally {
+            lock.unlock();
+        }
     }
 
     private int checkIndex(int index){
@@ -233,7 +241,7 @@ public abstract class IOFile<E extends Buffer> {
         }
     }
 
-    private final FileBlock createIndexBlock(int index){
+    protected FileBlock createIndexBlock(int index){
         return new FileBlock(uri, String.valueOf(index));
     }
 
@@ -378,6 +386,7 @@ public abstract class IOFile<E extends Buffer> {
      * @return
      */
     public final static long getLong(IOFile<LongBuffer> file, long p) {
+
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 

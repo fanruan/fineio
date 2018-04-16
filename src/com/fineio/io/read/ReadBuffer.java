@@ -264,4 +264,24 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
             clear();
         }
     }
+
+    public boolean isLoad() {
+        return load;
+    }
+
+    public void setAddress(long address) {
+        this.address = address;
+    }
+
+    public void setMaxSize(int maxSize) {
+        this.max_size = maxSize;
+    }
+
+    public void setAllocateSize(int allocateSize) {
+        this.allocateSize = allocateSize;
+    }
+
+    public void setLoad(boolean load) {
+        this.load = load;
+    }
 }

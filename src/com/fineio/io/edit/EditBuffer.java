@@ -135,10 +135,10 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
     /**
      * force关闭load入口不在加载,force与写也不支持多线程
      */
-    public void force() {
-        forceWrite();
-        closeWithOutSync();
-    }
+//    public void force() {
+//        forceWrite();
+//        closeWithOutSync();
+//    }
 
 
     /**

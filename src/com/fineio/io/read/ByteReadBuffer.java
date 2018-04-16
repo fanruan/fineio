@@ -3,6 +3,8 @@ package com.fineio.io.read;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.ReadModel;
 import com.fineio.io.ByteBuffer;
+import com.fineio.io.pool.BufferPool;
+import com.fineio.io.pool.PoolMode;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -14,8 +16,13 @@ import java.net.URI;
 public final class ByteReadBuffer extends  ReadBuffer implements ByteBuffer {
 
     public static final ReadModel MODEL = new ReadModel<ByteBuffer>() {
+        private BufferPool pool = BufferPool.getInstance(getPoolMode());
+        public PoolMode getPoolMode() {
+            return PoolMode.BYTE;
+        }
 
-        protected final ByteReadBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
+        @Override
+        protected ByteReadBuffer newBlockBuffer(Connector connector, FileBlock block, int max_offset) {
             return new ByteReadBuffer(connector, block, max_offset);
         }
 

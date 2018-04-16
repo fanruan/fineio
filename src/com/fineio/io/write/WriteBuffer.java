@@ -10,11 +10,15 @@ import com.fineio.io.base.Job;
 import com.fineio.io.base.JobAssist;
 import com.fineio.io.file.writer.SyncManager;
 import com.fineio.io.base.AbstractBuffer;
+import com.fineio.io.read.ReadBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.URI;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * Created by daniel on 2017/2/15.
@@ -146,15 +150,16 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         afterStatusChange();
     }
 
-    public void force() {
-        forceWrite();
-        closeWithOutSync();
-    }
+//    public void force() {
+//        forceWrite();
+//        closeWithOutSync();
+//    }
 
 
     public void closeWithOutSync() {
         this.clear();
     }
+
 
     protected final void forceWrite() {
         int i = 0;
@@ -169,23 +174,19 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         }
     }
 
-
-    protected JobAssist createWriteJob() {
-        return new JobAssist(bufferKey, new Job() {
-            public void doJob() {
-                try {
-                    write0();
-                } catch (StreamCloseException e){
-                    flushed = false;
-                    //stream close这种还是直接触发写把，否则force的时候如果有三次那么就会出现写不成功的bug
-                    //理论讲写方法都是单线程，所以force的时候肯定也不会再写了，但是不怕一万就怕万一
-                    //这样执行下去job会唤醒force的while循环会执行一次会导致写次数++
-                    //所以不trigger了直接循环执行把
-                    doJob();
-                }
+    protected final void normalForceWrite() {
+        int i = 0;
+        while (needFlush()) {
+            i++;
+            SyncManager.getInstance().force(createNormalWriteJob());
+            //尝试3次依然抛错就不写了 强制释放内存 TODO后续考虑对异常未保存文件处理
+            if(i > 3) {
+                flushed = true;
+                break;
             }
-        });
+        }
     }
+
 
     private transient long lastWriteTime;
     //20秒内响应一次写
@@ -221,6 +222,41 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         }
     }
 
+    private JobAssist createNormalWriteJob() {
+        return new JobAssist(bufferKey, new Job() {
+            public void doJob() {
+                try {
+                    write0();
+                    clearAfterWrite();
+                } catch (StreamCloseException e){
+                    flushed = false;
+                    //stream close这种还是直接触发写把，否则force的时候如果有三次那么就会出现写不成功的bug
+                    //理论讲写方法都是单线程，所以force的时候肯定也不会再写了，但是不怕一万就怕万一
+                    //这样执行下去job会唤醒force的while循环会执行一次会导致写次数++
+                    //所以不trigger了直接循环执行把
+                    doJob();
+                }
+            }
+        });
+    }
+
+
+    protected JobAssist createWriteJob() {
+        return new JobAssist(bufferKey, new Job() {
+            public void doJob() {
+                try {
+                    write0();
+                } catch (StreamCloseException e){
+                    flushed = false;
+                    //stream close这种还是直接触发写把，否则force的时候如果有三次那么就会出现写不成功的bug
+                    //理论讲写方法都是单线程，所以force的时候肯定也不会再写了，但是不怕一万就怕万一
+                    //这样执行下去job会唤醒force的while循环会执行一次会导致写次数++
+                    //所以不trigger了直接循环执行把
+                    doJob();
+                }
+            }
+        });
+    }
 
     protected void clearAfterWrite() {
         clear();
@@ -232,7 +268,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
             try {
                 bufferKey.getConnector().write(bufferKey.getBlock(), getInputStream());
                 flushed = true;
-                clearAfterWrite();
+//                clearAfterWrite();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -244,4 +280,43 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
         return LEVEL.WRITE;
     }
 
+    protected void constructorAccess(final Constructor<? extends Buffer> constructor) {
+        AccessController.doPrivileged(new PrivilegedAction<Object>() {
+            @Override
+            public Object run() {
+                constructor.setAccessible(true);
+                return null;
+            }
+        });
+    }
+
+    public void force() {
+        if (directAccess) {
+            normalForce();
+        } else {
+            pooledForce();
+        }
+    }
+
+    public void pooledForce() {
+        try {
+            registerForRead();
+            forceWrite();
+            CacheManager.getInstance().clearBufferMemory((Buffer) this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void normalForce() {
+        try {
+            normalForceWrite();
+            closeWithOutSync();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        closeWithOutSync();
+    }
+
+    protected abstract void registerForRead();
 }
