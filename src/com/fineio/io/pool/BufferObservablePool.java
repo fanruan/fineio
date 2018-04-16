@@ -19,7 +19,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class BufferObservablePool {
     private ConcurrentHashMap<URI, BufferObservable> observableMap;
-    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 
     public BufferObservablePool() {
         observableMap = new ConcurrentHashMap<URI, BufferObservable>();
@@ -27,86 +26,56 @@ public class BufferObservablePool {
 
     public void registerFromBuffer(ReadBuffer buffer, boolean force) {
         URI uri = buffer.getUri();
-        Lock writeLock = lock.writeLock();
-        writeLock.lock();
-        try {
-            BufferObservable observable = observableMap.get(uri);
-            if (null == observable) {
-                observable = BufferObservable.newInstance(uri);
-                observable.setBuffer(buffer, false);
-            } else if (!observable.isBufferValid()) {
-                observable.setBuffer(buffer, false);
-            } else if (force) {
-                observable.setBuffer(buffer, true);
-                observable.bufferChanged();
-            }
-            observableMap.put(uri, observable);
-        } finally {
-            writeLock.unlock();
+        BufferObservable observable = observableMap.get(uri);
+        if (null == observable) {
+            observable = BufferObservable.newInstance(uri);
+            observable.setBuffer(buffer, false);
+        } else if (!observable.isBufferValid()) {
+            observable.setBuffer(buffer, false);
+        } else if (force) {
+            observable.setBuffer(buffer, true);
+            observable.bufferChanged();
         }
+        observableMap.put(uri, observable);
     }
 
     public void registerFromIOFile(URI uri, ReadIOFile ioFile) {
-        Lock writeLock = lock.writeLock();
-        writeLock.lock();
-        try {
-            BufferObservable observable = observableMap.get(uri);
-            if (null == observable) {
-                observable = BufferObservable.newInstance(uri);
-            }
-            observable.registerObserver(ioFile);
-            observableMap.put(uri, observable);
-        } finally {
-            writeLock.unlock();
+        BufferObservable observable = observableMap.get(uri);
+        if (null == observable) {
+            observable = BufferObservable.newInstance(uri);
         }
+        observable.registerObserver(ioFile);
+        observableMap.put(uri, observable);
     }
 
     public boolean cleanOne() {
         boolean clean = false;
-        Lock writeLock = lock.writeLock();
-        writeLock.lock();
-        try {
-            List<BufferObservable> list = new ArrayList<BufferObservable>(observableMap.values());
-            if (!list.isEmpty()) {
-                Collections.sort(list);
-                BufferObservable observable = list.get(0);
-                observableMap.remove(observable.getUri());
-                observable.bufferCleaned();
-                clean = true;
-            }
-        } finally {
-            writeLock.unlock();
+        List<BufferObservable> list = new ArrayList<BufferObservable>(observableMap.values());
+        if (!list.isEmpty()) {
+            Collections.sort(list);
+            BufferObservable observable = list.get(0);
+            observableMap.remove(observable.getUri());
+            observable.bufferCleaned();
+            clean = true;
         }
         return clean;
     }
 
     public void cleanAll() {
-        Lock writeLock = lock.writeLock();
-        writeLock.lock();
-        try {
-            ConcurrentHashMap<URI, BufferObservable> map = new ConcurrentHashMap<URI, BufferObservable>(observableMap);
-            observableMap.clear();
-            Iterator<Map.Entry<URI, BufferObservable>> iterator = map.entrySet().iterator();
-            while (iterator.hasNext()) {
-                iterator.next().getValue().bufferCleaned();
-            }
-            map.clear();
-        } finally {
-            writeLock.unlock();
+        ConcurrentHashMap<URI, BufferObservable> map = new ConcurrentHashMap<URI, BufferObservable>(observableMap);
+        observableMap.clear();
+        Iterator<Map.Entry<URI, BufferObservable>> iterator = map.entrySet().iterator();
+        while (iterator.hasNext()) {
+            iterator.next().getValue().bufferCleaned();
         }
+        map.clear();
     }
 
     public ReadBuffer getBuffer(URI uri) {
-        Lock readLock = lock.readLock();
-        readLock.lock();
-        try {
-            BufferObservable observable = observableMap.get(uri);
-            if (null == observable) {
-                return null;
-            }
-            return observable.getBuffer();
-        } finally {
-            readLock.unlock();
+        BufferObservable observable = observableMap.get(uri);
+        if (null == observable) {
+            return null;
         }
+        return observable.getBuffer();
     }
 }

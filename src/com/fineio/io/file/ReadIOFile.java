@@ -65,21 +65,15 @@ public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> im
     public void update(BufferObservable observable) {
         int block = observable.getBlock();
         if (-1 != block && block < buffers.length) {
-            Lock lock = readWriteLock.writeLock();
-            lock.lock();
-            try {
-                switch (observable.getState()) {
-                    case CHANGE:
-                        buffers[block] = (T) observable.getBuffer();
-                        break;
-                    case CLEAR:
-                        buffers[block] = null;
-                        break;
-                    default:
-                        break;
-                }
-            } finally {
-                lock.unlock();
+            switch (observable.getState()) {
+                case CHANGE:
+                    buffers[block] = (T) observable.getBuffer();
+                    break;
+                case CLEAR:
+                    buffers[block] = null;
+                    break;
+                default:
+                    break;
             }
         }
     }
