@@ -10,6 +10,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author yee
@@ -18,8 +21,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class BufferPool {
     private static ConcurrentHashMap<PoolMode, BufferPool> poolMap = new ConcurrentHashMap<PoolMode, BufferPool>();
     private ConcurrentHashMap<URI, BufferObservable>[] observableMaps;
+    private static ScheduledExecutorService cleanOneThread;
+//    private static ScheduledExecutorService cleanAllThread;
     private static final int DEFAULT_MAP_COUNT = 10;
     private int size;
+    private static final long CLEAN_ONE_TIMEOUT = 60000L;
+//    private static final long CLEAN_ALL_TIMEOUT = 10 * 60000L;
+
     private BufferPool(int size) {
         this.size = size;
         observableMaps = new ConcurrentHashMap[size];
@@ -43,6 +51,15 @@ public class BufferPool {
                 }
             }
         }
+        if (cleanOneThread == null) {
+            cleanOneThread = Executors.newSingleThreadScheduledExecutor();
+            cleanOneThread.scheduleAtFixedRate(new ScheduledCleanOneTask(), CLEAN_ONE_TIMEOUT, CLEAN_ONE_TIMEOUT, TimeUnit.MILLISECONDS);
+        }
+
+//        if (cleanAllThread == null) {
+//            cleanAllThread = Executors.newSingleThreadScheduledExecutor();
+//            cleanAllThread.scheduleAtFixedRate(new ScheduledCleanAllTask(), CLEAN_ALL_TIMEOUT, CLEAN_ALL_TIMEOUT, TimeUnit.MILLISECONDS);
+//        }
         return pool;
     }
 
@@ -53,7 +70,7 @@ public class BufferPool {
         if (null == observable) {
             observable = BufferObservable.newInstance(uri);
             observable.setBuffer(buffer, false);
-        } else if (!observable.isBufferValid()){
+        } else if (!observable.isBufferValid()) {
             observable.setBuffer(buffer, false);
         } else if (force) {
             observable.setBuffer(buffer, true);
@@ -130,4 +147,20 @@ public class BufferPool {
             iterator.next().getValue().cleanAll();
         }
     }
+
+    private static class ScheduledCleanOneTask implements Runnable {
+
+        @Override
+        public void run() {
+            cleanAllEachMode();
+        }
+    }
+
+//    private static class ScheduledCleanAllTask implements Runnable {
+//
+//        @Override
+//        public void run() {
+//            cleanAllEachMode();
+//        }
+//    }
 }
