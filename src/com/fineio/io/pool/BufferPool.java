@@ -21,7 +21,7 @@ public class BufferPool {
     private static ScheduledExecutorService cleanOneThread;
     private static final int DEFAULT_MAP_COUNT = 10;
     private int size;
-    private static final long CLEAN_ONE_TIMEOUT = 30000L;
+    private static final long CLEAN_ONE_TIMEOUT = 60000L;
 
     private BufferPool(int size) {
         this.size = size;
@@ -114,11 +114,4 @@ public class BufferPool {
         }
     }
 
-//    private static class ScheduledCleanAllTask implements Runnable {
-//
-//        @Override
-//        public void run() {
-//            cleanAllEachMode();
-//        }
-//    }
 }
