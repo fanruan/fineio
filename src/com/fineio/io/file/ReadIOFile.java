@@ -78,4 +78,20 @@ public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> im
         }
     }
 
+    @Override
+    public void close() {
+        synchronized (this) {
+            if (released) {
+                return;
+            }
+            writeHeader();
+            BufferPool pool = BufferPool.getInstance(poolMode);
+            if (buffers != null) {
+                for (int i = 0; i < buffers.length; i++) {
+                    pool.cleanByKey(buffers[i].getUri());
+                }
+            }
+            released = true;
+        }
+    }
 }

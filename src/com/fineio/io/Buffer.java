@@ -3,6 +3,8 @@ package com.fineio.io;
 import com.fineio.cache.LEVEL;
 import com.fineio.io.base.BufferKey;
 
+import java.net.URI;
+
 /**
  * Created by daniel on 2017/2/20.
  */
@@ -73,4 +75,7 @@ public interface Buffer {
      * @return
      */
     int getLength();
+
+    URI getUri();
+
 }

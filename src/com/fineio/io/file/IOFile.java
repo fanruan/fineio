@@ -43,7 +43,7 @@ public abstract class IOFile<E extends Buffer> {
     protected long single_block_len;
     protected volatile E[] buffers;
 
-    private volatile boolean released = false;
+    protected volatile boolean released = false;
 
     /*
      * 文件长度

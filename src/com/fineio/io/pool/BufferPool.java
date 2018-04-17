@@ -83,6 +83,10 @@ public class BufferPool {
         return observableMaps[getIndex(uri)].getBuffer(uri);
     }
 
+    public void cleanByKey(URI uri) {
+        observableMaps[getIndex(uri)].clean(uri);
+    }
+
     private int getIndex(URI uri) {
         int hash = Math.abs(uri.hashCode());
         return hash % size;

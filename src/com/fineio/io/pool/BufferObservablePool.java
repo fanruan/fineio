@@ -10,8 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author yee
@@ -77,5 +75,12 @@ public class BufferObservablePool {
             return null;
         }
         return observable.getBuffer();
+    }
+
+    public void clean(URI uri) {
+        BufferObservable observable = observableMap.remove(uri);
+        if (null != observable) {
+            observable.bufferCleaned();
+        }
     }
 }
