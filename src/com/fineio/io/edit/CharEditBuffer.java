@@ -3,15 +3,19 @@ package com.fineio.io.edit;
 import com.fineio.io.file.EditModel;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.CharBuffer;
+import com.fineio.io.pool.BufferPool;
+import com.fineio.io.pool.PoolMode;
+import com.fineio.io.read.CharReadBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.lang.reflect.Constructor;
 import java.net.URI;
 
 /**
  * Created by daniel on 2017/2/14.
  */
-public final  class CharEditBuffer extends EditBuffer implements CharBuffer {
+public final class CharEditBuffer extends EditBuffer implements CharBuffer {
 
     public static final EditModel MODEL = new EditModel<CharBuffer>() {
 
@@ -53,21 +57,37 @@ public final  class CharEditBuffer extends EditBuffer implements CharBuffer {
     }
 
     /**
-     *
      * @param position 位置
-     * @param b 值
+     * @param b        值
      */
-    public  final  void put(int position, char b) {
+    public final void put(int position, char b) {
         ensureCapacity(position);
         judeChange(position, b);
         MemoryUtils.put(address, position, b);
     }
 
     private void judeChange(int position, char b) {
-        if(!changed) {
-            if(b != get(position)){
+        if (!changed) {
+            if (b != get(position)) {
                 changed = true;
             }
+        }
+    }
+
+    @Override
+    protected void registerForRead() {
+        try {
+            CharReadBuffer buffer = null;
+            final Constructor<CharReadBuffer> constructor = CharReadBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
+            constructorAccess(constructor);
+            buffer = constructor.newInstance(bufferKey.getConnector(), bufferKey.getBlock(), current_max_offset);
+            buffer.setAddress(address);
+            buffer.setMaxSize(current_max_size);
+            buffer.setAllocateSize(allocateSize);
+            buffer.setLoad(true);
+            BufferPool.getInstance(PoolMode.CHAR).registerFromBuffer(buffer, true);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

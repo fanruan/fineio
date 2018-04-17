@@ -9,13 +9,13 @@ import com.fineio.storage.Connector;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Created by daniel on 2017/2/10.
- *
  */
 public abstract class IOFile<E extends Buffer> {
-
 
     /**
      * 内部路径 key
@@ -43,15 +43,15 @@ public abstract class IOFile<E extends Buffer> {
     protected long single_block_len;
     protected volatile E[] buffers;
 
-    private volatile boolean released = false;
+    protected volatile boolean released = false;
 
     /*
-    * 文件长度
+     * 文件长度
      */
 //    public abstract long length();
 
     IOFile(Connector connector, URI uri, AbstractFileModel<E> model) {
-        if(uri == null || connector == null|| model == null){
+        if (uri == null || connector == null || model == null) {
             throw new IOSetException("uri  or connector or model can't be null");
         }
         this.connector = connector;
@@ -62,16 +62,17 @@ public abstract class IOFile<E extends Buffer> {
     /**
      * 获取设置的path
      */
-    public String getPath(){
+    public String getPath() {
         return uri.getPath();
     }
 
-    protected final FileBlock createHeadBlock(){
+    protected final FileBlock createHeadBlock() {
         return new FileBlock(uri, FileConstants.HEAD);
     }
 
     /**
      * 注意所有写方法并不支持多线程操作，仅读的方法支持
+     *
      * @param size
      */
     protected final void createBufferArray(int size) {
@@ -84,7 +85,7 @@ public abstract class IOFile<E extends Buffer> {
     }
 
     protected final int checkBuffer(int index) {
-        if(index < 0){
+        if (index < 0) {
             throw new BufferIndexOutOfBoundsException(index);
         }
         return inRange(index) ? index : createBufferArrayInRange(index);
@@ -93,29 +94,29 @@ public abstract class IOFile<E extends Buffer> {
     private int createBufferArrayInRange(int index) {
         Buffer[] buffers = this.buffers;
         createBufferArray(index + 1);
-        if(buffers != null){
+        if (buffers != null) {
             System.arraycopy(buffers, 0, this.buffers, 0, buffers.length);
         }
         return index;
     }
 
     //读
-    protected  int gi(long p) {
-        return   (int)(p >> block_size_offset);
+    protected int gi(long p) {
+        return (int) (p >> block_size_offset);
     }
 
     //触发写
     protected int giw(long p) {
-        int len =  (int)(p >> block_size_offset);
-        if(len > 0){
+        int len = (int) (p >> block_size_offset);
+        if (len > 0) {
             checkWrite(len);
         }
         return len;
     }
 
-    protected   void checkWrite(int len) {
-        if(bufferWriteIndex != len) {
-            if(bufferWriteIndex != -1){
+    protected void checkWrite(int len) {
+        if (bufferWriteIndex != len) {
+            if (bufferWriteIndex != -1) {
                 buffers[bufferWriteIndex].write();
             }
             bufferWriteIndex = len;
@@ -125,7 +126,7 @@ public abstract class IOFile<E extends Buffer> {
     private volatile int bufferWriteIndex = -1;
 
     private final int gi() {
-        if(buffers == null || buffers.length == 0) {
+        if (buffers == null || buffers.length == 0) {
             return 0;
         }
         int len = buffers.length - 1;
@@ -138,26 +139,25 @@ public abstract class IOFile<E extends Buffer> {
     }
 
 
-
-    private final int gp(long p){
-        return (int)(p & single_block_len);
+    private final int gp(long p) {
+        return (int) (p & single_block_len);
     }
 
 
-    private final E getBuffer(int index){
-        return buffers[checkIndex(index)] != null ?  buffers[index] : initBuffer(index);
+    private final E getBuffer(int index) {
+        return buffers[checkIndex(index)] != null ? buffers[index] : initBuffer(index);
     }
 
-    private int checkIndex(int index){
-        if(index > -1 && index < blocks){
+    private int checkIndex(int index) {
+        if (index > -1 && index < blocks) {
             return index;
         }
         throw new BufferIndexOutOfBoundsException(index);
     }
 
     private E initBuffer(int index) {
-        synchronized (this){
-            if(buffers[index] == null) {
+        synchronized (this) {
+            if (buffers[index] == null) {
                 buffers[index] = createBuffer(index);
             }
             return buffers[index];
@@ -167,9 +167,10 @@ public abstract class IOFile<E extends Buffer> {
 
     /**
      * 删除操作
+     *
      * @return
      */
-    public boolean delete(){
+    public boolean delete() {
         synchronized (this) {
             boolean delete = connector.delete(createHeadBlock());
             if (buffers != null) {
@@ -190,17 +191,19 @@ public abstract class IOFile<E extends Buffer> {
                 delete = v;
             }
             URI parentURI = uri;
-            while (null != (parentURI = connector.deleteParent(new FileBlock(parentURI))));
+            while (null != (parentURI = connector.deleteParent(new FileBlock(parentURI)))) ;
             released = true;
-            return  delete;
+            return delete;
         }
     }
+
     /**
      * 复制
+     *
      * @return
      */
-    public  boolean copyTo(URI destUri){
-        synchronized(this) {
+    public boolean copyTo(URI destUri) {
+        synchronized (this) {
             try {
                 if (buffers != null) {
                     URI destURI = URI.create(destUri.getPath() + "/");
@@ -219,21 +222,22 @@ public abstract class IOFile<E extends Buffer> {
 
     /**
      * 判断是否存在
+     *
      * @return
      */
     public boolean exists() {
         synchronized (this) {
             boolean exists = connector.exists(createHeadBlock());
-//            boolean v = connector.exists(createIndexBlock(0));
-//            if (exists) {
-//                exists = v;
-//            }
+            boolean v = connector.exists(createIndexBlock(0));
+            if (exists) {
+                exists = v;
+            }
             released = true;
-            return  exists;
+            return exists;
         }
     }
 
-    private final FileBlock createIndexBlock(int index){
+    protected FileBlock createIndexBlock(int index) {
         return new FileBlock(uri, String.valueOf(index));
     }
 
@@ -244,71 +248,85 @@ public abstract class IOFile<E extends Buffer> {
 
     /**
      * 连续写的方法，从当前已知的最大位置开始写
+     *
      * @param file
      * @param d
      */
 
     public static void put(IOFile<DoubleBuffer> file, double d) {
-        file.getBuffer(file.checkBuffer(file.gi( ))).put(d);
+        file.getBuffer(file.checkBuffer(file.gi())).put(d);
     }
+
     /**
      * 连续写的方法，从当前已知的最大位置开始写
+     *
      * @param file
      * @param d
      */
 
-    public static void put(IOFile<ByteBuffer> file,   byte d) {
-        file.getBuffer(file.checkBuffer(file.gi( ))).put(d);
+    public static void put(IOFile<ByteBuffer> file, byte d) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(d);
     }
+
     /**
      * 连续写的方法，从当前已知的最大位置开始写
+     *
      * @param file
      * @param d
      */
 
-    public static void put(IOFile<CharBuffer> file,  char d) {
-        file.getBuffer(file.checkBuffer(file.gi( ))).put(  d);
+    public static void put(IOFile<CharBuffer> file, char d) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(d);
     }
+
     /**
      * 连续写的方法，从当前已知的最大位置开始写
+     *
      * @param file
      * @param d
      */
 
-    public static void put(IOFile<FloatBuffer> file,  float d) {
-        file.getBuffer(file.checkBuffer(file.gi( ))).put(  d);
+    public static void put(IOFile<FloatBuffer> file, float d) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(d);
     }
+
     /**
      * 连续写的方法，从当前已知的最大位置开始写
+     *
      * @param file
      * @param d
      */
 
-    public static void put(IOFile<LongBuffer> file,   long d) {
-        file.getBuffer(file.checkBuffer(file.gi( ))).put(d);
+    public static void put(IOFile<LongBuffer> file, long d) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(d);
     }
+
     /**
      * 连续写的方法，从当前已知的最大位置开始写
+     *
      * @param file
      * @param d
      */
 
     public static void put(IOFile<IntBuffer> file, int d) {
-        file.getBuffer(file.checkBuffer(file.gi( ))).put(  d);
+        file.getBuffer(file.checkBuffer(file.gi())).put(d);
     }
+
     /**
      * 连续写的方法，从当前已知的最大位置开始写
+     *
      * @param file
      * @param d
      */
 
-    public static void put(IOFile<ShortBuffer> file,  short d) {
-        file.getBuffer(file.checkBuffer(file.gi( ))).put(  d);
+    public static void put(IOFile<ShortBuffer> file, short d) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(d);
     }
 
 
     /**
      * 随机写
+     *
      * @param file
      * @param p
      * @param d
@@ -316,8 +334,10 @@ public abstract class IOFile<E extends Buffer> {
     public static void put(IOFile<DoubleBuffer> file, long p, double d) {
         file.getBuffer(file.checkBuffer(file.giw(p))).put(file.gp(p), d);
     }
+
     /**
      * 随机写
+     *
      * @param file
      * @param p
      * @param d
@@ -325,8 +345,10 @@ public abstract class IOFile<E extends Buffer> {
     public static void put(IOFile<ByteBuffer> file, long p, byte d) {
         file.getBuffer(file.checkBuffer(file.giw(p))).put(file.gp(p), d);
     }
+
     /**
      * 随机写
+     *
      * @param file
      * @param p
      * @param d
@@ -334,8 +356,10 @@ public abstract class IOFile<E extends Buffer> {
     public static void put(IOFile<CharBuffer> file, long p, char d) {
         file.getBuffer(file.checkBuffer(file.giw(p))).put(file.gp(p), d);
     }
+
     /**
      * 随机写
+     *
      * @param file
      * @param p
      * @param d
@@ -343,8 +367,10 @@ public abstract class IOFile<E extends Buffer> {
     public static void put(IOFile<FloatBuffer> file, long p, float d) {
         file.getBuffer(file.checkBuffer(file.giw(p))).put(file.gp(p), d);
     }
+
     /**
      * 随机写
+     *
      * @param file
      * @param p
      * @param d
@@ -352,8 +378,10 @@ public abstract class IOFile<E extends Buffer> {
     public static void put(IOFile<LongBuffer> file, long p, long d) {
         file.getBuffer(file.checkBuffer(file.giw(p))).put(file.gp(p), d);
     }
+
     /**
      * 随机写
+     *
      * @param file
      * @param p
      * @param d
@@ -361,8 +389,10 @@ public abstract class IOFile<E extends Buffer> {
     public static void put(IOFile<IntBuffer> file, long p, int d) {
         file.getBuffer(file.checkBuffer(file.giw(p))).put(file.gp(p), d);
     }
+
     /**
      * 随机写
+     *
      * @param file
      * @param p
      * @param d
@@ -373,16 +403,19 @@ public abstract class IOFile<E extends Buffer> {
 
     /**
      * 随机读
+     *
      * @param file
      * @param p
      * @return
      */
     public final static long getLong(IOFile<LongBuffer> file, long p) {
+
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
 
     /**
      * 随机读
+     *
      * @param file
      * @param p
      * @return
@@ -393,6 +426,7 @@ public abstract class IOFile<E extends Buffer> {
 
     /**
      * 随机读
+     *
      * @param file
      * @param p
      * @return
@@ -403,6 +437,7 @@ public abstract class IOFile<E extends Buffer> {
 
     /**
      * 随机读
+     *
      * @param file
      * @param p
      * @return
@@ -413,6 +448,7 @@ public abstract class IOFile<E extends Buffer> {
 
     /**
      * 随机读
+     *
      * @param file
      * @param p
      * @return
@@ -423,6 +459,7 @@ public abstract class IOFile<E extends Buffer> {
 
     /**
      * 随机读
+     *
      * @param file
      * @param p
      * @return
@@ -430,8 +467,10 @@ public abstract class IOFile<E extends Buffer> {
     public final static byte getByte(IOFile<ByteBuffer> file, long p) {
         return file.getBuffer(file.gi(p)).get(file.gp(p));
     }
+
     /**
      * 随机读
+     *
      * @param file
      * @param p
      * @return
@@ -461,11 +500,11 @@ public abstract class IOFile<E extends Buffer> {
 
     public void close() {
         synchronized (this) {
-            if(released){
+            if (released) {
                 return;
             }
             writeHeader();
-            if(buffers != null) {
+            if (buffers != null) {
                 for (int i = 0; i < buffers.length; i++) {
                     if (buffers[i] != null) {
                         buffers[i].force();

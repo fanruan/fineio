@@ -3,6 +3,7 @@ package com.fineio.io.read;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.ReadModel;
 import com.fineio.io.CharBuffer;
+import com.fineio.io.pool.PoolMode;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -15,13 +16,17 @@ public final  class CharReadBuffer extends ReadBuffer implements CharBuffer {
 
     public static final ReadModel MODEL = new ReadModel<CharBuffer>() {
 
+        public PoolMode getPoolMode() {
+            return PoolMode.CHAR;
+        }
+
         @Override
-        protected final CharBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
+        protected final CharReadBuffer newBlockBuffer(Connector connector, FileBlock block, int max_offset) {
             return new CharReadBuffer(connector, block, max_offset);
         }
 
         @Override
-        public final CharBuffer createBuffer(Connector connector, URI uri) {
+        public final CharReadBuffer createBuffer(Connector connector, URI uri) {
             return new CharReadBuffer(connector, uri);
         }
 

@@ -33,7 +33,7 @@ public abstract class AbstractBuffer implements BaseBuffer {
     private  volatile boolean access = false;
     protected volatile int allocateSize = 0;
     protected volatile boolean directAccess = false;
-    private volatile URI uri;
+    protected volatile URI uri;
 
 
 
@@ -126,9 +126,9 @@ public abstract class AbstractBuffer implements BaseBuffer {
 
     protected AbstractBuffer(Connector connector, FileBlock block) {
         this.bufferKey = new BufferKey(connector, block);
-        this.uri = block.getBlockURI();
         manager = CacheManager.getInstance();
         manager.registerBuffer((Buffer) this);
+        this.uri = block.getBlockURI();
     }
 
     protected final void clearMemory() {
@@ -155,7 +155,15 @@ public abstract class AbstractBuffer implements BaseBuffer {
      */
     protected abstract int getLengthOffset();
 
+
+    public boolean isClose() {
+        return close;
+    }
+
     public URI getUri() {
-        return null != uri ? uri : bufferKey.getBlock().getBlockURI();
+        if (null == uri) {
+            uri = bufferKey.getBlock().getBlockURI();
+        }
+        return uri;
     }
 }

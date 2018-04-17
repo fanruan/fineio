@@ -3,15 +3,20 @@ package com.fineio.io.write;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.WriteModel;
 import com.fineio.io.IntBuffer;
+import com.fineio.io.pool.BufferPool;
+import com.fineio.io.pool.PoolMode;
+import com.fineio.io.read.IntReadBuffer;
+import com.fineio.io.read.ReadBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.lang.reflect.Constructor;
 import java.net.URI;
 
 /**
  * Created by daniel on 2017/2/14.
  */
-public final  class IntWriteBuffer extends WriteBuffer implements IntBuffer{
+public final class IntWriteBuffer extends WriteBuffer implements IntBuffer {
 
     public static final WriteModel MODEL = new WriteModel<IntBuffer>() {
 
@@ -47,9 +52,8 @@ public final  class IntWriteBuffer extends WriteBuffer implements IntBuffer{
     }
 
     /**
-     *
      * @param position 位置
-     * @param b 值
+     * @param b        值
      */
     public final void put(int position, int b) {
         ensureCapacity(position);
@@ -59,5 +63,22 @@ public final  class IntWriteBuffer extends WriteBuffer implements IntBuffer{
     public final int get(int p) {
         checkIndex(p);
         return MemoryUtils.getInt(address, p);
+    }
+
+    @Override
+    protected void registerForRead() {
+        try {
+            IntReadBuffer buffer = null;
+            final Constructor<IntReadBuffer> constructor = IntReadBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
+            constructorAccess(constructor);
+            buffer = constructor.newInstance(bufferKey.getConnector(), bufferKey.getBlock(), current_max_offset);
+            buffer.setAddress(address);
+            buffer.setMaxSize(current_max_size);
+            buffer.setAllocateSize(allocateSize);
+            buffer.setLoad(true);
+            BufferPool.getInstance(PoolMode.INT).registerFromBuffer(buffer, false);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

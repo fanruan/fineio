@@ -3,15 +3,19 @@ package com.fineio.io.edit;
 import com.fineio.io.file.EditModel;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.LongBuffer;
+import com.fineio.io.pool.BufferPool;
+import com.fineio.io.pool.PoolMode;
+import com.fineio.io.read.LongReadBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.lang.reflect.Constructor;
 import java.net.URI;
 
 /**
  * Created by daniel on 2017/2/14.
  */
-public  final class LongEditBuffer extends EditBuffer implements LongBuffer{
+public final class LongEditBuffer extends EditBuffer implements LongBuffer {
 
     public static final EditModel MODEL = new EditModel<LongBuffer>() {
 
@@ -20,7 +24,7 @@ public  final class LongEditBuffer extends EditBuffer implements LongBuffer{
         }
 
         @Override
-        public final LongEditBuffer  createBuffer(Connector connector, URI uri) {
+        public final LongEditBuffer createBuffer(Connector connector, URI uri) {
             return new LongEditBuffer(connector, uri);
         }
 
@@ -51,21 +55,37 @@ public  final class LongEditBuffer extends EditBuffer implements LongBuffer{
     }
 
     /**
-     *
      * @param position 位置
-     * @param b 值
+     * @param b        值
      */
-    public  final  void put(int position, long b) {
+    public final void put(int position, long b) {
         ensureCapacity(position);
         judeChange(position, b);
         MemoryUtils.put(address, position, b);
     }
 
     private final void judeChange(int position, long b) {
-        if(!changed) {
-            if(b != get(position)){
+        if (!changed) {
+            if (b != get(position)) {
                 changed = true;
             }
+        }
+    }
+
+    @Override
+    protected void registerForRead() {
+        try {
+            LongReadBuffer buffer = null;
+            final Constructor<LongReadBuffer> constructor = LongReadBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
+            constructorAccess(constructor);
+            buffer = constructor.newInstance(bufferKey.getConnector(), bufferKey.getBlock(), current_max_offset);
+            buffer.setAddress(address);
+            buffer.setMaxSize(current_max_size);
+            buffer.setAllocateSize(allocateSize);
+            buffer.setLoad(true);
+            BufferPool.getInstance(PoolMode.LONG).registerFromBuffer(buffer, true);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }
