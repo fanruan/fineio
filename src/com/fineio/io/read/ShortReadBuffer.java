@@ -3,6 +3,7 @@ package com.fineio.io.read;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.ReadModel;
 import com.fineio.io.ShortBuffer;
+import com.fineio.io.pool.PoolMode;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -16,13 +17,17 @@ public final  class ShortReadBuffer extends ReadBuffer implements ShortBuffer{
 
     public static final ReadModel MODEL = new ReadModel<ShortBuffer>() {
 
+        public PoolMode getPoolMode() {
+            return PoolMode.SHORT;
+        }
+
         @Override
-        protected final ShortBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
+        protected final ShortReadBuffer newBlockBuffer(Connector connector, FileBlock block, int max_offset) {
             return new ShortReadBuffer(connector, block, max_offset);
         }
 
         @Override
-        public final ShortBuffer createBuffer(Connector connector, URI uri) {
+        public final ShortReadBuffer createBuffer(Connector connector, URI uri) {
             return new ShortReadBuffer(connector, uri);
         }
 

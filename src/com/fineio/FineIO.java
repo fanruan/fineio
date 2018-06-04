@@ -12,7 +12,6 @@ import com.fineio.io.file.IOFile;
 import com.fineio.io.file.ReadIOFile;
 import com.fineio.io.*;
 import com.fineio.io.file.WriteIOFile;
-import com.fineio.io.file.writer.ForceManager;
 import com.fineio.io.file.writer.SyncManager;
 import com.fineio.memory.MemoryConf;
 import com.fineio.storage.Connector;
@@ -354,14 +353,6 @@ public final  class FineIO {
         CacheManager.getInstance().resetTimer(t);
     }
 
-    /**
-     * 设置内存超时检查时间
-     * @param t
-     * @return
-     */
-    public final static void setSyncSchedule(long t) {
-        ForceManager.getInstance().resetTimer(t);
-    }
 
 
     /**

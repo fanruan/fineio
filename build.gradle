@@ -14,7 +14,7 @@ repositories {
     mavenCentral()
 }
 
-sourceCompatibility=1.5
+sourceCompatibility=1.6
 def baseDir='.'
 def jarname='fineio.jar'
 //获取什么分支名
@@ -83,7 +83,7 @@ def dataContent ={def dir ->
 task copyFile(type:Copy,dependsOn:compileJava){
 	list.each{ def srcDir->
 		copy{
-			with dataContent.call("${srcDir}") 
+			with dataContent.call("${srcDir}")
 			into ('build/classes/main')
 		}
 	}
@@ -101,7 +101,7 @@ task addTime(dependsOn:'copyFile'){
 	fw.close()
 	ant.copy(todir:"build/classes/main/"){
 		fileset(file:"fineiobuild.txt")
-	}			
+	}
 }
 
 
@@ -123,10 +123,10 @@ task obfuse(dependsOn:'build')<<{
 				patternset(refid:'datapatternset')
 			}
 			method(name:'void writeObject(java.io.ObjectOutputStream)'){
-				patternset(refid:'datapatternset')				
+				patternset(refid:'datapatternset')
 			}
 			field(name:'serialVersionUID'){
-				patternset(refid:'datapatternset')				
+				patternset(refid:'datapatternset')
 			}
 			'class'(methods:'private',fields:'private'){
 				patternset{
@@ -174,7 +174,7 @@ task copyjar(dependsOn:'obfuse')<<{
 		}
 		delete(file:"${baseDir}/JAR/CN/${jarname}")
 		delete(dir:"${baseDir}/JAR/tmp")
-	}	
+	}
 }
 
 //上传exe文件到ftp上

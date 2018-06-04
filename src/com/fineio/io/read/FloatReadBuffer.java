@@ -3,6 +3,7 @@ package com.fineio.io.read;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.ReadModel;
 import com.fineio.io.FloatBuffer;
+import com.fineio.io.pool.PoolMode;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -16,13 +17,17 @@ public final  class FloatReadBuffer extends ReadBuffer implements FloatBuffer {
 
     public static final ReadModel MODEL = new ReadModel<FloatBuffer>() {
 
+        public PoolMode getPoolMode() {
+            return PoolMode.FLOAT;
+        }
+
         @Override
-        protected final FloatBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
+        protected final FloatReadBuffer newBlockBuffer(Connector connector, FileBlock block, int max_offset) {
             return new FloatReadBuffer(connector, block, max_offset);
         }
 
         @Override
-        public final FloatBuffer createBuffer(Connector connector, URI uri) {
+        public final FloatReadBuffer createBuffer(Connector connector, URI uri) {
             return new FloatReadBuffer(connector, uri);
         }
 

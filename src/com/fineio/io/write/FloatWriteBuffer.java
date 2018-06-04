@@ -3,15 +3,20 @@ package com.fineio.io.write;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.WriteModel;
 import com.fineio.io.FloatBuffer;
+import com.fineio.io.pool.BufferPool;
+import com.fineio.io.pool.PoolMode;
+import com.fineio.io.read.FloatReadBuffer;
+import com.fineio.io.read.ReadBuffer;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.lang.reflect.Constructor;
 import java.net.URI;
 
 /**
  * Created by daniel on 2017/2/14.
  */
-public final  class FloatWriteBuffer extends WriteBuffer implements FloatBuffer {
+public final class FloatWriteBuffer extends WriteBuffer implements FloatBuffer {
 
     public static final WriteModel MODEL = new WriteModel<FloatBuffer>() {
 
@@ -20,7 +25,7 @@ public final  class FloatWriteBuffer extends WriteBuffer implements FloatBuffer 
         }
 
         @Override
-        public final FloatWriteBuffer  createBuffer(Connector connector, URI uri) {
+        public final FloatWriteBuffer createBuffer(Connector connector, URI uri) {
             return new FloatWriteBuffer(connector, uri);
         }
 
@@ -46,9 +51,8 @@ public final  class FloatWriteBuffer extends WriteBuffer implements FloatBuffer 
     }
 
     /**
-     *
      * @param position 位置
-     * @param b 值
+     * @param b        值
      */
     public final void put(int position, float b) {
         ensureCapacity(position);
@@ -58,5 +62,22 @@ public final  class FloatWriteBuffer extends WriteBuffer implements FloatBuffer 
     public final float get(int p) {
         checkIndex(p);
         return MemoryUtils.getFloat(address, p);
+    }
+
+    @Override
+    protected void registerForRead() {
+        try {
+            FloatReadBuffer buffer = null;
+            final Constructor<FloatReadBuffer> constructor = FloatReadBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
+            constructorAccess(constructor);
+            buffer = constructor.newInstance(bufferKey.getConnector(), bufferKey.getBlock(), current_max_offset);
+            buffer.setAddress(address);
+            buffer.setMaxSize(current_max_size);
+            buffer.setAllocateSize(allocateSize);
+            buffer.setLoad(true);
+            BufferPool.getInstance(PoolMode.FLOAT).registerFromBuffer(buffer, false);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
