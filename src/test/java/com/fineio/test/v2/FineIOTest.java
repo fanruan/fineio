@@ -63,6 +63,7 @@ public class FineIOTest extends TestCase {
         assertTrue(exp);
         assertEquals(30, FineIO.getSyncThreads());
         MemoryLeakTest.assertSizeMemory(0);
+        FineIO.setSyncThreads(counts);
     }
 
     public void testCreateReadIOFilePlus() throws Exception {
