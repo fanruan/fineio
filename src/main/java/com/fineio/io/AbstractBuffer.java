@@ -564,6 +564,11 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         @Override
         public void force() {
             forceWrite(buffer.isDirect());
+            level = LEVEL.READ;
+            if (!buffer.isDirect()) {
+                readBuffer = readOnlyBuffer();
+                reference.decrementWithoutWatch();
+            }
             returnMemoryIfNeed();
             if (buffer.isDirect()) {
                 manager = null;
@@ -604,11 +609,11 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                         if (clear) {
                             closeWithOutSync();
                         }
-                        level = LEVEL.READ;
-                        if (!clear) {
-                            readBuffer = readOnlyBuffer();
-                            reference.decrementWithoutWatch();
-                        }
+//                        level = LEVEL.READ;
+//                        if (!clear) {
+//                            readBuffer = readOnlyBuffer();
+//                            reference.decrementWithoutWatch();
+//                        }
                     } catch (StreamCloseException e) {
                         flushed = false;
                         //stream close这种还是直接触发写把，否则force的时候如果有三次那么就会出现写不成功的bug
