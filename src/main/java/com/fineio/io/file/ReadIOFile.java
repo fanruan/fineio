@@ -37,7 +37,7 @@ public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
 
     @Override
     protected LEVEL getLevel() {
-        return LEVEL.READ;
+        return LEVEL.READABLE;
     }
 
 

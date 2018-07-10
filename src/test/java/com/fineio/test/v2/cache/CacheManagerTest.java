@@ -133,14 +133,14 @@ public class CacheManagerTest extends TestCase {
                     return;
                 }
                 MemoryUtils.free(address);
-                CacheManager.getInstance().returnMemory(this, LEVEL.READ);
+                CacheManager.getInstance().returnMemory(this, LEVEL.READABLE);
                 close = true;
             }
         }
 
 
         public LEVEL getLevel() {
-            return LEVEL.READ;
+            return LEVEL.READABLE;
         }
 
         public boolean recentAccess() {
@@ -216,7 +216,7 @@ public class CacheManagerTest extends TestCase {
                     return;
                 }
                 MemoryUtils.free(address);
-                CacheManager.getInstance().returnMemory(this, LEVEL.READ);
+                CacheManager.getInstance().returnMemory(this, LEVEL.READABLE);
                 load = false;
             }
         }

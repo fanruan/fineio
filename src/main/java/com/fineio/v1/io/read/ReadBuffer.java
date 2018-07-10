@@ -91,7 +91,7 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
 
 
     public LEVEL getLevel() {
-        return LEVEL.READ;
+        return LEVEL.READABLE;
     }
 
     /**

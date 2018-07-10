@@ -156,7 +156,7 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
     }
 
     public LEVEL getLevel() {
-        return LEVEL.EDIT;
+        return LEVEL.EDITABLE;
     }
 
 

@@ -5,9 +5,11 @@ package com.fineio.cache;
  */
 public enum  LEVEL {
     //Read的释放优先级高，优先释放
-    READ,
+    READABLE,
     //EDIT释放优先级低，不优先释放
-    EDIT,
+    EDITABLE,
     //WRITE是不允许释放并且控制最大占用空间
-    WRITE
+    WRITABLE,
+
+    CLOSABLE
 }

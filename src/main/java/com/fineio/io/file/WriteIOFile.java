@@ -39,7 +39,7 @@ public final class WriteIOFile<T extends Buffer> extends IOFile<T> {
 
     @Override
     protected LEVEL getLevel() {
-        return LEVEL.WRITE;
+        return LEVEL.WRITABLE;
     }
 
     @Override

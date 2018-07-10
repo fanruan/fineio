@@ -132,7 +132,7 @@ public class CacheManagerTest extends TestCase {
 
 
         public LEVEL getLevel() {
-            return LEVEL.READ;
+            return LEVEL.READABLE;
         }
 
         public boolean recentAccess() {

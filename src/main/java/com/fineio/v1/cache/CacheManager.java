@@ -88,15 +88,15 @@ public class CacheManager {
 
     public Buffer registerBuffer(Buffer buffer){
         switch (buffer.getLevel()){
-            case READ: {
+            case READABLE: {
                 read.put(buffer);
                 break;
             }
-            case EDIT: {
+            case EDITABLE: {
                 edit.put(buffer);
                 break;
             }
-            case WRITE: {
+            case WRITABLE: {
                 write.put(buffer);
                 break;
             }
@@ -107,15 +107,15 @@ public class CacheManager {
     private Buffer checkBuffer( Buffer buffer){
         boolean update = false;
         switch (buffer.getLevel()){
-            case READ: {
+            case READABLE: {
                 update = read.contains(buffer);
                 break;
             }
-            case EDIT: {
+            case EDITABLE: {
                 update = edit.contains(buffer);
                 break;
             }
-            case WRITE: {
+            case WRITABLE: {
                 update = write.contains(buffer);
                 break;
             }
@@ -129,15 +129,15 @@ public class CacheManager {
     private Buffer updateBuffer( Buffer buffer){
         boolean update = false;
         switch (buffer.getLevel()){
-            case READ: {
+            case READABLE: {
                 update = read.update(buffer);
                 break;
             }
-            case EDIT: {
+            case EDITABLE: {
                 update = edit.update(buffer);
                 break;
             }
-            case WRITE: {
+            case WRITABLE: {
                 update = write.update(buffer);
                 break;
             }
@@ -155,15 +155,15 @@ public class CacheManager {
      */
     public void releaseBuffer(Buffer buffer, boolean remove) {
         switch (buffer.getLevel()){
-            case READ: {
+            case READABLE: {
                 read.remove(buffer, remove);
                 break;
             }
-            case EDIT: {
+            case EDITABLE: {
                 edit.remove(buffer, remove);
                 break;
             }
-            case WRITE: {
+            case WRITABLE: {
                 write.remove(buffer, remove);
                 break;
             }
@@ -178,15 +178,15 @@ public class CacheManager {
     public void clearBufferMemory(Buffer buffer) {
         int reduce_size = 0 - buffer.getAllocateSize();
         switch (buffer.getLevel()){
-            case READ: {
+            case READABLE: {
                 read_size.add(reduce_size);
                 break;
             }
-            case EDIT: {
+            case EDITABLE: {
                 read_size.add(reduce_size);
                 break;
             }
-            case WRITE: {
+            case WRITABLE: {
                 write_size.add(reduce_size);
                 break;
             }

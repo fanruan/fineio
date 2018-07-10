@@ -241,7 +241,7 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
 
 
     public LEVEL getLevel() {
-        return LEVEL.WRITE;
+        return LEVEL.WRITABLE;
     }
 
 }

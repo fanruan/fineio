@@ -105,7 +105,7 @@ public class MemoryHandler {
     public void returnMemory(Buffer buffer, LEVEL level) {
         long size = 0 - buffer.getAllocateSize();
         switch (level) {
-            case WRITE:
+            case WRITABLE:
                 write_size.add(size);
                 boolean cache = !buffer.isDirect();
                 if (buffer instanceof WriteOnlyBuffer) {
@@ -115,8 +115,8 @@ public class MemoryHandler {
                     read_size.add(0 - size);
                 }
                 break;
-            case EDIT:
-            case READ:
+            case EDITABLE:
+            case READABLE:
                 read_size.add(size);
         }
     }

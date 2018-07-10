@@ -37,7 +37,7 @@ public final class EditIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
 
     @Override
     protected LEVEL getLevel() {
-        return LEVEL.EDIT;
+        return LEVEL.EDITABLE;
     }
 
     @Override
