@@ -5,6 +5,7 @@ import com.fineio.base.Worker;
 import com.fineio.io.Buffer;
 import com.fineio.io.write.WriteOnlyBuffer;
 import com.fineio.memory.MemoryConf;
+import com.fineio.memory.MemoryHelper;
 import sun.misc.VM;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -47,7 +48,7 @@ public class MemoryHandler {
     private GcCallBack gcCallBack;
 
     private MemoryHandler(GcCallBack gcCallBack) {
-        maxMemory = MemoryConf.getTotalMemSize();
+        maxMemory = MemoryHelper.getMaxMemory();
         if (VM.isBooted()) {
             maxMemory = Math.min(VM.maxDirectMemory(), maxMemory);
         }
