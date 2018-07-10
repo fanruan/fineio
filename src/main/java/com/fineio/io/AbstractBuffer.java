@@ -61,7 +61,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         this.directAccess = false;
         this.maxOffset = maxOffset;
         this.uri = block.getBlockURI();
-        this.bufferPrivilege = BufferPrivilege.CLOSABLE;
+        this.bufferPrivilege = BufferPrivilege.CLEANABLE;
         this.manager = CacheManager.getInstance();
     }
 
@@ -69,7 +69,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         this.bufferKey = new BufferKey(connector, new FileBlock(uri));
         this.directAccess = true;
         this.uri = uri;
-        this.bufferPrivilege = BufferPrivilege.CLOSABLE;
+        this.bufferPrivilege = BufferPrivilege.CLEANABLE;
         this.manager = CacheManager.getInstance();
     }
 
@@ -97,7 +97,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
     @Override
     public boolean recentAccess() {
-        return bufferPrivilege != BufferPrivilege.CLOSABLE || access;
+        return bufferPrivilege != BufferPrivilege.CLEANABLE || access;
     }
 
     @Override
@@ -171,7 +171,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
     protected void clear() {
         switch (bufferPrivilege) {
-            case CLOSABLE:
+            case CLEANABLE:
             case READABLE:
                 readBuffer.closeWithOutSync();
                 break;
@@ -209,7 +209,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     }
 
     public final R readOnlyBuffer() {
-        if (bufferPrivilege == BufferPrivilege.READABLE || bufferPrivilege == BufferPrivilege.CLOSABLE) {
+        if (bufferPrivilege == BufferPrivilege.READABLE || bufferPrivilege == BufferPrivilege.CLEANABLE) {
             if (null == readBuffer) {
                 synchronized (this) {
                     if (null == readBuffer) {
@@ -231,7 +231,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     public final W writeOnlyBuffer() {
         lock.writeLock().lock();
         try {
-            if (bufferPrivilege != BufferPrivilege.READABLE || bufferPrivilege != BufferPrivilege.CLOSABLE) {
+            if (bufferPrivilege != BufferPrivilege.READABLE || bufferPrivilege != BufferPrivilege.CLEANABLE) {
                 throw new RuntimeException("Buffer cannot convert to writeBuffer because it is already being modified");
             }
 
@@ -254,7 +254,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     public final E editBuffer() {
         lock.writeLock().lock();
         try {
-            if (bufferPrivilege != BufferPrivilege.READABLE || bufferPrivilege != BufferPrivilege.CLOSABLE) {
+            if (bufferPrivilege != BufferPrivilege.READABLE || bufferPrivilege != BufferPrivilege.CLEANABLE) {
                 throw new RuntimeException("Buffer cannot convert to editBuffer because it is already being modified");
             }
             bufferPrivilege = BufferPrivilege.EDITABLE;
@@ -279,7 +279,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     @Override
     public int getLength() {
         switch (bufferPrivilege) {
-            case CLOSABLE:
+            case CLEANABLE:
             case READABLE:
                 return readBuffer.getLength();
             case WRITABLE:
@@ -628,7 +628,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                         if (clear) {
                             closeWithOutSync();
                         }
-                        bufferPrivilege = BufferPrivilege.CLOSABLE;
+                        bufferPrivilege = BufferPrivilege.CLEANABLE;
 //                        if (!clear) {
 //                            readBuffer = readOnlyBuffer();
 //                            reference.decrementWithoutWatch();
