@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author yee
@@ -53,6 +54,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     private URI uri;
     private volatile int waitHelper = 0;
     private AtomicClearLong reference = new AtomicClearLong(createWatcher());
+    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     protected AbstractBuffer(Connector connector, FileBlock block, int maxOffset) {
         this.bufferKey = new BufferKey(connector, block);
@@ -95,7 +97,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
     @Override
     public boolean recentAccess() {
-        return access || level != LEVEL.READ;
+        return level != LEVEL.READ || access;
     }
 
     @Override
@@ -103,6 +105,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         access = false;
     }
 
+    @Override
     public URI getUri() {
         return uri;
     }
@@ -113,8 +116,12 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         AbstractBuffer that = (AbstractBuffer) o;
 
@@ -153,9 +160,6 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
     @Override
     public void close() {
-//        clear();
-//        closeWithOutSync();
-//        closeWithOutSync();
         reference.set(0, false);
         clear();
     }
@@ -165,7 +169,6 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         reference.set(0, true);
     }
 
-    //    @Override
     protected void clear() {
         switch (level) {
             case READ:
@@ -180,6 +183,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         }
     }
 
+    @Override
     public LEVEL getLevel() {
         return level;
     }
@@ -224,35 +228,46 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     protected abstract R createReadOnlyBuffer();
 
     public final W writeOnlyBuffer() {
-        if (level != LEVEL.READ) {
-            throw new RuntimeException("Buffer cannot convert to writeBuffer because it is already being modified");
-        }
-        level = LEVEL.WRITE;
-        if (null == writeBuffer) {
-            synchronized (this) {
-                if (null == writeBuffer) {
-                    writeBuffer = createWriteOnlyBuffer();
+        lock.writeLock().lock();
+        try {
+            if (level != LEVEL.READ) {
+                throw new RuntimeException("Buffer cannot convert to writeBuffer because it is already being modified");
+            }
+
+            level = LEVEL.WRITE;
+            if (null == writeBuffer) {
+                synchronized (this) {
+                    if (null == writeBuffer) {
+                        writeBuffer = createWriteOnlyBuffer();
+                    }
                 }
             }
+            return writeBuffer;
+        } finally {
+            lock.writeLock().unlock();
         }
-        return writeBuffer;
     }
 
     protected abstract W createWriteOnlyBuffer();
 
     public final E editBuffer() {
-        if (level != LEVEL.READ) {
-            throw new RuntimeException("Buffer cannot convert to editBuffer because it is already being modified");
-        }
-        level = LEVEL.EDIT;
-        if (null == editBuffer) {
-            synchronized (this) {
-                if (null == editBuffer) {
-                    editBuffer = createEditBuffer();
+        lock.writeLock().lock();
+        try {
+            if (level != LEVEL.READ) {
+                throw new RuntimeException("Buffer cannot convert to editBuffer because it is already being modified");
+            }
+            level = LEVEL.EDIT;
+            if (null == editBuffer) {
+                synchronized (this) {
+                    if (null == editBuffer) {
+                        editBuffer = createEditBuffer();
+                    }
                 }
             }
+            return editBuffer;
+        } finally {
+            lock.writeLock().unlock();
         }
-        return editBuffer;
     }
 
     @Override
@@ -527,7 +542,12 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             long t = System.currentTimeMillis();
             if (t - lastWriteTime > PERIOD) {
                 lastWriteTime = t;
+                level = LEVEL.READ;
                 SyncManager.getInstance().triggerWork(createWriteJob(buffer.isDirect()));
+                if (!buffer.isDirect()) {
+                    readBuffer = readOnlyBuffer();
+                    reference.decrementWithoutWatch();
+                }
             }
 
         }
@@ -603,6 +623,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
         protected JobAssist createWriteJob(final boolean clear) {
             return new JobAssist(bufferKey, new Job() {
+                @Override
                 public void doJob() {
                     try {
                         write0();
