@@ -1,6 +1,6 @@
 package com.fineio.io;
 
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
 
 import java.net.URI;
 
@@ -50,7 +50,7 @@ public interface Buffer {
 
     void closeWithOutSync();
 
-    LEVEL getLevel();
+    BufferPrivilege getBufferPrivilege();
 
     /**
      * 获取byte大小

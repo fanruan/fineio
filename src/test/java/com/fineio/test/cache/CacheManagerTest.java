@@ -1,6 +1,6 @@
 package com.fineio.test.cache;
 
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.exception.FileCloseException;
 import com.fineio.exception.MemorySetException;
 import com.fineio.memory.MemoryConf;
@@ -131,8 +131,8 @@ public class CacheManagerTest extends TestCase {
         }
 
 
-        public LEVEL getLevel() {
-            return LEVEL.READABLE;
+        public BufferPrivilege getLevel() {
+            return BufferPrivilege.READABLE;
         }
 
         public boolean recentAccess() {

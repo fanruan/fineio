@@ -1,8 +1,8 @@
 package com.fineio.io;
 
 import com.fineio.base.Maths;
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.cache.CacheManager;
-import com.fineio.cache.LEVEL;
 import com.fineio.cache.Watcher;
 import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
@@ -46,7 +46,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     protected volatile boolean load;
     private volatile AtomicInteger status = new AtomicInteger(0);
     private volatile boolean access = false;
-    private volatile LEVEL level;
+    private volatile BufferPrivilege bufferPrivilege;
     private volatile R readBuffer;
     private volatile W writeBuffer;
     private volatile E editBuffer;
@@ -61,7 +61,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         this.directAccess = false;
         this.maxOffset = maxOffset;
         this.uri = block.getBlockURI();
-        this.level = LEVEL.CLOSABLE;
+        this.bufferPrivilege = BufferPrivilege.CLOSABLE;
         this.manager = CacheManager.getInstance();
     }
 
@@ -69,7 +69,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         this.bufferKey = new BufferKey(connector, new FileBlock(uri));
         this.directAccess = true;
         this.uri = uri;
-        this.level = LEVEL.CLOSABLE;
+        this.bufferPrivilege = BufferPrivilege.CLOSABLE;
         this.manager = CacheManager.getInstance();
     }
 
@@ -97,7 +97,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
     @Override
     public boolean recentAccess() {
-        return level != LEVEL.CLOSABLE || access;
+        return bufferPrivilege != BufferPrivilege.CLOSABLE || access;
     }
 
     @Override
@@ -170,7 +170,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     }
 
     protected void clear() {
-        switch (level) {
+        switch (bufferPrivilege) {
             case CLOSABLE:
             case READABLE:
                 readBuffer.closeWithOutSync();
@@ -185,8 +185,8 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     }
 
     @Override
-    public LEVEL getLevel() {
-        return level;
+    public BufferPrivilege getBufferPrivilege() {
+        return bufferPrivilege;
     }
 
     /**
@@ -209,7 +209,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     }
 
     public final R readOnlyBuffer() {
-        if (level == LEVEL.READABLE || level == LEVEL.CLOSABLE) {
+        if (bufferPrivilege == BufferPrivilege.READABLE || bufferPrivilege == BufferPrivilege.CLOSABLE) {
             if (null == readBuffer) {
                 synchronized (this) {
                     if (null == readBuffer) {
@@ -231,11 +231,11 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     public final W writeOnlyBuffer() {
         lock.writeLock().lock();
         try {
-            if (level != LEVEL.READABLE || level != LEVEL.CLOSABLE) {
+            if (bufferPrivilege != BufferPrivilege.READABLE || bufferPrivilege != BufferPrivilege.CLOSABLE) {
                 throw new RuntimeException("Buffer cannot convert to writeBuffer because it is already being modified");
             }
 
-            level = LEVEL.WRITABLE;
+            bufferPrivilege = BufferPrivilege.WRITABLE;
             if (null == writeBuffer) {
                 synchronized (this) {
                     if (null == writeBuffer) {
@@ -254,10 +254,10 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     public final E editBuffer() {
         lock.writeLock().lock();
         try {
-            if (level != LEVEL.READABLE || level != LEVEL.CLOSABLE) {
+            if (bufferPrivilege != BufferPrivilege.READABLE || bufferPrivilege != BufferPrivilege.CLOSABLE) {
                 throw new RuntimeException("Buffer cannot convert to editBuffer because it is already being modified");
             }
-            level = LEVEL.EDITABLE;
+            bufferPrivilege = BufferPrivilege.EDITABLE;
             if (null == editBuffer) {
                 synchronized (this) {
                     if (null == editBuffer) {
@@ -278,7 +278,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
     @Override
     public int getLength() {
-        switch (level) {
+        switch (bufferPrivilege) {
             case CLOSABLE:
             case READABLE:
                 return readBuffer.getLength();
@@ -311,8 +311,8 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         }
 
         @Override
-        public LEVEL getLevel() {
-            return LEVEL.READABLE;
+        public BufferPrivilege getBufferPrivilege() {
+            return BufferPrivilege.READABLE;
         }
 
         @Override
@@ -379,7 +379,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                 beforeStatusChange();
                 MemoryUtils.free(address);
                 afterStatusChange();
-                manager.returnMemory(this, getLevel());
+                manager.returnMemory(this, getBufferPrivilege());
                 exitPool();
                 manager = null;
             }
@@ -387,7 +387,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
         @Override
         protected void check(int position) {
-            if (level != LEVEL.READABLE) {
+            if (bufferPrivilege != BufferPrivilege.READABLE) {
                 throw new RuntimeException("Writing");
             }
             if (ir(position)) {
@@ -540,7 +540,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             long t = System.currentTimeMillis();
             if (t - lastWriteTime > PERIOD) {
                 lastWriteTime = t;
-                level = LEVEL.READABLE;
+                bufferPrivilege = BufferPrivilege.READABLE;
                 SyncManager.getInstance().triggerWork(createWriteJob(buffer.isDirect()));
                 if (!buffer.isDirect()) {
                     readBuffer = readOnlyBuffer();
@@ -552,7 +552,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
         protected void returnMemoryIfNeed() {
             if (allocateSize != 0) {
-                manager.returnMemory(this, getLevel());
+                manager.returnMemory(this, getBufferPrivilege());
 //                if (buffer.isDirect()) {
 //                    manager = null;
 //                }
@@ -575,14 +575,14 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         }
 
         @Override
-        public LEVEL getLevel() {
-            return LEVEL.WRITABLE;
+        public BufferPrivilege getBufferPrivilege() {
+            return BufferPrivilege.WRITABLE;
         }
 
         @Override
         public void force() {
             forceWrite(buffer.isDirect());
-            level = LEVEL.READABLE;
+            bufferPrivilege = BufferPrivilege.READABLE;
             if (!buffer.isDirect()) {
                 readBuffer = readOnlyBuffer();
                 reference.decrementWithoutWatch();
@@ -628,7 +628,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                         if (clear) {
                             closeWithOutSync();
                         }
-                        level = LEVEL.CLOSABLE;
+                        bufferPrivilege = BufferPrivilege.CLOSABLE;
 //                        if (!clear) {
 //                            readBuffer = readOnlyBuffer();
 //                            reference.decrementWithoutWatch();
@@ -673,8 +673,8 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         }
 
         @Override
-        public LEVEL getLevel() {
-            return LEVEL.EDITABLE;
+        public BufferPrivilege getBufferPrivilege() {
+            return BufferPrivilege.EDITABLE;
         }
 
         @Override
@@ -763,7 +763,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         @Override
         public void forceAndClear() {
             forceWrite(true);
-            manager.returnMemory(buffer, getLevel());
+            manager.returnMemory(buffer, getBufferPrivilege());
             allocateSize = 0;
             exitPool();
             manager = null;

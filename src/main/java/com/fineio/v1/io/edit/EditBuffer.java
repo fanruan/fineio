@@ -1,7 +1,7 @@
 package com.fineio.v1.io.edit;
 
 import com.fineio.base.Maths;
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
 import com.fineio.io.file.FileBlock;
@@ -155,8 +155,8 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
         }
     }
 
-    public LEVEL getLevel() {
-        return LEVEL.EDITABLE;
+    public BufferPrivilege getLevel() {
+        return BufferPrivilege.EDITABLE;
     }
 
 

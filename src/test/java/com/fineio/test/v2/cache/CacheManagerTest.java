@@ -1,8 +1,8 @@
 package com.fineio.test.v2.cache;
 
 import com.fineio.FineIO;
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.cache.CacheManager;
-import com.fineio.cache.LEVEL;
 import com.fineio.exception.MemorySetException;
 import com.fineio.io.write.WriteOnlyBuffer;
 import com.fineio.memory.MemoryConf;
@@ -133,14 +133,14 @@ public class CacheManagerTest extends TestCase {
                     return;
                 }
                 MemoryUtils.free(address);
-                CacheManager.getInstance().returnMemory(this, LEVEL.READABLE);
+                CacheManager.getInstance().returnMemory(this, BufferPrivilege.READABLE);
                 close = true;
             }
         }
 
 
-        public LEVEL getLevel() {
-            return LEVEL.READABLE;
+        public BufferPrivilege getBufferPrivilege() {
+            return BufferPrivilege.READABLE;
         }
 
         public boolean recentAccess() {
@@ -216,7 +216,7 @@ public class CacheManagerTest extends TestCase {
                     return;
                 }
                 MemoryUtils.free(address);
-                CacheManager.getInstance().returnMemory(this, LEVEL.READABLE);
+                CacheManager.getInstance().returnMemory(this, BufferPrivilege.READABLE);
                 load = false;
             }
         }

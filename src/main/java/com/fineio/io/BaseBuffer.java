@@ -1,6 +1,6 @@
 package com.fineio.io;
 
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.exception.StreamCloseException;
 import com.fineio.io.base.DirectInputStream;
 import com.fineio.io.base.StreamCloseChecker;
@@ -97,8 +97,8 @@ public abstract class BaseBuffer implements Buffer {
     }
 
     @Override
-    public LEVEL getLevel() {
-        return buffer.getLevel();
+    public BufferPrivilege getBufferPrivilege() {
+        return buffer.getBufferPrivilege();
     }
 
     @Override

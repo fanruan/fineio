@@ -1,6 +1,6 @@
 package com.fineio.io.file;
 
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.io.Buffer;
 import com.fineio.io.FileModel;
 import com.fineio.io.edit.EditBuffer;
@@ -36,8 +36,8 @@ public final class EditIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
     }
 
     @Override
-    protected LEVEL getLevel() {
-        return LEVEL.EDITABLE;
+    protected BufferPrivilege getLevel() {
+        return BufferPrivilege.EDITABLE;
     }
 
     @Override

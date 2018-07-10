@@ -102,9 +102,9 @@ public class MemoryHandler {
         return allocator.allocateWrite(address, oldSize, newSize);
     }
 
-    public void returnMemory(Buffer buffer, LEVEL level) {
+    public void returnMemory(Buffer buffer, BufferPrivilege bufferPrivilege) {
         long size = 0 - buffer.getAllocateSize();
-        switch (level) {
+        switch (bufferPrivilege) {
             case WRITABLE:
                 write_size.add(size);
                 boolean cache = !buffer.isDirect();

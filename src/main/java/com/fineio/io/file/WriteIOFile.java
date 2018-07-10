@@ -1,6 +1,6 @@
 package com.fineio.io.file;
 
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.io.Buffer;
 import com.fineio.io.FileModel;
 import com.fineio.io.write.WriteOnlyBuffer;
@@ -38,8 +38,8 @@ public final class WriteIOFile<T extends Buffer> extends IOFile<T> {
     }
 
     @Override
-    protected LEVEL getLevel() {
-        return LEVEL.WRITABLE;
+    protected BufferPrivilege getLevel() {
+        return BufferPrivilege.WRITABLE;
     }
 
     @Override

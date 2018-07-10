@@ -1,6 +1,6 @@
 package com.fineio.v1.io.write;
 
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.StreamCloseException;
 import com.fineio.io.base.Job;
@@ -240,8 +240,8 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     }
 
 
-    public LEVEL getLevel() {
-        return LEVEL.WRITABLE;
+    public BufferPrivilege getLevel() {
+        return BufferPrivilege.WRITABLE;
     }
 
 }
