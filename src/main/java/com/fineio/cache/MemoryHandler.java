@@ -5,9 +5,11 @@ import com.fineio.base.Worker;
 import com.fineio.io.Buffer;
 import com.fineio.io.write.WriteOnlyBuffer;
 import com.fineio.memory.MemoryConf;
+import com.fineio.memory.MemoryHelper;
+import sun.misc.VM;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -23,11 +25,18 @@ public class MemoryHandler {
     private static final int MIN_WRITE_OFFSET = 3;
     private static final long TRIGGER_TIME = 30000;
     private volatile AtomicWatchLong read_size = new AtomicWatchLong();
-    //正在读的等待的数量
+    private volatile static long maxMemory;
+    /**
+     * 正在读的等待的数量
+     */
     private volatile AtomicInteger read_wait_count = new AtomicInteger(0);
-    //写的内存大小
+    /**
+     * 写的内存大小
+     */
     private volatile AtomicWatchLong write_size = new AtomicWatchLong();
-    //正在写的等待的数量
+    /**
+     * 正在写的等待的数量
+     */
     private volatile AtomicInteger write_wait_count = new AtomicInteger(0);
     private MemoryAllocator allocator = new MemoryAllocator();
     private ScheduledExecutorService gcThreadTrigger;
@@ -36,18 +45,23 @@ public class MemoryHandler {
 
     private QueueWorkerThread gcThread;
 
-    private GCCallBack gcCallBack;
+    private GcCallBack gcCallBack;
 
-    MemoryHandler(GCCallBack gcCallBack) {
+    private MemoryHandler(GcCallBack gcCallBack) {
+        maxMemory = MemoryHelper.getMaxMemory();
+        if (VM.isBooted()) {
+            maxMemory = Math.min(VM.maxDirectMemory(), maxMemory);
+        }
         this.gcCallBack = gcCallBack;
         read_size.addListener(createReadWatcher());
         write_size.addListener(createWriteWatcher());
         gcThread = new QueueWorkerThread(new Worker() {
+            @Override
             public void work() {
                 gc();
             }
         });
-        gcThreadTrigger = Executors.newSingleThreadScheduledExecutor();
+        gcThreadTrigger = new ScheduledThreadPoolExecutor(1);
         gcThreadTrigger.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -56,6 +70,10 @@ public class MemoryHandler {
                 }
             }
         }, 0, TRIGGER_TIME, TimeUnit.MILLISECONDS);
+    }
+
+    public static MemoryHandler newInstance(GcCallBack gcCallBack) {
+        return new MemoryHandler(gcCallBack);
     }
 
     private void gc() {
@@ -257,10 +275,15 @@ public class MemoryHandler {
      * @return
      */
     private boolean cs(long size) {
-        return size < MemoryConf.getFreeMemory();
+        return getReadSize() + getWriteSize() + size < maxMemory;
     }
 
-    interface GCCallBack {
+    interface GcCallBack {
+        /**
+         * 执行GC
+         *
+         * @return
+         */
         boolean gc();
     }
 

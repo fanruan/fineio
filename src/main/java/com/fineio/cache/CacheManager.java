@@ -37,7 +37,7 @@ public class CacheManager {
         poolMap.put(PoolMode.LONG, new BufferPool<LongBuffer>());
         poolMap.put(PoolMode.FLOAT, new BufferPool<FloatBuffer>());
         poolMap.put(PoolMode.DOUBLE, new BufferPool<DoubleBuffer>());
-        memoryHandler = new MemoryHandler(createGCCallBack());
+        memoryHandler = MemoryHandler.newInstance(createGCCallBack());
     }
 
     public static CacheManager getInstance() {
@@ -82,8 +82,8 @@ public class CacheManager {
         return memoryHandler.allocateWrite(address, oldSize, newSize);
     }
 
-    private MemoryHandler.GCCallBack createGCCallBack() {
-        return new MemoryHandler.GCCallBack() {
+    private MemoryHandler.GcCallBack createGCCallBack() {
+        return new MemoryHandler.GcCallBack() {
             @Override
             public boolean gc() {
                 Iterator<Map.Entry<PoolMode, BufferPool>> iterator = poolMap.entrySet().iterator();
