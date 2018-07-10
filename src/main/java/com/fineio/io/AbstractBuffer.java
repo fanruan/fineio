@@ -231,7 +231,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     public final W writeOnlyBuffer() {
         lock.writeLock().lock();
         try {
-            if (bufferPrivilege != BufferPrivilege.READABLE || bufferPrivilege != BufferPrivilege.CLEANABLE) {
+            if (bufferPrivilege == BufferPrivilege.WRITABLE || bufferPrivilege == BufferPrivilege.EDITABLE) {
                 throw new RuntimeException("Buffer cannot convert to writeBuffer because it is already being modified");
             }
 
@@ -254,7 +254,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     public final E editBuffer() {
         lock.writeLock().lock();
         try {
-            if (bufferPrivilege != BufferPrivilege.READABLE || bufferPrivilege != BufferPrivilege.CLEANABLE) {
+            if (bufferPrivilege == BufferPrivilege.WRITABLE || bufferPrivilege == BufferPrivilege.EDITABLE) {
                 throw new RuntimeException("Buffer cannot convert to editBuffer because it is already being modified");
             }
             bufferPrivilege = BufferPrivilege.EDITABLE;
@@ -387,7 +387,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
         @Override
         protected void check(int position) {
-            if (bufferPrivilege != BufferPrivilege.READABLE) {
+            if (bufferPrivilege == BufferPrivilege.WRITABLE || bufferPrivilege == BufferPrivilege.EDITABLE) {
                 throw new RuntimeException("Writing");
             }
             if (ir(position)) {
@@ -455,6 +455,10 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         @Override
         public boolean needClear() {
             return needClear;
+        }
+
+        protected void flip() {
+            bufferPrivilege = BufferPrivilege.READABLE;
         }
 
         protected void setCurrentCapacity(int offset) {
