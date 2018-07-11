@@ -117,6 +117,7 @@ public class MemoryHandler {
                 break;
             case EDITABLE:
             case READABLE:
+            case CLEANABLE:
                 read_size.add(size);
         }
     }
