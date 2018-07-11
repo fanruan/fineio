@@ -140,8 +140,8 @@ public class CacheManager {
         poolMap.get(mode).remove(buffer);
     }
 
-    public void returnMemory(Buffer buffer, LEVEL level) {
-        memoryHandler.returnMemory(buffer, level);
+    public void returnMemory(Buffer buffer, BufferPrivilege bufferPrivilege) {
+        memoryHandler.returnMemory(buffer, bufferPrivilege);
     }
 
 }

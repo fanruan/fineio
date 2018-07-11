@@ -1,6 +1,6 @@
 package com.fineio.io.file;
 
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.io.Buffer;
 import com.fineio.io.FileModel;
 import com.fineio.storage.Connector;
@@ -36,8 +36,8 @@ public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
     }
 
     @Override
-    protected LEVEL getLevel() {
-        return LEVEL.READ;
+    protected BufferPrivilege getLevel() {
+        return BufferPrivilege.READABLE;
     }
 
 

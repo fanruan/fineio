@@ -1,7 +1,7 @@
 package com.fineio.io.file;
 
 import com.fineio.base.Bits;
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.IOSetException;
 import com.fineio.io.Buffer;
@@ -428,7 +428,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
         }
     }
 
-    protected abstract LEVEL getLevel();
+    protected abstract BufferPrivilege getLevel();
 
     protected FileBlock createIndexBlock(int index) {
         return new FileBlock(uri, String.valueOf(index));

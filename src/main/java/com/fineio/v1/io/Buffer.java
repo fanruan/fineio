@@ -1,6 +1,6 @@
 package com.fineio.v1.io;
 
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
 
 /**
  * Created by daniel on 2017/2/20.
@@ -43,7 +43,7 @@ public interface Buffer {
      *
      * @return
      */
-    LEVEL getLevel();
+    BufferPrivilege getLevel();
 
 
     /**

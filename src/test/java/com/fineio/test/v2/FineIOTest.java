@@ -449,6 +449,7 @@ public class FineIOTest extends TestCase {
 
 
     public void testDirectAccess() {
+        CacheManager.clear();
         Connector connector = new WriteIOFileTest.MemoryConnector();
         URI uri = URI.create("A");
         DirectWriteIOFile<DoubleBuffer> dw = FineIO.createIOFile(connector, uri, FineIO.MODEL.WRITE_DOUBLE_DIRECT);
