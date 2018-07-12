@@ -4,6 +4,7 @@ import com.fineio.exception.IOSetException;
 import com.fineio.io.base.BufferKey;
 import com.fineio.io.base.Job;
 import com.fineio.io.base.JobAssist;
+import com.fineio.logger.FineIOLoggers;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -150,7 +151,7 @@ public final class SyncManager {
                                     jobAssist.doJob();
                                 } catch (Throwable e) {
                                     //TODO对与失败的处理//比如磁盘满啊 之类
-                                    e.printStackTrace();
+                                    FineIOLoggers.getLogger().error(e);
                                 } finally {
                                     runningLock.lock();
                                     JobAssist assist =  runningThread.remove(jobAssist.getKey());

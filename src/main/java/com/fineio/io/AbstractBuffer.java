@@ -16,6 +16,7 @@ import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.writer.SyncManager;
 import com.fineio.io.read.ReadOnlyBuffer;
 import com.fineio.io.write.WriteOnlyBuffer;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -355,7 +356,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                     accessor.invoke();
                     allocateMemory(accessor.getBytes(), accessor.getOff());
                 } catch (OutOfMemoryError e) {
-                    e.printStackTrace();
+                    FineIOLoggers.getLogger().error(e);
                 }
             }
         }
@@ -524,7 +525,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                 MemoryUtils.fill0(address + len, newLen - len);
 
             } catch (OutOfMemoryError error) {
-                error.printStackTrace();
+                FineIOLoggers.getLogger().error(error);
             }
             afterStatusChange();
         }
@@ -656,7 +657,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                     bufferKey.getConnector().write(bufferKey.getBlock(), getInputStream());
                     flushed = true;
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    FineIOLoggers.getLogger().error(e);
                 }
             }
         }
@@ -732,7 +733,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                 MemoryUtils.fill0(address + len, newLen - len);
 
             } catch (OutOfMemoryError error) {
-                error.printStackTrace();
+                FineIOLoggers.getLogger().error(error);
             }
             afterStatusChange();
         }
@@ -813,7 +814,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                     MemoryUtils.fill0(address + off, len - off);
                 } catch (OutOfMemoryError error) {
                     //todo 预防内存设置超大 赋值的时候发生溢出需要抛出异常
-                    error.printStackTrace();
+                    FineIOLoggers.getLogger().error(error);
                 }
                 load = true;
                 this.maxPosition = max_position - 1;

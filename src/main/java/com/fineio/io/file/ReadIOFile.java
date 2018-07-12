@@ -3,6 +3,7 @@ package com.fineio.io.file;
 import com.fineio.cache.BufferPrivilege;
 import com.fineio.io.Buffer;
 import com.fineio.io.FileModel;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.storage.Connector;
 
 import java.io.IOException;
@@ -74,7 +75,7 @@ public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
                     return true;
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                FineIOLoggers.getLogger().error(e);
             }
             return false;
         }
