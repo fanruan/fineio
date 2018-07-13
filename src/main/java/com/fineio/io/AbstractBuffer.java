@@ -13,6 +13,7 @@ import com.fineio.io.base.Job;
 import com.fineio.io.base.JobAssist;
 import com.fineio.io.edit.EditBuffer;
 import com.fineio.io.file.FileBlock;
+import com.fineio.io.file.writer.JobFinishedManager;
 import com.fineio.io.file.writer.SyncManager;
 import com.fineio.io.read.ReadOnlyBuffer;
 import com.fineio.io.write.WriteOnlyBuffer;
@@ -547,6 +548,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                 lastWriteTime = t;
                 bufferPrivilege = BufferPrivilege.READABLE;
                 SyncManager.getInstance().triggerWork(createWriteJob(buffer.isDirect()));
+                JobFinishedManager.getInstance().addTask(AbstractBuffer.this.getUri());
                 if (!buffer.isDirect()) {
                     readBuffer = readOnlyBuffer();
                     reference.decrementWithoutWatch();
@@ -611,6 +613,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             int i = 0;
             while (needFlush()) {
                 i++;
+                JobFinishedManager.getInstance().addTask(AbstractBuffer.this.getUri());
                 SyncManager.getInstance().force(createWriteJob(clear));
                 //尝试3次依然抛错就不写了 强制释放内存 TODO后续考虑对异常未保存文件处理
                 if (i > 3) {
