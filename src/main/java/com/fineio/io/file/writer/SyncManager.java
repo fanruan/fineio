@@ -4,7 +4,6 @@ import com.fineio.exception.IOSetException;
 import com.fineio.io.base.BufferKey;
 import com.fineio.io.base.Job;
 import com.fineio.io.base.JobAssist;
-import com.fineio.io.file.writer.task.JobFutureTask;
 import com.fineio.io.file.writer.task.Pair;
 import com.fineio.logger.FineIOLoggers;
 
@@ -12,6 +11,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -173,7 +173,13 @@ public final class SyncManager {
                                 return pair;
                             }
                         });
-                        JobFinishedManager.getInstance().submit(future);
+                        try {
+                            JobFinishedManager.getInstance().submit(future);
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }

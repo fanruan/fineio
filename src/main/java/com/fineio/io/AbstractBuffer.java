@@ -237,10 +237,10 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                 throw new RuntimeException("Buffer cannot convert to writeBuffer because it is already being modified");
             }
 
-            JobFinishedManager.getInstance().addTask(this.getUri());
             bufferPrivilege = BufferPrivilege.WRITABLE;
             if (null == writeBuffer) {
                 synchronized (this) {
+                    JobFinishedManager.getInstance().addTask(this.getUri());
                     if (null == writeBuffer) {
                         writeBuffer = createWriteOnlyBuffer();
                     }
@@ -260,11 +260,11 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             if (bufferPrivilege == BufferPrivilege.WRITABLE || bufferPrivilege == BufferPrivilege.EDITABLE) {
                 throw new RuntimeException("Buffer cannot convert to editBuffer because it is already being modified");
             }
-            JobFinishedManager.getInstance().addTask(this.getUri());
             bufferPrivilege = BufferPrivilege.EDITABLE;
             if (null == editBuffer) {
                 synchronized (this) {
                     if (null == editBuffer) {
+                        JobFinishedManager.getInstance().addTask(this.getUri());
                         editBuffer = createEditBuffer();
                     }
                 }
