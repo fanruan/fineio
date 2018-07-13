@@ -8,17 +8,13 @@ import com.fineio.io.file.writer.task.TaskKey;
 import com.fineio.logger.FineIOLoggers;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.Iterator;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * @author yee
@@ -47,11 +43,12 @@ public final class JobFinishedManager {
             public void run() {
                 try {
                     while (true) {
-                        Future<URI> uri = service.take();
-                        map.remove(new FinishOneTaskKey(uri.get()));
-                        if (!map.isEmpty() && map.firstKey().getType() == TaskKey.KeyType.DONE) {
+                        while (!map.isEmpty() && map.firstKey().getType() == TaskKey.KeyType.DONE) {
                             ((Runnable) map.poll()).run();
                         }
+                        Future<URI> uri = service.take();
+                        map.remove(new FinishOneTaskKey(uri.get()));
+                        LockSupport.parkNanos(100 * 1000);
                     }
                 } catch (Exception e) {
                     FineIOLoggers.getLogger().error(e);
@@ -73,49 +70,52 @@ public final class JobFinishedManager {
     }
 
     public class TaskMap {
-        private ConcurrentHashMap<TaskKey, Object> map = new ConcurrentHashMap<TaskKey, Object>();
-        private List<TaskKey> linkedList = Collections.synchronizedList(new LinkedList<TaskKey>());
+        private ConcurrentLinkedQueue<Pair<TaskKey, Object>> queue = new ConcurrentLinkedQueue<Pair<TaskKey, Object>>();
+//        private List<TaskKey> linkedList = Collections.synchronizedList(new ArrayList<TaskKey>());
 
         public void addTask(URI uri) {
             TaskKey key = new FinishOneTaskKey(uri);
-            linkedList.add(key);
-            map.put(key, uri);
+            queue.add(new Pair<TaskKey, Object>(key, uri));
         }
 
         public void finish(final Runnable runnable) {
             TaskKey key = new DoneTaskKey();
-            linkedList.add(key);
-            map.put(key, runnable);
+//            linkedList.add(key);
+            queue.add(new Pair<TaskKey, Object>(key, runnable));
         }
 
         public TaskKey firstKey() {
             try {
-                return linkedList.get(0);
+                Iterator<Pair<TaskKey, Object>> it = queue.iterator();
+                if (it.hasNext()) {
+                    return it.next().getKey();
+                }
+                return null;
             } catch (Exception ignore) {
                 return null;
             }
         }
 
         public Object poll() {
-            TaskKey key = firstKey();
-            if (null != key) {
-                Object result = map.get(key);
-                remove(key);
-                return result;
-            }
-            return null;
+            return queue.poll().getValue();
         }
 
         public void remove(TaskKey key) {
             try {
-                linkedList.remove(key);
-                map.remove(key);
+                Iterator<Pair<TaskKey, Object>> it = queue.iterator();
+                while (it.hasNext()) {
+                    Pair<TaskKey, Object> pair = it.next();
+                    if (key.equals(pair.getKey())) {
+                        it.remove();
+                        return;
+                    }
+                }
             } catch (Exception ignore) {
             }
         }
 
         public boolean isEmpty() {
-            return linkedList.isEmpty() && map.isEmpty();
+            return queue.isEmpty();
         }
     }
 }
