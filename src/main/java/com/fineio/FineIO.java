@@ -18,7 +18,10 @@ import com.fineio.io.file.EditIOFile;
 import com.fineio.io.file.IOFile;
 import com.fineio.io.file.ReadIOFile;
 import com.fineio.io.file.WriteIOFile;
+import com.fineio.io.file.writer.JobFinishedManager;
 import com.fineio.io.file.writer.SyncManager;
+import com.fineio.logger.FineIOLogger;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.MemoryConf;
 import com.fineio.storage.Connector;
 
@@ -39,6 +42,22 @@ public final class FineIO {
      */
     public static <F> F createIOFile(Connector connector, URI uri, MODEL<F> model) {
         return model.createIOFile(connector, uri);
+    }
+
+    /**
+     * 设置Logger
+     * @param logger
+     */
+    public static void setLogger(FineIOLogger logger) {
+        FineIOLoggers.setLogger(logger);
+    }
+
+    /**
+     * 前面的任务都结束了调用
+     * @param runnable
+     */
+    public static void doWhenFinished(Runnable runnable) {
+        JobFinishedManager.getInstance().finish(runnable);
     }
 
     /**

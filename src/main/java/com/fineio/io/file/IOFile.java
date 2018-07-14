@@ -28,6 +28,7 @@ import com.fineio.io.write.IntWriteBuffer;
 import com.fineio.io.write.LongWriteBuffer;
 import com.fineio.io.write.ShortWriteBuffer;
 import com.fineio.io.write.WriteOnlyBuffer;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 
@@ -446,7 +447,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
         try {
             connector.write(block, bytes);
         } catch (Throwable e) {
-            e.printStackTrace();
+            FineIOLoggers.getLogger().error(e);
         }
     }
 

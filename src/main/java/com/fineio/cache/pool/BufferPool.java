@@ -109,12 +109,12 @@ public class BufferPool<Buffer extends com.fineio.io.Buffer> {
         if (timer != null) {
             timer.cancel();
         }
-        timer = new Timer();
+        timer = new Timer("FineIOCleanTimer");
         timer.schedule(createTimeoutTask(), timeout, timeout);
         if (activeTimer != null) {
             activeTimer.cancel();
         }
-        activeTimer = new Timer();
+        activeTimer = new Timer("FineIOBufferActiveTimer");
         activeTimer.schedule(createBufferActiveTask(), timeout / ACTIVE_PERCENT, timeout / ACTIVE_PERCENT);
     }
 
