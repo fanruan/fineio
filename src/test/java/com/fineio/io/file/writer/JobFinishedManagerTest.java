@@ -17,7 +17,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author yee
@@ -105,7 +105,13 @@ public class JobFinishedManagerTest {
                     @Override
                     public void run() {
                         for (Future<Pair<URI, Boolean>> future : futures) {
-                            JobFinishedManager.getInstance().submit(future);
+                            try {
+                                JobFinishedManager.getInstance().submit(future);
+                            } catch (ExecutionException e) {
+                                e.printStackTrace();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 });
