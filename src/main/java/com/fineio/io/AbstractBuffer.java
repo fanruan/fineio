@@ -80,15 +80,19 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             @Override
             public void watch(long change) {
                 if (change <= 0) {
+                    boolean preClose;
                     synchronized (AbstractBuffer.this) {
+                        preClose = close;
                         if (!close) {
                             close = true;
                             maxSize = 0;
                             changed = false;
-                            clear();
-                            address = 0;
-                            allocateSize = 0;
                         }
+                    }
+                    if (!preClose) {
+                        clear();
+                        address = 0;
+                        allocateSize = 0;
                     }
                 }
             }
@@ -162,8 +166,9 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
     @Override
     public void close() {
-        reference.set(0, false);
-        clear();
+//        reference.set(0, true);
+//        clear();
+        closeWithOutSync();
     }
 
     @Override
