@@ -33,7 +33,6 @@ import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 
 import java.io.Closeable;
-import java.lang.ref.WeakReference;
 import java.net.URI;
 
 /**
@@ -66,7 +65,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      * 单个block的大小
      */
     protected long single_block_len;
-    protected volatile WeakReference<Buffer>[] buffers;
+    protected volatile Buffer[] buffers;
     protected volatile boolean released = false;
     private volatile int bufferWriteIndex = -1;
 
@@ -333,7 +332,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
     final void checkWrite(int len) {
         if (bufferWriteIndex != len) {
             if (bufferWriteIndex != -1) {
-                ((WriteOnlyBuffer) buffers[bufferWriteIndex].get()).write();
+                ((WriteOnlyBuffer) buffers[bufferWriteIndex]).write();
             }
             bufferWriteIndex = len;
         }
@@ -344,7 +343,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
             return 0;
         }
         int len = buffers.length - 1;
-        return ((WriteOnlyBuffer) buffers[len].get()).full() ? triggerWrite(len + 1) : len;
+        return ((WriteOnlyBuffer) buffers[len]).full() ? triggerWrite(len + 1) : len;
     }
 
     final int triggerWrite(int len) {
@@ -359,7 +358,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      */
     protected final void createBufferArray(int size) {
         this.blocks = size;
-        this.buffers = new WeakReference[size];
+        this.buffers = new Buffer[size];
     }
 
     private boolean inRange(int index) {
@@ -374,7 +373,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
     }
 
     private int createBufferArrayInRange(int index) {
-        WeakReference<Buffer>[] buffers = this.buffers;
+        Buffer[] buffers = this.buffers;
         createBufferArray(index + 1);
         if (buffers != null) {
             System.arraycopy(buffers, 0, this.buffers, 0, buffers.length);
@@ -392,7 +391,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
     }
 
     protected final Buffer getBuffer(int index) {
-        return buffers[checkIndex(index)] != null ? buffers[index].get() : initBuffer(index);
+        return buffers[checkIndex(index)] != null ? buffers[index] : initBuffer(index);
     }
 
     private int checkIndex(int index) {
@@ -405,9 +404,9 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
     private Buffer initBuffer(int index) {
         synchronized (this) {
             if (buffers[index] == null) {
-                buffers[index] = new WeakReference<Buffer>(createBuffer(index));
+                buffers[index] = createBuffer(index);
             }
-            return buffers[index].get();
+            return buffers[index];
         }
     }
 
@@ -483,9 +482,9 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
     public long fileSize() {
         long size = 0;
         if (buffers != null) {
-            for (WeakReference<Buffer> buffer : buffers) {
-                if (null != buffer && null != buffer.get()) {
-                    size += buffer.get().getAllocateSize();
+            for (Buffer buffer : buffers) {
+                if (null != buffer) {
+                    size += buffer.getAllocateSize();
                 }
             }
         }

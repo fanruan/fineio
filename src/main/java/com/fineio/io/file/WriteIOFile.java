@@ -46,14 +46,12 @@ public final class WriteIOFile<T extends Buffer> extends IOFile<T> {
     protected void closeChild(boolean clear) {
         if (buffers != null) {
             for (int i = 0; i < buffers.length; i++) {
-                if (buffers[i] != null && null != buffers[i].get()) {
-                    WriteOnlyBuffer buffer = (WriteOnlyBuffer) buffers[i].get();
+                if (buffers[i] != null) {
                     if (clear) {
-                        buffer.forceAndClear();
+                        ((WriteOnlyBuffer) buffers[i]).forceAndClear();
                     } else {
-                        buffer.force();
+                        ((WriteOnlyBuffer) buffers[i]).force();
                     }
-                    buffer = null;
                     buffers[i] = null;
                 }
             }
