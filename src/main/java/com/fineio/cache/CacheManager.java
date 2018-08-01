@@ -88,9 +88,9 @@ public class CacheManager {
             public boolean gc() {
                 Iterator<Map.Entry<PoolMode, BufferPool>> iterator = poolMap.entrySet().iterator();
                 while (iterator.hasNext()) {
-                    AbstractBuffer buffer = (AbstractBuffer) iterator.next().getValue().getIdleBuffer();
+                    AbstractBuffer buffer = (AbstractBuffer) iterator.next().getValue().poll();
                     if (null != buffer) {
-                        buffer.unReference();
+                        buffer.closeWithOutSync();
                         return true;
                     }
                 }

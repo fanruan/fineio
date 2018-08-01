@@ -150,4 +150,8 @@ public class BufferPool<Buffer extends com.fineio.io.Buffer> {
             }
         }
     }
+
+    public Buffer poll() {
+        return map.poll();
+    }
 }
