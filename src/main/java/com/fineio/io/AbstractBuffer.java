@@ -400,7 +400,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                 throw new RuntimeException("Writing");
             }
             if (ir(position)) {
-                access();
+                access = true;
                 return;
             }
             lc(position);

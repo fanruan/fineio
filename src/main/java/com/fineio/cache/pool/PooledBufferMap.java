@@ -1,7 +1,7 @@
 package com.fineio.cache.pool;
 
 import com.fineio.io.Buffer;
-import com.fineio.v1.cache.CacheObject;
+import com.fineio.v1.cache.CacheLinkedMap;
 
 import java.net.URI;
 import java.util.Iterator;
@@ -13,27 +13,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2018/5/31
  */
 public class PooledBufferMap<B extends Buffer> {
-    private Map<B, CacheObject<B>> activeMap =
-            new ConcurrentHashMap<B, CacheObject<B>>();
+    private CacheLinkedMap<B> activeMap = new CacheLinkedMap<B>();
     private Map<URI, B> keyMap = new ConcurrentHashMap<URI, B>();
 
     public boolean updateBuffer(B buffer) {
-        synchronized (this) {
-            CacheObject<B> co = activeMap.get(buffer);
-            if (co != null) {
-                co.updateTime();
-                return true;
-            }
-        }
-        return false;
+        return activeMap.update(buffer);
     }
 
     public long getIdle(B buffer) {
-        CacheObject<B> co = activeMap.get(buffer);
-        if (co != null) {
-            return co.getIdle();
-        }
-        return 0;
+        return activeMap.getIdle(buffer);
     }
 
     /**
@@ -43,13 +31,12 @@ public class PooledBufferMap<B extends Buffer> {
      */
     public void put(B t) {
         synchronized (this) {
-            CacheObject<B> co = activeMap.get(t);
-            if (co == null) {
-                co = new CacheObject<B>(t);
-                activeMap.put(t, co);
+            B buffer = keyMap.get(t.getUri());
+            if (null == buffer) {
                 keyMap.put(t.getUri(), t);
+                activeMap.put(t);
             } else {
-                co.updateTime();
+                activeMap.update(t);
             }
         }
     }
@@ -58,26 +45,25 @@ public class PooledBufferMap<B extends Buffer> {
         if (!keyMap.containsKey(uri)) {
             return null;
         }
-        CacheObject<B> co = activeMap.get(keyMap.get(uri));
-        if (null != co) {
-            co.updateTime();
-            return co.get();
-        }
-        return null;
+        B buffer = keyMap.get(uri);
+        activeMap.update(buffer);
+        return buffer;
     }
 
     public Iterator<B> iterator() {
-        return activeMap.keySet().iterator();
+        return activeMap.iterator();
     }
 
     public void remove(B buffer) {
         synchronized (this) {
-            CacheObject<B> co = activeMap.get(buffer);
-            if (co == null) {
-                return;
-            }
-            activeMap.remove(buffer);
+            activeMap.remove(buffer, true);
             keyMap.remove(buffer.getUri());
         }
+    }
+
+    public B poll() {
+        B buffer = activeMap.poll();
+        keyMap.remove(buffer.getUri());
+        return buffer;
     }
 }
