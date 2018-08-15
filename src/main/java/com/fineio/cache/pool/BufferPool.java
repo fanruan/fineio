@@ -1,5 +1,6 @@
 package com.fineio.cache.pool;
 
+import com.fineio.cache.AtomicWatchLong;
 import com.fineio.exception.FileCloseException;
 import com.fineio.io.AbstractBuffer;
 
@@ -7,6 +8,7 @@ import java.net.URI;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author yee
@@ -19,13 +21,14 @@ public class BufferPool<Buffer extends com.fineio.io.Buffer> {
     private static final long DEFAULT_TIMER_TIME = 600000;
     private static final int ACTIVE_PERCENT = 10;
     private volatile long timeout = DEFAULT_TIMER_TIME;
-    private PooledBufferMap<Buffer> map = new PooledBufferMap<Buffer>();
+    private PooledBufferMap<Buffer> map;
     private Timer timer = new Timer("FineIOCleanTimer");
     private Timer activeTimer = new Timer("FineIOBufferActiveTimer");
 
     public BufferPool() {
         timer.schedule(createTimeoutTask(), timeout, timeout);
         activeTimer.schedule(createBufferActiveTask(), timeout / ACTIVE_PERCENT, timeout / ACTIVE_PERCENT);
+        map = new PooledBufferMap<Buffer>();
     }
 
     public void registerBuffer(Buffer buffer) {

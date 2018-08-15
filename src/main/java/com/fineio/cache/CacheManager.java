@@ -11,11 +11,17 @@ import com.fineio.io.FloatBuffer;
 import com.fineio.io.IntBuffer;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.ShortBuffer;
+import com.fineio.logger.FineIOLogger;
+import com.fineio.logger.FineIOLoggers;
 
 import java.net.URI;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * @author yee
@@ -26,9 +32,14 @@ public class CacheManager {
 
     private ConcurrentHashMap<PoolMode, BufferPool> poolMap;
     private MemoryHandler memoryHandler;
+    private long maxExistsBufferSize;
+    private Semaphore semaphore;
 
 
     private CacheManager() {
+        memoryHandler = MemoryHandler.newInstance(createGCCallBack());
+        maxExistsBufferSize = (MemoryHandler.getMaxMemory() >> 22) + 10;
+        semaphore = new Semaphore((int) maxExistsBufferSize);
         poolMap = new ConcurrentHashMap<PoolMode, BufferPool>();
         poolMap.put(PoolMode.BYTE, new BufferPool<ByteBuffer>());
         poolMap.put(PoolMode.CHAR, new BufferPool<CharBuffer>());
@@ -37,7 +48,6 @@ public class CacheManager {
         poolMap.put(PoolMode.LONG, new BufferPool<LongBuffer>());
         poolMap.put(PoolMode.FLOAT, new BufferPool<FloatBuffer>());
         poolMap.put(PoolMode.DOUBLE, new BufferPool<DoubleBuffer>());
-        memoryHandler = MemoryHandler.newInstance(createGCCallBack());
     }
 
     public static CacheManager getInstance() {
@@ -105,7 +115,14 @@ public class CacheManager {
 
     public void registerBuffer(PoolMode mode, Buffer buffer) {
         if (mode.isAssignableFrom(buffer.getClass())) {
-            poolMap.get(mode).registerBuffer(buffer);
+            if (getCurrentMemorySize() < MemoryHandler.getMaxMemory() * 0.8) {
+                poolMap.get(mode).registerBuffer(buffer);
+            } else {
+                while (!memoryHandler.forceGC()) {
+                    LockSupport.parkNanos(1 * 1000);
+                }
+                registerBuffer(mode, buffer);
+            }
         }
     }
 
@@ -143,5 +160,6 @@ public class CacheManager {
     public void returnMemory(Buffer buffer, BufferPrivilege bufferPrivilege) {
         memoryHandler.returnMemory(buffer, bufferPrivilege);
     }
+
 
 }

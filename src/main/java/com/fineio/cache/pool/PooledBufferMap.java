@@ -1,5 +1,6 @@
 package com.fineio.cache.pool;
 
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.io.Buffer;
 import com.fineio.v1.cache.CacheLinkedMap;
 
@@ -15,6 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PooledBufferMap<B extends Buffer> {
     private CacheLinkedMap<B> activeMap = new CacheLinkedMap<B>();
     private Map<URI, B> keyMap = new ConcurrentHashMap<URI, B>();
+
+
+    public PooledBufferMap() {
+    }
 
     public boolean updateBuffer(B buffer) {
         return activeMap.update(buffer);
@@ -61,9 +66,18 @@ public class PooledBufferMap<B extends Buffer> {
         }
     }
 
+    synchronized
     public B poll() {
         B buffer = activeMap.poll();
-        keyMap.remove(buffer.getUri());
-        return buffer;
+        if (null == buffer) {
+            return null;
+        }
+        if (buffer.getBufferPrivilege().compareTo(BufferPrivilege.EDITABLE) < 0) {
+            keyMap.remove(buffer.getUri());
+            return buffer;
+        } else {
+            activeMap.update(buffer);
+            return null;
+        }
     }
 }

@@ -288,6 +288,10 @@ public class MemoryHandler {
         boolean gc();
     }
 
+    public static long getMaxMemory() {
+        return maxMemory;
+    }
+
     private class MemoryAllocator {
         /**
          * 分配读内存
