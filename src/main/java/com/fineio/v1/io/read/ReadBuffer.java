@@ -125,7 +125,7 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
                 return;
             }
             if (close) {
-                throw new FileCloseException();
+                throw new FileCloseException(getUri());
             }
             if(directAccess) {
                 DirectAccess();

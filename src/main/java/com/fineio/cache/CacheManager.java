@@ -12,6 +12,8 @@ import com.fineio.io.IntBuffer;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.ShortBuffer;
 
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.Map;
@@ -26,10 +28,12 @@ public class CacheManager {
 
     private ConcurrentHashMap<PoolMode, BufferPool> poolMap;
     private MemoryHandler memoryHandler;
+    public ReferenceQueue<Buffer> referenceQueue;
 
 
     private CacheManager() {
         memoryHandler = MemoryHandler.newInstance(createGCCallBack());
+        referenceQueue = new ReferenceQueue<Buffer>();
         poolMap = new ConcurrentHashMap<PoolMode, BufferPool>();
         poolMap.put(PoolMode.BYTE, new BufferPool<ByteBuffer>());
         poolMap.put(PoolMode.CHAR, new BufferPool<CharBuffer>());
@@ -91,6 +95,12 @@ public class CacheManager {
                     AbstractBuffer buffer = (AbstractBuffer) iterator.next().getValue().poll();
                     if (null != buffer) {
                         buffer.closeWithOutSync();
+                        Reference<? extends Buffer> ref = null;
+                        while (null != (ref = referenceQueue.poll())) {
+                            synchronized (ref) {
+                                ref.clear();
+                            }
+                        }
                         return true;
                     }
                 }

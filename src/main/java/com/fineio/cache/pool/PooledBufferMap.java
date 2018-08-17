@@ -76,7 +76,7 @@ public class PooledBufferMap<B extends Buffer> {
         if (null == buffer) {
             return null;
         }
-        if (buffer.getBufferPrivilege().compareTo(BufferPrivilege.READABLE) < 0
+        if (buffer.getBufferPrivilege().compareTo(BufferPrivilege.READABLE) <= 0
                 && ((AbstractBuffer) buffer).getSyncStatus() != SyncStatus.SYNC) {
             keyMap.remove(buffer.getUri());
             return buffer;

@@ -61,8 +61,8 @@ abstract class AbstractReadIOFile<T extends Buffer> extends IOFile<T> {
             if (buffers != null) {
                 for (int i = 0; i < buffers.length; i++) {
                     //内存泄露
-                    if (!released && buffers[i] != null) {
-                        buffers[i].closeWithOutSync();
+                    if (!released && buffers[i] != null && null != buffers[i].get()) {
+                        buffers[i].get().closeWithOutSync();
                         buffers[i] = null;
                     }
                     boolean v = connector.delete(createIndexBlock(i));

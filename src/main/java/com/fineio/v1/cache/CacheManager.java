@@ -121,7 +121,7 @@ public class CacheManager {
             }
         }
         if(!update){
-            throw new FileCloseException();
+            throw new FileCloseException(buffer.getUri());
         }
         return buffer;
     }
@@ -143,7 +143,7 @@ public class CacheManager {
             }
         }
         if(!update){
-            throw new FileCloseException();
+            throw new FileCloseException(buffer.getUri());
         }
         return buffer;
     }

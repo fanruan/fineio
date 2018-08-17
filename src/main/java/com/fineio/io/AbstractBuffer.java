@@ -369,7 +369,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                     return;
                 }
                 if (buffer.close) {
-                    throw new FileCloseException();
+                    throw new FileCloseException(uri);
                 }
                 Accessor accessor = null;
                 if (buffer.directAccess) {
@@ -813,7 +813,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                     return;
                 }
                 if (close) {
-                    throw new FileCloseException();
+                    throw new FileCloseException(uri);
                 }
                 Accessor accessor = null;
                 if (directAccess) {
