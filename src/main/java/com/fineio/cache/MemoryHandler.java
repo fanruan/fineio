@@ -368,6 +368,7 @@ public class MemoryHandler {
                 memoryLock.unlock();
                 //触发gc干活
                 gcThread.triggerWork();
+
                 synchronized (rw) {
                     try {
                         rw.wait();

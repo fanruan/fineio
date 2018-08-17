@@ -1,14 +1,15 @@
 package com.fineio.cache.pool;
 
-import com.fineio.cache.AtomicWatchLong;
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.exception.FileCloseException;
 import com.fineio.io.AbstractBuffer;
 
 import java.net.URI;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author yee
@@ -85,18 +86,13 @@ public class BufferPool<Buffer extends com.fineio.io.Buffer> {
         return new TimerTask() {
             @Override
             public void run() {
-                removeTimeout(map);
+                removeTimeout();
             }
 
-            private void removeTimeout(PooledBufferMap<Buffer> map) {
-                Iterator<Buffer> iterator = map.iterator();
-                while (iterator.hasNext()) {
-                    Buffer buffer = iterator.next();
-                    if (buffer != null) {
-                        if (map.getIdle(buffer) > timeout) {
-                            ((AbstractBuffer) buffer).unReference();
-                        }
-                    }
+            private void removeTimeout() {
+                Set<Buffer> cleanable = getIdleBuffer();
+                for (Buffer buffer : cleanable) {
+                    ((AbstractBuffer) buffer).unReference();
                 }
             }
         };
@@ -125,17 +121,18 @@ public class BufferPool<Buffer extends com.fineio.io.Buffer> {
         map.remove(buffer);
     }
 
-    public Buffer getIdleBuffer() {
+    public Set<Buffer> getIdleBuffer() {
         Iterator<Buffer> iterator = map.iterator();
+        HashSet<Buffer> buffers = new HashSet<Buffer>();
         while (iterator.hasNext()) {
             Buffer buffer = iterator.next();
-            if (buffer != null) {
+            if (buffer != null && buffer.getBufferPrivilege().compareTo(BufferPrivilege.EDITABLE) < 0) {
                 if (map.getIdle(buffer) > timeout) {
-                    return buffer;
+                    buffers.add(buffer);
                 }
             }
         }
-        return null;
+        return buffers;
     }
 
     public void clear() {
@@ -157,4 +154,5 @@ public class BufferPool<Buffer extends com.fineio.io.Buffer> {
     public Buffer poll() {
         return map.poll();
     }
+
 }

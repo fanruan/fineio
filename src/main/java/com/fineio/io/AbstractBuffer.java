@@ -3,6 +3,7 @@ package com.fineio.io;
 import com.fineio.base.Maths;
 import com.fineio.cache.BufferPrivilege;
 import com.fineio.cache.CacheManager;
+import com.fineio.cache.SyncStatus;
 import com.fineio.cache.Watcher;
 import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
@@ -53,6 +54,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     private volatile W writeBuffer;
     private volatile E editBuffer;
     private volatile boolean flushed;
+    private volatile SyncStatus syncStatus = SyncStatus.UNSUPPORTED;
     private URI uri;
     private volatile int waitHelper = 0;
     private AtomicClearLong reference = new AtomicClearLong(createWatcher());
@@ -73,6 +75,11 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         this.uri = uri;
         this.bufferPrivilege = BufferPrivilege.CLEANABLE;
         this.manager = CacheManager.getInstance();
+    }
+
+    synchronized
+    public SyncStatus getSyncStatus() {
+        return syncStatus;
     }
 
     private Watcher createWatcher() {
@@ -103,7 +110,13 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
     @Override
     public boolean recentAccess() {
-        return bufferPrivilege != BufferPrivilege.CLEANABLE || access;
+        if (bufferPrivilege.compareTo(BufferPrivilege.EDITABLE) >= 0) {
+            return true;
+        }
+        if (bufferPrivilege == BufferPrivilege.CLEANABLE) {
+            return true;
+        }
+        return access || syncStatus == SyncStatus.SYNC;
     }
 
     @Override
@@ -181,12 +194,15 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             case CLEANABLE:
             case READABLE:
                 readBuffer.closeWithOutSync();
+                readBuffer = null;
                 break;
             case WRITABLE:
                 writeBuffer.forceAndClear();
+                writeBuffer = null;
                 break;
             case EDITABLE:
                 editBuffer.forceAndClear();
+                editBuffer = null;
                 break;
         }
     }
@@ -223,6 +239,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                         if (0 != address) {
                             load = true;
                         }
+                        close = false;
                         readBuffer = createReadOnlyBuffer();
                     }
                 }
@@ -633,6 +650,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         }
 
         protected JobAssist createWriteJob(final boolean clear) {
+            syncStatus = SyncStatus.SYNC;
             return new JobAssist(bufferKey, new Job() {
                 @Override
                 public void doJob() {
@@ -642,6 +660,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                             closeWithOutSync();
                         }
                         bufferPrivilege = BufferPrivilege.CLEANABLE;
+                        syncStatus = SyncStatus.FINISHED;
 //                        if (!clear) {
 //                            readBuffer = readOnlyBuffer();
 //                            reference.decrementWithoutWatch();

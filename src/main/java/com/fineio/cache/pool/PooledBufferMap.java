@@ -1,6 +1,8 @@
 package com.fineio.cache.pool;
 
 import com.fineio.cache.BufferPrivilege;
+import com.fineio.cache.SyncStatus;
+import com.fineio.io.AbstractBuffer;
 import com.fineio.io.Buffer;
 import com.fineio.v1.cache.CacheLinkedMap;
 
@@ -47,12 +49,14 @@ public class PooledBufferMap<B extends Buffer> {
     }
 
     public B get(URI uri) {
-        if (!keyMap.containsKey(uri)) {
+        synchronized (this) {
+            B buffer = keyMap.get(uri);
+            if (null != buffer) {
+                activeMap.update(buffer);
+                return buffer;
+            }
             return null;
         }
-        B buffer = keyMap.get(uri);
-        activeMap.update(buffer);
-        return buffer;
     }
 
     public Iterator<B> iterator() {
@@ -72,7 +76,8 @@ public class PooledBufferMap<B extends Buffer> {
         if (null == buffer) {
             return null;
         }
-        if (buffer.getBufferPrivilege().compareTo(BufferPrivilege.EDITABLE) < 0) {
+        if (buffer.getBufferPrivilege().compareTo(BufferPrivilege.READABLE) < 0
+                && ((AbstractBuffer) buffer).getSyncStatus() != SyncStatus.SYNC) {
             keyMap.remove(buffer.getUri());
             return buffer;
         } else {
@@ -80,4 +85,5 @@ public class PooledBufferMap<B extends Buffer> {
             return null;
         }
     }
+
 }
