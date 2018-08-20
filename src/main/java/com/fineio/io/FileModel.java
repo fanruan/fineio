@@ -31,7 +31,6 @@ public enum FileModel {
         return bufferModel.createBuffer(connector, uri).readOnlyBuffer();
     }
 
-    @Deprecated
     public EditBuffer createBufferForEdit(Connector connector, FileBlock block, int max_offset) {
         return bufferModel.createBuffer(connector, block, max_offset).editBuffer();
     }
