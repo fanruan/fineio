@@ -3,7 +3,9 @@ package com.fineio.io;
 import com.fineio.base.Maths;
 import com.fineio.cache.BufferPrivilege;
 import com.fineio.cache.CacheManager;
+import com.fineio.cache.SyncStatus;
 import com.fineio.cache.Watcher;
+import com.fineio.cache.pool.PoolMode;
 import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
@@ -53,6 +55,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     private volatile W writeBuffer;
     private volatile E editBuffer;
     private volatile boolean flushed;
+    private volatile SyncStatus syncStatus = SyncStatus.UNSUPPORTED;
     private URI uri;
     private volatile int waitHelper = 0;
     private AtomicClearLong reference = new AtomicClearLong(createWatcher());
@@ -73,6 +76,11 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         this.uri = uri;
         this.bufferPrivilege = BufferPrivilege.CLEANABLE;
         this.manager = CacheManager.getInstance();
+    }
+
+    synchronized
+    public SyncStatus getSyncStatus() {
+        return syncStatus;
     }
 
     private Watcher createWatcher() {
@@ -103,7 +111,13 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
     @Override
     public boolean recentAccess() {
-        return bufferPrivilege != BufferPrivilege.CLEANABLE || access;
+        if (bufferPrivilege.compareTo(BufferPrivilege.EDITABLE) >= 0) {
+            return true;
+        }
+        if (bufferPrivilege == BufferPrivilege.CLEANABLE) {
+            return true;
+        }
+        return access || syncStatus == SyncStatus.SYNC;
     }
 
     @Override
@@ -181,12 +195,15 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             case CLEANABLE:
             case READABLE:
                 readBuffer.closeWithOutSync();
+                readBuffer = null;
                 break;
             case WRITABLE:
                 writeBuffer.forceAndClear();
+                writeBuffer = null;
                 break;
             case EDITABLE:
                 editBuffer.forceAndClear();
+                editBuffer = null;
                 break;
         }
     }
@@ -223,6 +240,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                         if (0 != address) {
                             load = true;
                         }
+                        close = false;
                         readBuffer = createReadOnlyBuffer();
                     }
                 }
@@ -300,6 +318,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         }
     }
 
+    @Deprecated
     protected abstract E createEditBuffer();
 
     protected abstract class InnerReadBuffer extends BaseBuffer implements ReadOnlyBuffer {
@@ -313,6 +332,8 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             }
             allocateSize = buffer.allocateSize;
         }
+
+        protected abstract PoolMode poolMode();
 
         @Override
         public int getAllocateSize() {
@@ -352,7 +373,9 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                     return;
                 }
                 if (buffer.close) {
-                    throw new FileCloseException();
+                    manager = CacheManager.getInstance();
+                    close = false;
+                    manager.registerBuffer(poolMode(), buffer);
                 }
                 Accessor accessor = null;
                 if (buffer.directAccess) {
@@ -390,7 +413,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                 afterStatusChange();
                 manager.returnMemory(this, getBufferPrivilege());
                 exitPool();
-                manager = null;
+//                manager = null;
             }
         }
 
@@ -416,7 +439,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                     if (ir(p)) {
                         return;
                     }
-                    throw new BufferIndexOutOfBoundsException(p);
+                    throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
                 } else {
                     ll(p);
                 }
@@ -494,7 +517,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             if (ir(p)) {
                 return;
             }
-            throw new BufferIndexOutOfBoundsException(p);
+            throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
         }
 
         protected void ensureCapacity(int position) {
@@ -502,7 +525,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                 addCapacity(position);
                 changed = true;
             } else {
-                throw new BufferIndexOutOfBoundsException(position);
+                throw new BufferIndexOutOfBoundsException(uri, position, maxSize);
             }
         }
 
@@ -633,6 +656,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         }
 
         protected JobAssist createWriteJob(final boolean clear) {
+            syncStatus = SyncStatus.SYNC;
             return new JobAssist(bufferKey, new Job() {
                 @Override
                 public void doJob() {
@@ -642,6 +666,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                             closeWithOutSync();
                         }
                         bufferPrivilege = BufferPrivilege.CLEANABLE;
+                        syncStatus = SyncStatus.FINISHED;
 //                        if (!clear) {
 //                            readBuffer = readOnlyBuffer();
 //                            reference.decrementWithoutWatch();
@@ -676,6 +701,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         }
     }
 
+    @Deprecated
     protected abstract class InnerEditBuffer extends InnerWriteBuffer implements EditBuffer {
 
         public InnerEditBuffer() {
@@ -698,7 +724,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             if (position < maxSize && !close) {
                 addCapacity(position);
             } else {
-                throw new BufferIndexOutOfBoundsException(position);
+                throw new BufferIndexOutOfBoundsException(uri, position, maxSize);
             }
         }
 
@@ -717,7 +743,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                     if (ir(p)) {
                         return;
                     }
-                    throw new BufferIndexOutOfBoundsException(p);
+                    throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
                 } else {
                     ll(p);
                 }
@@ -794,7 +820,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                     return;
                 }
                 if (close) {
-                    throw new FileCloseException();
+                    throw new FileCloseException(uri);
                 }
                 Accessor accessor = null;
                 if (directAccess) {
@@ -829,6 +855,12 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                 setCurrentCapacity(offset);
                 afterStatusChange();
             }
+        }
+
+        @Override
+        public boolean full() {
+            loadContent();
+            return super.full();
         }
 
         @Override

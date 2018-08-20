@@ -12,10 +12,14 @@ import com.fineio.io.IntBuffer;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.ShortBuffer;
 
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * @author yee
@@ -26,18 +30,23 @@ public class CacheManager {
 
     private ConcurrentHashMap<PoolMode, BufferPool> poolMap;
     private MemoryHandler memoryHandler;
+    public ReferenceQueue<? extends Buffer> referenceQueue;
+    private AtomicLong maxExistsBuffer;
 
 
     private CacheManager() {
-        poolMap = new ConcurrentHashMap<PoolMode, BufferPool>();
-        poolMap.put(PoolMode.BYTE, new BufferPool<ByteBuffer>());
-        poolMap.put(PoolMode.CHAR, new BufferPool<CharBuffer>());
-        poolMap.put(PoolMode.SHORT, new BufferPool<ShortBuffer>());
-        poolMap.put(PoolMode.INT, new BufferPool<IntBuffer>());
-        poolMap.put(PoolMode.LONG, new BufferPool<LongBuffer>());
-        poolMap.put(PoolMode.FLOAT, new BufferPool<FloatBuffer>());
-        poolMap.put(PoolMode.DOUBLE, new BufferPool<DoubleBuffer>());
         memoryHandler = MemoryHandler.newInstance(createGCCallBack());
+        long maxSize = MemoryHandler.getMaxMemory() >> 22;
+        maxExistsBuffer = new AtomicLong(maxSize);
+        referenceQueue = new ReferenceQueue<Buffer>();
+        poolMap = new ConcurrentHashMap<PoolMode, BufferPool>();
+        poolMap.put(PoolMode.BYTE, new BufferPool<ByteBuffer>(PoolMode.BYTE, (ReferenceQueue<ByteBuffer>) referenceQueue));
+        poolMap.put(PoolMode.CHAR, new BufferPool<CharBuffer>(PoolMode.CHAR, (ReferenceQueue<CharBuffer>) referenceQueue));
+        poolMap.put(PoolMode.SHORT, new BufferPool<ShortBuffer>(PoolMode.SHORT, (ReferenceQueue<ShortBuffer>) referenceQueue));
+        poolMap.put(PoolMode.INT, new BufferPool<IntBuffer>(PoolMode.INT, (ReferenceQueue<IntBuffer>) referenceQueue));
+        poolMap.put(PoolMode.LONG, new BufferPool<LongBuffer>(PoolMode.LONG, (ReferenceQueue<LongBuffer>) referenceQueue));
+        poolMap.put(PoolMode.FLOAT, new BufferPool<FloatBuffer>(PoolMode.FLOAT, (ReferenceQueue<FloatBuffer>) referenceQueue));
+        poolMap.put(PoolMode.DOUBLE, new BufferPool<DoubleBuffer>(PoolMode.DOUBLE, (ReferenceQueue<DoubleBuffer>) referenceQueue));
     }
 
     public static CacheManager getInstance() {
@@ -87,14 +96,24 @@ public class CacheManager {
             @Override
             public boolean gc() {
                 Iterator<Map.Entry<PoolMode, BufferPool>> iterator = poolMap.entrySet().iterator();
+                boolean result = false;
                 while (iterator.hasNext()) {
                     AbstractBuffer buffer = (AbstractBuffer) iterator.next().getValue().poll();
                     if (null != buffer) {
                         buffer.closeWithOutSync();
-                        return true;
+                        Reference<? extends Buffer> ref = null;
+                        while (null != (ref = referenceQueue.poll())) {
+                            synchronized (ref) {
+                                ref.clear();
+                                ref = null;
+                            }
+                        }
+                        result = true;
+                        break;
                     }
                 }
-                return false;
+                System.gc();
+                return result;
             }
         };
     }
@@ -105,7 +124,17 @@ public class CacheManager {
 
     public void registerBuffer(PoolMode mode, Buffer buffer) {
         if (mode.isAssignableFrom(buffer.getClass())) {
-            poolMap.get(mode).registerBuffer(buffer);
+            if (maxExistsBuffer.get() > 0) {
+                maxExistsBuffer.decrementAndGet();
+                poolMap.get(mode).registerBuffer(buffer);
+            } else {
+                for (int i = 0; i < 10; i++) {
+                    memoryHandler.forceGC();
+                    LockSupport.parkNanos(1 * 1000);
+                }
+                registerBuffer(mode, buffer);
+            }
+
         }
     }
 
@@ -142,6 +171,8 @@ public class CacheManager {
 
     public void returnMemory(Buffer buffer, BufferPrivilege bufferPrivilege) {
         memoryHandler.returnMemory(buffer, bufferPrivilege);
+        maxExistsBuffer.incrementAndGet();
     }
+
 
 }

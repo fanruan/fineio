@@ -81,6 +81,11 @@ public class LongBuffer extends AbstractBuffer<LongReadBuffer, LongWriteBuffer, 
             check(pos);
             return MemoryUtils.getLong(address, pos);
         }
+
+        @Override
+        protected PoolMode poolMode() {
+            return PoolMode.LONG;
+        }
     }
 
     private final class LongBufferW extends InnerWriteBuffer implements LongWriteBuffer {
@@ -97,6 +102,7 @@ public class LongBuffer extends AbstractBuffer<LongReadBuffer, LongWriteBuffer, 
         }
     }
 
+    @Deprecated
     private final class LongBufferE extends InnerEditBuffer implements LongEditBuffer {
 
         @Override

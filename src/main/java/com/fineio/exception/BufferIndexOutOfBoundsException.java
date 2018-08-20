@@ -1,11 +1,18 @@
 package com.fineio.exception;
 
+import java.net.URI;
+
 /**
- * Created by daniel on 2017/2/13.
+ * @author daniel
+ * @date 2017/2/13
  */
-public class BufferIndexOutOfBoundsException extends ArrayIndexOutOfBoundsException {
+public class BufferIndexOutOfBoundsException extends IndexOutOfBoundsException {
 
     public BufferIndexOutOfBoundsException(long index) {
-        super((int) index);
+        super("Index out of range: " + index);
+    }
+
+    public BufferIndexOutOfBoundsException(URI uri, long index, long maxSize) {
+        super("Index out of range: " + uri + " index: " + index + " maxSize: " + maxSize);
     }
 }

@@ -40,7 +40,7 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
                 return;
             }
             if(close) {
-                throw  new FileCloseException();
+                throw new FileCloseException(getUri());
             }
             Accessor accessor = null;
             if(directAccess) {

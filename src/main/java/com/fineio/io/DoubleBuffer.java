@@ -81,6 +81,11 @@ public class DoubleBuffer extends AbstractBuffer<DoubleReadBuffer, DoubleWriteBu
             check(pos);
             return MemoryUtils.getDouble(address, pos);
         }
+
+        @Override
+        protected PoolMode poolMode() {
+            return PoolMode.DOUBLE;
+        }
     }
 
     private final class DoubleBufferW extends InnerWriteBuffer implements DoubleWriteBuffer {
@@ -97,6 +102,7 @@ public class DoubleBuffer extends AbstractBuffer<DoubleReadBuffer, DoubleWriteBu
         }
     }
 
+    @Deprecated
     private final class DoubleBufferE extends InnerEditBuffer implements DoubleEditBuffer {
 
         @Override

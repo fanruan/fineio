@@ -288,6 +288,10 @@ public class MemoryHandler {
         boolean gc();
     }
 
+    public static long getMaxMemory() {
+        return maxMemory;
+    }
+
     private class MemoryAllocator {
         /**
          * 分配读内存
@@ -364,6 +368,7 @@ public class MemoryHandler {
                 memoryLock.unlock();
                 //触发gc干活
                 gcThread.triggerWork();
+
                 synchronized (rw) {
                     try {
                         rw.wait();

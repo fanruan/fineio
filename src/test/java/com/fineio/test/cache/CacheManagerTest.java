@@ -12,6 +12,7 @@ import com.fineio.v1.io.Buffer;
 import junit.framework.TestCase;
 
 import java.lang.reflect.Field;
+import java.net.URI;
 
 /**
  * Created by daniel on 2017/3/6.
@@ -155,6 +156,11 @@ public class CacheManagerTest extends TestCase {
         @Override
         public int getLength() {
             return cap;
+        }
+
+        @Override
+        public URI getUri() {
+            return null;
         }
     }
 

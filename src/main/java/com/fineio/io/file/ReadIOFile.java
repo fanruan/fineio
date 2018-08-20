@@ -50,8 +50,8 @@ public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
     protected void closeChild(boolean clear) {
         if (buffers != null) {
             for (int i = 0; i < buffers.length; i++) {
-                if (buffers[i] != null) {
-                    buffers[i].close();
+                if (buffers[i] != null && null != buffers[i].get()) {
+                    buffers[i].get().close();
                     buffers[i] = null;
                 }
             }

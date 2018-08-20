@@ -1,8 +1,11 @@
 package com.fineio.cache.pool;
 
+import com.fineio.cache.SyncStatus;
+import com.fineio.io.AbstractBuffer;
 import com.fineio.io.Buffer;
 import com.fineio.v1.cache.CacheLinkedMap;
 
+import java.lang.ref.ReferenceQueue;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.Map;
@@ -13,8 +16,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2018/5/31
  */
 public class PooledBufferMap<B extends Buffer> {
-    private CacheLinkedMap<B> activeMap = new CacheLinkedMap<B>();
+    private CacheLinkedMap<B> activeMap;
     private Map<URI, B> keyMap = new ConcurrentHashMap<URI, B>();
+
+
+    public PooledBufferMap(ReferenceQueue<B> referenceQueue) {
+        activeMap = new CacheLinkedMap<B>(referenceQueue);
+    }
 
     public boolean updateBuffer(B buffer) {
         return activeMap.update(buffer);
@@ -42,12 +50,14 @@ public class PooledBufferMap<B extends Buffer> {
     }
 
     public B get(URI uri) {
-        if (!keyMap.containsKey(uri)) {
+        synchronized (this) {
+            B buffer = keyMap.get(uri);
+            if (null != buffer) {
+                activeMap.update(buffer);
+                return buffer;
+            }
             return null;
         }
-        B buffer = keyMap.get(uri);
-        activeMap.update(buffer);
-        return buffer;
     }
 
     public Iterator<B> iterator() {
@@ -61,9 +71,27 @@ public class PooledBufferMap<B extends Buffer> {
         }
     }
 
+    synchronized
     public B poll() {
         B buffer = activeMap.poll();
-        keyMap.remove(buffer.getUri());
-        return buffer;
+        if (null == buffer) {
+            return null;
+        }
+        switch (buffer.getBufferPrivilege()) {
+            case CLEANABLE:
+                keyMap.remove(buffer.getUri());
+                return buffer;
+            case READABLE:
+                if (((AbstractBuffer) buffer).getSyncStatus() != SyncStatus.SYNC) {
+                    keyMap.remove(buffer.getUri());
+                    return buffer;
+                }
+                activeMap.update(buffer);
+                return null;
+            default:
+                activeMap.update(buffer);
+                return null;
+        }
     }
+
 }
