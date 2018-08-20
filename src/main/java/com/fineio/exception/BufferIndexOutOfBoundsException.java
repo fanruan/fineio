@@ -13,6 +13,6 @@ public class BufferIndexOutOfBoundsException extends IndexOutOfBoundsException {
     }
 
     public BufferIndexOutOfBoundsException(URI uri, long index, long maxSize) {
-        super("Index out of range: " + uri.getPath() + " index: " + index + " maxSize: " + maxSize);
+        super("Index out of range: " + uri + " index: " + index + " maxSize: " + maxSize);
     }
 }
