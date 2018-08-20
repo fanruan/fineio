@@ -1,8 +1,16 @@
 package com.fineio.io.file;
 
+import com.fineio.FineIO;
 import com.fineio.cache.BufferPrivilege;
 import com.fineio.io.Buffer;
+import com.fineio.io.ByteBuffer;
+import com.fineio.io.CharBuffer;
+import com.fineio.io.DoubleBuffer;
 import com.fineio.io.FileModel;
+import com.fineio.io.FloatBuffer;
+import com.fineio.io.IntBuffer;
+import com.fineio.io.LongBuffer;
+import com.fineio.io.ShortBuffer;
 import com.fineio.io.write.WriteOnlyBuffer;
 import com.fineio.storage.Connector;
 
@@ -64,7 +72,7 @@ public class AppendIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
 
     @Override
     public void put(long p, double d) {
-        throw new UnsupportedOperationException();
+        FineIO.put((IOFile<DoubleBuffer>) this, d);
     }
 
     /**
@@ -75,7 +83,7 @@ public class AppendIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
      */
     @Override
     public void put(long p, byte d) {
-        throw new UnsupportedOperationException();
+        FineIO.put((IOFile<ByteBuffer>) this, d);
     }
 
     /**
@@ -86,7 +94,7 @@ public class AppendIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
      */
     @Override
     public void put(long p, char d) {
-        throw new UnsupportedOperationException();
+        FineIO.put((IOFile<CharBuffer>) this, d);
     }
 
     /**
@@ -97,7 +105,7 @@ public class AppendIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
      */
     @Override
     public void put(long p, float d) {
-        throw new UnsupportedOperationException();
+        FineIO.put((IOFile<FloatBuffer>) this, d);
     }
 
     /**
@@ -108,7 +116,7 @@ public class AppendIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
      */
     @Override
     public void put(long p, long d) {
-        throw new UnsupportedOperationException();
+        FineIO.put((IOFile<LongBuffer>) this, d);
     }
 
     /**
@@ -119,7 +127,7 @@ public class AppendIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
      */
     @Override
     public void put(long p, int d) {
-        throw new UnsupportedOperationException();
+        FineIO.put((IOFile<IntBuffer>) this, d);
     }
 
     /**
@@ -130,6 +138,6 @@ public class AppendIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
      */
     @Override
     public void put(long p, short d) {
-        throw new UnsupportedOperationException();
+        FineIO.put((IOFile<ShortBuffer>) this, d);
     }
 }
