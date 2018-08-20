@@ -109,7 +109,7 @@ public class AppendIOFileTest extends TestCase {
         return arrays;
     }
 
-    public void testWriteDouble() throws Exception {
+    public void testAppendDouble() throws Exception {
         Connector connector = new MemoryConnector();
         URI u = new URI("test");
         IOFile file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_DOUBLE);
@@ -133,15 +133,8 @@ public class AppendIOFileTest extends TestCase {
         int change = doubles.length / 2;
         double beforeChange = doubles[change];
         doubles[change] = -100000000 * Math.random();
-        boolean exp = false;
-        try {
-            FineIO.put(edit, change, doubles[change]);
-        } catch (Exception e) {
-            exp = true;
-        }
-        assertTrue(exp);
+        FineIO.put(edit, change, doubles[change]);
         int position = doubles.length;
-        FineIO.put(edit, doubles[change]);
         edit.close();
         read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_DOUBLE);
         assertEquals(FineIO.getDouble(read, change), beforeChange);
@@ -158,7 +151,7 @@ public class AppendIOFileTest extends TestCase {
         assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
-    public void testWriteLong() throws Exception {
+    public void testAppendLong() throws Exception {
         Connector connector = new MemoryConnector();
         URI u = new URI("test");
         IOFile<LongBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_LONG);
@@ -182,15 +175,8 @@ public class AppendIOFileTest extends TestCase {
         int change = values.length / 2;
         long lastValue = values[change];
         values[change] = Double.doubleToLongBits(-100000000 * Math.random());
-        boolean exp = false;
-        try {
-            FineIO.put(edit, change, values[change]);
-        } catch (Exception e) {
-            exp = true;
-        }
-        assertTrue(exp);
+        FineIO.put(edit, change, values[change]);
         int position = values.length;
-        FineIO.put(edit, values[change]);
         edit.close();
         read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_LONG);
         assertEquals(FineIO.getLong(read, change), lastValue);
@@ -206,7 +192,7 @@ public class AppendIOFileTest extends TestCase {
         assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
-    public void testWriteChar() throws Exception {
+    public void testAppendChar() throws Exception {
         Connector connector = new MemoryConnector();
         URI u = new URI("test");
         IOFile<CharBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_CHAR);
@@ -230,15 +216,8 @@ public class AppendIOFileTest extends TestCase {
         int change = values.length / 2;
         char lastValue = values[change];
         values[change] = (char) Double.doubleToLongBits(-100000000 * Math.random());
-        boolean exp = false;
-        try {
-            FineIO.put(edit, change, values[change]);
-        } catch (Exception e) {
-            exp = true;
-        }
-        assertTrue(exp);
+        FineIO.put(edit, change, values[change]);
         int position = values.length;
-        FineIO.put(edit, values[change]);
         edit.close();
         read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_CHAR);
         assertEquals(FineIO.getChar(read, change), lastValue);
@@ -254,7 +233,7 @@ public class AppendIOFileTest extends TestCase {
         assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
-    public void testWriteInt() throws Exception {
+    public void testAppendInt() throws Exception {
         Connector connector = new MemoryConnector();
         URI u = new URI("test");
         IOFile<IntBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_INT);
@@ -279,14 +258,8 @@ public class AppendIOFileTest extends TestCase {
         int lastValue = values[change];
         values[change] = (int) Double.doubleToLongBits(-100000000 * Math.random());
         boolean exp = false;
-        try {
-            FineIO.put(edit, change, values[change]);
-        } catch (Exception e) {
-            exp = true;
-        }
-        assertTrue(exp);
+        FineIO.put(edit, change, values[change]);
         int position = values.length;
-        FineIO.put(edit, values[change]);
         edit.close();
         read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_INT);
         assertEquals(FineIO.getInt(read, change), lastValue);
@@ -302,7 +275,7 @@ public class AppendIOFileTest extends TestCase {
         assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
-    public void testWriteFloat() throws Exception {
+    public void testAppendFloat() throws Exception {
         Connector connector = new MemoryConnector();
         URI u = new URI("test");
         IOFile<FloatBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_FLOAT);
@@ -326,15 +299,8 @@ public class AppendIOFileTest extends TestCase {
         int change = values.length / 2;
         float lastValue = values[change];
         values[change] = (float) Double.doubleToLongBits(-100000000 * Math.random());
-        boolean exp = false;
-        try {
-            FineIO.put(edit, change, values[change]);
-        } catch (Exception e) {
-            exp = true;
-        }
-        assertTrue(exp);
+        FineIO.put(edit, change, values[change]);
         int position = values.length;
-        FineIO.put(edit, values[change]);
         edit.close();
         read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_FLOAT);
         assertEquals(FineIO.getFloat(read, change), lastValue);
@@ -350,7 +316,7 @@ public class AppendIOFileTest extends TestCase {
         assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
-    public void testWriteShort() throws Exception {
+    public void testAppendShort() throws Exception {
         Connector connector = new MemoryConnector();
         URI u = new URI("test");
         IOFile<ShortBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_SHORT);
@@ -374,15 +340,8 @@ public class AppendIOFileTest extends TestCase {
         int change = values.length / 2;
         short lastValue = values[change];
         values[change] = (short) Double.doubleToLongBits(-100000000 * Math.random());
-        boolean exp = false;
-        try {
-            FineIO.put(edit, change, values[change]);
-        } catch (Exception e) {
-            exp = true;
-        }
-        assertTrue(exp);
+        FineIO.put(edit, change, values[change]);
         int position = values.length;
-        FineIO.put(edit, values[change]);
         edit.close();
         read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_SHORT);
         assertEquals(FineIO.getShort(read, change), lastValue);
@@ -398,7 +357,7 @@ public class AppendIOFileTest extends TestCase {
         assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
-    public void testWriteByte() throws Exception {
+    public void testAppendByte() throws Exception {
         Connector connector = new MemoryConnector();
         URI u = new URI("test");
         IOFile<ByteBuffer> file = FineIO.createIOFile(connector, u, FineIO.MODEL.WRITE_BYTE);
@@ -423,14 +382,8 @@ public class AppendIOFileTest extends TestCase {
         byte lastValue = values[change];
         values[change] = (byte) Double.doubleToLongBits(-100000000 * Math.random());
         boolean exp = false;
-        try {
-            FineIO.put(edit, change, values[change]);
-        } catch (Exception e) {
-            exp = true;
-        }
-        assertTrue(exp);
+        FineIO.put(edit, change, values[change]);
         int position = values.length;
-        FineIO.put(edit, values[change]);
         edit.close();
         read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_BYTE);
         assertEquals(FineIO.getByte(read, change), lastValue);
