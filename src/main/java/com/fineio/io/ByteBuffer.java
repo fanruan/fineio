@@ -81,6 +81,11 @@ public class ByteBuffer extends AbstractBuffer<ByteReadBuffer, ByteWriteBuffer, 
             check(pos);
             return MemoryUtils.getByte(address, pos);
         }
+
+        @Override
+        protected PoolMode poolMode() {
+            return PoolMode.BYTE;
+        }
     }
 
     private final class ByteBufferW extends InnerWriteBuffer implements ByteWriteBuffer {
@@ -97,6 +102,7 @@ public class ByteBuffer extends AbstractBuffer<ByteReadBuffer, ByteWriteBuffer, 
         }
     }
 
+    @Deprecated
     private final class ByteBufferE extends InnerEditBuffer implements ByteEditBuffer {
 
         @Override

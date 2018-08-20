@@ -80,6 +80,11 @@ public class CharBuffer extends AbstractBuffer<CharReadBuffer, CharWriteBuffer, 
             check(pos);
             return MemoryUtils.getChar(address, pos);
         }
+
+        @Override
+        protected PoolMode poolMode() {
+            return PoolMode.CHAR;
+        }
     }
 
     private final class CharBufferW extends InnerWriteBuffer implements CharWriteBuffer {
@@ -96,6 +101,7 @@ public class CharBuffer extends AbstractBuffer<CharReadBuffer, CharWriteBuffer, 
         }
     }
 
+    @Deprecated
     private final class CharBufferE extends InnerEditBuffer implements CharEditBuffer {
 
         @Override

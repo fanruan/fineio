@@ -81,6 +81,11 @@ public class ShortBuffer extends AbstractBuffer<ShortReadBuffer, ShortWriteBuffe
             check(pos);
             return MemoryUtils.getShort(address, pos);
         }
+
+        @Override
+        protected PoolMode poolMode() {
+            return PoolMode.SHORT;
+        }
     }
 
     private final class ShortBufferW extends InnerWriteBuffer implements ShortWriteBuffer {
@@ -97,6 +102,7 @@ public class ShortBuffer extends AbstractBuffer<ShortReadBuffer, ShortWriteBuffe
         }
     }
 
+    @Deprecated
     private final class ShortBufferE extends InnerEditBuffer implements ShortEditBuffer {
 
         @Override

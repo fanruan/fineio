@@ -80,6 +80,11 @@ public class IntBuffer extends AbstractBuffer<IntReadBuffer, IntWriteBuffer, Int
             check(pos);
             return MemoryUtils.getInt(address, pos);
         }
+
+        @Override
+        protected PoolMode poolMode() {
+            return PoolMode.INT;
+        }
     }
 
     private final class IntBufferW extends InnerWriteBuffer implements IntWriteBuffer {
@@ -96,6 +101,7 @@ public class IntBuffer extends AbstractBuffer<IntReadBuffer, IntWriteBuffer, Int
         }
     }
 
+    @Deprecated
     private final class IntBufferE extends InnerEditBuffer implements IntEditBuffer {
 
         @Override

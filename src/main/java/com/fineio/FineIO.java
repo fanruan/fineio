@@ -705,36 +705,42 @@ public final class FineIO {
             }
         };
 
+        @Deprecated
         MODEL<EditIOFile<LongBuffer>> EDIT_LONG = new MODEL<EditIOFile<LongBuffer>>() {
 
             public EditIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
                 return EditIOFile.createFineIO(connector, uri, FileModel.LONG);
             }
         };
+        @Deprecated
         MODEL<EditIOFile<DoubleBuffer>> EDIT_DOUBLE = new MODEL<EditIOFile<DoubleBuffer>>() {
 
             public EditIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
                 return EditIOFile.createFineIO(connector, uri, FileModel.DOUBLE);
             }
         };
+        @Deprecated
         MODEL<EditIOFile<FloatBuffer>> EDIT_FLOAT = new MODEL<EditIOFile<FloatBuffer>>() {
 
             public EditIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
                 return EditIOFile.createFineIO(connector, uri, FileModel.FLOAT);
             }
         };
+        @Deprecated
         MODEL<EditIOFile<IntBuffer>> EDIT_INT = new MODEL<EditIOFile<IntBuffer>>() {
 
             public EditIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
                 return EditIOFile.createFineIO(connector, uri, FileModel.INT);
             }
         };
+        @Deprecated
         MODEL<EditIOFile<CharBuffer>> EDIT_CHAR = new MODEL<EditIOFile<CharBuffer>>() {
 
             public EditIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
                 return EditIOFile.createFineIO(connector, uri, FileModel.CHAR);
             }
         };
+        @Deprecated
         MODEL<EditIOFile<ByteBuffer>> EDIT_BYTE = new MODEL<EditIOFile<ByteBuffer>>() {
 
             public EditIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
@@ -742,13 +748,13 @@ public final class FineIO {
             }
         };
 
+        @Deprecated
         MODEL<EditIOFile<ShortBuffer>> EDIT_SHORT = new MODEL<EditIOFile<ShortBuffer>>() {
 
             public EditIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
                 return EditIOFile.createFineIO(connector, uri, FileModel.SHORT);
             }
         };
-
 
         MODEL<DirectReadIOFile<LongBuffer>> READ_LONG_DIRECT = new MODEL<DirectReadIOFile<LongBuffer>>() {
 
@@ -762,20 +768,19 @@ public final class FineIO {
                 return DirectReadIOFile.createFineIO(connector, uri, FileModel.DOUBLE);
             }
         };
-
         MODEL<DirectReadIOFile<FloatBuffer>> READ_FLOAT_DIRECT = new MODEL<DirectReadIOFile<FloatBuffer>>() {
 
             public DirectReadIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
                 return DirectReadIOFile.createFineIO(connector, uri, FileModel.FLOAT);
             }
         };
-
         MODEL<DirectReadIOFile<IntBuffer>> READ_INT_DIRECT = new MODEL<DirectReadIOFile<IntBuffer>>() {
 
             public DirectReadIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
                 return DirectReadIOFile.createFineIO(connector, uri, FileModel.INT);
             }
         };
+
         MODEL<DirectReadIOFile<CharBuffer>> READ_CHAR_DIRECT = new MODEL<DirectReadIOFile<CharBuffer>>() {
 
             public DirectReadIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
@@ -840,44 +845,49 @@ public final class FineIO {
                 return DirectWriteIOFile.createFineIO(connector, uri, FileModel.SHORT);
             }
         };
-
+        @Deprecated
         MODEL<DirectEditIOFile<LongBuffer>> EDIT_LONG_DIRECT = new MODEL<DirectEditIOFile<LongBuffer>>() {
 
             public DirectEditIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
                 return DirectEditIOFile.createFineIO(connector, uri, FileModel.LONG);
             }
         };
+        @Deprecated
         MODEL<DirectEditIOFile<DoubleBuffer>> EDIT_DOUBLE_DIRECT = new MODEL<DirectEditIOFile<DoubleBuffer>>() {
 
             public DirectEditIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
                 return DirectEditIOFile.createFineIO(connector, uri, FileModel.DOUBLE);
             }
         };
+        @Deprecated
         MODEL<DirectEditIOFile<FloatBuffer>> EDIT_FLOAT_DIRECT = new MODEL<DirectEditIOFile<FloatBuffer>>() {
 
             public DirectEditIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
                 return DirectEditIOFile.createFineIO(connector, uri, FileModel.FLOAT);
             }
         };
+        @Deprecated
         MODEL<DirectEditIOFile<IntBuffer>> EDIT_INT_DIRECT = new MODEL<DirectEditIOFile<IntBuffer>>() {
 
             public DirectEditIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
                 return DirectEditIOFile.createFineIO(connector, uri, FileModel.INT);
             }
         };
+        @Deprecated
         MODEL<DirectEditIOFile<CharBuffer>> EDIT_CHAR_DIRECT = new MODEL<DirectEditIOFile<CharBuffer>>() {
 
             public DirectEditIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
                 return DirectEditIOFile.createFineIO(connector, uri, FileModel.CHAR);
             }
         };
+        @Deprecated
         MODEL<DirectEditIOFile<ByteBuffer>> EDIT_BYTE_DIRECT = new MODEL<DirectEditIOFile<ByteBuffer>>() {
 
             public DirectEditIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
                 return DirectEditIOFile.createFineIO(connector, uri, FileModel.BYTE);
             }
         };
-
+        @Deprecated
         MODEL<DirectEditIOFile<ShortBuffer>> EDIT_SHORT_DIRECT = new MODEL<DirectEditIOFile<ShortBuffer>>() {
 
             public DirectEditIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {

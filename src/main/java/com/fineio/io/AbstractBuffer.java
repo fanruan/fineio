@@ -5,6 +5,7 @@ import com.fineio.cache.BufferPrivilege;
 import com.fineio.cache.CacheManager;
 import com.fineio.cache.SyncStatus;
 import com.fineio.cache.Watcher;
+import com.fineio.cache.pool.PoolMode;
 import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
@@ -317,6 +318,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         }
     }
 
+    @Deprecated
     protected abstract E createEditBuffer();
 
     protected abstract class InnerReadBuffer extends BaseBuffer implements ReadOnlyBuffer {
@@ -330,6 +332,8 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             }
             allocateSize = buffer.allocateSize;
         }
+
+        protected abstract PoolMode poolMode();
 
         @Override
         public int getAllocateSize() {
@@ -369,7 +373,9 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                     return;
                 }
                 if (buffer.close) {
-                    throw new FileCloseException(uri);
+                    manager = CacheManager.getInstance();
+                    close = false;
+                    manager.registerBuffer(poolMode(), buffer);
                 }
                 Accessor accessor = null;
                 if (buffer.directAccess) {
@@ -407,7 +413,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                 afterStatusChange();
                 manager.returnMemory(this, getBufferPrivilege());
                 exitPool();
-                manager = null;
+//                manager = null;
             }
         }
 
@@ -433,7 +439,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                     if (ir(p)) {
                         return;
                     }
-                    throw new BufferIndexOutOfBoundsException(p);
+                    throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
                 } else {
                     ll(p);
                 }
@@ -511,7 +517,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             if (ir(p)) {
                 return;
             }
-            throw new BufferIndexOutOfBoundsException(p);
+            throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
         }
 
         protected void ensureCapacity(int position) {
@@ -519,7 +525,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                 addCapacity(position);
                 changed = true;
             } else {
-                throw new BufferIndexOutOfBoundsException(position);
+                throw new BufferIndexOutOfBoundsException(uri, position, maxSize);
             }
         }
 
@@ -695,6 +701,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         }
     }
 
+    @Deprecated
     protected abstract class InnerEditBuffer extends InnerWriteBuffer implements EditBuffer {
 
         public InnerEditBuffer() {
@@ -717,7 +724,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             if (position < maxSize && !close) {
                 addCapacity(position);
             } else {
-                throw new BufferIndexOutOfBoundsException(position);
+                throw new BufferIndexOutOfBoundsException(uri, position, maxSize);
             }
         }
 
@@ -736,7 +743,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                     if (ir(p)) {
                         return;
                     }
-                    throw new BufferIndexOutOfBoundsException(p);
+                    throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
                 } else {
                     ll(p);
                 }

@@ -34,6 +34,7 @@ import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 
 import java.io.Closeable;
+import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.net.URI;
 
@@ -392,9 +393,15 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
         return (int) (p & single_block_len);
     }
 
-    synchronized
     protected final Buffer getBuffer(int index) {
-        return buffers[checkIndex(index)] != null && null != buffers[index].get() ? buffers[index].get() : initBuffer(index);
+        if (buffers[checkIndex(index)] != null) {
+            synchronized (buffers[index]) {
+                if (null != buffers[index].get()) {
+                    return buffers[index].get();
+                }
+            }
+        }
+        return initBuffer(index);
     }
 
     private int checkIndex(int index) {
@@ -405,12 +412,12 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
     }
 
     private Buffer initBuffer(int index) {
-//        synchronized (this) {
+        synchronized (this) {
         if (buffers[index] == null || buffers[index].get() == null) {
-            buffers[index] = new WeakReference<Buffer>(createBuffer(index), CacheManager.getInstance().referenceQueue);
+            buffers[index] = new WeakReference<Buffer>(createBuffer(index), (ReferenceQueue<? super Buffer>) CacheManager.getInstance().referenceQueue);
             }
         return buffers[index].get();
-//        }
+        }
     }
 
     protected abstract Buffer createBuffer(int index);

@@ -80,6 +80,11 @@ public class FloatBuffer extends AbstractBuffer<FloatReadBuffer, FloatWriteBuffe
             check(pos);
             return MemoryUtils.getFloat(address, pos);
         }
+
+        @Override
+        protected PoolMode poolMode() {
+            return PoolMode.FLOAT;
+        }
     }
 
     private final class FloatBufferW extends InnerWriteBuffer implements FloatWriteBuffer {
@@ -96,6 +101,7 @@ public class FloatBuffer extends AbstractBuffer<FloatReadBuffer, FloatWriteBuffe
         }
     }
 
+    @Deprecated
     private final class FloatBufferE extends InnerEditBuffer implements FloatEditBuffer {
 
         @Override

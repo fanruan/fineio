@@ -1,11 +1,11 @@
 package com.fineio.cache.pool;
 
-import com.fineio.cache.BufferPrivilege;
 import com.fineio.cache.SyncStatus;
 import com.fineio.io.AbstractBuffer;
 import com.fineio.io.Buffer;
 import com.fineio.v1.cache.CacheLinkedMap;
 
+import java.lang.ref.ReferenceQueue;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.Map;
@@ -16,11 +16,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2018/5/31
  */
 public class PooledBufferMap<B extends Buffer> {
-    private CacheLinkedMap<B> activeMap = new CacheLinkedMap<B>();
+    private CacheLinkedMap<B> activeMap;
     private Map<URI, B> keyMap = new ConcurrentHashMap<URI, B>();
 
 
-    public PooledBufferMap() {
+    public PooledBufferMap(ReferenceQueue<B> referenceQueue) {
+        activeMap = new CacheLinkedMap<B>(referenceQueue);
     }
 
     public boolean updateBuffer(B buffer) {
@@ -76,13 +77,20 @@ public class PooledBufferMap<B extends Buffer> {
         if (null == buffer) {
             return null;
         }
-        if (buffer.getBufferPrivilege().compareTo(BufferPrivilege.READABLE) <= 0
-                && ((AbstractBuffer) buffer).getSyncStatus() != SyncStatus.SYNC) {
-            keyMap.remove(buffer.getUri());
-            return buffer;
-        } else {
-            activeMap.update(buffer);
-            return null;
+        switch (buffer.getBufferPrivilege()) {
+            case CLEANABLE:
+                keyMap.remove(buffer.getUri());
+                return buffer;
+            case READABLE:
+                if (((AbstractBuffer) buffer).getSyncStatus() != SyncStatus.SYNC) {
+                    keyMap.remove(buffer.getUri());
+                    return buffer;
+                }
+                activeMap.update(buffer);
+                return null;
+            default:
+                activeMap.update(buffer);
+                return null;
         }
     }
 

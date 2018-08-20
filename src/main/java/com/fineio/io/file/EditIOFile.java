@@ -11,6 +11,7 @@ import java.net.URI;
 /**
  * Created by daniel on 2017/2/10.
  */
+@Deprecated
 public final class EditIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
 
     EditIOFile(Connector connector, URI uri, FileModel model) {
