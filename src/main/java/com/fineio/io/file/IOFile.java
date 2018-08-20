@@ -161,78 +161,72 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
     /**
      * 随机写
      *
-     * @param file
      * @param p
      * @param d
      */
-    public static void put(IOFile<DoubleBuffer> file, long p, double d) {
-        ((DoubleWriteBuffer) file.getBuffer(file.checkBuffer(file.giw(p)))).put(file.gp(p), d);
+    public void put(long p, double d) {
+        ((DoubleWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
     }
 
     /**
      * 随机写
      *
-     * @param file
      * @param p
      * @param d
      */
-    public static void put(IOFile<ByteBuffer> file, long p, byte d) {
-        ((ByteWriteBuffer) file.getBuffer(file.checkBuffer(file.giw(p)))).put(file.gp(p), d);
+    public void put(long p, byte d) {
+        ((ByteWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
     }
 
     /**
      * 随机写
      *
-     * @param file
      * @param p
      * @param d
      */
-    public static void put(IOFile<CharBuffer> file, long p, char d) {
-        ((CharWriteBuffer) file.getBuffer(file.checkBuffer(file.giw(p)))).put(file.gp(p), d);
+    public void put(long p, char d) {
+        ((CharWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
     }
 
     /**
      * 随机写
      *
-     * @param file
+
      * @param p
      * @param d
      */
-    public static void put(IOFile<FloatBuffer> file, long p, float d) {
-        ((FloatWriteBuffer) file.getBuffer(file.checkBuffer(file.giw(p)))).put(file.gp(p), d);
+    public void put(long p, float d) {
+        ((FloatWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
     }
 
     /**
      * 随机写
      *
-     * @param file
      * @param p
      * @param d
      */
-    public static void put(IOFile<LongBuffer> file, long p, long d) {
-        ((LongWriteBuffer) file.getBuffer(file.checkBuffer(file.giw(p)))).put(file.gp(p), d);
+    public void put(long p, long d) {
+        ((LongWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
     }
 
     /**
      * 随机写
      *
-     * @param file
      * @param p
      * @param d
      */
-    public static void put(IOFile<IntBuffer> file, long p, int d) {
-        ((IntWriteBuffer) file.getBuffer(file.checkBuffer(file.giw(p)))).put(file.gp(p), d);
+    public void put(long p, int d) {
+        ((IntWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
     }
 
     /**
      * 随机写
      *
-     * @param file
      * @param p
      * @param d
      */
-    public static void put(IOFile<ShortBuffer> file, long p, short d) {
-        ((ShortWriteBuffer) file.getBuffer(file.checkBuffer(file.giw(p)))).put(file.gp(p), d);
+    public void put(long p, short d) {
+        ((ShortWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
     }
 
     /**
@@ -346,7 +340,13 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
             return 0;
         }
         int len = buffers.length - 1;
-        return ((WriteOnlyBuffer) buffers[len].get()).full() ? triggerWrite(len + 1) : len;
+        WriteOnlyBuffer buffer = null;
+        if (null == buffers[len] || null == buffers[len].get()) {
+            buffer = (WriteOnlyBuffer) initBuffer(len);
+        } else {
+            buffer = (WriteOnlyBuffer) buffers[len].get();
+        }
+        return buffer.full() ? triggerWrite(len + 1) : len;
     }
 
     final int triggerWrite(int len) {

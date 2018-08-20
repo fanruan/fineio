@@ -7,6 +7,6 @@ import java.net.URI;
  */
 public class FileCloseException extends RuntimeException {
     public FileCloseException(URI uri) {
-        super("Buffer '" + uri.getPath() + "' had been close");
+        super("Buffer '" + uri + "' had been close");
     }
 }

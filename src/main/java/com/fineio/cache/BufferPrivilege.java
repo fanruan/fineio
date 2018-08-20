@@ -11,6 +11,7 @@ public enum BufferPrivilege {
     READABLE,
     //EDIT释放优先级低，不优先释放
     EDITABLE,
+    APPEND,
     //WRITE是不允许释放并且控制最大占用空间
     WRITABLE
 }

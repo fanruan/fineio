@@ -858,6 +858,12 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         }
 
         @Override
+        public boolean full() {
+            loadContent();
+            return super.full();
+        }
+
+        @Override
         public boolean isLoad() {
             return load;
         }
