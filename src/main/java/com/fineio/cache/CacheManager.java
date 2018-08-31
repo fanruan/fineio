@@ -169,8 +169,8 @@ public class CacheManager {
         poolMap.get(mode).remove(buffer);
     }
 
-    public void returnMemory(Buffer buffer, BufferPrivilege bufferPrivilege) {
-        memoryHandler.returnMemory(buffer, bufferPrivilege);
+    public void returnMemory(Buffer buffer, BufferPrivilege bufferPrivilege, boolean positive) {
+        memoryHandler.returnMemory(buffer, bufferPrivilege, positive);
         maxExistsBuffer.incrementAndGet();
     }
 

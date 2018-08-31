@@ -102,8 +102,9 @@ public class MemoryHandler {
         return allocator.allocateWrite(address, oldSize, newSize);
     }
 
-    public void returnMemory(Buffer buffer, BufferPrivilege bufferPrivilege) {
-        long size = 0 - buffer.getAllocateSize();
+    public void returnMemory(Buffer buffer, BufferPrivilege bufferPrivilege, boolean positive) {
+        long size = buffer.getAllocateSize();
+        size = positive ? size : 0 - size;
         switch (bufferPrivilege) {
             case WRITABLE:
                 write_size.add(size);
