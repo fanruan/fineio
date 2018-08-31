@@ -7,7 +7,10 @@ import com.fineio.v1.cache.CacheLinkedMap;
 
 import java.lang.ref.ReferenceQueue;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -92,6 +95,21 @@ public class PooledBufferMap<B extends Buffer> {
                 activeMap.update(buffer);
                 return null;
         }
+    }
+
+    synchronized
+    public List<B> pollAllCleanable() {
+        List<B> result = new ArrayList<B>() {
+            @Override
+            public boolean add(B b) {
+                return null != b && super.add(b);
+            }
+        };
+        int size = keyMap.size();
+        for (int i = 0; i < size; i++) {
+            result.add(poll());
+        }
+        return Collections.unmodifiableList(result);
     }
 
 }

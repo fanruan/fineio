@@ -77,9 +77,14 @@ public class MemoryHandler {
     }
 
     private void gc() {
+        int tryCount = 0;
         while (getReadWaitCount() != 0 || getWriteWaitCount() != 0) {
             if (!forceGC()) {
                 break;
+            }
+            if (++tryCount == 3) {
+                gcCallBack.forceGC();
+                tryCount = 0;
             }
         }
         //stop 1微妙
@@ -287,6 +292,8 @@ public class MemoryHandler {
          * @return
          */
         boolean gc();
+
+        void forceGC();
     }
 
     public static long getMaxMemory() {

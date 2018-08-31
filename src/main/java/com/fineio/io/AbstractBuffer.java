@@ -428,7 +428,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                 beforeStatusChange();
                 MemoryUtils.free(address);
                 afterStatusChange();
-                manager.returnMemory(this, getBufferPrivilege(), false);
+                manager.returnMemory(buffer, getBufferPrivilege(), false);
                 exitPool();
 //                manager = null;
             }
@@ -570,7 +570,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             beforeStatusChange();
             try {
                 address = manager.allocateWrite(address, len, newLen);
-                allocateSize = newLen;
+                buffer.allocateSize = newLen;
                 MemoryUtils.fill0(address + len, newLen - len);
 
             } catch (OutOfMemoryError error) {
@@ -607,10 +607,12 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         protected void returnMemoryIfNeed() {
             if (allocateSize != 0) {
                 manager.returnMemory(this, getBufferPrivilege(), false);
-//                if (buffer.isDirect()) {
-//                    manager = null;
-//                }
-                allocateSize = 0;
+
+                if (isDirect()) {
+                    allocateSize = 0;
+                    return;
+                }
+                load = true;
             }
         }
 
@@ -622,7 +624,10 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                 beforeStatusChange();
                 MemoryUtils.free(address);
                 afterStatusChange();
-                returnMemoryIfNeed();
+                if (allocateSize != 0) {
+                    manager.returnMemory(this, getBufferPrivilege(), false);
+                    allocateSize = 0;
+                }
                 exitPool();
                 address = 0;
             }
@@ -790,30 +795,13 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             afterStatusChange();
         }
 
-//        @Override
-//        public void force() {
-//            forceWrite(buffer.isDirect());
-//        }
-
-
-        @Override
-        public void closeWithOutSync() {
-            if (address != 0) {
-                close = true;
-                load = false;
-                beforeStatusChange();
-                MemoryUtils.free(address);
-                afterStatusChange();
-                super.returnMemoryIfNeed();
-                exitPool();
-                address = 0;
-            }
-        }
-
         @Override
         protected void returnMemoryIfNeed() {
             if (buffer.isDirect()) {
-                super.returnMemoryIfNeed();
+                if (allocateSize != 0) {
+                    manager.returnMemory(buffer, getBufferPrivilege(), false);
+                    allocateSize = 0;
+                }
             }
         }
 
