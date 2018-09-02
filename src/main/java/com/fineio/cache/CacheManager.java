@@ -22,6 +22,7 @@ import java.util.concurrent.locks.LockSupport;
  */
 public class CacheManager {
     private volatile static CacheManager instance;
+    public static final int MAX_AUTO_FREE_COUNT = 10;
 
     private ConcurrentHashMap<PoolMode, BufferPool> poolMap;
     private MemoryHandler memoryHandler;
@@ -148,11 +149,11 @@ public class CacheManager {
                 maxExistsBuffer.decrementAndGet();
                 poolMap.get(mode).registerBuffer(buffer);
             } else {
-                for (int i = 0; i < 10; i++) {
+                for (int i = 0; i < MAX_AUTO_FREE_COUNT; i++) {
                     memoryHandler.forceGC();
                     LockSupport.parkNanos(1 * 1000);
                 }
-                if (limitCount.incrementAndGet() == 10) {
+                if (limitCount.incrementAndGet() == MAX_AUTO_FREE_COUNT) {
                     maxExistsBuffer.set(10);
                     limitCount.set(0);
                 }
