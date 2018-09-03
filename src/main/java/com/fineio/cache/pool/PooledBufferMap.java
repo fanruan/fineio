@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author yee
@@ -21,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PooledBufferMap<B extends Buffer> {
     private CacheLinkedMap<B> activeMap;
     private Map<URI, B> keyMap = new ConcurrentHashMap<URI, B>();
+    private ReentrantLock lock = new ReentrantLock();
 
 
     public PooledBufferMap(ReferenceQueue<B> referenceQueue) {
@@ -74,54 +76,62 @@ public class PooledBufferMap<B extends Buffer> {
         }
     }
 
-    synchronized
     public B poll() {
-        B buffer = activeMap.poll();
-        if (null == buffer) {
-            return null;
-        }
-        switch (buffer.getBufferPrivilege()) {
-            case CLEANABLE:
-                keyMap.remove(buffer.getUri());
-                return buffer;
-            case READABLE:
-                if (((AbstractBuffer) buffer).getSyncStatus() != SyncStatus.SYNC) {
-                    keyMap.remove(buffer.getUri());
-                    return buffer;
-                }
-                activeMap.update(buffer);
-                return null;
-            default:
-                activeMap.update(buffer);
-                return null;
-        }
-    }
-
-    synchronized
-    public List<B> pollAllCleanable() {
-        List<B> result = new ArrayList<B>() {
-            @Override
-            public boolean add(B b) {
-                return null != b && super.add(b);
-            }
-        };
-        int size = keyMap.size();
-        for (int i = 0; i < size; i++) {
+        lock.lock();
+        try {
             B buffer = activeMap.poll();
             if (null == buffer) {
-                return Collections.unmodifiableList(result);
+                return null;
             }
             switch (buffer.getBufferPrivilege()) {
                 case CLEANABLE:
                     keyMap.remove(buffer.getUri());
-                    result.add(buffer);
-                    break;
+                    return buffer;
+                case READABLE:
+                    if (((AbstractBuffer) buffer).getSyncStatus() != SyncStatus.SYNC) {
+                        keyMap.remove(buffer.getUri());
+                        return buffer;
+                    }
+                    activeMap.update(buffer);
+                    return null;
                 default:
                     activeMap.update(buffer);
-                    break;
+                    return null;
             }
+        } finally {
+            lock.unlock();
         }
-        return Collections.unmodifiableList(result);
+    }
+
+    public List<B> pollAllCleanable() {
+        lock.lock();
+        try {
+            List<B> result = new ArrayList<B>() {
+                @Override
+                public boolean add(B b) {
+                    return null != b && super.add(b);
+                }
+            };
+            int size = keyMap.size();
+            for (int i = 0; i < size; i++) {
+                B buffer = activeMap.poll();
+                if (null == buffer) {
+                    return Collections.unmodifiableList(result);
+                }
+                switch (buffer.getBufferPrivilege()) {
+                    case CLEANABLE:
+                        keyMap.remove(buffer.getUri());
+                        result.add(buffer);
+                        break;
+                    default:
+                        activeMap.update(buffer);
+                        break;
+                }
+            }
+            return Collections.unmodifiableList(result);
+        } finally {
+            lock.unlock();
+        }
     }
 
 }

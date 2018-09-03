@@ -452,12 +452,13 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
         private final void lc(int p) {
             synchronized (buffer) {
-                if (buffer.load) {
+                if (buffer.load && buffer.address != 0) {
                     if (ir(p)) {
                         return;
                     }
                     throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
                 } else {
+                    buffer.load = false;
                     ll(p);
                 }
             }
