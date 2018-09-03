@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.LockSupport;
 
 /**
  * @author yee
@@ -22,17 +21,19 @@ import java.util.concurrent.locks.LockSupport;
  */
 public class CacheManager {
     private volatile static CacheManager instance;
-    public static final int MAX_AUTO_FREE_COUNT = 10;
+    public static final int MAX_AUTO_FREE_COUNT = 3;
 
     private ConcurrentHashMap<PoolMode, BufferPool> poolMap;
     private MemoryHandler memoryHandler;
     public ReferenceQueue<? extends Buffer> referenceQueue;
     private AtomicLong maxExistsBuffer;
     private AtomicInteger limitCount = new AtomicInteger(0);
+    private MemoryHandler.GcCallBack callBack;
 
 
     private CacheManager() {
-        memoryHandler = MemoryHandler.newInstance(createGCCallBack());
+        callBack = createGCCallBack();
+        memoryHandler = MemoryHandler.newInstance(callBack);
         long maxSize = MemoryHandler.getMaxMemory() >> 22;
         maxExistsBuffer = new AtomicLong(maxSize);
         referenceQueue = new ReferenceQueue<Buffer>();
@@ -149,14 +150,11 @@ public class CacheManager {
                 maxExistsBuffer.decrementAndGet();
                 poolMap.get(mode).registerBuffer(buffer);
             } else {
-                for (int i = 0; i < MAX_AUTO_FREE_COUNT; i++) {
-                    memoryHandler.forceGC();
-                    LockSupport.parkNanos(1 * 1000);
-                }
                 if (limitCount.incrementAndGet() == MAX_AUTO_FREE_COUNT) {
-                    maxExistsBuffer.set(10);
+                    maxExistsBuffer.set(MAX_AUTO_FREE_COUNT);
                     limitCount.set(0);
                 }
+                callBack.forceGC();
                 registerBuffer(mode, buffer);
             }
 

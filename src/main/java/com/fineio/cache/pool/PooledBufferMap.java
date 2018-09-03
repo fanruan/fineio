@@ -107,7 +107,19 @@ public class PooledBufferMap<B extends Buffer> {
         };
         int size = keyMap.size();
         for (int i = 0; i < size; i++) {
-            result.add(poll());
+            B buffer = activeMap.poll();
+            if (null == buffer) {
+                return Collections.unmodifiableList(result);
+            }
+            switch (buffer.getBufferPrivilege()) {
+                case CLEANABLE:
+                    keyMap.remove(buffer.getUri());
+                    result.add(buffer);
+                    break;
+                default:
+                    activeMap.update(buffer);
+                    break;
+            }
         }
         return Collections.unmodifiableList(result);
     }
