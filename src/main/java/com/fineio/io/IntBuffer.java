@@ -50,7 +50,9 @@ public class IntBuffer extends AbstractBuffer<IntReadBuffer, IntWriteBuffer, Int
 
     @Override
     protected void exitPool() {
-        manager.removeBuffer(PoolMode.INT, this);
+        if (!directAccess) {
+            manager.removeBuffer(PoolMode.INT, this);
+        }
     }
 
     @Override

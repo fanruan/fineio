@@ -189,7 +189,15 @@ public class CacheManager {
     }
 
     public void removeBuffer(PoolMode mode, AbstractBuffer buffer) {
-        poolMap.get(mode).remove(buffer);
+        synchronized (this) {
+            BufferPool<Buffer> pool = poolMap.get(mode);
+            if (null == pool) {
+                pool = new BufferPool(mode, referenceQueue);
+                poolMap.put(mode, pool);
+            } else {
+                poolMap.get(mode).remove(buffer);
+            }
+        }
     }
 
     public void returnMemory(Buffer buffer, BufferPrivilege bufferPrivilege, boolean positive) {

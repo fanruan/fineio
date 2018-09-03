@@ -51,7 +51,9 @@ public class ShortBuffer extends AbstractBuffer<ShortReadBuffer, ShortWriteBuffe
 
     @Override
     protected void exitPool() {
-        manager.removeBuffer(PoolMode.SHORT, this);
+        if (!directAccess) {
+            manager.removeBuffer(PoolMode.SHORT, this);
+        }
     }
 
     @Override

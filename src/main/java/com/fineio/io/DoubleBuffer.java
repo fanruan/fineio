@@ -51,7 +51,9 @@ public class DoubleBuffer extends AbstractBuffer<DoubleReadBuffer, DoubleWriteBu
 
     @Override
     protected void exitPool() {
-        manager.removeBuffer(PoolMode.DOUBLE, this);
+        if (!directAccess) {
+            manager.removeBuffer(PoolMode.DOUBLE, this);
+        }
     }
 
     @Override

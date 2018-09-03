@@ -340,6 +340,9 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                 check(0);
                 return true;
             } catch (Exception e) {
+                maxSize = 0;
+                address = 0;
+                allocateSize = 0;
                 return false;
             }
         }
@@ -504,8 +507,8 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                 needClear = true;
             } else {
                 if (maxSize > 0) {
+                    int offset = Maths.log2(maxSize);
                     maxPosition = maxSize - 1;
-                    int offset = Maths.log2(maxPosition);
                     setCurrentCapacity(offset);
                 } else {
                     maxSize = 1 << maxOffset;

@@ -51,7 +51,9 @@ public class ByteBuffer extends AbstractBuffer<ByteReadBuffer, ByteWriteBuffer, 
 
     @Override
     protected void exitPool() {
-        manager.removeBuffer(PoolMode.BYTE, this);
+        if (!directAccess) {
+            manager.removeBuffer(PoolMode.BYTE, this);
+        }
     }
 
     @Override

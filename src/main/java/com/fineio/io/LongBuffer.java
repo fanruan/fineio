@@ -51,7 +51,9 @@ public class LongBuffer extends AbstractBuffer<LongReadBuffer, LongWriteBuffer, 
 
     @Override
     protected void exitPool() {
-        manager.removeBuffer(PoolMode.LONG, this);
+        if (!directAccess) {
+            manager.removeBuffer(PoolMode.LONG, this);
+        }
     }
 
     @Override

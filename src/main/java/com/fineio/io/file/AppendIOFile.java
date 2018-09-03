@@ -11,6 +11,7 @@ import com.fineio.io.FloatBuffer;
 import com.fineio.io.IntBuffer;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.ShortBuffer;
+import com.fineio.io.read.ReadOnlyBuffer;
 import com.fineio.io.write.WriteOnlyBuffer;
 import com.fineio.storage.Connector;
 
@@ -47,7 +48,8 @@ public class AppendIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
             throw new UnsupportedOperationException(String.format("Index %d is unsupported in Append MODE"));
         }
         if (index == maxBlockIndex) {
-            return model.createBufferForEdit(connector, createIndexBlock(index), block_size_offset);
+            ReadOnlyBuffer buffer = model.createBufferForRead(connector, createIndexBlock(index), block_size_offset);
+            buffer.flip();
         }
         return model.createBufferForWrite(connector, createIndexBlock(index), block_size_offset);
     }

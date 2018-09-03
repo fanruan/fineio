@@ -50,7 +50,9 @@ public class FloatBuffer extends AbstractBuffer<FloatReadBuffer, FloatWriteBuffe
 
     @Override
     protected void exitPool() {
-        manager.removeBuffer(PoolMode.FLOAT, this);
+        if (!directAccess) {
+            manager.removeBuffer(PoolMode.FLOAT, this);
+        }
     }
 
     @Override
