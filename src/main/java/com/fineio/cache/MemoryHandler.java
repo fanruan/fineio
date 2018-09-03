@@ -80,12 +80,12 @@ public class MemoryHandler {
         int tryCount = 0;
         while (getReadWaitCount() != 0 || getWriteWaitCount() != 0) {
             if (!forceGC()) {
-                break;
+                if (++tryCount == 3) {
+                    gcCallBack.forceGC();
+                    break;
+                }
             }
-            if (++tryCount == 3) {
-                gcCallBack.forceGC();
-                tryCount = 0;
-            }
+
         }
         //stop 1微妙
         LockSupport.parkNanos(1000);
