@@ -480,6 +480,11 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         }
     }
 
+    public static void main(String[] args) {
+        System.out.println(Maths.log2((1 << 20) - 1));
+        System.out.println(Integer.numberOfTrailingZeros(Integer.highestOneBit((1 << 20) - 1)));
+    }
+
 
     protected abstract class InnerWriteBuffer extends BaseBuffer implements WriteOnlyBuffer {
 
@@ -500,10 +505,11 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             } else {
                 if (maxSize > 0) {
                     maxPosition = maxSize - 1;
-                    int offset = Integer.numberOfTrailingZeros(Integer.highestOneBit(maxPosition)) + 1;
+                    int offset = Maths.log2(maxPosition);
                     setCurrentCapacity(offset);
+                } else {
+                    maxSize = 1 << maxOffset;
                 }
-                maxSize = 1 << maxOffset;
             }
         }
 
