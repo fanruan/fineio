@@ -483,11 +483,6 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(Maths.log2((1 << 20) - 1));
-        System.out.println(Integer.numberOfTrailingZeros(Integer.highestOneBit((1 << 20) - 1)));
-    }
-
 
     protected abstract class InnerWriteBuffer extends BaseBuffer implements WriteOnlyBuffer {
 
@@ -595,7 +590,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
         @Override
         public boolean full() {
-            return maxPosition == maxSize - 1;
+            return maxPosition >= maxSize - 1;
         }
 
         @Override
@@ -604,6 +599,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             long t = System.currentTimeMillis();
             if (t - lastWriteTime > PERIOD) {
                 lastWriteTime = t;
+                syncStatus = SyncStatus.SYNC;
                 bufferPrivilege = BufferPrivilege.READABLE;
                 SyncManager.getInstance().triggerWork(createWriteJob(buffer.isDirect()));
                 if (!buffer.isDirect()) {
@@ -650,6 +646,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
         @Override
         public void force() {
+            syncStatus = SyncStatus.SYNC;
             forceWrite(buffer.isDirect());
             bufferPrivilege = BufferPrivilege.READABLE;
             if (!buffer.isDirect()) {
@@ -689,7 +686,6 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         }
 
         protected JobAssist createWriteJob(final boolean clear) {
-            syncStatus = SyncStatus.SYNC;
             return new JobAssist(bufferKey, new Job() {
                 @Override
                 public void doJob() {
