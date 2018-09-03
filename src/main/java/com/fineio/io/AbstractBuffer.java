@@ -505,9 +505,8 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                     int offset = Maths.log2(maxSize);
                     maxPosition = maxSize - 1;
                     setCurrentCapacity(offset);
-                } else {
-                    maxSize = 1 << maxOffset;
                 }
+                maxSize = 1 << maxOffset;
             }
         }
 
