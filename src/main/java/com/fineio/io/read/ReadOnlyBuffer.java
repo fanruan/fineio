@@ -19,6 +19,8 @@ public interface ReadOnlyBuffer extends Buffer {
 
     void clear();
 
+    void flip();
+
     abstract class Accessor {
         protected byte[] bytes;
         protected int off;

@@ -77,10 +77,15 @@ public class MemoryHandler {
     }
 
     private void gc() {
+        int tryCount = 0;
         while (getReadWaitCount() != 0 || getWriteWaitCount() != 0) {
             if (!forceGC()) {
-                break;
+                if (++tryCount == 3) {
+                    gcCallBack.forceGC();
+                    break;
+                }
             }
+
         }
         //stop 1微妙
         LockSupport.parkNanos(1000);
@@ -102,8 +107,9 @@ public class MemoryHandler {
         return allocator.allocateWrite(address, oldSize, newSize);
     }
 
-    public void returnMemory(Buffer buffer, BufferPrivilege bufferPrivilege) {
-        long size = 0 - buffer.getAllocateSize();
+    public void returnMemory(Buffer buffer, BufferPrivilege bufferPrivilege, boolean positive) {
+        long size = buffer.getAllocateSize();
+        size = positive ? size : 0 - size;
         switch (bufferPrivilege) {
             case WRITABLE:
                 write_size.add(size);
@@ -286,6 +292,8 @@ public class MemoryHandler {
          * @return
          */
         boolean gc();
+
+        void forceGC();
     }
 
     public static long getMaxMemory() {

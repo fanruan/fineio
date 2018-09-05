@@ -4,22 +4,16 @@ import com.fineio.cache.pool.BufferPool;
 import com.fineio.cache.pool.PoolMode;
 import com.fineio.io.AbstractBuffer;
 import com.fineio.io.Buffer;
-import com.fineio.io.ByteBuffer;
-import com.fineio.io.CharBuffer;
-import com.fineio.io.DoubleBuffer;
-import com.fineio.io.FloatBuffer;
-import com.fineio.io.IntBuffer;
-import com.fineio.io.LongBuffer;
-import com.fineio.io.ShortBuffer;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.net.URI;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.LockSupport;
 
 /**
  * @author yee
@@ -27,26 +21,23 @@ import java.util.concurrent.locks.LockSupport;
  */
 public class CacheManager {
     private volatile static CacheManager instance;
+    public static final int MAX_AUTO_FREE_COUNT = 3;
 
     private ConcurrentHashMap<PoolMode, BufferPool> poolMap;
     private MemoryHandler memoryHandler;
     public ReferenceQueue<? extends Buffer> referenceQueue;
     private AtomicLong maxExistsBuffer;
+    private AtomicInteger limitCount = new AtomicInteger(0);
+    private MemoryHandler.GcCallBack callBack;
 
 
     private CacheManager() {
-        memoryHandler = MemoryHandler.newInstance(createGCCallBack());
+        callBack = createGCCallBack();
+        memoryHandler = MemoryHandler.newInstance(callBack);
         long maxSize = MemoryHandler.getMaxMemory() >> 22;
         maxExistsBuffer = new AtomicLong(maxSize);
         referenceQueue = new ReferenceQueue<Buffer>();
         poolMap = new ConcurrentHashMap<PoolMode, BufferPool>();
-        poolMap.put(PoolMode.BYTE, new BufferPool<ByteBuffer>(PoolMode.BYTE, (ReferenceQueue<ByteBuffer>) referenceQueue));
-        poolMap.put(PoolMode.CHAR, new BufferPool<CharBuffer>(PoolMode.CHAR, (ReferenceQueue<CharBuffer>) referenceQueue));
-        poolMap.put(PoolMode.SHORT, new BufferPool<ShortBuffer>(PoolMode.SHORT, (ReferenceQueue<ShortBuffer>) referenceQueue));
-        poolMap.put(PoolMode.INT, new BufferPool<IntBuffer>(PoolMode.INT, (ReferenceQueue<IntBuffer>) referenceQueue));
-        poolMap.put(PoolMode.LONG, new BufferPool<LongBuffer>(PoolMode.LONG, (ReferenceQueue<LongBuffer>) referenceQueue));
-        poolMap.put(PoolMode.FLOAT, new BufferPool<FloatBuffer>(PoolMode.FLOAT, (ReferenceQueue<FloatBuffer>) referenceQueue));
-        poolMap.put(PoolMode.DOUBLE, new BufferPool<DoubleBuffer>(PoolMode.DOUBLE, (ReferenceQueue<DoubleBuffer>) referenceQueue));
     }
 
     public static CacheManager getInstance() {
@@ -98,7 +89,8 @@ public class CacheManager {
                 Iterator<Map.Entry<PoolMode, BufferPool>> iterator = poolMap.entrySet().iterator();
                 boolean result = false;
                 while (iterator.hasNext()) {
-                    AbstractBuffer buffer = (AbstractBuffer) iterator.next().getValue().poll();
+                    BufferPool pool = iterator.next().getValue();
+                    AbstractBuffer buffer = (AbstractBuffer) pool.poll();
                     if (null != buffer) {
                         buffer.closeWithOutSync();
                         Reference<? extends Buffer> ref = null;
@@ -115,11 +107,47 @@ public class CacheManager {
                 System.gc();
                 return result;
             }
+
+            @Override
+            public void forceGC() {
+                Iterator<Map.Entry<PoolMode, BufferPool>> iterator = poolMap.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    BufferPool pool = iterator.next().getValue();
+                    List<AbstractBuffer> list = pool.pollAllCleanable();
+                    if (!list.isEmpty()) {
+                        for (AbstractBuffer buffer : list) {
+                            synchronized (buffer) {
+                                if (buffer.getBufferPrivilege() == BufferPrivilege.CLEANABLE) {
+                                    buffer.closeWithOutSync();
+                                    Reference<? extends Buffer> ref = null;
+                                    while (null != (ref = referenceQueue.poll())) {
+                                        synchronized (ref) {
+                                            ref.clear();
+                                            ref = null;
+                                        }
+                                    }
+                                } else {
+                                    pool.registerBuffer(buffer);
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+                System.gc();
+            }
         };
     }
 
     public <B extends AbstractBuffer> B getBuffer(PoolMode mode, URI uri) {
-        return (B) poolMap.get(mode).getBuffer(uri);
+        synchronized (this) {
+            BufferPool<B> pool = poolMap.get(mode);
+            if (null == pool) {
+                pool = new BufferPool(mode, referenceQueue);
+                poolMap.put(mode, pool);
+            }
+            return pool.getBuffer(uri);
+        }
     }
 
     public void registerBuffer(PoolMode mode, Buffer buffer) {
@@ -128,10 +156,7 @@ public class CacheManager {
                 maxExistsBuffer.decrementAndGet();
                 poolMap.get(mode).registerBuffer(buffer);
             } else {
-                for (int i = 0; i < 10; i++) {
-                    memoryHandler.forceGC();
-                    LockSupport.parkNanos(1 * 1000);
-                }
+                callBack.forceGC();
                 registerBuffer(mode, buffer);
             }
 
@@ -166,13 +191,22 @@ public class CacheManager {
     }
 
     public void removeBuffer(PoolMode mode, AbstractBuffer buffer) {
-        poolMap.get(mode).remove(buffer);
+        synchronized (this) {
+            BufferPool<Buffer> pool = poolMap.get(mode);
+            if (null == pool) {
+                pool = new BufferPool(mode, referenceQueue);
+                poolMap.put(mode, pool);
+            } else {
+                poolMap.get(mode).remove(buffer);
+            }
+        }
     }
 
-    public void returnMemory(Buffer buffer, BufferPrivilege bufferPrivilege) {
-        memoryHandler.returnMemory(buffer, bufferPrivilege);
-        maxExistsBuffer.incrementAndGet();
+    public void returnMemory(Buffer buffer, BufferPrivilege bufferPrivilege, boolean positive) {
+        memoryHandler.returnMemory(buffer, bufferPrivilege, positive);
+        if (!positive) {
+            maxExistsBuffer.incrementAndGet();
+        }
     }
-
 
 }

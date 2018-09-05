@@ -50,7 +50,9 @@ public class CharBuffer extends AbstractBuffer<CharReadBuffer, CharWriteBuffer, 
 
     @Override
     protected void exitPool() {
-        manager.removeBuffer(PoolMode.CHAR, this);
+        if (!directAccess) {
+            manager.removeBuffer(PoolMode.CHAR, this);
+        }
     }
 
     @Override
@@ -77,8 +79,13 @@ public class CharBuffer extends AbstractBuffer<CharReadBuffer, CharWriteBuffer, 
 
         @Override
         public char get(int pos) {
-            check(pos);
-            return MemoryUtils.getChar(address, pos);
+            lock.lock();
+            try {
+                check(pos);
+                return MemoryUtils.getChar(address, pos);
+            } finally {
+                lock.unlock();
+            }
         }
 
         @Override
