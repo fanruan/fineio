@@ -80,8 +80,13 @@ public class ShortBuffer extends AbstractBuffer<ShortReadBuffer, ShortWriteBuffe
 
         @Override
         public short get(int pos) {
-            check(pos);
-            return MemoryUtils.getShort(address, pos);
+            lock.lock();
+            try {
+                check(pos);
+                return MemoryUtils.getShort(address, pos);
+            } finally {
+                lock.unlock();
+            }
         }
 
         @Override

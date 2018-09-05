@@ -79,8 +79,13 @@ public class FloatBuffer extends AbstractBuffer<FloatReadBuffer, FloatWriteBuffe
 
         @Override
         public float get(int pos) {
-            check(pos);
-            return MemoryUtils.getFloat(address, pos);
+            lock.lock();
+            try {
+                check(pos);
+                return MemoryUtils.getFloat(address, pos);
+            } finally {
+                lock.unlock();
+            }
         }
 
         @Override

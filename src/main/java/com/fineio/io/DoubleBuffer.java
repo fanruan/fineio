@@ -80,8 +80,13 @@ public class DoubleBuffer extends AbstractBuffer<DoubleReadBuffer, DoubleWriteBu
 
         @Override
         public double get(int pos) {
-            check(pos);
-            return MemoryUtils.getDouble(address, pos);
+            lock.lock();
+            try {
+                check(pos);
+                return MemoryUtils.getDouble(address, pos);
+            } finally {
+                lock.unlock();
+            }
         }
 
         @Override

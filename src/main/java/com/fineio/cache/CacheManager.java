@@ -116,12 +116,18 @@ public class CacheManager {
                     List<AbstractBuffer> list = pool.pollAllCleanable();
                     if (!list.isEmpty()) {
                         for (AbstractBuffer buffer : list) {
-                            buffer.closeWithOutSync();
-                            Reference<? extends Buffer> ref = null;
-                            while (null != (ref = referenceQueue.poll())) {
-                                synchronized (ref) {
-                                    ref.clear();
-                                    ref = null;
+                            synchronized (buffer) {
+                                if (buffer.getBufferPrivilege() == BufferPrivilege.CLEANABLE) {
+                                    buffer.closeWithOutSync();
+                                    Reference<? extends Buffer> ref = null;
+                                    while (null != (ref = referenceQueue.poll())) {
+                                        synchronized (ref) {
+                                            ref.clear();
+                                            ref = null;
+                                        }
+                                    }
+                                } else {
+                                    pool.registerBuffer(buffer);
                                 }
                             }
                         }
@@ -150,10 +156,6 @@ public class CacheManager {
                 maxExistsBuffer.decrementAndGet();
                 poolMap.get(mode).registerBuffer(buffer);
             } else {
-                if (limitCount.incrementAndGet() == MAX_AUTO_FREE_COUNT) {
-                    maxExistsBuffer.set(MAX_AUTO_FREE_COUNT);
-                    limitCount.set(0);
-                }
                 callBack.forceGC();
                 registerBuffer(mode, buffer);
             }
@@ -206,6 +208,5 @@ public class CacheManager {
             maxExistsBuffer.incrementAndGet();
         }
     }
-
 
 }

@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -93,12 +94,12 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                         preClose = close;
                         if (!close) {
                             close = true;
-                            maxSize = 0;
                             changed = false;
                         }
                     }
                     if (!preClose) {
                         clear();
+                        maxSize = 0;
                         address = 0;
                         allocateSize = 0;
                     }
@@ -237,6 +238,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             if (null == readBuffer) {
                 synchronized (this) {
                     if (null == readBuffer) {
+                        bufferPrivilege = BufferPrivilege.READABLE;
                         if (0 != address) {
                             load = true;
                         }
@@ -324,9 +326,11 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
     protected abstract class InnerReadBuffer extends BaseBuffer implements ReadOnlyBuffer {
         protected int maxByteLen;
         protected int allocateSize;
+        protected ReentrantLock lock;
 
         public InnerReadBuffer() {
             super(AbstractBuffer.this);
+            lock = new ReentrantLock();
             if (!buffer.isDirect()) {
                 maxByteLen = 1 << (maxOffset + getOffset());
             }
@@ -426,14 +430,19 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
         @Override
         public void closeWithOutSync() {
-            if (load && address != 0) {
-                load = false;
-                beforeStatusChange();
-                MemoryUtils.free(address);
-                afterStatusChange();
-                manager.returnMemory(buffer, getBufferPrivilege(), false);
-                exitPool();
+            lock.lock();
+            try {
+                if (load && address != 0) {
+                    load = false;
+                    beforeStatusChange();
+                    MemoryUtils.free(address);
+                    afterStatusChange();
+                    manager.returnMemory(buffer, getBufferPrivilege(), false);
+                    exitPool();
 //                manager = null;
+                }
+            } finally {
+                lock.unlock();
             }
         }
 
@@ -505,6 +514,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                     int offset = Maths.log2(maxSize);
                     maxPosition = maxSize - 1;
                     setCurrentCapacity(offset);
+                    current_max_size = maxSize;
                 }
                 maxSize = 1 << maxOffset;
             }
