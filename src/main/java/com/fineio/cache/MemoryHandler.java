@@ -80,8 +80,9 @@ public class MemoryHandler {
         int tryCount = 0;
         while (getReadWaitCount() != 0 || getWriteWaitCount() != 0) {
             if (!forceGC()) {
-                if (++tryCount == 3) {
-                    gcCallBack.forceGC();
+                if (++tryCount == 5) {
+                    System.gc();
+                    maxMemory = (long) Math.min(1.1 * maxMemory, MemoryHelper.getMaxMemory());
                     break;
                 }
             }

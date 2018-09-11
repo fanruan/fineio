@@ -123,7 +123,7 @@ public final class SyncManager {
         });
     }
 
-    private Thread watch_thread = new Thread() {
+    private Thread watch_thread = new Thread("FineIO-SyncManager") {
         public void run() {
             while (true) {
                 while (isWait()) {
