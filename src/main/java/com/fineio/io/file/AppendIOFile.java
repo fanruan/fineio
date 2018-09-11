@@ -27,6 +27,9 @@ public class AppendIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
     AppendIOFile(Connector connector, URI uri, FileModel model) {
         super(connector, uri, model);
         maxBlockIndex = blocks - 1 < 0 ? 0 : blocks - 1;
+        if (null != buffers && blocks > 0) {
+            buffers[maxBlockIndex] = createBuffer(maxBlockIndex);
+        }
     }
 
     /**
@@ -63,11 +66,11 @@ public class AppendIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
     protected void closeChild(boolean clear) {
         if (buffers != null) {
             for (int i = 0; i < buffers.length; i++) {
-                if (buffers[i] != null && null != buffers[i].get()) {
+                if (buffers[i] != null) {
                     if (clear) {
-                        ((WriteOnlyBuffer) buffers[i].get()).forceAndClear();
+                        ((WriteOnlyBuffer) buffers[i]).forceAndClear();
                     } else {
-                        ((WriteOnlyBuffer) buffers[i].get()).force();
+                        ((WriteOnlyBuffer) buffers[i]).force();
                     }
                     buffers[i] = null;
                 }

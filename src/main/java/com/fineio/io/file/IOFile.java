@@ -2,7 +2,6 @@ package com.fineio.io.file;
 
 import com.fineio.base.Bits;
 import com.fineio.cache.BufferPrivilege;
-import com.fineio.cache.CacheManager;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.IOSetException;
 import com.fineio.io.Buffer;
@@ -34,8 +33,6 @@ import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 
 import java.io.Closeable;
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
 import java.net.URI;
 
 /**
@@ -68,7 +65,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      * 单个block的大小
      */
     protected long single_block_len;
-    protected volatile WeakReference<Buffer>[] buffers;
+    protected volatile Buffer[] buffers;
     protected volatile boolean released = false;
     private volatile int bufferWriteIndex = -1;
 
@@ -89,7 +86,13 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      */
 
     public static void put(IOFile<DoubleBuffer> file, double d) {
-        ((DoubleWriteBuffer) file.getBuffer(file.checkBuffer(file.gi()))).put(d);
+        int result = 0;
+        if (file.buffers == null || file.buffers.length == 0) {
+            result = 0;
+        } else {
+            result = ((WriteOnlyBuffer) file.buffers[file.buffers.length - 1]).full() ? file.triggerWrite(file.buffers.length) : file.buffers.length - 1;
+        }
+        ((DoubleWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
     }
 
     /**
@@ -100,7 +103,13 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      */
 
     public static void put(IOFile<ByteBuffer> file, byte d) {
-        ((ByteWriteBuffer) file.getBuffer(file.checkBuffer(file.gi()))).put(d);
+        int result = 0;
+        if (file.buffers == null || file.buffers.length == 0) {
+            result = 0;
+        } else {
+            result = ((WriteOnlyBuffer) file.buffers[file.buffers.length - 1]).full() ? file.triggerWrite(file.buffers.length) : file.buffers.length - 1;
+        }
+        ((ByteWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
     }
 
     /**
@@ -111,7 +120,13 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      */
 
     public static void put(IOFile<CharBuffer> file, char d) {
-        ((CharWriteBuffer) file.getBuffer(file.checkBuffer(file.gi()))).put(d);
+        int result = 0;
+        if (file.buffers == null || file.buffers.length == 0) {
+            result = 0;
+        } else {
+            result = ((WriteOnlyBuffer) file.buffers[file.buffers.length - 1]).full() ? file.triggerWrite(file.buffers.length) : file.buffers.length - 1;
+        }
+        ((CharWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
     }
 
     /**
@@ -122,7 +137,13 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      */
 
     public static void put(IOFile<FloatBuffer> file, float d) {
-        ((FloatWriteBuffer) file.getBuffer(file.checkBuffer(file.gi()))).put(d);
+        int result = 0;
+        if (file.buffers == null || file.buffers.length == 0) {
+            result = 0;
+        } else {
+            result = ((WriteOnlyBuffer) file.buffers[file.buffers.length - 1]).full() ? file.triggerWrite(file.buffers.length) : file.buffers.length - 1;
+        }
+        ((FloatWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
     }
 
     /**
@@ -133,7 +154,13 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      */
 
     public static void put(IOFile<LongBuffer> file, long d) {
-        ((LongWriteBuffer) file.getBuffer(file.checkBuffer(file.gi()))).put(d);
+        int result = 0;
+        if (file.buffers == null || file.buffers.length == 0) {
+            result = 0;
+        } else {
+            result = ((WriteOnlyBuffer) file.buffers[file.buffers.length - 1]).full() ? file.triggerWrite(file.buffers.length) : file.buffers.length - 1;
+        }
+        ((LongWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
     }
 
     /**
@@ -144,7 +171,13 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      */
 
     public static void put(IOFile<IntBuffer> file, int d) {
-        ((IntWriteBuffer) file.getBuffer(file.checkBuffer(file.gi()))).put(d);
+        int result = 0;
+        if (file.buffers == null || file.buffers.length == 0) {
+            result = 0;
+        } else {
+            result = ((WriteOnlyBuffer) file.buffers[file.buffers.length - 1]).full() ? file.triggerWrite(file.buffers.length) : file.buffers.length - 1;
+        }
+        ((IntWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
     }
 
     /**
@@ -155,78 +188,13 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      */
 
     public static void put(IOFile<ShortBuffer> file, short d) {
-        ((ShortWriteBuffer) file.getBuffer(file.checkBuffer(file.gi()))).put(d);
-    }
-
-    /**
-     * 随机写
-     *
-     * @param p
-     * @param d
-     */
-    public void put(long p, double d) {
-        ((DoubleWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
-    }
-
-    /**
-     * 随机写
-     *
-     * @param p
-     * @param d
-     */
-    public void put(long p, byte d) {
-        ((ByteWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
-    }
-
-    /**
-     * 随机写
-     *
-     * @param p
-     * @param d
-     */
-    public void put(long p, char d) {
-        ((CharWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
-    }
-
-    /**
-     * 随机写
-     *
-
-     * @param p
-     * @param d
-     */
-    public void put(long p, float d) {
-        ((FloatWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
-    }
-
-    /**
-     * 随机写
-     *
-     * @param p
-     * @param d
-     */
-    public void put(long p, long d) {
-        ((LongWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
-    }
-
-    /**
-     * 随机写
-     *
-     * @param p
-     * @param d
-     */
-    public void put(long p, int d) {
-        ((IntWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
-    }
-
-    /**
-     * 随机写
-     *
-     * @param p
-     * @param d
-     */
-    public void put(long p, short d) {
-        ((ShortWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
+        int result = 0;
+        if (file.buffers == null || file.buffers.length == 0) {
+            result = 0;
+        } else {
+            result = ((WriteOnlyBuffer) file.buffers[file.buffers.length - 1]).full() ? file.triggerWrite(file.buffers.length) : file.buffers.length - 1;
+        }
+        ((ShortWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
     }
 
     /**
@@ -237,7 +205,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      * @return
      */
     public final static long getLong(IOFile<LongBuffer> file, long p) {
-        return ((LongReadBuffer) file.getBuffer(file.gi(p))).get(file.gp(p));
+        return ((LongReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
     }
 
     /**
@@ -248,7 +216,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      * @return
      */
     public final static int getInt(IOFile<IntBuffer> file, long p) {
-        return ((IntReadBuffer) file.getBuffer(file.gi(p))).get(file.gp(p));
+        return ((IntReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
     }
 
     /**
@@ -259,7 +227,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      * @return
      */
     public final static char getChar(IOFile<CharBuffer> file, long p) {
-        return ((CharReadBuffer) file.getBuffer(file.gi(p))).get(file.gp(p));
+        return ((CharReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
     }
 
     /**
@@ -270,7 +238,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      * @return
      */
     public final static double getDouble(IOFile<DoubleBuffer> file, long p) {
-        return ((DoubleReadBuffer) file.getBuffer(file.gi(p))).get(file.gp(p));
+        return ((DoubleReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
     }
 
     /**
@@ -281,7 +249,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      * @return
      */
     public final static float getFloat(IOFile<FloatBuffer> file, long p) {
-        return ((FloatReadBuffer) file.getBuffer(file.gi(p))).get(file.gp(p));
+        return ((FloatReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
     }
 
     /**
@@ -292,7 +260,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      * @return
      */
     public final static byte getByte(IOFile<ByteBuffer> file, long p) {
-        return ((ByteReadBuffer) file.getBuffer(file.gi(p))).get(file.gp(p));
+        return ((ByteReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
     }
 
     /**
@@ -303,7 +271,105 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      * @return
      */
     public final static short getShort(IOFile<ShortBuffer> file, long p) {
-        return ((ShortReadBuffer) file.getBuffer(file.gi(p))).get(file.gp(p));
+        return ((ShortReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
+    }
+
+    /**
+     * 随机写
+     *
+     * @param p
+     * @param d
+     */
+    public void put(long p, double d) {
+        int len = (int) (p >> block_size_offset);
+        if (len > 0) {
+            checkWrite(len);
+        }
+        ((DoubleWriteBuffer) this.getBuffer(this.checkBuffer(len))).put((int) (p & single_block_len), d);
+    }
+
+    /**
+     * 随机写
+     *
+     * @param p
+     * @param d
+     */
+    public void put(long p, byte d) {
+        int len = (int) (p >> block_size_offset);
+        if (len > 0) {
+            checkWrite(len);
+        }
+        ((ByteWriteBuffer) this.getBuffer(this.checkBuffer(len))).put((int) (p & single_block_len), d);
+    }
+
+    /**
+     * 随机写
+     *
+     * @param p
+     * @param d
+     */
+    public void put(long p, char d) {
+        int len = (int) (p >> block_size_offset);
+        if (len > 0) {
+            checkWrite(len);
+        }
+        ((CharWriteBuffer) this.getBuffer(this.checkBuffer(len))).put((int) (p & single_block_len), d);
+    }
+
+    /**
+     * 随机写
+     *
+     * @param p
+     * @param d
+     */
+    public void put(long p, float d) {
+        int len = (int) (p >> block_size_offset);
+        if (len > 0) {
+            checkWrite(len);
+        }
+        ((FloatWriteBuffer) this.getBuffer(this.checkBuffer(len))).put((int) (p & single_block_len), d);
+    }
+
+    /**
+     * 随机写
+     *
+     * @param p
+     * @param d
+     */
+    public void put(long p, long d) {
+        int len = (int) (p >> block_size_offset);
+        if (len > 0) {
+            checkWrite(len);
+        }
+        ((LongWriteBuffer) this.getBuffer(this.checkBuffer(len))).put((int) (p & single_block_len), d);
+    }
+
+    /**
+     * 随机写
+     *
+     * @param p
+     * @param d
+     */
+    public void put(long p, int d) {
+        int len = (int) (p >> block_size_offset);
+        if (len > 0) {
+            checkWrite(len);
+        }
+        ((IntWriteBuffer) this.getBuffer(this.checkBuffer(len))).put((int) (p & single_block_len), d);
+    }
+
+    /**
+     * 随机写
+     *
+     * @param p
+     * @param d
+     */
+    public void put(long p, short d) {
+        int len = (int) (p >> block_size_offset);
+        if (len > 0) {
+            checkWrite(len);
+        }
+        ((ShortWriteBuffer) this.getBuffer(this.checkBuffer(len))).put((int) (p & single_block_len), d);
     }
 
     /**
@@ -317,36 +383,13 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
         return new FileBlock(uri, FileConstants.HEAD);
     }
 
-    //触发写
-    final int giw(long p) {
-        int len = (int) (p >> block_size_offset);
-        if (len > 0) {
-            checkWrite(len);
-        }
-        return len;
-    }
-
     final void checkWrite(int len) {
         if (bufferWriteIndex != len) {
             if (bufferWriteIndex != -1) {
-                ((WriteOnlyBuffer) buffers[bufferWriteIndex].get()).write();
+                ((WriteOnlyBuffer) buffers[bufferWriteIndex]).write();
             }
             bufferWriteIndex = len;
         }
-    }
-
-    final int gi() {
-        if (buffers == null || buffers.length == 0) {
-            return 0;
-        }
-        int len = buffers.length - 1;
-        WriteOnlyBuffer buffer = null;
-        if (null == buffers[len] || null == buffers[len].get()) {
-            buffer = (WriteOnlyBuffer) initBuffer(len);
-        } else {
-            buffer = (WriteOnlyBuffer) buffers[len].get();
-        }
-        return buffer.full() ? triggerWrite(len + 1) : len;
     }
 
     final int triggerWrite(int len) {
@@ -361,7 +404,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      */
     protected final void createBufferArray(int size) {
         this.blocks = size;
-        this.buffers = new WeakReference[size];
+        this.buffers = new Buffer[size];
     }
 
     private boolean inRange(int index) {
@@ -376,7 +419,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
     }
 
     private int createBufferArrayInRange(int index) {
-        WeakReference<Buffer>[] buffers = this.buffers;
+        Buffer[] buffers = this.buffers;
         createBufferArray(index + 1);
         if (buffers != null) {
             System.arraycopy(buffers, 0, this.buffers, 0, buffers.length);
@@ -384,22 +427,9 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
         return index;
     }
 
-    //读
-    protected int gi(long p) {
-        return (int) (p >> block_size_offset);
-    }
-
-    protected final int gp(long p) {
-        return (int) (p & single_block_len);
-    }
-
     protected final Buffer getBuffer(int index) {
         if (buffers[checkIndex(index)] != null) {
-            synchronized (buffers[index]) {
-                if (null != buffers[index].get()) {
-                    return buffers[index].get();
-                }
-            }
+            return buffers[index];
         }
         return initBuffer(index);
     }
@@ -413,10 +443,10 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
 
     private Buffer initBuffer(int index) {
         synchronized (this) {
-        if (buffers[index] == null || buffers[index].get() == null) {
-            buffers[index] = new WeakReference<Buffer>(createBuffer(index), (ReferenceQueue<? super Buffer>) CacheManager.getInstance().referenceQueue);
+            if (buffers[index] == null) {
+                buffers[index] = createBuffer(index);
             }
-        return buffers[index].get();
+            return buffers[index];
         }
     }
 
@@ -492,9 +522,9 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
     public long fileSize() {
         long size = 0;
         if (buffers != null) {
-            for (WeakReference<Buffer> buffer : buffers) {
-                if (null != buffer && null != buffer.get()) {
-                    size += buffer.get().getAllocateSize();
+            for (Buffer buffer : buffers) {
+                if (null != buffer) {
+                    size += buffer.getAllocateSize();
                 }
             }
         }

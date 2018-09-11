@@ -451,34 +451,26 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             if (bufferPrivilege == BufferPrivilege.WRITABLE || bufferPrivilege == BufferPrivilege.EDITABLE) {
                 throw new RuntimeException("Writing");
             }
-            if (ir(position)) {
+            if (position > -1 && position < buffer.maxSize) {
                 access = true;
                 return;
             }
             lc(position);
         }
 
-        private final boolean ir(int p) {
-            return p > -1 && p < buffer.maxSize;
-        }
-
         private final void lc(int p) {
             synchronized (buffer) {
                 if (buffer.load && buffer.address != 0) {
-                    if (ir(p)) {
+                    if (p > -1 && p < buffer.maxSize) {
                         return;
                     }
                     throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
                 } else {
                     buffer.load = false;
-                    ll(p);
+                    loadContent();
+                    check(p);
                 }
             }
-        }
-
-        private final void ll(int p) {
-            loadContent();
-            check(p);
         }
 
         private void allocateMemory(byte[] bytes, int off) {
@@ -593,10 +585,6 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
             afterStatusChange();
         }
 
-        protected final boolean ir(int p) {
-            return p > -1 && p < current_max_size;
-        }
-
         @Override
         public boolean full() {
             return maxPosition >= maxSize - 1;
@@ -705,10 +693,6 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                         }
                         bufferPrivilege = BufferPrivilege.CLEANABLE;
                         syncStatus = SyncStatus.FINISHED;
-//                        if (!clear) {
-//                            readBuffer = readOnlyBuffer();
-//                            reference.decrementWithoutWatch();
-//                        }
                     } catch (StreamCloseException e) {
                         flushed = false;
                         //stream close这种还是直接触发写把，否则force的时候如果有三次那么就会出现写不成功的bug
@@ -768,7 +752,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
         @Override
         protected void check(int p) {
-            if (ir(p)) {
+            if (p > -1 && p < current_max_size) {
                 access();
                 return;
             }
@@ -778,7 +762,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         private final void lc(int p) {
             synchronized (this) {
                 if (load) {
-                    if (ir(p)) {
+                    if (p > -1 && p < current_max_size) {
                         return;
                     }
                     throw new BufferIndexOutOfBoundsException(uri, p, maxSize);

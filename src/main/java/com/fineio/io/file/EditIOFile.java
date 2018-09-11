@@ -45,11 +45,11 @@ public final class EditIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
     protected void closeChild(boolean clear) {
         if (buffers != null) {
             for (int i = 0; i < buffers.length; i++) {
-                if (buffers[i] != null && null != buffers[i].get()) {
+                if (buffers[i] != null) {
                     if (clear) {
-                        ((EditBuffer) buffers[i].get()).forceAndClear();
+                        ((EditBuffer) buffers[i]).forceAndClear();
                     } else {
-                        ((EditBuffer) buffers[i].get()).force();
+                        ((EditBuffer) buffers[i]).force();
                     }
                     buffers[i] = null;
                 }

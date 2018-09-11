@@ -12,7 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -21,13 +20,12 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class CacheManager {
     private volatile static CacheManager instance;
-    public static final int MAX_AUTO_FREE_COUNT = 3;
 
     private ConcurrentHashMap<PoolMode, BufferPool> poolMap;
     private MemoryHandler memoryHandler;
     public ReferenceQueue<? extends Buffer> referenceQueue;
     private AtomicLong maxExistsBuffer;
-    private AtomicInteger limitCount = new AtomicInteger(0);
+    //    private AtomicInteger limitCount = new AtomicInteger(0);
     private MemoryHandler.GcCallBack callBack;
 
 
@@ -104,7 +102,7 @@ public class CacheManager {
                         break;
                     }
                 }
-                System.gc();
+//                System.gc();
                 return result;
             }
 
@@ -116,25 +114,22 @@ public class CacheManager {
                     List<AbstractBuffer> list = pool.pollAllCleanable();
                     if (!list.isEmpty()) {
                         for (AbstractBuffer buffer : list) {
-                            synchronized (buffer) {
-                                if (buffer.getBufferPrivilege() == BufferPrivilege.CLEANABLE) {
-                                    buffer.closeWithOutSync();
-                                    Reference<? extends Buffer> ref = null;
-                                    while (null != (ref = referenceQueue.poll())) {
-                                        synchronized (ref) {
-                                            ref.clear();
-                                            ref = null;
-                                        }
+                            if (buffer.getBufferPrivilege() == BufferPrivilege.CLEANABLE) {
+                                buffer.closeWithOutSync();
+                                Reference<? extends Buffer> ref = null;
+                                while (null != (ref = referenceQueue.poll())) {
+                                    synchronized (ref) {
+                                        ref.clear();
+                                        ref = null;
                                     }
-                                } else {
-                                    pool.registerBuffer(buffer);
                                 }
                             }
                         }
+                        System.gc();
                         break;
                     }
                 }
-                System.gc();
+//                System.gc();
             }
         };
     }
