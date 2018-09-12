@@ -437,7 +437,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
                     beforeStatusChange();
                     MemoryUtils.free(address);
                     afterStatusChange();
-                    manager.returnMemory(buffer, getBufferPrivilege(), false);
+                    manager.returnMemory(buffer, BufferPrivilege.READABLE, false);
                     exitPool();
 //                manager = null;
                 }
@@ -609,7 +609,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
 
         protected void returnMemoryIfNeed() {
             if (allocateSize != 0) {
-                manager.returnMemory(this, getBufferPrivilege(), false);
+                manager.returnMemory(this, BufferPrivilege.WRITABLE, false);
 
                 if (isDirect()) {
                     allocateSize = 0;
@@ -798,7 +798,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         protected void returnMemoryIfNeed() {
             if (buffer.isDirect()) {
                 if (allocateSize != 0) {
-                    manager.returnMemory(buffer, getBufferPrivilege(), false);
+                    manager.returnMemory(buffer, BufferPrivilege.EDITABLE, false);
                     allocateSize = 0;
                 }
             }
@@ -807,7 +807,7 @@ public abstract class AbstractBuffer<R extends ReadOnlyBuffer, W extends WriteOn
         @Override
         public void forceAndClear() {
             forceWrite(true);
-            manager.returnMemory(buffer, getBufferPrivilege(), false);
+            manager.returnMemory(buffer, BufferPrivilege.EDITABLE, false);
             allocateSize = 0;
             exitPool();
             manager = null;
