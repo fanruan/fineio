@@ -80,7 +80,7 @@ public final class SyncManager {
 
     private volatile AtomicInteger working_jobs = new AtomicInteger(0);
 
-    private ExecutorService executor = FineIOExecutors.newCachedExecutorService(SyncManager.class);
+    private ExecutorService executor = FineIOExecutors.newFixedThreadPool(threads, SyncManager.class);
 
     private volatile  JobContainer map = new JobContainer();
 
