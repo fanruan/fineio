@@ -3,6 +3,7 @@ package com.fineio.cache.pool;
 import com.fineio.cache.BufferPrivilege;
 import com.fineio.exception.FileCloseException;
 import com.fineio.io.AbstractBuffer;
+import com.fineio.thread.FineIOExecutors;
 
 import java.lang.ref.ReferenceQueue;
 import java.net.URI;
@@ -10,8 +11,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author yee
@@ -26,16 +28,25 @@ public class BufferPool<Buffer extends com.fineio.io.Buffer> {
     private volatile long timeout = DEFAULT_TIMER_TIME;
     private PooledBufferMap<Buffer> map;
     private PoolMode mode;
-    private Timer timer;
-    private Timer activeTimer;
+
+    private ScheduledExecutorService timeoutService;
+    private ScheduledExecutorService activeService;
 
     public BufferPool(PoolMode mode, ReferenceQueue<Buffer> referenceQueue) {
         this.mode = mode;
-        timer = new Timer("FineIOCleanTimer_" + mode.name());
-        timer.schedule(createTimeoutTask(), timeout, timeout);
-        activeTimer = new Timer("FineIOBufferActiveTimer_" + mode.name());
-        activeTimer.schedule(createBufferActiveTask(), timeout / ACTIVE_PERCENT, timeout / ACTIVE_PERCENT);
+        initTimeoutService();
+        initActiveService();
         map = new PooledBufferMap<Buffer>(referenceQueue);
+    }
+
+    private void initTimeoutService() {
+        timeoutService = FineIOExecutors.newScheduledExecutorService(1, "FineIOCleanTimer-" + mode.name());
+        timeoutService.scheduleAtFixedRate(createTimeoutTask(), timeout, timeout, TimeUnit.MILLISECONDS);
+    }
+
+    private void initActiveService() {
+        activeService = FineIOExecutors.newScheduledExecutorService(1, "FineIOBufferActiveTimer_" + mode.name());
+        activeService.scheduleAtFixedRate(createBufferActiveTask(), timeout / ACTIVE_PERCENT, timeout / ACTIVE_PERCENT, TimeUnit.MILLISECONDS);
     }
 
     public void registerBuffer(Buffer buffer) {
@@ -111,16 +122,14 @@ public class BufferPool<Buffer extends com.fineio.io.Buffer> {
      */
     public synchronized void resetTimer(long t) {
         timeout = t;
-        if (timer != null) {
-            timer.cancel();
+        if (timeoutService != null) {
+            timeoutService.shutdown();
         }
-        timer = new Timer("FineIOCleanTimer_" + mode.name());
-        timer.schedule(createTimeoutTask(), timeout, timeout);
-        if (activeTimer != null) {
-            activeTimer.cancel();
+        initTimeoutService();
+        if (activeService != null) {
+            activeService.shutdown();
         }
-        activeTimer = new Timer("FineIOBufferActiveTimer_" + mode.name());
-        activeTimer.schedule(createBufferActiveTask(), timeout / ACTIVE_PERCENT, timeout / ACTIVE_PERCENT);
+        initActiveService();
     }
 
     public void remove(Buffer buffer) {
@@ -142,11 +151,11 @@ public class BufferPool<Buffer extends com.fineio.io.Buffer> {
     }
 
     public void clear() {
-        if (null != timer) {
-            timer.cancel();
+        if (null != timeoutService) {
+            timeoutService.shutdown();
         }
-        if (null != activeTimer) {
-            activeTimer.cancel();
+        if (null != activeService) {
+            activeService.shutdown();
         }
         Iterator<Buffer> iterator = map.iterator();
         while (iterator.hasNext()) {
