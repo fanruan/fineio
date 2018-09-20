@@ -25,6 +25,10 @@ public class FineIOExecutors {
         return Executors.newCachedThreadPool(new FineIOThreadFactory(clazz));
     }
 
+    public static ExecutorService newSingleThreadExecutor(String prefix) {
+        return Executors.newSingleThreadExecutor(new FineIOThreadFactory(prefix));
+    }
+
     public static ExecutorService newSingleThreadExecutor(Class clazz) {
         return Executors.newSingleThreadExecutor(new FineIOThreadFactory(clazz));
     }
