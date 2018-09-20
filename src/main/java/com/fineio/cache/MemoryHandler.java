@@ -126,6 +126,8 @@ public class MemoryHandler {
             case READABLE:
             case CLEANABLE:
                 read_size.add(size);
+                break;
+            default:
         }
     }
 
@@ -310,11 +312,11 @@ public class MemoryHandler {
          */
         public long allocateRead(long size) {
             try {
-                read_wait_count.addAndGet(1);
+                read_wait_count.incrementAndGet();
                 long address = allocateRW(read_size, new NewAllocator(size));
                 return address;
             } finally {
-                read_wait_count.addAndGet(-1);
+                read_wait_count.decrementAndGet();
             }
         }
 
@@ -328,11 +330,11 @@ public class MemoryHandler {
          */
         public long allocateEdit(long address, long oldSize, long newSize) {
             try {
-                read_wait_count.addAndGet(1);
+                read_wait_count.incrementAndGet();
                 address = allocateRW(read_size, new ReAllocator(address, oldSize, newSize));
                 return address;
             } finally {
-                read_wait_count.addAndGet(-1);
+                read_wait_count.decrementAndGet();
             }
         }
 
@@ -346,11 +348,11 @@ public class MemoryHandler {
          */
         public long allocateWrite(long address, long oldSize, long newSize) {
             try {
-                write_wait_count.addAndGet(1);
+                write_wait_count.incrementAndGet();
                 address = allocateRW(write_size, new ReAllocator(address, oldSize, newSize));
                 return address;
             } finally {
-                write_wait_count.addAndGet(-1);
+                write_wait_count.decrementAndGet();
             }
         }
 
