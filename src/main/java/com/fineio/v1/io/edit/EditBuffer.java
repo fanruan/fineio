@@ -1,7 +1,6 @@
 package com.fineio.v1.io.edit;
 
 import com.fineio.base.Maths;
-import com.fineio.cache.BufferPrivilege;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
 import com.fineio.io.file.FileBlock;
@@ -10,6 +9,7 @@ import com.fineio.storage.Connector;
 import com.fineio.v1.cache.CacheManager;
 import com.fineio.v1.io.Buffer;
 import com.fineio.v1.io.write.WriteBuffer;
+import com.fineio.v2.cache.BufferPrivilege;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

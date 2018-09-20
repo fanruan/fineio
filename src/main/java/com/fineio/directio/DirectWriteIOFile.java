@@ -1,9 +1,9 @@
 package com.fineio.directio;
 
-import com.fineio.io.Buffer;
-import com.fineio.io.FileModel;
-import com.fineio.io.write.WriteOnlyBuffer;
 import com.fineio.storage.Connector;
+import com.fineio.v2.io.Buffer;
+import com.fineio.v2.io.FileModel;
+import com.fineio.v2.io.write.WriteOnlyBuffer;
 
 import java.net.URI;
 

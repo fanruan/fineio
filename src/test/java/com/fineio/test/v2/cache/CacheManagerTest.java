@@ -1,13 +1,13 @@
 package com.fineio.test.v2.cache;
 
-import com.fineio.FineIO;
-import com.fineio.cache.BufferPrivilege;
-import com.fineio.cache.CacheManager;
 import com.fineio.exception.MemorySetException;
-import com.fineio.io.write.WriteOnlyBuffer;
 import com.fineio.memory.MemoryConf;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.test.v2.io.MemoryLeakTest;
+import com.fineio.v2.FineIO;
+import com.fineio.v2.cache.BufferPrivilege;
+import com.fineio.v2.cache.CacheManager;
+import com.fineio.v2.io.write.WriteOnlyBuffer;
 import junit.framework.TestCase;
 
 import java.lang.reflect.Field;

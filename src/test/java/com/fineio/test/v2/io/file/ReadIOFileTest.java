@@ -2,14 +2,14 @@ package com.fineio.test.v2.io.file;
 
 import com.fineio.base.Bits;
 import com.fineio.exception.BlockNotFoundException;
-import com.fineio.io.FileModel;
-import com.fineio.io.IntBuffer;
-import com.fineio.io.LongBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.FileConstants;
-import com.fineio.io.file.ReadIOFile;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
+import com.fineio.v2.io.FileModel;
+import com.fineio.v2.io.IntBuffer;
+import com.fineio.v2.io.LongBuffer;
+import com.fineio.v2.io.file.ReadIOFile;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.easymock.IMocksControl;

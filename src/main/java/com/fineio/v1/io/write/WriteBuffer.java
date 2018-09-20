@@ -1,6 +1,5 @@
 package com.fineio.v1.io.write;
 
-import com.fineio.cache.BufferPrivilege;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.StreamCloseException;
 import com.fineio.io.base.Job;
@@ -12,6 +11,7 @@ import com.fineio.storage.Connector;
 import com.fineio.v1.cache.CacheManager;
 import com.fineio.v1.io.Buffer;
 import com.fineio.v1.io.base.AbstractBuffer;
+import com.fineio.v2.cache.BufferPrivilege;
 
 import java.io.IOException;
 import java.net.URI;

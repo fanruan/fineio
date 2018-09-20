@@ -1,11 +1,11 @@
 package com.fineio.test.v2.directio;
 
-import com.fineio.FineIO;
 import com.fineio.directio.DirectIOFile;
-import com.fineio.io.IntBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.test.v2.io.MemoryLeakTest;
 import com.fineio.test.v2.io.file.WriteIOFileTest;
+import com.fineio.v2.FineIO;
+import com.fineio.v2.io.IntBuffer;
 import junit.framework.TestCase;
 
 import java.io.IOException;

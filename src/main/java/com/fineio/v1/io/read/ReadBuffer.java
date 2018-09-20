@@ -1,6 +1,5 @@
 package com.fineio.v1.io.read;
 
-import com.fineio.cache.BufferPrivilege;
 import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
@@ -11,6 +10,7 @@ import com.fineio.v1.cache.CacheManager;
 import com.fineio.v1.io.Buffer;
 import com.fineio.v1.io.base.AbstractBuffer;
 import com.fineio.v1.io.file.ReadIOFile;
+import com.fineio.v2.cache.BufferPrivilege;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

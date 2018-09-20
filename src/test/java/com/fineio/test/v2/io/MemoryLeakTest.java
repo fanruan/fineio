@@ -1,11 +1,11 @@
 package com.fineio.test.v2.io;
 
-import com.fineio.FineIO;
-import com.fineio.cache.CacheManager;
-import com.fineio.io.FloatBuffer;
 import com.fineio.io.file.FileBlock;
-import com.fineio.io.file.IOFile;
 import com.fineio.storage.Connector;
+import com.fineio.v2.FineIO;
+import com.fineio.v2.cache.CacheManager;
+import com.fineio.v2.io.FloatBuffer;
+import com.fineio.v2.io.file.IOFile;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;

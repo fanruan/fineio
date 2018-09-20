@@ -1,6 +1,6 @@
 package com.fineio.v1.io;
 
-import com.fineio.cache.BufferPrivilege;
+import com.fineio.v2.cache.BufferPrivilege;
 
 import java.net.URI;
 
