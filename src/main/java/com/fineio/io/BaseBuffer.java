@@ -251,6 +251,7 @@ public abstract class BaseBuffer implements Buffer {
                 }
                 level = Level.READ;
                 break;
+            case CLEAN:
             case READ:
                 if (null != memoryObject) {
                     address = memoryObject.getAddress();
@@ -380,12 +381,22 @@ public abstract class BaseBuffer implements Buffer {
     }
 
     public synchronized void asWrite() {
-        if (level == Level.WRITE) {
-            return;
+        switch (level) {
+            case READ:
+            case CLEAN:
+                flip();
+                break;
+            case WRITE:
+                break;
+            default:
+                if (!direct) {
+                    writeMaxPosition = 1 << maxOffset;
+                } else {
+                    writeMaxPosition = Integer.MAX_VALUE;
+                    maxOffset = 31;
+                }
         }
-        if (level == Level.WRITE) {
-            return;
-        }
+
         level = Level.WRITE;
         if (!direct) {
             writeMaxPosition = 1 << maxOffset;
