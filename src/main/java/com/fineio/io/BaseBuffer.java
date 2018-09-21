@@ -136,7 +136,6 @@ public abstract class BaseBuffer implements Buffer {
 
     protected abstract int getOffset();
 
-    synchronized
     public final void checkRead0() {
         try {
             if (-1 < writeCurrentPosition && address != 0) {
@@ -149,6 +148,10 @@ public abstract class BaseBuffer implements Buffer {
     }
 
     protected final void checkRead(int p) {
+        if (!load) {
+            loadContent();
+            listener.update(this);
+        }
         if (p < readMaxPosition && p > -1) {
             if (!access) {
                 access = true;
@@ -198,7 +201,7 @@ public abstract class BaseBuffer implements Buffer {
             throw new RuntimeException(e);
         }
         status.incrementAndGet();
-        MemoryObject object = allocator.allocate();
+        MemoryObject object = MemoryManager.INSTANCE.allocate(allocator);
         this.address = object.getAddress();
         this.allocateSize = newLen;
         status.incrementAndGet();
@@ -210,30 +213,32 @@ public abstract class BaseBuffer implements Buffer {
     }
 
     protected void loadContent() {
-        level = Level.READ;
-        if (load) {
-            return;
-        }
-        if (close) {
-            close = false;
-        }
-        Allocator allocator;
-        try {
-            if (!direct) {
-                allocator = BaseMemoryAllocator.Builder.BLOCK.build(
-                        bufferKey.getConnector().read(bufferKey.getBlock()), maxLength);
-            } else {
-                allocator = BaseMemoryAllocator.Builder.SMALL.build(
-                        bufferKey.getConnector().read(bufferKey.getBlock()));
+        synchronized (this) {
+            level = Level.READ;
+            if (load) {
+                return;
             }
-        } catch (Exception e) {
-            throw new BufferConstructException(e);
+            if (close) {
+                close = false;
+            }
+            Allocator allocator;
+            try {
+                if (!direct) {
+                    allocator = BaseMemoryAllocator.Builder.BLOCK.build(
+                            bufferKey.getConnector().read(bufferKey.getBlock()), maxLength);
+                } else {
+                    allocator = BaseMemoryAllocator.Builder.SMALL.build(
+                            bufferKey.getConnector().read(bufferKey.getBlock()));
+                }
+            } catch (Exception e) {
+                throw new BufferConstructException(e);
+            }
+            memoryObject = MemoryManager.INSTANCE.allocate(allocator);
+            this.address = memoryObject.getAddress();
+            this.allocateSize = memoryObject.getAllocateSize();
+            this.load = true;
+            this.readMaxPosition = (int) (this.allocateSize >> getOffset());
         }
-        memoryObject = allocator.allocate();
-        this.address = memoryObject.getAddress();
-        this.allocateSize = memoryObject.getAllocateSize();
-        this.load = true;
-        this.readMaxPosition = (int) (this.allocateSize >> getOffset());
     }
 
     @Override
@@ -404,5 +409,14 @@ public abstract class BaseBuffer implements Buffer {
             writeMaxPosition = Integer.MAX_VALUE;
             maxOffset = 31;
         }
+    }
+
+    @Override
+    public void unLoad() {
+        level = Level.INITIAL;
+        load = false;
+        allocateSize = 0;
+        readMaxPosition = 0;
+        address = 0;
     }
 }

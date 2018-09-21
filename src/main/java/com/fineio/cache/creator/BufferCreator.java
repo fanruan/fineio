@@ -13,6 +13,7 @@ import com.fineio.io.ShortBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.memory.manager.deallocator.DeAllocator;
 import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
+import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.memory.manager.obj.impl.AllocateObject;
 import com.fineio.storage.Connector;
 import com.fineio.thread.FineIOExecutors;
@@ -43,7 +44,14 @@ public abstract class BufferCreator<B extends Buffer> {
             @Override
             public void remove(Buffer buffer) {
                 bufferMap.remove(buffer.getUri(), true);
-                DE_ALLOCATOR.deAllocate(new AllocateObject(buffer.getAddress(), buffer.getAllocateSize()));
+                MemoryObject object = new AllocateObject(buffer.getAddress(), buffer.getAllocateSize());
+                buffer.unLoad();
+                DE_ALLOCATOR.deAllocate(object);
+            }
+
+            @Override
+            public void update(Buffer buffer) {
+                bufferMap.put(buffer.getUri(), (B) buffer);
             }
         };
     }

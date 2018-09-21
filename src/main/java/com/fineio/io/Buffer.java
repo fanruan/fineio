@@ -32,7 +32,11 @@ public interface Buffer {
 
     void resetAccess();
 
+    void unLoad();
+
     interface Listener {
         void remove(Buffer buffer);
+
+        void update(Buffer buffer);
     }
 }

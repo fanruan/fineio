@@ -11,8 +11,10 @@ import sun.misc.VM;
 
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -40,7 +42,6 @@ public enum MemoryManager {
      * 扩容上限
      */
     private final long memorySizeUpLimit;
-    private final Runnable gcRunnable;
     /**
      * 读内存空间
      */
@@ -63,6 +64,7 @@ public enum MemoryManager {
     private volatile AtomicInteger writeWaitCount = new AtomicInteger(0);
     private Lock memoryLock = new ReentrantLock();
     private ExecutorService gcThread = FineIOExecutors.newSingleThreadExecutor("io-gc-thread");
+    private final LinkedBlockingQueue<CleanTask> taskQueue = new LinkedBlockingQueue<CleanTask>();
 
     private Cleaner cleaner;
 
@@ -72,26 +74,24 @@ public enum MemoryManager {
         currentMaxSize = Math.min(VM.maxDirectMemory(), getMaxSize());
         releaseLimit = (long) (currentMaxSize * DEFAULT_RELEASE_RATE);
         memorySizeUpLimit = (long) (getMaxSize() * DEFAULT_RELEASE_RATE);
-        gcRunnable = createGCRunnable();
-    }
-
-    private final Runnable createGCRunnable() {
-        return new Runnable() {
+        gcThread.execute(new Runnable() {
             @Override
             public void run() {
-                if (null != cleaner) {
-                    int tryTime = 0;
-                    while (!cleaner.clean()) {
-                        if (++tryTime >= TRY_CLEAN_TIME) {
-                            currentMaxSize = (long) Math.min(currentMaxSize * DEFAULT_INCREMENT_RATE, memorySizeUpLimit);
-                            doMoreNotifyCheck();
-                            break;
+                while (true) {
+                    try {
+                        CleanTask task = taskQueue.take();
+                        if (readWaitCount.get() + writeWaitCount.get() > 0) {
+                            if (task.getCheckSize() >= releaseLimit) {
+                                task.run();
+                            }
                         }
+                        LockSupport.parkNanos(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                    System.gc();
                 }
             }
-        };
+        });
     }
 
     public final void updateRead(long size) {
@@ -119,20 +119,20 @@ public enum MemoryManager {
     }
 
     public final MemoryObject allocate(Allocator allocator) {
-        memoryLock.lock();
-        //判断条件加上锁把
         return checkMemory(allocator, checkGC(allocator));
     }
 
     private final long checkGC(Allocator allocator) {
         long checkSize = readSize.get() + writeSize.get() + allocator.getAllocateSize();
         if (checkSize >= releaseLimit) {
-            gcThread.submit(gcRunnable);
+            taskQueue.offer(new CleanTask(allocator.getAllocateSize()));
         }
         return checkSize;
     }
 
     private final MemoryObject checkMemory(Allocator allocator, long checkSize) {
+        memoryLock.lock();
+        //判断条件加上锁把
         if (checkSize < currentMaxSize) {
             try {
                 return allocator.allocate();
@@ -142,23 +142,27 @@ public enum MemoryManager {
             }
         } else {
             memoryLock.unlock();
-            gcThread.submit(gcRunnable);
+            taskQueue.offer(new CleanTask(allocator.getAllocateSize()));
             if (allocator instanceof ReadAllocator) {
+                readWaitCount.incrementAndGet();
                 synchronized (readSize) {
                     try {
                         readSize.wait();
                     } catch (InterruptedException e) {
                     }
                 }
+                readWaitCount.decrementAndGet();
             } else {
+                writeWaitCount.incrementAndGet();
                 synchronized (writeSize) {
                     try {
                         writeSize.wait();
                     } catch (InterruptedException e) {
                     }
                 }
+                writeWaitCount.decrementAndGet();
             }
-            return checkMemory(allocator, checkSize);
+            return checkMemory(allocator, readSize.get() + writeSize.get() + allocator.getAllocateSize());
         }
     }
 
@@ -280,5 +284,33 @@ public enum MemoryManager {
 
     public interface Cleaner {
         boolean clean();
+    }
+
+    private class CleanTask implements Runnable {
+
+        private long allocateSize;
+
+        public CleanTask(long allocateSize) {
+            this.allocateSize = allocateSize;
+        }
+
+        @Override
+        public void run() {
+            if (null != cleaner) {
+                int tryTime = 0;
+                while (!cleaner.clean()) {
+                    if (++tryTime >= TRY_CLEAN_TIME) {
+                        currentMaxSize = (long) Math.min(currentMaxSize * DEFAULT_INCREMENT_RATE, memorySizeUpLimit);
+                        doMoreNotifyCheck();
+                        break;
+                    }
+                }
+                System.gc();
+            }
+        }
+
+        public long getCheckSize() {
+            return readSize.get() + writeSize.get() + allocateSize;
+        }
     }
 }
