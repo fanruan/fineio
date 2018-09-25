@@ -12,6 +12,8 @@ import sun.misc.VM;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.LockSupport;
@@ -32,7 +34,7 @@ public enum MemoryManager {
     private static final double DEFAULT_RELEASE_RATE = 0.8D;
     private static final int LEVEL_LINE = 2;
     private static final int MIN_WRITE_OFFSET = 3;
-    private static final int TRY_CLEAN_TIME = 10;
+    private static final int TRY_CLEAN_TIME = 100;
     private static final double DEFAULT_INCREMENT_RATE = 1.1D;
     /**
      * 释放内存上限
@@ -64,6 +66,7 @@ public enum MemoryManager {
     private volatile AtomicInteger writeWaitCount = new AtomicInteger(0);
     private Lock memoryLock = new ReentrantLock();
     private ExecutorService gcThread = FineIOExecutors.newSingleThreadExecutor("io-gc-thread");
+    private ScheduledExecutorService gcTrigger = FineIOExecutors.newScheduledExecutorService(1, "io-gc-trigger");
     private final LinkedBlockingQueue<CleanTask> taskQueue = new LinkedBlockingQueue<CleanTask>();
 
     private Cleaner cleaner;
@@ -92,6 +95,7 @@ public enum MemoryManager {
                 }
             }
         });
+        gcTrigger.scheduleAtFixedRate(new CleanOneTask(), 30, 30, TimeUnit.SECONDS);
     }
 
     public final void updateRead(long size) {
@@ -284,6 +288,10 @@ public enum MemoryManager {
 
     public interface Cleaner {
         boolean clean();
+
+        boolean cleanAllCleanable();
+
+        void triggerWrite();
     }
 
     private class CleanTask implements Runnable {
@@ -298,19 +306,47 @@ public enum MemoryManager {
         public void run() {
             if (null != cleaner) {
                 int tryTime = 0;
+                boolean triggerGC = true;
                 while (!cleaner.clean()) {
-                    if (++tryTime >= TRY_CLEAN_TIME) {
-                        currentMaxSize = (long) Math.min(currentMaxSize * DEFAULT_INCREMENT_RATE, memorySizeUpLimit);
-                        doMoreNotifyCheck();
+                    if (++tryTime >= TRY_CLEAN_TIME / 2) {
+                        cleaner.triggerWrite();
+                        triggerGC = cleaner.cleanAllCleanable();
+                        if (triggerGC) {
+                            break;
+                        }
+                    }
+                    if (tryTime >= TRY_CLEAN_TIME) {
+                        if (currentMaxSize < memorySizeUpLimit) {
+                            currentMaxSize = (long) Math.min(currentMaxSize * DEFAULT_INCREMENT_RATE, memorySizeUpLimit);
+                            triggerGC = false;
+                            doMoreNotifyCheck();
+                        }
                         break;
                     }
+                    LockSupport.parkNanos(1000);
                 }
-                System.gc();
+                if (triggerGC) {
+                    System.gc();
+                }
             }
         }
 
         public long getCheckSize() {
             return readSize.get() + writeSize.get() + allocateSize;
+        }
+    }
+
+    private class CleanOneTask implements Runnable {
+
+        @Override
+        public void run() {
+            if (null != cleaner) {
+                int i = 0;
+                do {
+                    cleaner.clean();
+                } while (++i < 10);
+                System.gc();
+            }
         }
     }
 }

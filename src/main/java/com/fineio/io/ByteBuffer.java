@@ -21,7 +21,7 @@ public class ByteBuffer extends BaseBuffer {
 
     public byte get(int pos) {
         checkRead(pos);
-        return MemoryUtils.getByte(address, pos);
+        return MemoryUtils.getByte(memoryObject.getAddress(), pos);
     }
 
     public void put(byte value) {

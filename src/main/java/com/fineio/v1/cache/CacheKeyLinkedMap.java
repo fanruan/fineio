@@ -124,7 +124,7 @@ public class CacheKeyLinkedMap<K, T> {
      */
     public void put(K k, T t) {
         synchronized (this) {
-            CacheObject<T> co = indexMap.get(t);
+            CacheObject<T> co = indexMap.get(k);
             if (co == null) {
                 co = new CacheObject<T>(t, referenceQueue);
                 indexMap.put(k, co);

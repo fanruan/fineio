@@ -21,7 +21,7 @@ public class CharBuffer extends BaseBuffer {
 
     public char get(int pos) {
         checkRead(pos);
-        return MemoryUtils.getChar(address, pos);
+        return MemoryUtils.getChar(memoryObject.getAddress(), pos);
     }
 
     public void put(char value) {

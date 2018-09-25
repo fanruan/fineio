@@ -2,6 +2,7 @@ package com.fineio.io;
 
 
 import com.fineio.cache.SyncStatus;
+import com.fineio.memory.manager.obj.MemoryObject;
 
 import java.net.URI;
 
@@ -33,6 +34,12 @@ public interface Buffer {
     void resetAccess();
 
     void unLoad();
+
+    MemoryObject getFreeObject();
+
+    boolean full();
+
+    void force();
 
     interface Listener {
         void remove(Buffer buffer);

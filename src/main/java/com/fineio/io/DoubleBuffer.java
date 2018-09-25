@@ -21,7 +21,7 @@ public class DoubleBuffer extends BaseBuffer {
 
     public double get(int pos) {
         checkRead(pos);
-        return MemoryUtils.getDouble(address, pos);
+        return MemoryUtils.getDouble(memoryObject.getAddress(), pos);
     }
 
     public void put(double value) {

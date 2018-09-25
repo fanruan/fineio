@@ -21,7 +21,7 @@ public class ShortBuffer extends BaseBuffer {
 
     public short get(int pos) {
         checkRead(pos);
-        return MemoryUtils.getShort(address, pos);
+        return MemoryUtils.getShort(memoryObject.getAddress(), pos);
     }
 
     public void put(short value) {

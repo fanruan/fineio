@@ -14,7 +14,7 @@ import com.fineio.io.file.FileBlock;
 import com.fineio.memory.manager.deallocator.DeAllocator;
 import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.manager.MemoryManager;
-import com.fineio.memory.manager.obj.impl.AllocateObject;
+import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
@@ -54,10 +54,36 @@ public final class CacheManager {
                 return result;
             }
 
+            @Override
+            public boolean cleanAllCleanable() {
+                boolean result = false;
+                result |= BYTE_CREATOR.cleanableBuffers();
+                result |= INT_CREATOR.cleanableBuffers();
+                result |= LONG_CREATOR.cleanableBuffers();
+                result |= DOUBLE_CREATOR.cleanableBuffers();
+                result |= SHORT_CREATOR.cleanableBuffers();
+                result |= CHAR_CREATOR.cleanableBuffers();
+                result |= FLOAT_CREATOR.cleanableBuffers();
+                return result;
+            }
+
+            @Override
+            public void triggerWrite() {
+                BYTE_CREATOR.triggerWrite();
+                INT_CREATOR.triggerWrite();
+                LONG_CREATOR.triggerWrite();
+                DOUBLE_CREATOR.triggerWrite();
+                SHORT_CREATOR.triggerWrite();
+                CHAR_CREATOR.triggerWrite();
+                FLOAT_CREATOR.triggerWrite();
+            }
+
             private boolean clean(BufferCreator creator) {
                 Buffer buffer = creator.poll();
                 if (null != buffer) {
-                    deAllocator.deAllocate(new AllocateObject(buffer.getAddress(), buffer.getAllocateSize()));
+                    MemoryObject obj = buffer.getFreeObject();
+                    deAllocator.deAllocate(obj);
+                    buffer.unLoad();
                     return true;
                 }
                 return false;

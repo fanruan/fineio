@@ -21,7 +21,7 @@ public class FloatBuffer extends BaseBuffer {
 
     public float get(int pos) {
         checkRead(pos);
-        return MemoryUtils.getByte(address, pos);
+        return MemoryUtils.getByte(memoryObject.getAddress(), pos);
     }
 
     public void put(float value) {

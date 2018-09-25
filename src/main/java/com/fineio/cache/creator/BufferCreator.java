@@ -8,19 +8,23 @@ import com.fineio.io.CharBuffer;
 import com.fineio.io.DoubleBuffer;
 import com.fineio.io.FloatBuffer;
 import com.fineio.io.IntBuffer;
+import com.fineio.io.Level;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.ShortBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.memory.manager.deallocator.DeAllocator;
 import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
-import com.fineio.memory.manager.obj.impl.AllocateObject;
 import com.fineio.storage.Connector;
 import com.fineio.thread.FineIOExecutors;
-import com.fineio.v1.cache.CacheKeyLinkedMap;
+import com.fineio.v1.cache.CacheLinkedMap;
 
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
 import java.net.URI;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -34,26 +38,62 @@ public abstract class BufferCreator<B extends Buffer> {
     protected final ScheduledExecutorService activeService = FineIOExecutors.newScheduledExecutorService(1, "active-thread");
     protected final ScheduledExecutorService timeoutService = FineIOExecutors.newScheduledExecutorService(1, "timeout-thread");
     protected Buffer.Listener listener;
-    private CacheKeyLinkedMap<URI, B> bufferMap;
+    protected final ReferenceQueue<B> bufferReferenceQueue;
+    private CacheLinkedMap<B> bufferMap;
+    private Map<URI, B> keyMap = new ConcurrentHashMap<URI, B>();
 
     private BufferCreator() {
-        bufferMap = new CacheKeyLinkedMap<URI, B>();
+        bufferReferenceQueue = new ReferenceQueue<B>();
+        bufferMap = new CacheLinkedMap<B>(bufferReferenceQueue);
         activeService.scheduleWithFixedDelay(createActiveTask(), TIMEOUT / 2, TIMEOUT / 2, TimeUnit.MILLISECONDS);
         timeoutService.scheduleWithFixedDelay(createTimeoutTask(), TIMEOUT, TIMEOUT, TimeUnit.MILLISECONDS);
         listener = new Buffer.Listener() {
             @Override
             public void remove(Buffer buffer) {
-                bufferMap.remove(buffer.getUri(), true);
-                MemoryObject object = new AllocateObject(buffer.getAddress(), buffer.getAllocateSize());
-                buffer.unLoad();
+                bufferMap.remove((B) buffer, true);
+                MemoryObject object = buffer.getFreeObject();
                 DE_ALLOCATOR.deAllocate(object);
+                buffer.unLoad();
+                Reference<? extends B> ref = null;
+                while (null != (ref = bufferReferenceQueue.poll())) {
+                    synchronized (ref) {
+                        ref.clear();
+                        ref = null;
+                    }
+                }
             }
 
             @Override
             public void update(Buffer buffer) {
-                bufferMap.put(buffer.getUri(), (B) buffer);
+                bufferMap.put((B) buffer);
             }
         };
+    }
+
+    public final void triggerWrite() {
+        Iterator<B> iterator = bufferMap.iterator();
+        while (iterator.hasNext()) {
+            B buffer = iterator.next();
+            if (buffer.full()) {
+                buffer.force();
+            }
+        }
+    }
+
+    public final boolean cleanableBuffers() {
+        boolean result = false;
+        Iterator<B> iterator = bufferMap.iterator();
+        while (iterator.hasNext()) {
+            B buffer = iterator.next();
+            if (buffer.getLevel() == Level.CLEAN) {
+                bufferMap.remove(buffer, true);
+                keyMap.remove(buffer.getUri());
+                DE_ALLOCATOR.deAllocate(buffer.getFreeObject());
+                buffer.unLoad();
+                result = true;
+            }
+        }
+        return result;
     }
 
     private final Runnable createActiveTask() {
@@ -69,18 +109,18 @@ public abstract class BufferCreator<B extends Buffer> {
             }
 
             private void resetAccess() {
-                Iterator<URI> iterator = bufferMap.iterator();
+                Iterator<B> iterator = bufferMap.iterator();
                 while (iterator.hasNext()) {
-                    bufferMap.get(iterator.next(), false).resentAccess();
+                    iterator.next().resetAccess();
                 }
             }
 
             private void update() {
-                Iterator<URI> iterator = bufferMap.iterator();
+                Iterator<B> iterator = bufferMap.iterator();
                 while (iterator.hasNext()) {
-                    URI key = iterator.next();
-                    if (bufferMap.get(key, false).resentAccess()) {
-                        bufferMap.update(key);
+                    B buffer = iterator.next();
+                    if (buffer.resentAccess()) {
+                        bufferMap.update(buffer);
                     }
                 }
             }
@@ -91,14 +131,13 @@ public abstract class BufferCreator<B extends Buffer> {
         return new Runnable() {
             @Override
             public void run() {
-                Iterator<URI> iterator = bufferMap.iterator();
+                Iterator<B> iterator = bufferMap.iterator();
                 while (iterator.hasNext()) {
-                    URI key = iterator.next();
-                    if (bufferMap.getIdle(key) >= TIMEOUT) {
-                        B buffer = bufferMap.get(key, false);
+                    B buffer = iterator.next();
+                    if (bufferMap.getIdle(buffer) >= TIMEOUT) {
                         switch (buffer.getLevel()) {
                             case WRITE:
-                                bufferMap.update(key);
+                                bufferMap.update(buffer);
                                 break;
                             case CLEAN:
                                 clearBuffer(buffer);
@@ -109,65 +148,74 @@ public abstract class BufferCreator<B extends Buffer> {
                                 }
                             default:
                         }
+                        Reference<? extends B> ref = null;
+                        while (null != (ref = bufferReferenceQueue.poll())) {
+                            synchronized (ref) {
+                                ref.clear();
+                                ref = null;
+                            }
+                        }
                     }
                 }
             }
 
             private void clearBuffer(Buffer buffer) {
-                bufferMap.remove(buffer.getUri(), true);
-                DE_ALLOCATOR.deAllocate(new AllocateObject(buffer.getAddress(), buffer.getAllocateSize()));
+                bufferMap.remove((B) buffer, true);
+                DE_ALLOCATOR.deAllocate(buffer.getFreeObject());
+                buffer.unLoad();
             }
         };
     }
 
     public B createBuffer(Connector connector, FileBlock block, int maxOffset) {
-        B buffer = bufferMap.get(block.getBlockURI(), true);
-        if (null == buffer) {
-            buffer = create(connector, block, maxOffset);
-            bufferMap.put(block.getBlockURI(), buffer);
+        synchronized (this) {
+            B buffer = keyMap.get(block.getBlockURI());
+            if (null == buffer) {
+                buffer = create(connector, block, maxOffset);
+            }
+            bufferMap.put(buffer);
+            return buffer;
         }
-        return buffer;
 //        return create(connector, block, maxOffset);
     }
 
     protected abstract B create(Connector connector, FileBlock block, int maxOffset);
 
     public B createBuffer(Connector connector, URI uri) {
-        B buffer = bufferMap.get(uri, true);
-        if (null == buffer) {
-            buffer = create(connector, uri);
-            bufferMap.put(uri, buffer);
+        synchronized (this) {
+            B buffer = keyMap.get(uri);
+            if (null == buffer) {
+                buffer = create(connector, uri);
+            }
+            bufferMap.put(buffer);
+            return buffer;
         }
-        return buffer;
     }
 
     protected abstract B create(Connector connector, URI uri);
 
     public B poll() {
-        int size = bufferMap.size();
-        for (int i = 0; i < size; i++) {
-            B buffer = bufferMap.poll();
-            if (null == buffer) {
-                return null;
-            }
-            switch (buffer.getLevel()) {
-                case READ:
-                    if (buffer.getSyncStatus() == SyncStatus.UNSUPPORTED) {
-                        return buffer;
-                    } else {
-                        bufferMap.put(buffer.getUri(), buffer);
-                    }
-                    break;
-                case CLEAN:
-                    return buffer;
-                case WRITE:
-                    bufferMap.put(buffer.getUri(), buffer);
-                    break;
-                default:
-                    break;
-            }
+        B buffer = bufferMap.peek();
+        if (null == buffer) {
+            return null;
         }
-        return null;
+        switch (buffer.getLevel()) {
+            case READ:
+                if (buffer.getSyncStatus() == SyncStatus.UNSUPPORTED) {
+                    keyMap.remove(buffer.getUri());
+                    return bufferMap.poll();
+                } else {
+                    bufferMap.update(buffer);
+                }
+                return null;
+            case CLEAN:
+                keyMap.remove(buffer.getUri());
+                return bufferMap.poll();
+            default:
+                bufferMap.update(buffer);
+                return null;
+
+        }
     }
 
     public enum Builder {

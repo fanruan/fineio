@@ -22,7 +22,7 @@ public class IntBuffer extends BaseBuffer {
 
     public int get(int pos) {
         checkRead(pos);
-        return MemoryUtils.getInt(address, pos);
+        return MemoryUtils.getInt(memoryObject.getAddress(), pos);
     }
 
     public void put(int value) {

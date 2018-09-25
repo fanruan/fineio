@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author yee
@@ -68,6 +70,8 @@ public abstract class BaseBuffer implements Buffer {
     private transient long lastWriteTime;
     private volatile boolean flushed;
 
+    private Lock lock = new ReentrantLock();
+
     public BaseBuffer(Connector connector, URI uri, Listener listener) {
         level = Level.INITIAL;
         syncStatus = SyncStatus.UNSUPPORTED;
@@ -111,12 +115,22 @@ public abstract class BaseBuffer implements Buffer {
 
     @Override
     public long getAddress() {
-        return address;
+        lock.lock();
+        try {
+            return address;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public long getAllocateSize() {
-        return allocateSize;
+        lock.lock();
+        try {
+            return allocateSize;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -141,8 +155,12 @@ public abstract class BaseBuffer implements Buffer {
             if (-1 < writeCurrentPosition && address != 0) {
                 readMaxPosition = writeMaxPosition + 1;
                 load = true;
+                if (null == memoryObject) {
+                    memoryObject = new AllocateObject(address, allocateSize);
+                }
+            } else {
+                loadContent();
             }
-            loadContent();
         } catch (Exception ignore) {
         }
     }
@@ -234,10 +252,15 @@ public abstract class BaseBuffer implements Buffer {
                 throw new BufferConstructException(e);
             }
             memoryObject = MemoryManager.INSTANCE.allocate(allocator);
-            this.address = memoryObject.getAddress();
-            this.allocateSize = memoryObject.getAllocateSize();
-            this.load = true;
-            this.readMaxPosition = (int) (this.allocateSize >> getOffset());
+            lock.lock();
+            try {
+                this.address = memoryObject.getAddress();
+                this.allocateSize = memoryObject.getAllocateSize();
+                this.load = true;
+                this.readMaxPosition = (int) (this.allocateSize >> getOffset());
+            } finally {
+                lock.unlock();
+            }
         }
     }
 
@@ -283,6 +306,7 @@ public abstract class BaseBuffer implements Buffer {
         }
     }
 
+    @Override
     public final boolean full() {
         if (level != Level.WRITE) {
             return false;
@@ -331,7 +355,8 @@ public abstract class BaseBuffer implements Buffer {
         return !flushed || changed;
     }
 
-    public void force() {
+    @Override
+    public final void force() {
         syncStatus = SyncStatus.SYNC;
         if (!direct) {
             flip();
@@ -412,11 +437,26 @@ public abstract class BaseBuffer implements Buffer {
     }
 
     @Override
+    public MemoryObject getFreeObject() {
+        lock.lock();
+        try {
+            return new AllocateObject(address, allocateSize);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
     public void unLoad() {
-        level = Level.INITIAL;
-        load = false;
-        allocateSize = 0;
-        readMaxPosition = 0;
-        address = 0;
+        lock.lock();
+        try {
+            level = Level.INITIAL;
+            load = false;
+            allocateSize = 0;
+            readMaxPosition = 0;
+            address = 0;
+        } finally {
+            lock.unlock();
+        }
     }
 }

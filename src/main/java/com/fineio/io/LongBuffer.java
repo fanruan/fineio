@@ -21,7 +21,7 @@ public class LongBuffer extends BaseBuffer {
 
     public long get(int pos) {
         checkRead(pos);
-        return MemoryUtils.getLong(address, pos);
+        return MemoryUtils.getLong(memoryObject.getAddress(), pos);
     }
 
     public void put(long value) {
