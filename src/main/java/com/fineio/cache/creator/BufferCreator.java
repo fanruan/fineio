@@ -172,6 +172,7 @@ public abstract class BufferCreator<B extends Buffer> {
             B buffer = keyMap.get(block.getBlockURI());
             if (null == buffer) {
                 buffer = create(connector, block, maxOffset);
+                keyMap.put(block.getBlockURI(), buffer);
             }
             bufferMap.put(buffer);
             return buffer;
@@ -186,6 +187,7 @@ public abstract class BufferCreator<B extends Buffer> {
             B buffer = keyMap.get(uri);
             if (null == buffer) {
                 buffer = create(connector, uri);
+                keyMap.put(uri, buffer);
             }
             bufferMap.put(buffer);
             return buffer;

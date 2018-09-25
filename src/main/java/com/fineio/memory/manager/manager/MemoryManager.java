@@ -342,10 +342,15 @@ public enum MemoryManager {
         public void run() {
             if (null != cleaner) {
                 int i = 0;
+                boolean clean = false;
                 do {
-                    cleaner.clean();
+                    clean |= cleaner.clean();
                 } while (++i < 10);
-                System.gc();
+                if (clean) {
+                    System.gc();
+                } else {
+                    cleaner.cleanAllCleanable();
+                }
             }
         }
     }
