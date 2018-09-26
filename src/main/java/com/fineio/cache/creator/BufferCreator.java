@@ -50,7 +50,8 @@ public abstract class BufferCreator<B extends Buffer> {
         listener = new Buffer.Listener() {
             @Override
             public void remove(Buffer buffer) {
-                bufferMap.remove((B) buffer, true);
+                B b = keyMap.remove(buffer.getUri());
+                bufferMap.remove(b, true);
                 MemoryObject object = buffer.getFreeObject();
                 DE_ALLOCATOR.deAllocate(object);
                 buffer.unLoad();
@@ -86,8 +87,8 @@ public abstract class BufferCreator<B extends Buffer> {
         while (iterator.hasNext()) {
             B buffer = iterator.next();
             if (buffer.getLevel() == Level.CLEAN) {
-                bufferMap.remove(buffer, true);
-                keyMap.remove(buffer.getUri());
+                B b = keyMap.remove(buffer.getUri());
+                bufferMap.remove(b, true);
                 DE_ALLOCATOR.deAllocate(buffer.getFreeObject());
                 buffer.unLoad();
                 result = true;
@@ -160,7 +161,8 @@ public abstract class BufferCreator<B extends Buffer> {
             }
 
             private void clearBuffer(Buffer buffer) {
-                bufferMap.remove((B) buffer, true);
+                B b = keyMap.remove(buffer.getUri());
+                bufferMap.remove(b, true);
                 DE_ALLOCATOR.deAllocate(buffer.getFreeObject());
                 buffer.unLoad();
             }

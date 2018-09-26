@@ -307,7 +307,8 @@ public abstract class BaseBuffer implements Buffer {
     }
 
     @Override
-    public final boolean full() {
+    synchronized
+    public boolean full() {
         if (level != Level.WRITE) {
             return false;
         }
@@ -458,5 +459,24 @@ public abstract class BaseBuffer implements Buffer {
         } finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        BaseBuffer that = (BaseBuffer) o;
+
+        return bufferKey != null ? bufferKey.equals(that.bufferKey) : that.bufferKey == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return bufferKey != null ? bufferKey.hashCode() : 0;
     }
 }

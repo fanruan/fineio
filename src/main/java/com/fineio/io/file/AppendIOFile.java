@@ -1,6 +1,7 @@
 package com.fineio.io.file;
 
 import com.fineio.io.BaseBuffer;
+import com.fineio.io.Level;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
@@ -29,8 +30,10 @@ public final class AppendIOFile<B extends BaseBuffer> extends BaseReadIOFile<B> 
                 if (buffers[index] == null) {
                     buffers[index] = model.createBuffer(connector, createIndexBlock(index), block_size_offset);
                 }
-                buffers[index].checkRead0();
-                buffers[index].flip();
+                if (buffers[index].getLevel() != Level.WRITE) {
+                    buffers[index].checkRead0();
+                    buffers[index].flip();
+                }
                 return (B) buffers[index];
             }
         }
