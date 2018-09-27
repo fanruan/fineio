@@ -23,14 +23,14 @@ public abstract class BaseDeAllocator extends SyncObject implements DeAllocator 
      */
     @Override
     public void deAllocate(MemoryObject memoryObject) {
-        FineIOLoggers.getLogger().error(String.format("auto release address: %d, release size: %d, currentSize: %d", memoryObject.getAddress(), memoryObject.getAllocateSize(), MemoryManager.INSTANCE.getCurrentMemorySize()));
+        FineIOLoggers.getLogger().debug(String.format("auto release address: %d, release size: %d, currentSize: %d", memoryObject.getAddress(), memoryObject.getAllocateSize(), MemoryManager.INSTANCE.getCurrentMemorySize()));
         if (null == memoryObject) {
             return;
         }
         beforeStatusChange();
         MemoryUtils.free(memoryObject.getAddress());
         returnMemory(memoryObject.getAllocateSize());
-        FineIOLoggers.getLogger().error(String.format("after free size: %d", MemoryManager.INSTANCE.getCurrentMemorySize()));
+        FineIOLoggers.getLogger().debug(String.format("after free size: %d", MemoryManager.INSTANCE.getCurrentMemorySize()));
     }
 
     /**
