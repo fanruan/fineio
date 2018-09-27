@@ -504,19 +504,4 @@ public class FineIO {
 
         F createIOFile(Connector connector, URI uri);
     }
-
-    public static void main(String[] args) {
-        Connector connector = FileConnector.newInstance("");
-        IOFile<ByteBuffer> ioFile = createIOFile(connector, URI.create("/d/0000"), MODEL.APPEND_BYTE);
-        put(ioFile, (byte) 10);
-        ioFile.close();
-        ioFile = createIOFile(connector, URI.create("/d/0000"), MODEL.APPEND_BYTE);
-        put(ioFile, (byte) 100);
-        ioFile.close();
-        ioFile = createIOFile(connector, URI.create("/d/0000"), MODEL.READ_BYTE);
-
-        System.out.println(getByte(ioFile, 0));
-        System.out.println(getByte(ioFile, 1));
-        ioFile.close();
-    }
 }
