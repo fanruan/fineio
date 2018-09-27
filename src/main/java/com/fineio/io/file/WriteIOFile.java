@@ -2,6 +2,7 @@ package com.fineio.io.file;
 
 
 import com.fineio.io.BaseBuffer;
+import com.fineio.io.Buffer;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
@@ -10,7 +11,7 @@ import java.net.URI;
  * @author yee
  * @date 2018/9/20
  */
-public final class WriteIOFile<B extends BaseBuffer> extends IOFile<B> {
+public final class WriteIOFile<B extends Buffer> extends IOFile<B> {
     WriteIOFile(Connector connector, URI uri, FileModel model) {
         super(connector, uri, model);
         this.block_size_offset = (byte) (connector.getBlockOffset() - model.offset());
@@ -22,10 +23,14 @@ public final class WriteIOFile<B extends BaseBuffer> extends IOFile<B> {
     }
 
     @Override
-    protected B initBuffer(int index) {
-        B buffer = super.initBuffer(index);
-        buffer.asWrite();
-        return buffer;
+    protected Buffer initBuffer(int index) {
+        synchronized (this) {
+            if (null == buffers[index]) {
+                BaseBuffer buffer = model.createBuffer(connector, createIndexBlock(index), block_size_offset);
+                buffers[index] = buffer.asWrite();
+            }
+            return buffers[index];
+        }
     }
 
     @Override

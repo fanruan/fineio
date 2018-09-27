@@ -9,7 +9,7 @@ import com.fineio.storage.Connector;
  * @author yee
  * @date 2018/9/19
  */
-public class LongBuffer extends BaseBuffer {
+public class LongBuffer extends BaseBuffer<LongBuffer.LongReadBuffer, LongBuffer.LongWriteBuffer> {
     public LongBuffer(Connector connector, FileBlock block, int maxOffset, Listener listener) {
         super(connector, block, maxOffset, listener);
     }
@@ -19,13 +19,38 @@ public class LongBuffer extends BaseBuffer {
         return MemoryConstants.OFFSET_LONG;
     }
 
-    public long get(int pos) {
-        checkRead(pos);
-        return MemoryUtils.getLong(memoryObject.getAddress(), pos);
+    @Override
+    public LongWriteBuffer asWrite() {
+        return new LongBufferW();
     }
 
-    public void put(long value) {
-        ensureCapacity(++writeCurrentPosition);
-        MemoryUtils.put(address, writeCurrentPosition, value);
+    @Override
+    public LongReadBuffer asRead() {
+        return new LongBufferR();
+    }
+
+    public interface LongReadBuffer extends BufferR {
+        long get(int pos);
+    }
+
+    public interface LongWriteBuffer extends BufferW {
+        void put(long value);
+    }
+
+    private class LongBufferR extends ReadBuffer implements LongReadBuffer {
+        @Override
+        public long get(int pos) {
+            checkRead(pos);
+            return MemoryUtils.getLong(memoryObject.getAddress(), pos);
+        }
+    }
+
+    private class LongBufferW extends WriteBuffer implements LongWriteBuffer {
+        @Override
+        public void put(long value) {
+            ensureCapacity(++writeCurrentPosition);
+            MemoryUtils.put(address, writeCurrentPosition, value);
+        }
     }
 }
+

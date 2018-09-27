@@ -1,8 +1,8 @@
 package com.fineio.io.file;
 
 import com.fineio.base.Bits;
-import com.fineio.io.BaseBuffer;
 import com.fineio.io.Buffer;
+import com.fineio.io.BufferW;
 import com.fineio.io.ByteBuffer;
 import com.fineio.io.CharBuffer;
 import com.fineio.io.DoubleBuffer;
@@ -19,7 +19,7 @@ import java.net.URI;
  * @author yee
  * @date 2018/9/20
  */
-public abstract class IOFile<B extends BaseBuffer> {
+public abstract class IOFile<B extends Buffer> {
     protected final static int STEP_LEN = MemoryConstants.STEP_LONG;
     private final static int HEAD_LEN = STEP_LEN + 1;
     /**
@@ -44,7 +44,7 @@ public abstract class IOFile<B extends BaseBuffer> {
      */
     protected long single_block_len;
     protected volatile boolean released = false;
-    protected volatile BaseBuffer[] buffers;
+    protected volatile Buffer[] buffers;
     private volatile int bufferWriteIndex = -1;
 
     IOFile(Connector connector, URI uri, FileModel model) {
@@ -57,19 +57,19 @@ public abstract class IOFile<B extends BaseBuffer> {
     }
 
     public final static int getInt(IOFile<IntBuffer> file, long p) {
-        return (file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
+        return ((IntBuffer.IntReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
     }
 
     public final static long getLong(IOFile<LongBuffer> file, long p) {
-        return (file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
+        return ((LongBuffer.LongReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
     }
 
     public final static double getDouble(IOFile<DoubleBuffer> file, long p) {
-        return (file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
+        return ((DoubleBuffer.DoubleReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
     }
 
     public final static byte getByte(IOFile<ByteBuffer> file, long p) {
-        return (file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
+        return ((ByteBuffer.ByteReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
     }
 
     public final static void put(IOFile<IntBuffer> file, int d) {
@@ -79,7 +79,7 @@ public abstract class IOFile<B extends BaseBuffer> {
         } else {
             result = file.calBufferIndex();
         }
-        (file.getBuffer(file.checkBuffer(result))).put(d);
+        ((IntBuffer.IntWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
     }
 
     public final static void put(IOFile<ByteBuffer> file, byte d) {
@@ -89,7 +89,7 @@ public abstract class IOFile<B extends BaseBuffer> {
         } else {
             result = file.calBufferIndex();
         }
-        (file.getBuffer(file.checkBuffer(result))).put(d);
+        ((ByteBuffer.ByteWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
     }
 
     public final static void put(IOFile<LongBuffer> file, long d) {
@@ -99,7 +99,7 @@ public abstract class IOFile<B extends BaseBuffer> {
         } else {
             result = file.calBufferIndex();
         }
-        (file.getBuffer(file.checkBuffer(result))).put(d);
+        ((LongBuffer.LongWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
     }
 
     public final static void put(IOFile<DoubleBuffer> file, double d) {
@@ -109,7 +109,7 @@ public abstract class IOFile<B extends BaseBuffer> {
         } else {
             result = file.calBufferIndex();
         }
-        (file.getBuffer(file.checkBuffer(result))).put(d);
+        ((DoubleBuffer.DoubleWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
     }
 
     public final static void put(IOFile<ShortBuffer> file, short d) {
@@ -119,7 +119,7 @@ public abstract class IOFile<B extends BaseBuffer> {
         } else {
             result = file.calBufferIndex();
         }
-        (file.getBuffer(file.checkBuffer(result))).put(d);
+        ((ShortBuffer.ShortWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
     }
 
     public final static void put(IOFile<FloatBuffer> file, float d) {
@@ -129,7 +129,7 @@ public abstract class IOFile<B extends BaseBuffer> {
         } else {
             result = file.calBufferIndex();
         }
-        (file.getBuffer(file.checkBuffer(result))).put(d);
+        ((FloatBuffer.FloatWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
     }
 
     public final static void put(IOFile<CharBuffer> file, char d) {
@@ -139,24 +139,24 @@ public abstract class IOFile<B extends BaseBuffer> {
         } else {
             result = file.calBufferIndex();
         }
-        (file.getBuffer(file.checkBuffer(result))).put(d);
+        ((CharBuffer.CharWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
     }
 
     public final static char getChar(IOFile<CharBuffer> file, long p) {
-        return (file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
+        return ((CharBuffer.CharReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
     }
 
     public final static float getFloat(IOFile<FloatBuffer> file, long p) {
-        return (file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
+        return ((FloatBuffer.FloatReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
     }
 
     public final static short getShort(IOFile<ShortBuffer> file, long p) {
-        return (file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
+        return ((ShortBuffer.ShortReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
     }
 
     protected final int calBufferIndex() {
         int len = buffers.length;
-        if (buffers[len - 1].full()) {
+        if (((BufferW) buffers[len - 1]).full()) {
             return triggerWrite(len);
         } else {
             return len - 1;
@@ -185,10 +185,10 @@ public abstract class IOFile<B extends BaseBuffer> {
         return len;
     }
 
-    private final B getBuffer(int i) {
+    private final Buffer getBuffer(int i) {
         if (i < buffers.length && i > -1) {
             if (buffers[i] != null) {
-                return (B) buffers[i];
+                return buffers[i];
             }
             return initBuffer(i);
         } else {
@@ -196,14 +196,7 @@ public abstract class IOFile<B extends BaseBuffer> {
         }
     }
 
-    protected B initBuffer(int index) {
-        synchronized (this) {
-            if (buffers[index] == null) {
-                buffers[index] = model.createBuffer(connector, createIndexBlock(index), block_size_offset);
-            }
-            return (B) buffers[index];
-        }
-    }
+    protected abstract Buffer initBuffer(int index);
 
     private final int checkIndex(int index) {
         if (index > -1 && index < blocks) {
@@ -227,13 +220,13 @@ public abstract class IOFile<B extends BaseBuffer> {
      */
     protected final void createBufferArray(int size) {
         this.blocks = size;
-        this.buffers = new BaseBuffer[size];
+        this.buffers = (B[]) new Buffer[size];
     }
 
     final void checkWrite(int len) {
         if (bufferWriteIndex != len) {
             if (bufferWriteIndex != -1) {
-                (buffers[bufferWriteIndex]).write();
+                ((BufferW) buffers[bufferWriteIndex]).write();
             }
             bufferWriteIndex = len;
         }

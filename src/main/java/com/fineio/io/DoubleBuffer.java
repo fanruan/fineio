@@ -9,7 +9,7 @@ import com.fineio.storage.Connector;
  * @author yee
  * @date 2018/9/19
  */
-public class DoubleBuffer extends BaseBuffer {
+public class DoubleBuffer extends BaseBuffer<DoubleBuffer.DoubleReadBuffer, DoubleBuffer.DoubleWriteBuffer> {
     public DoubleBuffer(Connector connector, FileBlock block, int maxOffset, Listener listener) {
         super(connector, block, maxOffset, listener);
     }
@@ -19,13 +19,38 @@ public class DoubleBuffer extends BaseBuffer {
         return MemoryConstants.OFFSET_DOUBLE;
     }
 
-    public double get(int pos) {
-        checkRead(pos);
-        return MemoryUtils.getDouble(memoryObject.getAddress(), pos);
+    @Override
+    public DoubleWriteBuffer asWrite() {
+        return new DoubleBufferW();
     }
 
-    public void put(double value) {
-        ensureCapacity(++writeCurrentPosition);
-        MemoryUtils.put(address, writeCurrentPosition, value);
+    @Override
+    public DoubleReadBuffer asRead() {
+        return new DoubleBufferR();
+    }
+
+    public interface DoubleReadBuffer extends BufferR {
+        double get(int pos);
+    }
+
+    public interface DoubleWriteBuffer extends BufferW {
+        void put(double value);
+    }
+
+    private class DoubleBufferR extends ReadBuffer implements DoubleReadBuffer {
+        @Override
+        public double get(int pos) {
+            checkRead(pos);
+            return MemoryUtils.getDouble(memoryObject.getAddress(), pos);
+        }
+    }
+
+    private class DoubleBufferW extends WriteBuffer implements DoubleWriteBuffer {
+        @Override
+        public void put(double value) {
+            ensureCapacity(++writeCurrentPosition);
+            MemoryUtils.put(address, writeCurrentPosition, value);
+        }
     }
 }
+

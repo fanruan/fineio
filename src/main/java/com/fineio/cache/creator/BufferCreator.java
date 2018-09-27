@@ -50,16 +50,18 @@ public abstract class BufferCreator<B extends Buffer> {
         listener = new Buffer.Listener() {
             @Override
             public void remove(Buffer buffer) {
-                B b = keyMap.remove(buffer.getUri());
-                bufferMap.remove(b, true);
                 MemoryObject object = buffer.getFreeObject();
-                DE_ALLOCATOR.deAllocate(object);
-                buffer.unLoad();
-                Reference<? extends B> ref = null;
-                while (null != (ref = bufferReferenceQueue.poll())) {
-                    synchronized (ref) {
-                        ref.clear();
-                        ref = null;
+                if (null != object) {
+                    B b = keyMap.remove(buffer.getUri());
+                    bufferMap.remove(b, true);
+                    DE_ALLOCATOR.deAllocate(object);
+                    buffer.unLoad();
+                    Reference<? extends B> ref = null;
+                    while (null != (ref = bufferReferenceQueue.poll())) {
+                        synchronized (ref) {
+                            ref.clear();
+                            ref = null;
+                        }
                     }
                 }
             }
@@ -69,16 +71,6 @@ public abstract class BufferCreator<B extends Buffer> {
                 bufferMap.put((B) buffer);
             }
         };
-    }
-
-    public final void triggerWrite() {
-        Iterator<B> iterator = bufferMap.iterator();
-        while (iterator.hasNext()) {
-            B buffer = iterator.next();
-            if (buffer.full()) {
-                buffer.force();
-            }
-        }
     }
 
     public final boolean cleanableBuffers() {
@@ -161,10 +153,13 @@ public abstract class BufferCreator<B extends Buffer> {
             }
 
             private void clearBuffer(Buffer buffer) {
-                B b = keyMap.remove(buffer.getUri());
-                bufferMap.remove(b, true);
-                DE_ALLOCATOR.deAllocate(buffer.getFreeObject());
-                buffer.unLoad();
+                MemoryObject object = buffer.getFreeObject();
+                if (null != object) {
+                    B b = keyMap.remove(buffer.getUri());
+                    bufferMap.remove(b, true);
+                    DE_ALLOCATOR.deAllocate(object);
+                    buffer.unLoad();
+                }
             }
         };
     }
@@ -175,8 +170,9 @@ public abstract class BufferCreator<B extends Buffer> {
             if (null == buffer) {
                 buffer = create(connector, block, maxOffset);
                 keyMap.put(block.getBlockURI(), buffer);
+            } else {
+                bufferMap.update(buffer);
             }
-            bufferMap.put(buffer);
             return buffer;
         }
 //        return create(connector, block, maxOffset);

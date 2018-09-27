@@ -69,13 +69,6 @@ public final class CacheManager {
 
             @Override
             public void triggerWrite() {
-                BYTE_CREATOR.triggerWrite();
-                INT_CREATOR.triggerWrite();
-                LONG_CREATOR.triggerWrite();
-                DOUBLE_CREATOR.triggerWrite();
-                SHORT_CREATOR.triggerWrite();
-                CHAR_CREATOR.triggerWrite();
-                FLOAT_CREATOR.triggerWrite();
             }
 
             private boolean clean(BufferCreator creator) {

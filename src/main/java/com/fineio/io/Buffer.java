@@ -25,8 +25,6 @@ public interface Buffer {
 
     boolean isClose();
 
-    void flip();
-
     void close();
 
     boolean resentAccess();
@@ -37,9 +35,9 @@ public interface Buffer {
 
     MemoryObject getFreeObject();
 
-    boolean full();
+    <B extends Buffer> B asRead();
 
-    void force();
+    <B extends Buffer> B asWrite();
 
     interface Listener {
         void remove(Buffer buffer);
@@ -47,3 +45,4 @@ public interface Buffer {
         void update(Buffer buffer);
     }
 }
+

@@ -9,7 +9,7 @@ import com.fineio.storage.Connector;
  * @author yee
  * @date 2018/9/19
  */
-public class CharBuffer extends BaseBuffer {
+public class CharBuffer extends BaseBuffer<CharBuffer.CharReadBuffer, CharBuffer.CharWriteBuffer> {
     public CharBuffer(Connector connector, FileBlock block, int maxOffset, Listener listener) {
         super(connector, block, maxOffset, listener);
     }
@@ -19,14 +19,38 @@ public class CharBuffer extends BaseBuffer {
         return MemoryConstants.OFFSET_CHAR;
     }
 
-    public char get(int pos) {
-        checkRead(pos);
-        return MemoryUtils.getChar(memoryObject.getAddress(), pos);
+    @Override
+    public CharWriteBuffer asWrite() {
+        return new CharBufferW();
     }
 
-    public void put(char value) {
-        ensureCapacity(++writeCurrentPosition);
-        MemoryUtils.put(address, writeCurrentPosition, value);
+    @Override
+    public CharReadBuffer asRead() {
+        return new CharBufferR();
     }
 
+    public interface CharReadBuffer extends BufferR {
+        char get(int pos);
+    }
+
+    public interface CharWriteBuffer extends BufferW {
+        void put(char value);
+    }
+
+    private class CharBufferR extends ReadBuffer implements CharReadBuffer {
+        @Override
+        public char get(int pos) {
+            checkRead(pos);
+            return MemoryUtils.getChar(memoryObject.getAddress(), pos);
+        }
+    }
+
+    private class CharBufferW extends WriteBuffer implements CharWriteBuffer {
+        @Override
+        public void put(char value) {
+            ensureCapacity(++writeCurrentPosition);
+            MemoryUtils.put(address, writeCurrentPosition, value);
+        }
+    }
 }
+

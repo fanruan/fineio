@@ -1,7 +1,7 @@
 package com.fineio.io.file;
 
 import com.fineio.base.Bits;
-import com.fineio.io.BaseBuffer;
+import com.fineio.io.Buffer;
 import com.fineio.storage.Connector;
 
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.net.URI;
  * @author yee
  * @date 2018/9/20
  */
-public abstract class BaseReadIOFile<B extends BaseBuffer> extends IOFile<B> {
+public abstract class BaseReadIOFile<B extends Buffer> extends IOFile<B> {
     BaseReadIOFile(Connector connector, URI uri, FileModel model) {
         super(connector, uri, model);
         readHeader(model.offset());
