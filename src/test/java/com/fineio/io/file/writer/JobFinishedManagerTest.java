@@ -56,7 +56,7 @@ public class JobFinishedManagerTest {
                 @Override
                 public Pair<URI, Boolean> get() throws InterruptedException, ExecutionException {
                     // 模拟获取延时
-                    Thread.sleep(1000);
+                    Thread.sleep(100);
                     FineIOLoggers.getLogger().info("consume uri_" + finalI);
                     return new Pair<URI, Boolean>(URI.create("uri_" + finalI), true);
                 }

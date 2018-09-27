@@ -51,7 +51,9 @@ public class LongBuffer extends AbstractBuffer<LongReadBuffer, LongWriteBuffer, 
 
     @Override
     protected void exitPool() {
-        manager.removeBuffer(PoolMode.LONG, this);
+        if (!directAccess) {
+            manager.removeBuffer(PoolMode.LONG, this);
+        }
     }
 
     @Override
@@ -78,8 +80,18 @@ public class LongBuffer extends AbstractBuffer<LongReadBuffer, LongWriteBuffer, 
 
         @Override
         public long get(int pos) {
-            check(pos);
-            return MemoryUtils.getLong(address, pos);
+            lock.lock();
+            try {
+                check(pos);
+                return MemoryUtils.getLong(address, pos);
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        protected PoolMode poolMode() {
+            return PoolMode.LONG;
         }
     }
 
@@ -97,6 +109,7 @@ public class LongBuffer extends AbstractBuffer<LongReadBuffer, LongWriteBuffer, 
         }
     }
 
+    @Deprecated
     private final class LongBufferE extends InnerEditBuffer implements LongEditBuffer {
 
         @Override

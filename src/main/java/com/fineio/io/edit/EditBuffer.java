@@ -7,5 +7,6 @@ import com.fineio.io.write.WriteOnlyBuffer;
  * @author yee
  * @date 2018/5/30
  */
+@Deprecated
 public interface EditBuffer extends ReadOnlyBuffer, WriteOnlyBuffer {
 }

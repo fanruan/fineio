@@ -68,4 +68,5 @@ public interface Buffer {
     int getLength();
 
     URI getUri();
+
 }

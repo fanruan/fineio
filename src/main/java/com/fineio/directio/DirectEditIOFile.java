@@ -10,6 +10,7 @@ import java.net.URI;
 /**
  * Created by daniel on 2017/2/10.
  */
+@Deprecated
 public final class DirectEditIOFile<T extends Buffer> extends DirectIOFile<T> {
 
 

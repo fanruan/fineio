@@ -133,7 +133,7 @@ public class CacheManagerTest extends TestCase {
                     return;
                 }
                 MemoryUtils.free(address);
-                CacheManager.getInstance().returnMemory(this, BufferPrivilege.READABLE);
+                CacheManager.getInstance().returnMemory(this, BufferPrivilege.READABLE, false);
                 close = true;
             }
         }
@@ -216,7 +216,7 @@ public class CacheManagerTest extends TestCase {
                     return;
                 }
                 MemoryUtils.free(address);
-                CacheManager.getInstance().returnMemory(this, BufferPrivilege.READABLE);
+                CacheManager.getInstance().returnMemory(this, BufferPrivilege.READABLE, false);
                 load = false;
             }
         }

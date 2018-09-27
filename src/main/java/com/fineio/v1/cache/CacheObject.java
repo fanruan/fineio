@@ -1,5 +1,6 @@
 package com.fineio.v1.cache;
 
+import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 
 /**
@@ -43,7 +44,15 @@ public class CacheObject<T> {
     }
 
     public CacheObject(T value){
-        this.value = new WeakReference<T>(value);
+        this(value, null);
+    }
+
+    public CacheObject(T value, ReferenceQueue<T> referenceQueue) {
+        if (null != referenceQueue) {
+            this.value = new WeakReference<T>(value, referenceQueue);
+        } else {
+            this.value = new WeakReference<T>(value);
+        }
     }
 
     public T get() {

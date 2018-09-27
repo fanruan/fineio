@@ -50,7 +50,9 @@ public class FloatBuffer extends AbstractBuffer<FloatReadBuffer, FloatWriteBuffe
 
     @Override
     protected void exitPool() {
-        manager.removeBuffer(PoolMode.FLOAT, this);
+        if (!directAccess) {
+            manager.removeBuffer(PoolMode.FLOAT, this);
+        }
     }
 
     @Override
@@ -77,8 +79,18 @@ public class FloatBuffer extends AbstractBuffer<FloatReadBuffer, FloatWriteBuffe
 
         @Override
         public float get(int pos) {
-            check(pos);
-            return MemoryUtils.getFloat(address, pos);
+            lock.lock();
+            try {
+                check(pos);
+                return MemoryUtils.getFloat(address, pos);
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        protected PoolMode poolMode() {
+            return PoolMode.FLOAT;
         }
     }
 
@@ -96,6 +108,7 @@ public class FloatBuffer extends AbstractBuffer<FloatReadBuffer, FloatWriteBuffe
         }
     }
 
+    @Deprecated
     private final class FloatBufferE extends InnerEditBuffer implements FloatEditBuffer {
 
         @Override
