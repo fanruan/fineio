@@ -198,6 +198,76 @@ public class FineIO {
     }
 
     /**
+     * 连续写入
+     *
+     * @param file
+     * @param d
+     */
+    public static void put(IOFile<DoubleBuffer> file, long pos, double d) {
+        IOFile.put(file, d);
+    }
+
+    /**
+     * 连续写入
+     *
+     * @param file
+     * @param d
+     */
+    public static void put(IOFile<ByteBuffer> file, long pos, byte d) {
+        IOFile.put(file, d);
+    }
+
+    /**
+     * 连续写入
+     *
+     * @param file
+     * @param d
+     */
+    public static void put(IOFile<CharBuffer> file, long pos, char d) {
+        IOFile.put(file, d);
+    }
+
+    /**
+     * 连续写入
+     *
+     * @param file
+     * @param d
+     */
+    public static void put(IOFile<FloatBuffer> file, long pos, float d) {
+        IOFile.put(file, d);
+    }
+
+    /**
+     * 连续写入
+     *
+     * @param file
+     * @param d
+     */
+    public static void put(IOFile<LongBuffer> file, long pos, long d) {
+        IOFile.put(file, d);
+    }
+
+    /**
+     * 连续写入
+     *
+     * @param file
+     * @param d
+     */
+    public static void put(IOFile<IntBuffer> file, long pos, int d) {
+        IOFile.put(file, d);
+    }
+
+    /**
+     * 连续写入
+     *
+     * @param file
+     * @param d
+     */
+    public static void put(IOFile<ShortBuffer> file, long pos, short d) {
+        IOFile.put(file, d);
+    }
+
+    /**
      * 随机读取
      *
      * @param file
@@ -433,5 +503,20 @@ public class FineIO {
         };
 
         F createIOFile(Connector connector, URI uri);
+    }
+
+    public static void main(String[] args) {
+        Connector connector = FileConnector.newInstance("");
+        IOFile<ByteBuffer> ioFile = createIOFile(connector, URI.create("/d/0000"), MODEL.APPEND_BYTE);
+        put(ioFile, (byte) 10);
+        ioFile.close();
+        ioFile = createIOFile(connector, URI.create("/d/0000"), MODEL.APPEND_BYTE);
+        put(ioFile, (byte) 100);
+        ioFile.close();
+        ioFile = createIOFile(connector, URI.create("/d/0000"), MODEL.READ_BYTE);
+
+        System.out.println(getByte(ioFile, 0));
+        System.out.println(getByte(ioFile, 1));
+        ioFile.close();
     }
 }

@@ -39,6 +39,8 @@ public interface Buffer {
 
     <B extends Buffer> B asWrite();
 
+    <B extends Buffer> B asAppend();
+
     interface Listener {
         void remove(Buffer buffer);
 

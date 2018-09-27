@@ -39,7 +39,7 @@ public enum MemoryManager {
     /**
      * 释放内存上限
      */
-    private final long releaseLimit;
+    private long releaseLimit;
     /**
      * 扩容上限
      */
@@ -67,6 +67,9 @@ public enum MemoryManager {
     private Lock memoryLock = new ReentrantLock();
     private ExecutorService gcThread = FineIOExecutors.newSingleThreadExecutor("io-gc-thread");
     private ScheduledExecutorService gcTrigger = FineIOExecutors.newScheduledExecutorService(1, "io-gc-trigger");
+    private ScheduledExecutorService releaseLimitThread = FineIOExecutors.newScheduledExecutorService(1, "io-limit-thread");
+    private volatile AtomicInteger releaseLimitCount = new AtomicInteger(0);
+    private volatile AtomicInteger triggerCount = new AtomicInteger(0);
     private final LinkedBlockingQueue<CleanTask> taskQueue = new LinkedBlockingQueue<CleanTask>();
 
     private Cleaner cleaner;
@@ -85,6 +88,7 @@ public enum MemoryManager {
                         CleanTask task = taskQueue.take();
                         if (readWaitCount.get() + writeWaitCount.get() > 0) {
                             if (task.getCheckSize() >= releaseLimit) {
+                                releaseLimitCount.incrementAndGet();
                                 task.run();
                             }
                         }
@@ -96,6 +100,18 @@ public enum MemoryManager {
             }
         });
         gcTrigger.scheduleAtFixedRate(new CleanOneTask(), 30, 30, TimeUnit.SECONDS);
+        releaseLimitThread.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                if (releaseLimitCount.get() >= 10) {
+                    releaseLimit = (long) Math.min(currentMaxSize * DEFAULT_RELEASE_RATE, releaseLimit * DEFAULT_INCREMENT_RATE);
+                } else if (releaseLimitCount.get() == 0) {
+                    currentMaxSize = Math.min(VM.maxDirectMemory(), getMaxSize());
+                    releaseLimit = (long) (currentMaxSize * DEFAULT_RELEASE_RATE);
+                }
+                releaseLimitCount.set(0);
+            }
+        }, 10, 10, TimeUnit.SECONDS);
     }
 
     public final void updateRead(long size) {
@@ -291,7 +307,7 @@ public enum MemoryManager {
 
         boolean cleanAllCleanable();
 
-        void triggerWrite();
+        void cleanReadable();
     }
 
     private class CleanTask implements Runnable {
@@ -309,7 +325,6 @@ public enum MemoryManager {
                 boolean triggerGC = true;
                 while (!cleaner.clean()) {
                     if (++tryTime >= TRY_CLEAN_TIME / 2) {
-                        cleaner.triggerWrite();
                         triggerGC = cleaner.cleanAllCleanable();
                         if (triggerGC) {
                             break;
@@ -342,15 +357,13 @@ public enum MemoryManager {
         public void run() {
             if (null != cleaner) {
                 try {
-                    int i = 0;
-                    boolean clean = false;
-                    do {
-                        clean |= cleaner.clean();
-                    } while (++i < 10);
-                    if (clean) {
+                    if (cleaner.clean()) {
                         System.gc();
-                    } else {
-                        cleaner.cleanAllCleanable();
+                    } else if (triggerCount.incrementAndGet() > 10) {
+                        if (!cleaner.cleanAllCleanable()) {
+                            cleaner.cleanReadable();
+                        }
+                        triggerCount.set(0);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

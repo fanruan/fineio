@@ -8,6 +8,7 @@ import com.fineio.io.CharBuffer;
 import com.fineio.io.DoubleBuffer;
 import com.fineio.io.FloatBuffer;
 import com.fineio.io.IntBuffer;
+import com.fineio.io.Level;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.ShortBuffer;
 import com.fineio.io.file.FileBlock;
@@ -57,18 +58,25 @@ public final class CacheManager {
             @Override
             public boolean cleanAllCleanable() {
                 boolean result = false;
-                result |= BYTE_CREATOR.cleanableBuffers();
-                result |= INT_CREATOR.cleanableBuffers();
-                result |= LONG_CREATOR.cleanableBuffers();
-                result |= DOUBLE_CREATOR.cleanableBuffers();
-                result |= SHORT_CREATOR.cleanableBuffers();
-                result |= CHAR_CREATOR.cleanableBuffers();
-                result |= FLOAT_CREATOR.cleanableBuffers();
+                result |= BYTE_CREATOR.cleanBuffers(Level.CLEAN);
+                result |= INT_CREATOR.cleanBuffers(Level.CLEAN);
+                result |= LONG_CREATOR.cleanBuffers(Level.CLEAN);
+                result |= DOUBLE_CREATOR.cleanBuffers(Level.CLEAN);
+                result |= SHORT_CREATOR.cleanBuffers(Level.CLEAN);
+                result |= CHAR_CREATOR.cleanBuffers(Level.CLEAN);
+                result |= FLOAT_CREATOR.cleanBuffers(Level.CLEAN);
                 return result;
             }
 
             @Override
-            public void triggerWrite() {
+            public void cleanReadable() {
+                BYTE_CREATOR.cleanBuffers(Level.READ);
+                INT_CREATOR.cleanBuffers(Level.READ);
+                LONG_CREATOR.cleanBuffers(Level.READ);
+                DOUBLE_CREATOR.cleanBuffers(Level.READ);
+                SHORT_CREATOR.cleanBuffers(Level.READ);
+                CHAR_CREATOR.cleanBuffers(Level.READ);
+                FLOAT_CREATOR.cleanBuffers(Level.READ);
             }
 
             private boolean clean(BufferCreator creator) {

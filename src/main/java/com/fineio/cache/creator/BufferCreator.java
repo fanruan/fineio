@@ -53,7 +53,9 @@ public abstract class BufferCreator<B extends Buffer> {
                 MemoryObject object = buffer.getFreeObject();
                 if (null != object) {
                     B b = keyMap.remove(buffer.getUri());
-                    bufferMap.remove(b, true);
+                    if (null != b) {
+                        bufferMap.remove(b, true);
+                    }
                     DE_ALLOCATOR.deAllocate(object);
                     buffer.unLoad();
                     Reference<? extends B> ref = null;
@@ -73,21 +75,41 @@ public abstract class BufferCreator<B extends Buffer> {
         };
     }
 
-    public final boolean cleanableBuffers() {
+    public final boolean cleanBuffers(Level level) {
         boolean result = false;
         Iterator<B> iterator = bufferMap.iterator();
         while (iterator.hasNext()) {
             B buffer = iterator.next();
-            if (buffer.getLevel() == Level.CLEAN) {
-                MemoryObject object = buffer.getFreeObject();
-                B b = keyMap.remove(buffer.getUri());
-                bufferMap.remove(b, true);
-                DE_ALLOCATOR.deAllocate(object);
-                buffer.unLoad();
-                result = true;
+            if (level == buffer.getLevel()) {
+                switch (level) {
+                    case READ:
+                        if (buffer.getSyncStatus() == SyncStatus.UNSUPPORTED) {
+                            cleanBuffer(buffer);
+                            result = true;
+                        }
+                        break;
+                    case CLEAN:
+                        result |= cleanBuffer(buffer);
+                        break;
+                    default:
+                }
             }
         }
         return result;
+    }
+
+    private boolean cleanBuffer(B buffer) {
+        MemoryObject object = buffer.getFreeObject();
+        if (null != object) {
+            B b = keyMap.remove(buffer.getUri());
+            if (null != b) {
+                bufferMap.remove(b, true);
+            }
+            DE_ALLOCATOR.deAllocate(object);
+            buffer.unLoad();
+            return true;
+        }
+        return false;
     }
 
     private final Runnable createActiveTask() {
@@ -154,13 +176,7 @@ public abstract class BufferCreator<B extends Buffer> {
             }
 
             private void clearBuffer(Buffer buffer) {
-                MemoryObject object = buffer.getFreeObject();
-                if (null != object) {
-                    B b = keyMap.remove(buffer.getUri());
-                    bufferMap.remove(b, true);
-                    DE_ALLOCATOR.deAllocate(object);
-                    buffer.unLoad();
-                }
+                BufferCreator.this.cleanBuffer((B) buffer);
             }
         };
     }

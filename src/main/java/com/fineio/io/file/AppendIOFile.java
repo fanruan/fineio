@@ -34,7 +34,7 @@ public final class AppendIOFile<B extends Buffer> extends BaseReadIOFile<B> {
                 return buffer;
             }
             if (index == blocks - 1) {
-                buffers[index] = buffer.asRead().asWrite();
+                buffers[index] = buffer.asAppend();
             } else {
                 buffers[index] = buffer.asWrite();
             }

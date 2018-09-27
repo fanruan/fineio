@@ -152,6 +152,16 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
     public abstract R asRead();
 
     @Override
+    public W asAppend() {
+        syncStatus = SyncStatus.SYNC;
+        try {
+            return asRead().asWrite();
+        } finally {
+            syncStatus = SyncStatus.UNSUPPORTED;
+        }
+    }
+
+    @Override
     public MemoryObject getFreeObject() {
         lock.lock();
         try {
@@ -201,6 +211,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         protected volatile long readAddress;
 
         public ReadBuffer() {
+            level = Level.READ;
             if (address == 0) {
                 checkRead0();
             } else {
@@ -216,6 +227,11 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         @Override
         public <B extends Buffer> B asWrite() {
             return (B) BaseBuffer.this.asWrite();
+        }
+
+        @Override
+        public <B extends Buffer> B asAppend() {
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -294,7 +310,8 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         }
 
         protected final void checkRead(int p) {
-            if (!load) {
+            if (!load || maxSize == 0 || address == 0) {
+                load = false;
                 loadContent();
                 listener.update(this);
             }
@@ -372,6 +389,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                 int offset = Maths.log2(maxSize);
                 setCurrentCapacity(offset);
                 currentMaxSize = maxSize;
+                writeCurrentPosition = maxSize - 1;
                 MemoryManager.INSTANCE.flip(allocateSize, true);
             }
             maxSize = 1 << maxOffset;
@@ -385,6 +403,11 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         @Override
         public <B extends Buffer> B asRead() {
             return (B) BaseBuffer.this.asRead();
+        }
+
+        @Override
+        public <B extends Buffer> B asAppend() {
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -481,7 +504,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             if (sync) {
                 syncStatus = SyncStatus.SYNC;
             }
-            if (writeCurrentPosition > 0) {
+            if (writeCurrentPosition >= 0) {
                 maxSize = writeCurrentPosition + 1;
                 load = true;
                 memoryObject = new AllocateObject(address, allocateSize);
