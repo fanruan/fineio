@@ -75,9 +75,11 @@ public final class CacheManager {
                 Buffer buffer = creator.poll();
                 if (null != buffer) {
                     MemoryObject obj = buffer.getFreeObject();
-                    deAllocator.deAllocate(obj);
-                    buffer.unLoad();
-                    return true;
+                    if (null != obj) {
+                        deAllocator.deAllocate(obj);
+                        buffer.unLoad();
+                        return true;
+                    }
                 }
                 return false;
             }

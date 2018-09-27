@@ -41,7 +41,7 @@ public class CharBuffer extends BaseBuffer<CharBuffer.CharReadBuffer, CharBuffer
         @Override
         public char get(int pos) {
             checkRead(pos);
-            return MemoryUtils.getChar(memoryObject.getAddress(), pos);
+            return MemoryUtils.getChar(readAddress, pos);
         }
     }
 

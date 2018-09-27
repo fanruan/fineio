@@ -79,9 +79,10 @@ public abstract class BufferCreator<B extends Buffer> {
         while (iterator.hasNext()) {
             B buffer = iterator.next();
             if (buffer.getLevel() == Level.CLEAN) {
+                MemoryObject object = buffer.getFreeObject();
                 B b = keyMap.remove(buffer.getUri());
                 bufferMap.remove(b, true);
-                DE_ALLOCATOR.deAllocate(buffer.getFreeObject());
+                DE_ALLOCATOR.deAllocate(object);
                 buffer.unLoad();
                 result = true;
             }
@@ -169,6 +170,7 @@ public abstract class BufferCreator<B extends Buffer> {
             B buffer = keyMap.get(block.getBlockURI());
             if (null == buffer) {
                 buffer = create(connector, block, maxOffset);
+                bufferMap.put(buffer);
                 keyMap.put(block.getBlockURI(), buffer);
             } else {
                 bufferMap.update(buffer);
@@ -194,6 +196,7 @@ public abstract class BufferCreator<B extends Buffer> {
 
     protected abstract B create(Connector connector, URI uri);
 
+    synchronized
     public B poll() {
         B buffer = bufferMap.peek();
         if (null == buffer) {

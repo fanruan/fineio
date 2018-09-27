@@ -41,7 +41,7 @@ public class DoubleBuffer extends BaseBuffer<DoubleBuffer.DoubleReadBuffer, Doub
         @Override
         public double get(int pos) {
             checkRead(pos);
-            return MemoryUtils.getDouble(memoryObject.getAddress(), pos);
+            return MemoryUtils.getDouble(readAddress, pos);
         }
     }
 

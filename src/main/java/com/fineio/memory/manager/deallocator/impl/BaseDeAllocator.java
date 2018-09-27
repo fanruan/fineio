@@ -1,5 +1,6 @@
 package com.fineio.memory.manager.deallocator.impl;
 
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.memory.manager.deallocator.DeAllocator;
 import com.fineio.memory.manager.manager.MemoryManager;
@@ -22,13 +23,14 @@ public abstract class BaseDeAllocator extends SyncObject implements DeAllocator 
      */
     @Override
     public void deAllocate(MemoryObject memoryObject) {
+        FineIOLoggers.getLogger().error(String.format("auto release address: %d, release size: %d, currentSize: %d", memoryObject.getAddress(), memoryObject.getAllocateSize(), MemoryManager.INSTANCE.getCurrentMemorySize()));
         if (null == memoryObject) {
             return;
         }
         beforeStatusChange();
         MemoryUtils.free(memoryObject.getAddress());
         returnMemory(memoryObject.getAllocateSize());
-
+        FineIOLoggers.getLogger().error(String.format("after free size: %d", MemoryManager.INSTANCE.getCurrentMemorySize()));
     }
 
     /**

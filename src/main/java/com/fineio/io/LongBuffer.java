@@ -41,7 +41,7 @@ public class LongBuffer extends BaseBuffer<LongBuffer.LongReadBuffer, LongBuffer
         @Override
         public long get(int pos) {
             checkRead(pos);
-            return MemoryUtils.getLong(memoryObject.getAddress(), pos);
+            return MemoryUtils.getLong(readAddress, pos);
         }
     }
 

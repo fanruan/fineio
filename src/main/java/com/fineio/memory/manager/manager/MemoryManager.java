@@ -89,7 +89,7 @@ public enum MemoryManager {
                             }
                         }
                         LockSupport.parkNanos(1000);
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -341,15 +341,19 @@ public enum MemoryManager {
         @Override
         public void run() {
             if (null != cleaner) {
-                int i = 0;
-                boolean clean = false;
-                do {
-                    clean |= cleaner.clean();
-                } while (++i < 10);
-                if (clean) {
-                    System.gc();
-                } else {
-                    cleaner.cleanAllCleanable();
+                try {
+                    int i = 0;
+                    boolean clean = false;
+                    do {
+                        clean |= cleaner.clean();
+                    } while (++i < 10);
+                    if (clean) {
+                        System.gc();
+                    } else {
+                        cleaner.cleanAllCleanable();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }

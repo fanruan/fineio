@@ -14,6 +14,7 @@ import com.fineio.io.base.StreamCloseChecker;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.writer.JobFinishedManager;
 import com.fineio.io.file.writer.SyncManager;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.impl.BaseMemoryAllocator;
 import com.fineio.memory.manager.manager.MemoryManager;
@@ -152,15 +153,34 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
     @Override
     public MemoryObject getFreeObject() {
-        if (level != Level.WRITE) {
-            lock.lock();
-            try {
-                return new AllocateObject(address, allocateSize);
-            } finally {
-                lock.unlock();
+        lock.lock();
+        try {
+            switch (level) {
+                case WRITE:
+                case INITIAL:
+                    return null;
+                case CLEAN:
+                    MemoryObject object = new AllocateObject(address, allocateSize);
+                    load = false;
+                    allocateSize = 0;
+                    maxSize = 0;
+                    address = 0;
+                    return object;
+                case READ:
+                    if (syncStatus != SyncStatus.SYNC) {
+                        MemoryObject obj = new AllocateObject(address, allocateSize);
+                        load = false;
+                        allocateSize = 0;
+                        maxSize = 0;
+                        address = 0;
+                        return obj;
+                    }
+                default:
+                    return null;
             }
+        } finally {
+            lock.unlock();
         }
-        return null;
     }
 
     @Override
@@ -178,9 +198,13 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
     }
 
     protected abstract class ReadBuffer implements Buffer {
+        protected volatile long readAddress;
+
         public ReadBuffer() {
             if (address == 0) {
                 checkRead0();
+            } else {
+                readAddress = address;
             }
         }
 
@@ -255,9 +279,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                         level = Level.READ;
                         if (0 < maxSize && address != 0) {
                             load = true;
-                            if (null == memoryObject) {
-                                memoryObject = new AllocateObject(address, allocateSize);
-                            }
+                            readAddress = address;
                         }
                         break;
                     case READ:
@@ -307,9 +329,10 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     throw new BufferConstructException(e);
                 }
                 memoryObject = MemoryManager.INSTANCE.allocate(allocator);
+                readAddress = memoryObject.getAddress();
                 lock.lock();
                 try {
-                    address = memoryObject.getAddress();
+                    address = readAddress;
                     allocateSize = memoryObject.getAllocateSize();
                     load = true;
                     maxSize = (int) (allocateSize >> getOffset());
@@ -386,22 +409,28 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
         private final JobAssist createWriteJob(final boolean clear) {
             return new JobAssist(bufferKey, new Job() {
+                private int tryTime = 0;
+
                 @Override
                 public void doJob() {
+                    if (tryTime++ > 3) {
+                        return;
+                    }
                     try {
                         write0();
                         sync = false;
+                        level = Level.CLEAN;
+                        syncStatus = SyncStatus.UNSUPPORTED;
                         if (clear) {
                             listener.remove(BaseBuffer.this);
                         }
-                        level = Level.CLEAN;
-                        syncStatus = SyncStatus.UNSUPPORTED;
                     } catch (StreamCloseException e) {
                         flushed = false;
                         //stream close这种还是直接触发写把，否则force的时候如果有三次那么就会出现写不成功的bug
                         //理论讲写方法都是单线程，所以force的时候肯定也不会再写了，但是不怕一万就怕万一
                         //这样执行下去job会唤醒force的while循环会执行一次会导致写次数++
                         //所以不trigger了直接循环执行把
+                        FineIOLoggers.getLogger().error(e);
                         doJob();
                     }
                 }
