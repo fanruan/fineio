@@ -1,7 +1,7 @@
 package com.fineio.v1.cache;
 
 
-
+import java.lang.ref.ReferenceQueue;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +13,14 @@ public class CacheLinkedMap<T> {
     //链表只是控制释放不一定保存了所有的值
     private CacheObject<T> head;
     private CacheObject<T> foot;
+    private ReferenceQueue<T> referenceQueue;
+
+    public CacheLinkedMap(ReferenceQueue<T> referenceQueue) {
+        this.referenceQueue = referenceQueue;
+    }
+
+    public CacheLinkedMap() {
+    }
 
     private Map<T, CacheObject<T>> indexMap = new ConcurrentHashMap<T, CacheObject<T>>();
 
@@ -86,7 +94,7 @@ public class CacheLinkedMap<T> {
         synchronized (this){
             CacheObject<T> co = indexMap.get(t);
             if(co == null){
-                co = new CacheObject<T>(t);
+                co = new CacheObject<T>(t, referenceQueue);
                 indexMap.put(t, co);
             } else {
                 co.updateTime();

@@ -1,6 +1,8 @@
 package com.fineio.v1.io;
 
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
+
+import java.net.URI;
 
 /**
  * Created by daniel on 2017/2/20.
@@ -43,7 +45,7 @@ public interface Buffer {
      *
      * @return
      */
-    LEVEL getLevel();
+    BufferPrivilege getLevel();
 
 
     /**
@@ -79,4 +81,6 @@ public interface Buffer {
      * @return
      */
     int getLength();
+
+    URI getUri();
 }

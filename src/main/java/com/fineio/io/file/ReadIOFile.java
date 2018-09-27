@@ -1,8 +1,9 @@
 package com.fineio.io.file;
 
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.io.Buffer;
 import com.fineio.io.FileModel;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.storage.Connector;
 
 import java.io.IOException;
@@ -36,8 +37,8 @@ public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
     }
 
     @Override
-    protected LEVEL getLevel() {
-        return LEVEL.READ;
+    protected BufferPrivilege getLevel() {
+        return BufferPrivilege.READABLE;
     }
 
 
@@ -49,8 +50,8 @@ public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
     protected void closeChild(boolean clear) {
         if (buffers != null) {
             for (int i = 0; i < buffers.length; i++) {
-                if (buffers[i] != null) {
-                    buffers[i].close();
+                if (buffers[i] != null && null != buffers[i].get()) {
+                    buffers[i].get().close();
                     buffers[i] = null;
                 }
             }
@@ -74,7 +75,7 @@ public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
                     return true;
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                FineIOLoggers.getLogger().error(e);
             }
             return false;
         }

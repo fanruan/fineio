@@ -1,6 +1,6 @@
 package com.fineio.io.file;
 
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.io.Buffer;
 import com.fineio.io.FileModel;
 import com.fineio.io.edit.EditBuffer;
@@ -11,6 +11,7 @@ import java.net.URI;
 /**
  * Created by daniel on 2017/2/10.
  */
+@Deprecated
 public final class EditIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
 
     EditIOFile(Connector connector, URI uri, FileModel model) {
@@ -36,19 +37,19 @@ public final class EditIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
     }
 
     @Override
-    protected LEVEL getLevel() {
-        return LEVEL.EDIT;
+    protected BufferPrivilege getLevel() {
+        return BufferPrivilege.EDITABLE;
     }
 
     @Override
     protected void closeChild(boolean clear) {
         if (buffers != null) {
             for (int i = 0; i < buffers.length; i++) {
-                if (buffers[i] != null) {
+                if (buffers[i] != null && null != buffers[i].get()) {
                     if (clear) {
-                        ((EditBuffer) buffers[i]).forceAndClear();
+                        ((EditBuffer) buffers[i].get()).forceAndClear();
                     } else {
-                        ((EditBuffer) buffers[i]).force();
+                        ((EditBuffer) buffers[i].get()).force();
                     }
                     buffers[i] = null;
                 }

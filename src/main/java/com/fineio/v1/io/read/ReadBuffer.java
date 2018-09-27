@@ -1,6 +1,6 @@
 package com.fineio.v1.io.read;
 
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
@@ -90,8 +90,8 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
     }
 
 
-    public LEVEL getLevel() {
-        return LEVEL.READ;
+    public BufferPrivilege getLevel() {
+        return BufferPrivilege.READABLE;
     }
 
     /**
@@ -125,7 +125,7 @@ public abstract class ReadBuffer extends AbstractBuffer implements Read {
                 return;
             }
             if (close) {
-                throw new FileCloseException();
+                throw new FileCloseException(getUri());
             }
             if(directAccess) {
                 DirectAccess();

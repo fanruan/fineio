@@ -51,7 +51,9 @@ public class ShortBuffer extends AbstractBuffer<ShortReadBuffer, ShortWriteBuffe
 
     @Override
     protected void exitPool() {
-        manager.removeBuffer(PoolMode.SHORT, this);
+        if (!directAccess) {
+            manager.removeBuffer(PoolMode.SHORT, this);
+        }
     }
 
     @Override
@@ -78,8 +80,18 @@ public class ShortBuffer extends AbstractBuffer<ShortReadBuffer, ShortWriteBuffe
 
         @Override
         public short get(int pos) {
-            check(pos);
-            return MemoryUtils.getShort(address, pos);
+            lock.lock();
+            try {
+                check(pos);
+                return MemoryUtils.getShort(address, pos);
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        protected PoolMode poolMode() {
+            return PoolMode.SHORT;
         }
     }
 
@@ -97,6 +109,7 @@ public class ShortBuffer extends AbstractBuffer<ShortReadBuffer, ShortWriteBuffe
         }
     }
 
+    @Deprecated
     private final class ShortBufferE extends InnerEditBuffer implements ShortEditBuffer {
 
         @Override

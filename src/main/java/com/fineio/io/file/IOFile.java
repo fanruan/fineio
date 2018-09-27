@@ -1,7 +1,8 @@
 package com.fineio.io.file;
 
 import com.fineio.base.Bits;
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
+import com.fineio.cache.CacheManager;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.IOSetException;
 import com.fineio.io.Buffer;
@@ -28,10 +29,13 @@ import com.fineio.io.write.IntWriteBuffer;
 import com.fineio.io.write.LongWriteBuffer;
 import com.fineio.io.write.ShortWriteBuffer;
 import com.fineio.io.write.WriteOnlyBuffer;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 
 import java.io.Closeable;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.net.URI;
 
 /**
@@ -64,7 +68,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      * 单个block的大小
      */
     protected long single_block_len;
-    protected volatile Buffer[] buffers;
+    protected volatile WeakReference<Buffer>[] buffers;
     protected volatile boolean released = false;
     private volatile int bufferWriteIndex = -1;
 
@@ -157,78 +161,72 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
     /**
      * 随机写
      *
-     * @param file
      * @param p
      * @param d
      */
-    public static void put(IOFile<DoubleBuffer> file, long p, double d) {
-        ((DoubleWriteBuffer) file.getBuffer(file.checkBuffer(file.giw(p)))).put(file.gp(p), d);
+    public void put(long p, double d) {
+        ((DoubleWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
     }
 
     /**
      * 随机写
      *
-     * @param file
      * @param p
      * @param d
      */
-    public static void put(IOFile<ByteBuffer> file, long p, byte d) {
-        ((ByteWriteBuffer) file.getBuffer(file.checkBuffer(file.giw(p)))).put(file.gp(p), d);
+    public void put(long p, byte d) {
+        ((ByteWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
     }
 
     /**
      * 随机写
      *
-     * @param file
      * @param p
      * @param d
      */
-    public static void put(IOFile<CharBuffer> file, long p, char d) {
-        ((CharWriteBuffer) file.getBuffer(file.checkBuffer(file.giw(p)))).put(file.gp(p), d);
+    public void put(long p, char d) {
+        ((CharWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
     }
 
     /**
      * 随机写
      *
-     * @param file
+
      * @param p
      * @param d
      */
-    public static void put(IOFile<FloatBuffer> file, long p, float d) {
-        ((FloatWriteBuffer) file.getBuffer(file.checkBuffer(file.giw(p)))).put(file.gp(p), d);
+    public void put(long p, float d) {
+        ((FloatWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
     }
 
     /**
      * 随机写
      *
-     * @param file
      * @param p
      * @param d
      */
-    public static void put(IOFile<LongBuffer> file, long p, long d) {
-        ((LongWriteBuffer) file.getBuffer(file.checkBuffer(file.giw(p)))).put(file.gp(p), d);
+    public void put(long p, long d) {
+        ((LongWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
     }
 
     /**
      * 随机写
      *
-     * @param file
      * @param p
      * @param d
      */
-    public static void put(IOFile<IntBuffer> file, long p, int d) {
-        ((IntWriteBuffer) file.getBuffer(file.checkBuffer(file.giw(p)))).put(file.gp(p), d);
+    public void put(long p, int d) {
+        ((IntWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
     }
 
     /**
      * 随机写
      *
-     * @param file
      * @param p
      * @param d
      */
-    public static void put(IOFile<ShortBuffer> file, long p, short d) {
-        ((ShortWriteBuffer) file.getBuffer(file.checkBuffer(file.giw(p)))).put(file.gp(p), d);
+    public void put(long p, short d) {
+        ((ShortWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
     }
 
     /**
@@ -331,7 +329,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
     final void checkWrite(int len) {
         if (bufferWriteIndex != len) {
             if (bufferWriteIndex != -1) {
-                ((WriteOnlyBuffer) buffers[bufferWriteIndex]).write();
+                ((WriteOnlyBuffer) buffers[bufferWriteIndex].get()).write();
             }
             bufferWriteIndex = len;
         }
@@ -342,7 +340,13 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
             return 0;
         }
         int len = buffers.length - 1;
-        return ((WriteOnlyBuffer) buffers[len]).full() ? triggerWrite(len + 1) : len;
+        WriteOnlyBuffer buffer = null;
+        if (null == buffers[len] || null == buffers[len].get()) {
+            buffer = (WriteOnlyBuffer) initBuffer(len);
+        } else {
+            buffer = (WriteOnlyBuffer) buffers[len].get();
+        }
+        return buffer.full() ? triggerWrite(len + 1) : len;
     }
 
     final int triggerWrite(int len) {
@@ -357,7 +361,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
      */
     protected final void createBufferArray(int size) {
         this.blocks = size;
-        this.buffers = new Buffer[size];
+        this.buffers = new WeakReference[size];
     }
 
     private boolean inRange(int index) {
@@ -372,7 +376,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
     }
 
     private int createBufferArrayInRange(int index) {
-        Buffer[] buffers = this.buffers;
+        WeakReference<Buffer>[] buffers = this.buffers;
         createBufferArray(index + 1);
         if (buffers != null) {
             System.arraycopy(buffers, 0, this.buffers, 0, buffers.length);
@@ -390,7 +394,14 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
     }
 
     protected final Buffer getBuffer(int index) {
-        return buffers[checkIndex(index)] != null ? buffers[index] : initBuffer(index);
+        if (buffers[checkIndex(index)] != null) {
+            synchronized (buffers[index]) {
+                if (null != buffers[index].get()) {
+                    return buffers[index].get();
+                }
+            }
+        }
+        return initBuffer(index);
     }
 
     private int checkIndex(int index) {
@@ -402,10 +413,10 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
 
     private Buffer initBuffer(int index) {
         synchronized (this) {
-            if (buffers[index] == null) {
-                buffers[index] = createBuffer(index);
+        if (buffers[index] == null || buffers[index].get() == null) {
+            buffers[index] = new WeakReference<Buffer>(createBuffer(index), (ReferenceQueue<? super Buffer>) CacheManager.getInstance().referenceQueue);
             }
-            return buffers[index];
+        return buffers[index].get();
         }
     }
 
@@ -428,7 +439,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
         }
     }
 
-    protected abstract LEVEL getLevel();
+    protected abstract BufferPrivilege getLevel();
 
     protected FileBlock createIndexBlock(int index) {
         return new FileBlock(uri, String.valueOf(index));
@@ -446,7 +457,7 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
         try {
             connector.write(block, bytes);
         } catch (Throwable e) {
-            e.printStackTrace();
+            FineIOLoggers.getLogger().error(e);
         }
     }
 
@@ -481,9 +492,9 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
     public long fileSize() {
         long size = 0;
         if (buffers != null) {
-            for (Buffer buffer : buffers) {
-                if (null != buffer) {
-                    size += buffer.getAllocateSize();
+            for (WeakReference<Buffer> buffer : buffers) {
+                if (null != buffer && null != buffer.get()) {
+                    size += buffer.get().getAllocateSize();
                 }
             }
         }

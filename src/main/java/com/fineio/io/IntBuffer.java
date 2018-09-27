@@ -50,7 +50,9 @@ public class IntBuffer extends AbstractBuffer<IntReadBuffer, IntWriteBuffer, Int
 
     @Override
     protected void exitPool() {
-        manager.removeBuffer(PoolMode.INT, this);
+        if (!directAccess) {
+            manager.removeBuffer(PoolMode.INT, this);
+        }
     }
 
     @Override
@@ -77,8 +79,18 @@ public class IntBuffer extends AbstractBuffer<IntReadBuffer, IntWriteBuffer, Int
 
         @Override
         public int get(int pos) {
-            check(pos);
-            return MemoryUtils.getInt(address, pos);
+            lock.lock();
+            try {
+                check(pos);
+                return MemoryUtils.getInt(address, pos);
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        protected PoolMode poolMode() {
+            return PoolMode.INT;
         }
     }
 
@@ -96,6 +108,7 @@ public class IntBuffer extends AbstractBuffer<IntReadBuffer, IntWriteBuffer, Int
         }
     }
 
+    @Deprecated
     private final class IntBufferE extends InnerEditBuffer implements IntEditBuffer {
 
         @Override

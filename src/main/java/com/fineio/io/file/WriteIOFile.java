@@ -1,6 +1,6 @@
 package com.fineio.io.file;
 
-import com.fineio.cache.LEVEL;
+import com.fineio.cache.BufferPrivilege;
 import com.fineio.io.Buffer;
 import com.fineio.io.FileModel;
 import com.fineio.io.write.WriteOnlyBuffer;
@@ -38,19 +38,19 @@ public final class WriteIOFile<T extends Buffer> extends IOFile<T> {
     }
 
     @Override
-    protected LEVEL getLevel() {
-        return LEVEL.WRITE;
+    protected BufferPrivilege getLevel() {
+        return BufferPrivilege.WRITABLE;
     }
 
     @Override
     protected void closeChild(boolean clear) {
         if (buffers != null) {
             for (int i = 0; i < buffers.length; i++) {
-                if (buffers[i] != null) {
+                if (buffers[i] != null && null != buffers[i].get()) {
                     if (clear) {
-                        ((WriteOnlyBuffer) buffers[i]).forceAndClear();
+                        ((WriteOnlyBuffer) buffers[i].get()).forceAndClear();
                     } else {
-                        ((WriteOnlyBuffer) buffers[i]).force();
+                        ((WriteOnlyBuffer) buffers[i].get()).force();
                     }
                     buffers[i] = null;
                 }
