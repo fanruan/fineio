@@ -35,6 +35,8 @@ public class LongBuffer extends BaseBuffer<LongBuffer.LongReadBuffer, LongBuffer
 
     public interface LongWriteBuffer extends BufferW {
         void put(long value);
+
+        void put(int pos, long value);
     }
 
     private class LongBufferR extends ReadBuffer implements LongReadBuffer {
@@ -48,8 +50,13 @@ public class LongBuffer extends BaseBuffer<LongBuffer.LongReadBuffer, LongBuffer
     private class LongBufferW extends WriteBuffer implements LongWriteBuffer {
         @Override
         public void put(long value) {
-            ensureCapacity(++writeCurrentPosition);
-            MemoryUtils.put(address, writeCurrentPosition, value);
+            put(++writeCurrentPosition, value);
+        }
+
+        @Override
+        public void put(int pos, long value) {
+            ensureCapacity(pos);
+            MemoryUtils.put(address, pos, value);
         }
     }
 }

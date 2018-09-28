@@ -35,6 +35,8 @@ public class DoubleBuffer extends BaseBuffer<DoubleBuffer.DoubleReadBuffer, Doub
 
     public interface DoubleWriteBuffer extends BufferW {
         void put(double value);
+
+        void put(int pos, double value);
     }
 
     private class DoubleBufferR extends ReadBuffer implements DoubleReadBuffer {
@@ -48,9 +50,15 @@ public class DoubleBuffer extends BaseBuffer<DoubleBuffer.DoubleReadBuffer, Doub
     private class DoubleBufferW extends WriteBuffer implements DoubleWriteBuffer {
         @Override
         public void put(double value) {
-            ensureCapacity(++writeCurrentPosition);
-            MemoryUtils.put(address, writeCurrentPosition, value);
+            put(++writeCurrentPosition, value);
         }
+
+        @Override
+        public void put(int pos, double value) {
+            ensureCapacity(pos);
+            MemoryUtils.put(address, pos, value);
+        }
+
     }
 }
 

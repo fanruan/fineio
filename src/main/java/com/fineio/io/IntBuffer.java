@@ -36,6 +36,8 @@ public class IntBuffer extends BaseBuffer<IntBuffer.IntReadBuffer, IntBuffer.Int
 
     public interface IntWriteBuffer extends BufferW {
         void put(int value);
+
+        void put(int pos, int value);
     }
 
     private class IntBufferR extends ReadBuffer implements IntReadBuffer {
@@ -49,8 +51,13 @@ public class IntBuffer extends BaseBuffer<IntBuffer.IntReadBuffer, IntBuffer.Int
     private class IntBufferW extends WriteBuffer implements IntWriteBuffer {
         @Override
         public void put(int value) {
-            ensureCapacity(++writeCurrentPosition);
-            MemoryUtils.put(address, writeCurrentPosition, value);
+            put(++writeCurrentPosition, value);
+        }
+
+        @Override
+        public void put(int pos, int value) {
+            ensureCapacity(pos);
+            MemoryUtils.put(address, pos, value);
         }
     }
 }

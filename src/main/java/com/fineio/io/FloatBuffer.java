@@ -35,6 +35,8 @@ public class FloatBuffer extends BaseBuffer<FloatBuffer.FloatReadBuffer, FloatBu
 
     public interface FloatWriteBuffer extends BufferW {
         void put(float value);
+
+        void put(int pos, float value);
     }
 
     private class FloatBufferR extends ReadBuffer implements FloatReadBuffer {
@@ -48,8 +50,13 @@ public class FloatBuffer extends BaseBuffer<FloatBuffer.FloatReadBuffer, FloatBu
     private class FloatBufferW extends WriteBuffer implements FloatWriteBuffer {
         @Override
         public void put(float value) {
-            ensureCapacity(++writeCurrentPosition);
-            MemoryUtils.put(address, writeCurrentPosition, value);
+            put(++writeCurrentPosition, value);
+        }
+
+        @Override
+        public void put(int pos, float value) {
+            ensureCapacity(pos);
+            MemoryUtils.put(address, pos, value);
         }
     }
 }

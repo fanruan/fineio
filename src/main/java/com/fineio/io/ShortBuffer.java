@@ -35,6 +35,8 @@ public class ShortBuffer extends BaseBuffer<ShortBuffer.ShortReadBuffer, ShortBu
 
     public interface ShortWriteBuffer extends BufferW {
         void put(short value);
+
+        void put(int pos, short value);
     }
 
     private class ShortBufferR extends ReadBuffer implements ShortReadBuffer {
@@ -48,8 +50,13 @@ public class ShortBuffer extends BaseBuffer<ShortBuffer.ShortReadBuffer, ShortBu
     private class ShortBufferW extends WriteBuffer implements ShortWriteBuffer {
         @Override
         public void put(short value) {
-            ensureCapacity(++writeCurrentPosition);
-            MemoryUtils.put(address, writeCurrentPosition, value);
+            put(++writeCurrentPosition, value);
+        }
+
+        @Override
+        public void put(int pos, short value) {
+            ensureCapacity(pos);
+            MemoryUtils.put(address, pos, value);
         }
     }
 }

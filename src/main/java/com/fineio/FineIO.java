@@ -204,7 +204,7 @@ public class FineIO {
      * @param d
      */
     public static void put(IOFile<DoubleBuffer> file, long pos, double d) {
-        IOFile.put(file, d);
+        IOFile.put(file, pos, d);
     }
 
     /**
@@ -214,7 +214,7 @@ public class FineIO {
      * @param d
      */
     public static void put(IOFile<ByteBuffer> file, long pos, byte d) {
-        IOFile.put(file, d);
+        IOFile.put(file, pos, d);
     }
 
     /**
@@ -224,7 +224,7 @@ public class FineIO {
      * @param d
      */
     public static void put(IOFile<CharBuffer> file, long pos, char d) {
-        IOFile.put(file, d);
+        IOFile.put(file, pos, d);
     }
 
     /**
@@ -234,7 +234,7 @@ public class FineIO {
      * @param d
      */
     public static void put(IOFile<FloatBuffer> file, long pos, float d) {
-        IOFile.put(file, d);
+        IOFile.put(file, pos, d);
     }
 
     /**
@@ -244,7 +244,7 @@ public class FineIO {
      * @param d
      */
     public static void put(IOFile<LongBuffer> file, long pos, long d) {
-        IOFile.put(file, d);
+        IOFile.put(file, pos, d);
     }
 
     /**
@@ -254,7 +254,7 @@ public class FineIO {
      * @param d
      */
     public static void put(IOFile<IntBuffer> file, long pos, int d) {
-        IOFile.put(file, d);
+        IOFile.put(file, pos, d);
     }
 
     /**
@@ -264,7 +264,7 @@ public class FineIO {
      * @param d
      */
     public static void put(IOFile<ShortBuffer> file, long pos, short d) {
-        IOFile.put(file, d);
+        IOFile.put(file, pos, d);
     }
 
     /**

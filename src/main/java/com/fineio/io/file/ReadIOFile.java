@@ -15,6 +15,11 @@ public final class ReadIOFile<B extends Buffer> extends BaseReadIOFile<B> {
         super(connector, uri, model);
     }
 
+    @Override
+    protected FileLevel getFileLevel() {
+        return FileLevel.READ;
+    }
+
     public static final <E extends BaseBuffer> ReadIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
         return new ReadIOFile<E>(connector, uri, model);
     }

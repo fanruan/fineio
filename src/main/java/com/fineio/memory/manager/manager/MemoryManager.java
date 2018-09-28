@@ -359,7 +359,7 @@ public enum MemoryManager {
                 try {
                     if (cleaner.clean()) {
                         System.gc();
-                    } else if (triggerCount.incrementAndGet() > 10) {
+                    } else if (triggerCount.incrementAndGet() > 2) {
                         if (!cleaner.cleanAllCleanable()) {
                             cleaner.cleanReadable();
                         }

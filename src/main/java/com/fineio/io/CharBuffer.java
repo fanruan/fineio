@@ -35,6 +35,8 @@ public class CharBuffer extends BaseBuffer<CharBuffer.CharReadBuffer, CharBuffer
 
     public interface CharWriteBuffer extends BufferW {
         void put(char value);
+
+        void put(int pos, char value);
     }
 
     private class CharBufferR extends ReadBuffer implements CharReadBuffer {
@@ -48,8 +50,13 @@ public class CharBuffer extends BaseBuffer<CharBuffer.CharReadBuffer, CharBuffer
     private class CharBufferW extends WriteBuffer implements CharWriteBuffer {
         @Override
         public void put(char value) {
-            ensureCapacity(++writeCurrentPosition);
-            MemoryUtils.put(address, writeCurrentPosition, value);
+            put(++writeCurrentPosition, value);
+        }
+
+        @Override
+        public void put(int pos, char value) {
+            ensureCapacity(pos);
+            MemoryUtils.put(address, pos, value);
         }
     }
 }

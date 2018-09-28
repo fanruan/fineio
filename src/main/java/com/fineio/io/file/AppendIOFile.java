@@ -19,6 +19,11 @@ public final class AppendIOFile<B extends Buffer> extends BaseReadIOFile<B> {
         }
     }
 
+    @Override
+    protected FileLevel getFileLevel() {
+        return FileLevel.APPEND;
+    }
+
     public static final <E extends BaseBuffer> AppendIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
         return new AppendIOFile<E>(connector, uri, model);
     }

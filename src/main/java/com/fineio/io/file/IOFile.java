@@ -142,6 +142,125 @@ public abstract class IOFile<B extends Buffer> {
         ((CharBuffer.CharWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
     }
 
+    /**
+     * 随机写
+     *
+     * @param p
+     * @param d
+     */
+    public final static void put(IOFile<DoubleBuffer> file, long p, double d) {
+        switch (file.getFileLevel()) {
+            case READ:
+                throw new UnsupportedOperationException();
+            case WRITE:
+                ((WriteIOFile<DoubleBuffer>) file).put(p, d);
+                break;
+            case APPEND:
+                put(file, d);
+            default:
+        }
+    }
+
+    /**
+     * 随机写
+     *
+     * @param p
+     * @param d
+     */
+    public final static void put(IOFile<CharBuffer> file, long p, char d) {
+        switch (file.getFileLevel()) {
+            case READ:
+                throw new UnsupportedOperationException();
+            case WRITE:
+                ((WriteIOFile<CharBuffer>) file).put(p, d);
+                break;
+            case APPEND:
+                put(file, d);
+            default:
+        }
+
+    }
+
+    /**
+     * 随机写
+     *
+     * @param p
+     * @param d
+     */
+    public final static void put(IOFile<LongBuffer> file, long p, long d) {
+        switch (file.getFileLevel()) {
+            case READ:
+                throw new UnsupportedOperationException();
+            case WRITE:
+                ((WriteIOFile<LongBuffer>) file).put(p, d);
+                break;
+            case APPEND:
+                put(file, d);
+            default:
+        }
+
+    }
+
+    /**
+     * 随机写
+     *
+     * @param p
+     * @param d
+     */
+    public final static void put(IOFile<IntBuffer> file, long p, int d) {
+        switch (file.getFileLevel()) {
+            case READ:
+                throw new UnsupportedOperationException();
+            case WRITE:
+                ((WriteIOFile<IntBuffer>) file).put(p, d);
+                break;
+            case APPEND:
+                put(file, d);
+            default:
+        }
+
+    }
+
+    /**
+     * 随机写
+     *
+     * @param p
+     * @param d
+     */
+    public final static void put(IOFile<ByteBuffer> file, long p, byte d) {
+        switch (file.getFileLevel()) {
+            case READ:
+                throw new UnsupportedOperationException();
+            case WRITE:
+                ((WriteIOFile<ByteBuffer>) file).put(p, d);
+                break;
+            case APPEND:
+                put(file, d);
+            default:
+        }
+
+    }
+
+    /**
+     * 随机写
+     *
+     * @param p
+     * @param d
+     */
+    public final static void put(IOFile<ShortBuffer> file, long p, short d) {
+        switch (file.getFileLevel()) {
+            case READ:
+                throw new UnsupportedOperationException();
+            case WRITE:
+                ((WriteIOFile<ShortBuffer>) file).put(p, d);
+                break;
+            case APPEND:
+                put(file, d);
+            default:
+        }
+
+    }
+
     public final static char getChar(IOFile<CharBuffer> file, long p) {
         return ((CharBuffer.CharReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
     }
@@ -154,6 +273,21 @@ public abstract class IOFile<B extends Buffer> {
         return ((ShortBuffer.ShortReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
     }
 
+    public final static void put(IOFile<FloatBuffer> file, long p, float d) {
+        switch (file.getFileLevel()) {
+            case READ:
+                throw new UnsupportedOperationException();
+            case WRITE:
+                ((WriteIOFile<FloatBuffer>) file).put(p, d);
+                break;
+            case APPEND:
+                put(file, d);
+            default:
+        }
+    }
+
+    protected abstract FileLevel getFileLevel();
+
     protected final int calBufferIndex() {
         int len = buffers.length;
         if (((BufferW) buffers[len - 1]).full()) {
@@ -163,7 +297,7 @@ public abstract class IOFile<B extends Buffer> {
         }
     }
 
-    private final int checkBuffer(int index) {
+    protected final int checkBuffer(int index) {
         return inRange(index) ? index : createBufferArrayInRange(index);
     }
 
@@ -185,7 +319,7 @@ public abstract class IOFile<B extends Buffer> {
         return len;
     }
 
-    private final Buffer getBuffer(int i) {
+    protected final Buffer getBuffer(int i) {
         if (i < buffers.length && i > -1) {
             if (buffers[i] != null) {
                 return buffers[i];
