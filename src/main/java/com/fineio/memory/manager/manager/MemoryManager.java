@@ -70,6 +70,7 @@ public enum MemoryManager {
     private ScheduledExecutorService releaseLimitThread = FineIOExecutors.newScheduledExecutorService(1, "io-limit-thread");
     private volatile AtomicInteger releaseLimitCount = new AtomicInteger(0);
     private volatile AtomicInteger triggerCount = new AtomicInteger(0);
+    private volatile AtomicInteger triggerGcCount = new AtomicInteger(0);
     private final LinkedBlockingQueue<CleanTask> taskQueue = new LinkedBlockingQueue<CleanTask>();
 
     private Cleaner cleaner;
@@ -340,8 +341,9 @@ public enum MemoryManager {
                     }
                     LockSupport.parkNanos(1000);
                 }
-                if (triggerGC) {
+                if (triggerGC && triggerGcCount.incrementAndGet() >= 20) {
                     System.gc();
+                    triggerGcCount.set(0);
                 }
             }
         }
@@ -357,8 +359,9 @@ public enum MemoryManager {
         public void run() {
             if (null != cleaner) {
                 try {
-                    if (cleaner.clean()) {
+                    if (cleaner.clean() && triggerGcCount.incrementAndGet() >= 20) {
                         System.gc();
+                        triggerGcCount.set(0);
                     } else if (triggerCount.incrementAndGet() > 2) {
                         if (!cleaner.cleanAllCleanable()) {
                             cleaner.cleanReadable();
