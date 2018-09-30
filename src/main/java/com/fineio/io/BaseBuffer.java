@@ -13,7 +13,7 @@ import com.fineio.io.base.JobAssist;
 import com.fineio.io.base.StreamCloseChecker;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.writer.JobFinishedManager;
-import com.fineio.io.file.writer.QueueSyncManager;
+import com.fineio.io.file.writer.SyncManager;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.impl.BaseMemoryAllocator;
@@ -429,7 +429,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                 lastWriteTime = t;
                 syncStatus = SyncStatus.SYNC;
                 if (level == Level.WRITE) {
-                    QueueSyncManager.INSTANCE.triggerWork(createWriteJob(direct));
+                    SyncManager.getInstance().triggerWork(createWriteJob(direct));
                     if (!direct) {
                         flip();
                     }
@@ -487,7 +487,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             int i = 0;
             while (needFlush()) {
                 i++;
-                QueueSyncManager.INSTANCE.force(createWriteJob(clear));
+                SyncManager.getInstance().force(createWriteJob(clear));
                 //尝试3次依然抛错就不写了 强制释放内存 TODO后续考虑对异常未保存文件处理
                 if (i > 3) {
                     flushed = true;
