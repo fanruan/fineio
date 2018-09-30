@@ -13,7 +13,7 @@ import com.fineio.io.base.JobAssist;
 import com.fineio.io.base.StreamCloseChecker;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.writer.JobFinishedManager;
-import com.fineio.io.file.writer.SyncManager;
+import com.fineio.io.file.writer.QueueSyncManager;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.impl.BaseMemoryAllocator;
@@ -382,17 +382,22 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         private volatile boolean changed;
 
         public WriteBuffer() {
-            level = Level.WRITE;
-            JobFinishedManager.getInstance().addTask(uri);
             sync = false;
-            if (maxSize > 0 && address > 0 && allocateSize > 0) {
-                int offset = Maths.log2(maxSize);
-                setCurrentCapacity(offset);
-                currentMaxSize = maxSize;
-                writeCurrentPosition = maxSize - 1;
-                MemoryManager.INSTANCE.flip(allocateSize, true);
+            switch (level) {
+                case READ:
+                case CLEAN:
+                    if (maxSize > 0 && address > 0 && allocateSize > 0) {
+                        int offset = Maths.log2(maxSize);
+                        setCurrentCapacity(offset);
+                        currentMaxSize = maxSize;
+                        writeCurrentPosition = maxSize - 1;
+                        MemoryManager.INSTANCE.flip(allocateSize, true);
+                    }
+                default:
             }
             maxSize = 1 << maxOffset;
+            level = Level.WRITE;
+            JobFinishedManager.getInstance().addTask(uri);
         }
 
         @Override
@@ -423,9 +428,11 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                 sync = true;
                 lastWriteTime = t;
                 syncStatus = SyncStatus.SYNC;
-                SyncManager.getInstance().triggerWork(createWriteJob(direct));
-                if (!direct) {
-                    flip();
+                if (level == Level.WRITE) {
+                    QueueSyncManager.INSTANCE.triggerWork(createWriteJob(direct));
+                    if (!direct) {
+                        flip();
+                    }
                 }
             }
         }
@@ -467,18 +474,20 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         @Override
         public final void force() {
             syncStatus = SyncStatus.SYNC;
-            sync = true;
-            if (!direct) {
-                flip();
+            if (level == Level.WRITE) {
+                sync = true;
+                if (!direct) {
+                    flip();
+                }
+                forceWrite(direct);
             }
-            forceWrite(direct);
         }
 
         private final void forceWrite(boolean clear) {
             int i = 0;
             while (needFlush()) {
                 i++;
-                SyncManager.getInstance().force(createWriteJob(clear));
+                QueueSyncManager.INSTANCE.force(createWriteJob(clear));
                 //尝试3次依然抛错就不写了 强制释放内存 TODO后续考虑对异常未保存文件处理
                 if (i > 3) {
                     flushed = true;
