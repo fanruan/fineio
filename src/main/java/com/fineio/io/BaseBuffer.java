@@ -416,7 +416,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         }
 
         @Override
-        synchronized
         public boolean full() {
             return writeCurrentPosition >= maxSize - 1;
         }
