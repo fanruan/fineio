@@ -2,6 +2,9 @@ package com.fineio.io.file;
 
 import com.fineio.io.BaseBuffer;
 import com.fineio.io.Buffer;
+import com.fineio.io.file.writer.JobFinishedManager;
+import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
+import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
@@ -33,5 +36,45 @@ public final class ReadIOFile<B extends Buffer> extends BaseReadIOFile<B> {
             }
             return buffers[index];
         }
+    }
+
+    /**
+     * 删除操作
+     *
+     * @return
+     */
+    public void delete() {
+
+        JobFinishedManager.getInstance().finish(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (this) {
+                    boolean delete = connector.delete(createHeadBlock());
+                    if (buffers != null) {
+                        for (int i = 0; i < buffers.length; i++) {
+                            //内存泄露
+                            if (!released && buffers[i] != null) {
+                                MemoryObject object = buffers[i].getFreeObject();
+                                if (null != object) {
+                                    BaseDeAllocator.Builder.READ.build().deAllocate(object);
+                                    buffers[i].unLoad();
+                                }
+                                buffers[i] = null;
+                            }
+                            boolean v = connector.delete(createIndexBlock(i));
+                            if (delete) {
+                                delete = v;
+                            }
+                        }
+                    }
+                    connector.delete(new FileBlock(uri));
+                    URI parentURI = uri;
+                    while (null != (parentURI = connector.deleteParent(new FileBlock(parentURI)))) {
+                    }
+                    released = true;
+                }
+            }
+        });
+
     }
 }
