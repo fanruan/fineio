@@ -73,73 +73,46 @@ public abstract class IOFile<B extends Buffer> {
     }
 
     public final static void put(IOFile<IntBuffer> file, int d) {
-        int result = 0;
-        if (file.buffers == null || file.buffers.length == 0) {
-            result = 0;
-        } else {
-            result = file.calBufferIndex();
-        }
-        ((IntBuffer.IntWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
+        ((IntBuffer.IntWriteBuffer) file.getBuffer(file.checkBuffer(file.cw()))).put(d);
     }
 
     public final static void put(IOFile<ByteBuffer> file, byte d) {
-        int result = 0;
-        if (file.buffers == null || file.buffers.length == 0) {
-            result = 0;
-        } else {
-            result = file.calBufferIndex();
-        }
-        ((ByteBuffer.ByteWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
+        ((ByteBuffer.ByteWriteBuffer) file.getBuffer(file.checkBuffer(file.cw()))).put(d);
     }
 
     public final static void put(IOFile<LongBuffer> file, long d) {
-        int result = 0;
-        if (file.buffers == null || file.buffers.length == 0) {
-            result = 0;
-        } else {
-            result = file.calBufferIndex();
-        }
-        ((LongBuffer.LongWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
+        ((LongBuffer.LongWriteBuffer) file.getBuffer(file.checkBuffer(file.cw()))).put(d);
     }
 
     public final static void put(IOFile<DoubleBuffer> file, double d) {
-        int result = 0;
-        if (file.buffers == null || file.buffers.length == 0) {
-            result = 0;
-        } else {
-            result = file.calBufferIndex();
-        }
-        ((DoubleBuffer.DoubleWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
+        ((DoubleBuffer.DoubleWriteBuffer) file.getBuffer(file.checkBuffer(file.cw()))).put(d);
     }
 
     public final static void put(IOFile<ShortBuffer> file, short d) {
-        int result = 0;
-        if (file.buffers == null || file.buffers.length == 0) {
-            result = 0;
-        } else {
-            result = file.calBufferIndex();
-        }
-        ((ShortBuffer.ShortWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
+        ((ShortBuffer.ShortWriteBuffer) file.getBuffer(file.checkBuffer(file.cw()))).put(d);
     }
 
     public final static void put(IOFile<FloatBuffer> file, float d) {
-        int result = 0;
-        if (file.buffers == null || file.buffers.length == 0) {
-            result = 0;
-        } else {
-            result = file.calBufferIndex();
-        }
-        ((FloatBuffer.FloatWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
+        ((FloatBuffer.FloatWriteBuffer) file.getBuffer(file.checkBuffer(file.cw()))).put(d);
     }
 
     public final static void put(IOFile<CharBuffer> file, char d) {
+        ((CharBuffer.CharWriteBuffer) file.getBuffer(file.checkBuffer(file.cw()))).put(d);
+    }
+
+    private int cw() {
         int result = 0;
-        if (file.buffers == null || file.buffers.length == 0) {
+        if (buffers == null || buffers.length == 0) {
             result = 0;
         } else {
-            result = file.calBufferIndex();
+            int len = buffers.length;
+            if (((BufferW) buffers[len - 1]).full()) {
+                result = triggerWrite(len);
+            } else {
+                result = len - 1;
+            }
         }
-        ((CharBuffer.CharWriteBuffer) file.getBuffer(file.checkBuffer(result))).put(d);
+        return result;
     }
 
     /**
@@ -288,15 +261,6 @@ public abstract class IOFile<B extends Buffer> {
 
     protected abstract FileLevel getFileLevel();
 
-    protected final int calBufferIndex() {
-        int len = buffers.length;
-        if (((BufferW) buffers[len - 1]).full()) {
-            return triggerWrite(len);
-        } else {
-            return len - 1;
-        }
-    }
-
     protected final int checkBuffer(int index) {
         return inRange(index) ? index : createBufferArrayInRange(index);
     }
@@ -332,13 +296,6 @@ public abstract class IOFile<B extends Buffer> {
 
     protected abstract Buffer initBuffer(int index);
 
-    private final int checkIndex(int index) {
-        if (index > -1 && index < blocks) {
-            return index;
-        }
-        throw new IndexOutOfBoundsException("" + index);
-    }
-
     protected FileBlock createIndexBlock(int index) {
         return new FileBlock(uri, String.valueOf(index));
     }
@@ -354,7 +311,7 @@ public abstract class IOFile<B extends Buffer> {
      */
     protected final void createBufferArray(int size) {
         this.blocks = size;
-        this.buffers = (B[]) new Buffer[size];
+        this.buffers = new Buffer[size];
     }
 
     final void checkWrite(int len) {
