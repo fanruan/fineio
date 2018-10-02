@@ -2,6 +2,7 @@ package com.fineio.io;
 
 
 import com.fineio.cache.SyncStatus;
+import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
 
 import java.net.URI;
@@ -42,7 +43,7 @@ public interface Buffer {
     <B extends Buffer> B asAppend();
 
     interface Listener {
-        void remove(Buffer buffer);
+        void remove(Buffer buffer, BaseDeAllocator.Builder builder);
 
         void update(Buffer buffer);
     }

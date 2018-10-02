@@ -356,4 +356,10 @@ public abstract class IOFile<B extends Buffer> {
             return exists;
         }
     }
+
+    @Override
+    protected void finalize() {
+        //防止没有执行close导致内存泄露
+        close();
+    }
 }

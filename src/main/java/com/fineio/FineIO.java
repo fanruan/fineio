@@ -1,5 +1,8 @@
 package com.fineio;
 
+import com.fineio.directio.DirectIOFile;
+import com.fineio.directio.DirectReadIOFile;
+import com.fineio.directio.DirectWriteIOFile;
 import com.fineio.exception.MemorySetException;
 import com.fineio.io.ByteBuffer;
 import com.fineio.io.CharBuffer;
@@ -26,7 +29,7 @@ import java.net.URI;
  * @author yee
  * @date 2018/9/20
  */
-public class FineIO {
+public final class FineIO {
     /**
      * 创建IO文件
      *
@@ -345,6 +348,230 @@ public class FineIO {
     }
 
 
+    /**
+     * 随机写入
+     *
+     * @param file
+     * @param p
+     * @param d
+     */
+    public static void put(DirectIOFile<DoubleBuffer> file, int p, double d) {
+        DirectIOFile.put(file, p, d);
+    }
+
+    /**
+     * 随机写入
+     *
+     * @param file
+     * @param p
+     * @param d
+     */
+    public static void put(DirectIOFile<ByteBuffer> file, int p, byte d) {
+        DirectIOFile.put(file, p, d);
+    }
+
+    /**
+     * 随机写入
+     *
+     * @param file
+     * @param p
+     * @param d
+     */
+    public static void put(DirectIOFile<CharBuffer> file, int p, char d) {
+        DirectIOFile.put(file, p, d);
+    }
+
+    /**
+     * 随机写入
+     *
+     * @param file
+     * @param p
+     * @param d
+     */
+    public static void put(DirectIOFile<FloatBuffer> file, int p, float d) {
+        DirectIOFile.put(file, p, d);
+    }
+
+    /**
+     * 随机写入
+     *
+     * @param file
+     * @param p
+     * @param d
+     */
+    public static void put(DirectIOFile<LongBuffer> file, int p, long d) {
+        DirectIOFile.put(file, p, d);
+    }
+
+    /**
+     * 随机写入
+     *
+     * @param file
+     * @param p
+     * @param d
+     */
+    public static void put(DirectIOFile<IntBuffer> file, int p, int d) {
+        DirectIOFile.put(file, p, d);
+    }
+
+    /**
+     * 随机写入
+     *
+     * @param file
+     * @param p
+     * @param d
+     */
+    public static void put(DirectIOFile<ShortBuffer> file, int p, short d) {
+        DirectIOFile.put(file, p, d);
+    }
+
+    /**
+     * 连续写入
+     *
+     * @param file
+     * @param d
+     */
+    public static void put(DirectIOFile<DoubleBuffer> file, double d) {
+        DirectIOFile.put(file, d);
+    }
+
+    /**
+     * 连续写入
+     *
+     * @param file
+     * @param d
+     */
+    public static void put(DirectIOFile<ByteBuffer> file, byte d) {
+        DirectIOFile.put(file, d);
+    }
+
+    /**
+     * 连续写入
+     *
+     * @param file
+     * @param d
+     */
+    public static void put(DirectIOFile<CharBuffer> file, char d) {
+        DirectIOFile.put(file, d);
+    }
+
+    /**
+     * 连续写入
+     *
+     * @param file
+     * @param d
+     */
+    public static void put(DirectIOFile<FloatBuffer> file, float d) {
+        DirectIOFile.put(file, d);
+    }
+
+    /**
+     * 连续写入
+     *
+     * @param file
+     * @param d
+     */
+    public static void put(DirectIOFile<LongBuffer> file, long d) {
+        DirectIOFile.put(file, d);
+    }
+
+    /**
+     * 连续写入
+     *
+     * @param file
+     * @param d
+     */
+    public static void put(DirectIOFile<IntBuffer> file, int d) {
+        DirectIOFile.put(file, d);
+    }
+
+    /**
+     * 连续写入
+     *
+     * @param file
+     * @param d
+     */
+    public static void put(DirectIOFile<ShortBuffer> file, short d) {
+        DirectIOFile.put(file, d);
+    }
+
+    /**
+     * 随机读取
+     *
+     * @param file
+     * @param p
+     * @return
+     */
+    public final static long getLong(DirectIOFile<LongBuffer> file, int p) {
+        return DirectIOFile.getLong(file, p);
+    }
+
+    /**
+     * 随机读取
+     *
+     * @param file
+     * @param p
+     * @return
+     */
+    public final static int getInt(DirectIOFile<IntBuffer> file, int p) {
+        return DirectIOFile.getInt(file, p);
+    }
+
+    /**
+     * 随机读取
+     *
+     * @param file
+     * @param p
+     * @return
+     */
+    public final static char getChar(DirectIOFile<CharBuffer> file, int p) {
+        return DirectIOFile.getChar(file, p);
+    }
+
+    /**
+     * 随机读取
+     *
+     * @param file
+     * @param p
+     * @return
+     */
+    public final static double getDouble(DirectIOFile<DoubleBuffer> file, int p) {
+        return DirectIOFile.getDouble(file, p);
+    }
+
+    /**
+     * 随机读取
+     *
+     * @param file
+     * @param p
+     * @return
+     */
+    public final static float getFloat(DirectIOFile<FloatBuffer> file, int p) {
+        return DirectIOFile.getFloat(file, p);
+    }
+
+    /**
+     * 随机读取
+     *
+     * @param file
+     * @param p
+     * @return
+     */
+    public final static byte getByte(DirectIOFile<ByteBuffer> file, int p) {
+        return DirectIOFile.getByte(file, p);
+    }
+
+    /**
+     * 随机读取
+     *
+     * @param file
+     * @param p
+     * @return
+     */
+    public final static short getShort(DirectIOFile<ShortBuffer> file, int p) {
+        return DirectIOFile.getShort(file, p);
+    }
+
     public interface MODEL<F> {
         FineIO.MODEL<ReadIOFile<LongBuffer>> READ_LONG = new FineIO.MODEL<ReadIOFile<LongBuffer>>() {
 
@@ -499,6 +726,111 @@ public class FineIO {
             @Override
             public AppendIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
                 return AppendIOFile.createFineIO(connector, uri, FileModel.SHORT);
+            }
+        };
+
+        FineIO.MODEL<DirectReadIOFile<LongBuffer>> DIRECT_READ_LONG = new FineIO.MODEL<DirectReadIOFile<LongBuffer>>() {
+
+            @Override
+            public DirectReadIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
+                return DirectReadIOFile.createFineIO(connector, uri, FileModel.LONG);
+            }
+        };
+        FineIO.MODEL<DirectReadIOFile<DoubleBuffer>> DIRECT_READ_DOUBLE = new FineIO.MODEL<DirectReadIOFile<DoubleBuffer>>() {
+
+            @Override
+            public DirectReadIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
+                return DirectReadIOFile.createFineIO(connector, uri, FileModel.DOUBLE);
+            }
+        };
+
+        FineIO.MODEL<DirectReadIOFile<FloatBuffer>> DIRECT_READ_FLOAT = new FineIO.MODEL<DirectReadIOFile<FloatBuffer>>() {
+
+            @Override
+            public DirectReadIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
+                return DirectReadIOFile.createFineIO(connector, uri, FileModel.FLOAT);
+            }
+        };
+
+        FineIO.MODEL<DirectReadIOFile<IntBuffer>> DIRECT_READ_INT = new FineIO.MODEL<DirectReadIOFile<IntBuffer>>() {
+
+            @Override
+            public DirectReadIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
+                return DirectReadIOFile.createFineIO(connector, uri, FileModel.INT);
+            }
+        };
+        FineIO.MODEL<DirectReadIOFile<CharBuffer>> DIRECT_READ_CHAR = new FineIO.MODEL<DirectReadIOFile<CharBuffer>>() {
+
+            @Override
+            public DirectReadIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
+                return DirectReadIOFile.createFineIO(connector, uri, FileModel.CHAR);
+            }
+        };
+        FineIO.MODEL<DirectReadIOFile<ByteBuffer>> DIRECT_READ_BYTE = new FineIO.MODEL<DirectReadIOFile<ByteBuffer>>() {
+
+            @Override
+            public DirectReadIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
+                return DirectReadIOFile.createFineIO(connector, uri, FileModel.BYTE);
+            }
+        };
+
+        FineIO.MODEL<DirectReadIOFile<ShortBuffer>> DIRECT_READ_SHORT = new FineIO.MODEL<DirectReadIOFile<ShortBuffer>>() {
+
+            @Override
+            public DirectReadIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
+                return DirectReadIOFile.createFineIO(connector, uri, FileModel.SHORT);
+            }
+        };
+
+
+        FineIO.MODEL<DirectWriteIOFile<LongBuffer>> DIRECT_WRITE_LONG = new FineIO.MODEL<DirectWriteIOFile<LongBuffer>>() {
+
+            @Override
+            public DirectWriteIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
+                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.LONG);
+            }
+        };
+        FineIO.MODEL<DirectWriteIOFile<DoubleBuffer>> DIRECT_WRITE_DOUBLE = new FineIO.MODEL<DirectWriteIOFile<DoubleBuffer>>() {
+
+            @Override
+            public DirectWriteIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
+                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.DOUBLE);
+            }
+        };
+        FineIO.MODEL<DirectWriteIOFile<FloatBuffer>> DIRECT_WRITE_FLOAT = new FineIO.MODEL<DirectWriteIOFile<FloatBuffer>>() {
+
+            @Override
+            public DirectWriteIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
+                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.FLOAT);
+            }
+        };
+        FineIO.MODEL<DirectWriteIOFile<IntBuffer>> DIRECT_WRITE_INT = new FineIO.MODEL<DirectWriteIOFile<IntBuffer>>() {
+
+            @Override
+            public DirectWriteIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
+                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.INT);
+            }
+        };
+        FineIO.MODEL<DirectWriteIOFile<CharBuffer>> DIRECT_WRITE_CHAR = new FineIO.MODEL<DirectWriteIOFile<CharBuffer>>() {
+
+            @Override
+            public DirectWriteIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
+                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.CHAR);
+            }
+        };
+        FineIO.MODEL<DirectWriteIOFile<ByteBuffer>> DIRECT_WRITE_BYTE = new FineIO.MODEL<DirectWriteIOFile<ByteBuffer>>() {
+
+            @Override
+            public DirectWriteIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
+                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.BYTE);
+            }
+        };
+
+        FineIO.MODEL<DirectWriteIOFile<ShortBuffer>> DIRECT_WRITE_SHORT = new FineIO.MODEL<DirectWriteIOFile<ShortBuffer>>() {
+
+            @Override
+            public DirectWriteIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
+                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.SHORT);
             }
         };
 

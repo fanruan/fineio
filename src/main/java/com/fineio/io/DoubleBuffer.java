@@ -5,6 +5,8 @@ import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
+import java.net.URI;
+
 /**
  * @author yee
  * @date 2018/9/19
@@ -12,6 +14,10 @@ import com.fineio.storage.Connector;
 public class DoubleBuffer extends BaseBuffer<DoubleBuffer.DoubleReadBuffer, DoubleBuffer.DoubleWriteBuffer> {
     public DoubleBuffer(Connector connector, FileBlock block, int maxOffset, Listener listener) {
         super(connector, block, maxOffset, listener);
+    }
+
+    public DoubleBuffer(Connector connector, URI uri, Listener listener) {
+        super(connector, uri, listener);
     }
 
     @Override

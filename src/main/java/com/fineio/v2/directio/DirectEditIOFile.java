@@ -1,4 +1,4 @@
-package com.fineio.directio;
+package com.fineio.v2.directio;
 
 import com.fineio.storage.Connector;
 import com.fineio.v2.io.Buffer;

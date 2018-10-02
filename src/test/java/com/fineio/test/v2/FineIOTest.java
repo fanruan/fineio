@@ -1,9 +1,6 @@
 package com.fineio.test.v2;
 
 import com.fineio.base.Bits;
-import com.fineio.directio.DirectEditIOFile;
-import com.fineio.directio.DirectReadIOFile;
-import com.fineio.directio.DirectWriteIOFile;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.IOSetException;
 import com.fineio.io.file.FileBlock;
@@ -13,6 +10,9 @@ import com.fineio.test.v2.io.MemoryLeakTest;
 import com.fineio.test.v2.io.file.WriteIOFileTest;
 import com.fineio.v2.FineIO;
 import com.fineio.v2.cache.CacheManager;
+import com.fineio.v2.directio.DirectEditIOFile;
+import com.fineio.v2.directio.DirectReadIOFile;
+import com.fineio.v2.directio.DirectWriteIOFile;
 import com.fineio.v2.io.ByteBuffer;
 import com.fineio.v2.io.CharBuffer;
 import com.fineio.v2.io.DoubleBuffer;

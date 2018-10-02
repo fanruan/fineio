@@ -1,23 +1,37 @@
-package com.fineio.directio;
+package com.fineio.v2.directio;
 
-import com.fineio.io.Buffer;
-import com.fineio.io.ByteBuffer;
-import com.fineio.io.CharBuffer;
-import com.fineio.io.DoubleBuffer;
-import com.fineio.io.FloatBuffer;
-import com.fineio.io.IntBuffer;
-import com.fineio.io.LongBuffer;
-import com.fineio.io.ShortBuffer;
-import com.fineio.io.file.FileModel;
 import com.fineio.storage.Connector;
+import com.fineio.v2.io.Buffer;
+import com.fineio.v2.io.ByteBuffer;
+import com.fineio.v2.io.CharBuffer;
+import com.fineio.v2.io.DoubleBuffer;
+import com.fineio.v2.io.FileModel;
+import com.fineio.v2.io.FloatBuffer;
+import com.fineio.v2.io.IntBuffer;
+import com.fineio.v2.io.LongBuffer;
+import com.fineio.v2.io.ShortBuffer;
+import com.fineio.v2.io.read.ByteReadBuffer;
+import com.fineio.v2.io.read.CharReadBuffer;
+import com.fineio.v2.io.read.DoubleReadBuffer;
+import com.fineio.v2.io.read.FloatReadBuffer;
+import com.fineio.v2.io.read.IntReadBuffer;
+import com.fineio.v2.io.read.LongReadBuffer;
+import com.fineio.v2.io.read.ShortReadBuffer;
+import com.fineio.v2.io.write.ByteWriteBuffer;
+import com.fineio.v2.io.write.CharWriteBuffer;
+import com.fineio.v2.io.write.DoubleWriteBuffer;
+import com.fineio.v2.io.write.FloatWriteBuffer;
+import com.fineio.v2.io.write.IntWriteBuffer;
+import com.fineio.v2.io.write.LongWriteBuffer;
+import com.fineio.v2.io.write.ShortWriteBuffer;
 
 import java.net.URI;
 
 /**
- * @author yee
- * @date 2018/10/2
+ * Created by daniel on 2017/4/25.
+ * 不支持大文件，建议使用小于64M文件
  */
-public abstract class DirectIOFile<B extends Buffer> {
+public abstract class DirectIOFile<E extends Buffer> {
     protected Connector connector;
     protected URI uri;
     protected volatile Buffer buffer;
@@ -39,7 +53,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      */
 
     public static void put(DirectIOFile<DoubleBuffer> file, double d) {
-        ((DoubleBuffer.DoubleWriteBuffer) file.getBuffer()).put(d);
+        ((DoubleWriteBuffer) file.getBuffer()).put(d);
     }
 
     /**
@@ -50,7 +64,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      */
 
     public static void put(DirectIOFile<ByteBuffer> file, byte d) {
-        ((ByteBuffer.ByteWriteBuffer) file.getBuffer()).put(d);
+        ((ByteWriteBuffer) file.getBuffer()).put(d);
     }
 
     /**
@@ -61,7 +75,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      */
 
     public static void put(DirectIOFile<CharBuffer> file, char d) {
-        ((CharBuffer.CharWriteBuffer) file.getBuffer()).put(d);
+        ((CharWriteBuffer) file.getBuffer()).put(d);
     }
 
     /**
@@ -72,7 +86,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      */
 
     public static void put(DirectIOFile<FloatBuffer> file, float d) {
-        ((FloatBuffer.FloatWriteBuffer) file.getBuffer()).put(d);
+        ((FloatWriteBuffer) file.getBuffer()).put(d);
     }
 
     /**
@@ -83,7 +97,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      */
 
     public static void put(DirectIOFile<LongBuffer> file, long d) {
-        ((LongBuffer.LongWriteBuffer) file.getBuffer()).put(d);
+        ((LongWriteBuffer) file.getBuffer()).put(d);
     }
 
     /**
@@ -94,7 +108,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      */
 
     public static void put(DirectIOFile<IntBuffer> file, int d) {
-        ((IntBuffer.IntWriteBuffer) file.getBuffer()).put(d);
+        ((IntWriteBuffer) file.getBuffer()).put(d);
     }
 
     /**
@@ -105,7 +119,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      */
 
     public static void put(DirectIOFile<ShortBuffer> file, short d) {
-        ((ShortBuffer.ShortWriteBuffer) file.getBuffer()).put(d);
+        ((ShortWriteBuffer) file.getBuffer()).put(d);
     }
 
 
@@ -117,7 +131,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      * @param d
      */
     public static void put(DirectIOFile<DoubleBuffer> file, int p, double d) {
-        ((DoubleBuffer.DoubleWriteBuffer) file.getBuffer()).put(p, d);
+        ((DoubleWriteBuffer) file.getBuffer()).put(p, d);
     }
 
     /**
@@ -128,7 +142,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      * @param d
      */
     public static void put(DirectIOFile<ByteBuffer> file, int p, byte d) {
-        ((ByteBuffer.ByteWriteBuffer) file.getBuffer()).put(p, d);
+        ((ByteWriteBuffer) file.getBuffer()).put(p, d);
     }
 
     /**
@@ -139,7 +153,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      * @param d
      */
     public static void put(DirectIOFile<CharBuffer> file, int p, char d) {
-        ((CharBuffer.CharWriteBuffer) file.getBuffer()).put(p, d);
+        ((CharWriteBuffer) file.getBuffer()).put(p, d);
     }
 
     /**
@@ -150,7 +164,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      * @param d
      */
     public static void put(DirectIOFile<FloatBuffer> file, int p, float d) {
-        ((FloatBuffer.FloatWriteBuffer) file.getBuffer()).put(p, d);
+        ((FloatWriteBuffer) file.getBuffer()).put(p, d);
     }
 
     /**
@@ -161,7 +175,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      * @param d
      */
     public static void put(DirectIOFile<LongBuffer> file, int p, long d) {
-        ((LongBuffer.LongWriteBuffer) file.getBuffer()).put(p, d);
+        ((LongWriteBuffer) file.getBuffer()).put(p, d);
     }
 
     /**
@@ -172,7 +186,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      * @param d
      */
     public static void put(DirectIOFile<IntBuffer> file, int p, int d) {
-        ((IntBuffer.IntWriteBuffer) file.getBuffer()).put(p, d);
+        ((IntWriteBuffer) file.getBuffer()).put(p, d);
     }
 
     /**
@@ -183,7 +197,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      * @param d
      */
     public static void put(DirectIOFile<ShortBuffer> file, int p, short d) {
-        ((ShortBuffer.ShortWriteBuffer) file.getBuffer()).put(p, d);
+        ((ShortWriteBuffer) file.getBuffer()).put(p, d);
     }
 
     /**
@@ -194,7 +208,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      * @return
      */
     public final static long getLong(DirectIOFile<LongBuffer> file, int p) {
-        return ((LongBuffer.LongReadBuffer) file.getBuffer()).get(p);
+        return ((LongReadBuffer) file.getBuffer()).get(p);
     }
 
     /**
@@ -205,7 +219,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      * @return
      */
     public final static int getInt(DirectIOFile<IntBuffer> file, int p) {
-        return ((IntBuffer.IntReadBuffer) file.getBuffer()).get(p);
+        return ((IntReadBuffer) file.getBuffer()).get(p);
     }
 
     /**
@@ -216,7 +230,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      * @return
      */
     public final static char getChar(DirectIOFile<CharBuffer> file, int p) {
-        return ((CharBuffer.CharReadBuffer) file.getBuffer()).get(p);
+        return ((CharReadBuffer) file.getBuffer()).get(p);
     }
 
     /**
@@ -227,7 +241,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      * @return
      */
     public final static double getDouble(DirectIOFile<DoubleBuffer> file, int p) {
-        return ((DoubleBuffer.DoubleReadBuffer) file.getBuffer()).get(p);
+        return ((DoubleReadBuffer) file.getBuffer()).get(p);
     }
 
     /**
@@ -238,7 +252,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      * @return
      */
     public final static float getFloat(DirectIOFile<FloatBuffer> file, int p) {
-        return ((FloatBuffer.FloatReadBuffer) file.getBuffer()).get(p);
+        return ((FloatReadBuffer) file.getBuffer()).get(p);
     }
 
     /**
@@ -249,7 +263,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      * @return
      */
     public final static byte getByte(DirectIOFile<ByteBuffer> file, int p) {
-        return ((ByteBuffer.ByteReadBuffer) file.getBuffer()).get(p);
+        return ((ByteReadBuffer) file.getBuffer()).get(p);
     }
 
     /**
@@ -260,7 +274,7 @@ public abstract class DirectIOFile<B extends Buffer> {
      * @return
      */
     public final static short getShort(DirectIOFile<ShortBuffer> file, int p) {
-        return ((ShortBuffer.ShortReadBuffer) file.getBuffer()).get(p);
+        return ((ShortReadBuffer) file.getBuffer()).get(p);
     }
 
     /**
@@ -274,9 +288,26 @@ public abstract class DirectIOFile<B extends Buffer> {
         return buffer != null ? buffer : initBuffer();
     }
 
+    /**
+     * 获取文件指定类型的长度
+     *
+     * @return
+     */
+    public int length() {
+        return getBuffer().getLength();
+    }
+
+    /**
+     * 获取文件指byte的长度
+     *
+     * @return
+     */
+    public int byteLength() {
+        return getBuffer().getByteSize();
+    }
+
     protected abstract Buffer initBuffer();
 
-    @Override
     protected void finalize() {
         //防止没有执行close导致内存泄露
         close();

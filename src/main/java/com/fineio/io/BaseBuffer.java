@@ -17,6 +17,7 @@ import com.fineio.io.file.writer.SyncManager;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.impl.BaseMemoryAllocator;
+import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.manager.MemoryManager;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.memory.manager.obj.impl.AllocateObject;
@@ -451,7 +452,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                         level = Level.CLEAN;
                         syncStatus = SyncStatus.UNSUPPORTED;
                         if (clear) {
-                            listener.remove(BaseBuffer.this);
+                            listener.remove(BaseBuffer.this, BaseDeAllocator.Builder.WRITE);
                         }
                     } catch (StreamCloseException e) {
                         flushed = false;

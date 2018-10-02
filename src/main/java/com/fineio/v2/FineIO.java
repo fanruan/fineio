@@ -1,9 +1,5 @@
 package com.fineio.v2;
 
-import com.fineio.directio.DirectEditIOFile;
-import com.fineio.directio.DirectIOFile;
-import com.fineio.directio.DirectReadIOFile;
-import com.fineio.directio.DirectWriteIOFile;
 import com.fineio.exception.MemorySetException;
 import com.fineio.io.file.writer.JobFinishedManager;
 import com.fineio.io.file.writer.SyncManager;
@@ -12,6 +8,10 @@ import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.MemoryConf;
 import com.fineio.storage.Connector;
 import com.fineio.v2.cache.CacheManager;
+import com.fineio.v2.directio.DirectEditIOFile;
+import com.fineio.v2.directio.DirectIOFile;
+import com.fineio.v2.directio.DirectReadIOFile;
+import com.fineio.v2.directio.DirectWriteIOFile;
 import com.fineio.v2.io.ByteBuffer;
 import com.fineio.v2.io.CharBuffer;
 import com.fineio.v2.io.DoubleBuffer;

@@ -12,6 +12,8 @@ import com.fineio.io.ShortBuffer;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 
+import java.net.URI;
+
 /**
  * @author yee
  * @date 2018/9/20
@@ -21,6 +23,11 @@ public enum FileModel {
      *
      */
     INT {
+        @Override
+        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri) {
+            return CacheManager.DataType.INT.createBuffer(connector, uri);
+        }
+
         @Override
         public byte offset() {
             return MemoryConstants.OFFSET_INT;
@@ -33,6 +40,11 @@ public enum FileModel {
     },
     BYTE {
         @Override
+        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri) {
+            return CacheManager.DataType.BYTE.createBuffer(connector, uri);
+        }
+
+        @Override
         public byte offset() {
             return MemoryConstants.OFFSET_BYTE;
         }
@@ -43,6 +55,11 @@ public enum FileModel {
         }
     },
     LONG {
+        @Override
+        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri) {
+            return CacheManager.DataType.LONG.createBuffer(connector, uri);
+        }
+
         @Override
         public byte offset() {
             return MemoryConstants.OFFSET_LONG;
@@ -55,6 +72,11 @@ public enum FileModel {
     },
     SHORT {
         @Override
+        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri) {
+            return CacheManager.DataType.SHORT.createBuffer(connector, uri);
+        }
+
+        @Override
         public byte offset() {
             return MemoryConstants.OFFSET_SHORT;
         }
@@ -65,6 +87,11 @@ public enum FileModel {
         }
     },
     FLOAT {
+        @Override
+        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri) {
+            return CacheManager.DataType.FLOAT.createBuffer(connector, uri);
+        }
+
         @Override
         public byte offset() {
             return MemoryConstants.OFFSET_FLOAT;
@@ -77,6 +104,11 @@ public enum FileModel {
     },
     DOUBLE {
         @Override
+        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri) {
+            return CacheManager.DataType.DOUBLE.createBuffer(connector, uri);
+        }
+
+        @Override
         public byte offset() {
             return MemoryConstants.OFFSET_DOUBLE;
         }
@@ -87,6 +119,11 @@ public enum FileModel {
         }
     },
     CHAR {
+        @Override
+        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri) {
+            return CacheManager.DataType.CHAR.createBuffer(connector, uri);
+        }
+
         @Override
         public byte offset() {
             return MemoryConstants.OFFSET_CHAR;
@@ -99,6 +136,8 @@ public enum FileModel {
     };
 
     public abstract <B extends BaseBuffer> B createBuffer(Connector connector, FileBlock fileBlock, int maxOffset);
+
+    public abstract <B extends BaseBuffer> B createBuffer(Connector connector, URI uri);
 
     public abstract byte offset();
 }

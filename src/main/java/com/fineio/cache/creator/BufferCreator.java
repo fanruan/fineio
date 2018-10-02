@@ -15,6 +15,7 @@ import com.fineio.io.file.FileBlock;
 import com.fineio.memory.manager.deallocator.DeAllocator;
 import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
+import com.fineio.memory.manager.obj.impl.AllocateObject;
 import com.fineio.storage.Connector;
 import com.fineio.thread.FineIOExecutors;
 import com.fineio.v1.cache.CacheLinkedMap;
@@ -35,28 +36,39 @@ import java.util.concurrent.TimeUnit;
 public abstract class BufferCreator<B extends Buffer> {
     private static final long TIMEOUT = 10 * 60 * 1000L;
     private static final DeAllocator DE_ALLOCATOR = BaseDeAllocator.Builder.READ.build();
-    protected final ScheduledExecutorService activeService = FineIOExecutors.newScheduledExecutorService(1, "active-thread");
-    protected final ScheduledExecutorService timeoutService = FineIOExecutors.newScheduledExecutorService(1, "timeout-thread");
+    protected final ScheduledExecutorService activeService;
+    protected final ScheduledExecutorService timeoutService;
     protected Buffer.Listener listener;
     protected final ReferenceQueue<B> bufferReferenceQueue;
     private CacheLinkedMap<B> bufferMap;
     private Map<URI, B> keyMap = new ConcurrentHashMap<URI, B>();
 
-    private BufferCreator() {
+    private BufferCreator(String prefix) {
         bufferReferenceQueue = new ReferenceQueue<B>();
         bufferMap = new CacheLinkedMap<B>(bufferReferenceQueue);
+        timeoutService = FineIOExecutors.newScheduledExecutorService(1, String.format("%s-timeout-thread", prefix));
+        activeService = FineIOExecutors.newScheduledExecutorService(1, String.format("%s-active-thread", prefix));
         activeService.scheduleWithFixedDelay(createActiveTask(), TIMEOUT / 2, TIMEOUT / 2, TimeUnit.MILLISECONDS);
         timeoutService.scheduleWithFixedDelay(createTimeoutTask(), TIMEOUT, TIMEOUT, TimeUnit.MILLISECONDS);
         listener = new Buffer.Listener() {
             @Override
-            public void remove(Buffer buffer) {
-                MemoryObject object = buffer.getFreeObject();
+            public void remove(Buffer buffer, BaseDeAllocator.Builder builder) {
+                MemoryObject object = null;
+                switch (builder) {
+                    case READ:
+                        object = buffer.getFreeObject();
+                        break;
+                    case WRITE:
+                        object = new AllocateObject(buffer.getAddress(), buffer.getAllocateSize());
+                        break;
+                    default:
+                }
                 if (null != object) {
                     B b = keyMap.remove(buffer.getUri());
                     if (null != b) {
                         bufferMap.remove(b, true);
                     }
-                    DE_ALLOCATOR.deAllocate(object);
+                    builder.build().deAllocate(object);
                     buffer.unLoad();
                     Reference<? extends B> ref = null;
                     while (null != (ref = bufferReferenceQueue.poll())) {
@@ -199,15 +211,7 @@ public abstract class BufferCreator<B extends Buffer> {
     protected abstract B create(Connector connector, FileBlock block, int maxOffset);
 
     public B createBuffer(Connector connector, URI uri) {
-        synchronized (this) {
-            B buffer = keyMap.get(uri);
-            if (null == buffer) {
-                buffer = create(connector, uri);
-                keyMap.put(uri, buffer);
-            }
-            bufferMap.put(buffer);
-            return buffer;
-        }
+        return create(connector, uri);
     }
 
     protected abstract B create(Connector connector, URI uri);
@@ -244,7 +248,7 @@ public abstract class BufferCreator<B extends Buffer> {
         BYTE {
             @Override
             public BufferCreator<ByteBuffer> build() {
-                return new BufferCreator<ByteBuffer>() {
+                return new BufferCreator<ByteBuffer>("byte") {
                     @Override
                     protected ByteBuffer create(Connector connector, FileBlock block, int maxOffset) {
                         return new ByteBuffer(connector, block, maxOffset, listener);
@@ -252,7 +256,7 @@ public abstract class BufferCreator<B extends Buffer> {
 
                     @Override
                     protected ByteBuffer create(Connector connector, URI uri) {
-                        return null;
+                        return new ByteBuffer(connector, uri, listener);
                     }
                 };
             }
@@ -263,7 +267,7 @@ public abstract class BufferCreator<B extends Buffer> {
         INT {
             @Override
             public BufferCreator<IntBuffer> build() {
-                return new BufferCreator<IntBuffer>() {
+                return new BufferCreator<IntBuffer>("int") {
                     @Override
                     protected IntBuffer create(Connector connector, FileBlock block, int maxOffset) {
                         return new IntBuffer(connector, block, maxOffset, listener);
@@ -271,7 +275,7 @@ public abstract class BufferCreator<B extends Buffer> {
 
                     @Override
                     protected IntBuffer create(Connector connector, URI uri) {
-                        return null;
+                        return new IntBuffer(connector, uri, listener);
                     }
                 };
             }
@@ -279,7 +283,7 @@ public abstract class BufferCreator<B extends Buffer> {
         LONG {
             @Override
             public BufferCreator<LongBuffer> build() {
-                return new BufferCreator<LongBuffer>() {
+                return new BufferCreator<LongBuffer>("long") {
                     @Override
                     protected LongBuffer create(Connector connector, FileBlock block, int maxOffset) {
                         return new LongBuffer(connector, block, maxOffset, listener);
@@ -287,7 +291,7 @@ public abstract class BufferCreator<B extends Buffer> {
 
                     @Override
                     protected LongBuffer create(Connector connector, URI uri) {
-                        return null;
+                        return new LongBuffer(connector, uri, listener);
                     }
                 };
             }
@@ -295,7 +299,7 @@ public abstract class BufferCreator<B extends Buffer> {
         FLOAT {
             @Override
             public BufferCreator<FloatBuffer> build() {
-                return new BufferCreator<FloatBuffer>() {
+                return new BufferCreator<FloatBuffer>("float") {
                     @Override
                     protected FloatBuffer create(Connector connector, FileBlock block, int maxOffset) {
                         return new FloatBuffer(connector, block, maxOffset, listener);
@@ -303,7 +307,7 @@ public abstract class BufferCreator<B extends Buffer> {
 
                     @Override
                     protected FloatBuffer create(Connector connector, URI uri) {
-                        return null;
+                        return new FloatBuffer(connector, uri, listener);
                     }
                 };
             }
@@ -311,7 +315,7 @@ public abstract class BufferCreator<B extends Buffer> {
         CHAR {
             @Override
             public BufferCreator<CharBuffer> build() {
-                return new BufferCreator<CharBuffer>() {
+                return new BufferCreator<CharBuffer>("char") {
                     @Override
                     protected CharBuffer create(Connector connector, FileBlock block, int maxOffset) {
                         return new CharBuffer(connector, block, maxOffset, listener);
@@ -319,7 +323,7 @@ public abstract class BufferCreator<B extends Buffer> {
 
                     @Override
                     protected CharBuffer create(Connector connector, URI uri) {
-                        return null;
+                        return new CharBuffer(connector, uri, listener);
                     }
                 };
             }
@@ -327,7 +331,7 @@ public abstract class BufferCreator<B extends Buffer> {
         SHORT {
             @Override
             public BufferCreator<ShortBuffer> build() {
-                return new BufferCreator<ShortBuffer>() {
+                return new BufferCreator<ShortBuffer>("short") {
                     @Override
                     protected ShortBuffer create(Connector connector, FileBlock block, int maxOffset) {
                         return new ShortBuffer(connector, block, maxOffset, listener);
@@ -335,7 +339,7 @@ public abstract class BufferCreator<B extends Buffer> {
 
                     @Override
                     protected ShortBuffer create(Connector connector, URI uri) {
-                        return null;
+                        return new ShortBuffer(connector, uri, listener);
                     }
                 };
             }
@@ -343,7 +347,7 @@ public abstract class BufferCreator<B extends Buffer> {
         DOUBLE {
             @Override
             public BufferCreator<DoubleBuffer> build() {
-                return new BufferCreator<DoubleBuffer>() {
+                return new BufferCreator<DoubleBuffer>("double") {
                     @Override
                     protected DoubleBuffer create(Connector connector, FileBlock block, int maxOffset) {
                         return new DoubleBuffer(connector, block, maxOffset, listener);
@@ -351,7 +355,7 @@ public abstract class BufferCreator<B extends Buffer> {
 
                     @Override
                     protected DoubleBuffer create(Connector connector, URI uri) {
-                        return null;
+                        return new DoubleBuffer(connector, uri, listener);
                     }
                 };
             }

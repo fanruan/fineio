@@ -1,31 +1,27 @@
 package com.fineio.directio;
 
+import com.fineio.io.Buffer;
 import com.fineio.io.file.FileBlock;
+import com.fineio.io.file.FileModel;
+import com.fineio.io.file.writer.JobFinishedManager;
+import com.fineio.memory.manager.deallocator.DeAllocator;
+import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
+import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.storage.Connector;
-import com.fineio.v2.io.Buffer;
-import com.fineio.v2.io.FileModel;
 
 import java.net.URI;
 
 /**
- * Created by daniel on 2017/4/25.
+ * @author yee
+ * @date 2018/10/2
  */
-public class DirectReadIOFile<T extends Buffer> extends DirectIOFile<T> {
+public final class DirectReadIOFile<B extends Buffer> extends DirectIOFile<B> {
+    private static final DeAllocator DE_ALLOCATOR = BaseDeAllocator.Builder.READ.build();
 
-
-    private DirectReadIOFile(Connector connector, URI uri, FileModel model) {
+    DirectReadIOFile(Connector connector, URI uri, FileModel model) {
         super(connector, uri, model);
     }
 
-    /**
-     * 创建File方法
-     *
-     * @param connector 连接器
-     * @param uri       子路径
-     * @param model     子类型
-     * @param <E>       继承ReadBuffer的子类型
-     * @return
-     */
     public static final <E extends Buffer> DirectReadIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
         return new DirectReadIOFile<E>(connector, uri, model);
     }
@@ -34,7 +30,7 @@ public class DirectReadIOFile<T extends Buffer> extends DirectIOFile<T> {
     protected Buffer initBuffer() {
         if (buffer == null) {
             synchronized (this) {
-                buffer = model.createBufferForRead(connector, uri);
+                buffer = model.createBuffer(connector, uri).asRead();
             }
         }
         return buffer;
@@ -43,21 +39,27 @@ public class DirectReadIOFile<T extends Buffer> extends DirectIOFile<T> {
     @Override
     protected void closeChild() {
         if (buffer != null) {
-            buffer.closeWithOutSync();
-        }
-    }
-
-    public boolean delete() {
-        synchronized (this) {
-            if (!released) {
-                if (buffer != null) {
-                    buffer.closeWithOutSync();
-                    buffer = null;
-                }
-                released = true;
+            MemoryObject object = buffer.getFreeObject();
+            if (null != object) {
+                DE_ALLOCATOR.deAllocate(object);
+                buffer.unLoad();
             }
+            buffer = null;
         }
-        return connector.delete(new FileBlock(uri));
     }
 
+    public void delete() {
+        JobFinishedManager.getInstance().finish(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (this) {
+                    if (!released) {
+                        closeChild();
+                        released = true;
+                    }
+                    connector.delete(new FileBlock(uri));
+                }
+            }
+        });
+    }
 }
