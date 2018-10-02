@@ -59,10 +59,10 @@ public abstract class BaseMemoryAllocator extends SyncObject {
         /**
          * 直接单文件Builder
          */
-        SMALL {
+        DIRECT {
             @Override
             public Allocator build(final InputStream is) {
-                return new SmallFileMemoryAllocator.SmallFileReadAllocator() {
+                return new DirectFileMemoryAllocator.DirectFileReadAllocator() {
                     @Override
                     public MemoryObject allocate() throws OutOfMemoryError {
                         return allocateRead(is);
@@ -72,7 +72,7 @@ public abstract class BaseMemoryAllocator extends SyncObject {
 
             @Override
             public Allocator build(final InputStream is, final int maxLength) {
-                return new SmallFileMemoryAllocator.SmallFileReadAllocator() {
+                return new DirectFileMemoryAllocator.DirectFileReadAllocator() {
                     @Override
                     public MemoryObject allocate() throws OutOfMemoryError {
                         return allocateRead(is, maxLength);
@@ -104,12 +104,7 @@ public abstract class BaseMemoryAllocator extends SyncObject {
         }
 
         public ReAllocator build(final MemoryObject memoryObject, final long newSize) {
-            return new BaseReAllocator() {
-                @Override
-                public MemoryObject allocate() throws OutOfMemoryError {
-                    return reAllocate(memoryObject.getAddress(), memoryObject.getAllocateSize(), newSize);
-                }
-            };
+            return build(memoryObject.getAddress(), memoryObject.getAllocateSize(), newSize);
         }
     }
 

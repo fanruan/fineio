@@ -14,11 +14,11 @@ import java.io.InputStream;
  * @author yee
  * @date 2018/9/18
  */
-public class SmallFileMemoryAllocator extends BaseMemoryAllocator {
+public class DirectFileMemoryAllocator extends BaseMemoryAllocator {
     private static final int DEFAULT_SIZE_STEP = 1024;
     private long allocateSize;
 
-    SmallFileMemoryAllocator() {
+    DirectFileMemoryAllocator() {
     }
 
     @Override
@@ -65,6 +65,6 @@ public class SmallFileMemoryAllocator extends BaseMemoryAllocator {
         return allocateRead(is, DEFAULT_SIZE_STEP);
     }
 
-    static abstract class SmallFileReadAllocator extends SmallFileMemoryAllocator implements ReadAllocator {
+    static abstract class DirectFileReadAllocator extends DirectFileMemoryAllocator implements ReadAllocator {
     }
 }

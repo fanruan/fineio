@@ -359,7 +359,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                         allocator = BaseMemoryAllocator.Builder.BLOCK.build(
                                 bufferKey.getConnector().read(bufferKey.getBlock()), maxLength);
                     } else {
-                        allocator = BaseMemoryAllocator.Builder.SMALL.build(
+                        allocator = BaseMemoryAllocator.Builder.DIRECT.build(
                                 bufferKey.getConnector().read(bufferKey.getBlock()));
                     }
                 } catch (Exception e) {
@@ -607,7 +607,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                 if (!direct) {
                     allocator = BaseMemoryAllocator.Builder.BLOCK.build(address, len, newLen);
                 } else {
-                    allocator = BaseMemoryAllocator.Builder.SMALL.build(address, len, newLen);
+                    allocator = BaseMemoryAllocator.Builder.DIRECT.build(address, len, newLen);
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
