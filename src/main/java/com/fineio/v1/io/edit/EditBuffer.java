@@ -8,8 +8,8 @@ import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 import com.fineio.v1.cache.CacheManager;
 import com.fineio.v1.io.Buffer;
+import com.fineio.v1.io.Level;
 import com.fineio.v1.io.write.WriteBuffer;
-import com.fineio.v2.cache.BufferPrivilege;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -155,8 +155,9 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
         }
     }
 
-    public BufferPrivilege getLevel() {
-        return BufferPrivilege.EDITABLE;
+    @Override
+    public Level getLevel() {
+        return Level.EDIT;
     }
 
 

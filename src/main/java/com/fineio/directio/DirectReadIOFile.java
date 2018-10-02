@@ -4,9 +4,6 @@ import com.fineio.io.Buffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.FileModel;
 import com.fineio.io.file.writer.JobFinishedManager;
-import com.fineio.memory.manager.deallocator.DeAllocator;
-import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
-import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
@@ -16,10 +13,10 @@ import java.net.URI;
  * @date 2018/10/2
  */
 public final class DirectReadIOFile<B extends Buffer> extends DirectIOFile<B> {
-    private static final DeAllocator DE_ALLOCATOR = BaseDeAllocator.Builder.READ.build();
 
     DirectReadIOFile(Connector connector, URI uri, FileModel model) {
         super(connector, uri, model);
+        initBuffer();
     }
 
     public static final <E extends Buffer> DirectReadIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
@@ -39,11 +36,7 @@ public final class DirectReadIOFile<B extends Buffer> extends DirectIOFile<B> {
     @Override
     protected void closeChild() {
         if (buffer != null) {
-            MemoryObject object = buffer.getFreeObject();
-            if (null != object) {
-                DE_ALLOCATOR.deAllocate(object);
-                buffer.unLoad();
-            }
+            buffer.clearAfterClose();
             buffer = null;
         }
     }

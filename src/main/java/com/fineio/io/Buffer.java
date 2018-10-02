@@ -28,11 +28,15 @@ public interface Buffer {
 
     void close();
 
+    void clearAfterClose();
+
     boolean resentAccess();
 
     void resetAccess();
 
     void unLoad();
+
+    int getLength();
 
     MemoryObject getFreeObject();
 

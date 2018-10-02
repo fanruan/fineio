@@ -77,4 +77,18 @@ public final class ReadIOFile<B extends Buffer> extends BaseReadIOFile<B> {
         });
 
     }
+
+    @Override
+    public void close() {
+        synchronized (this) {
+            if (null != buffers) {
+                for (int i = 0; i < buffers.length; i++) {
+                    if (null != buffers[i]) {
+                        buffers[i].clearAfterClose();
+                        buffers[i] = null;
+                    }
+                }
+            }
+        }
+    }
 }

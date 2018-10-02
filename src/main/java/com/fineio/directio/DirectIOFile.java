@@ -293,4 +293,11 @@ public abstract class DirectIOFile<B extends Buffer> {
     }
 
     protected abstract void closeChild();
+
+    public final int length() {
+        if (null != buffer) {
+            return buffer.getLength();
+        }
+        return 0;
+    }
 }

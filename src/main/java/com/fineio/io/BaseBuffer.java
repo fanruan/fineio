@@ -70,6 +70,8 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         this.direct = true;
         this.listener = listener;
         this.uri = uri;
+        this.maxOffset = 31;
+        this.maxSize = Integer.MAX_VALUE;
     }
 
     public BaseBuffer(Connector connector, FileBlock block, int maxOffset, Listener listener) {
@@ -82,6 +84,11 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         this.listener = listener;
         this.uri = block.getBlockURI();
 
+    }
+
+    @Override
+    public int getLength() {
+        return maxSize;
     }
 
     @Override
@@ -178,13 +185,15 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     address = 0;
                     return object;
                 case READ:
-                    if (syncStatus != SyncStatus.SYNC) {
-                        MemoryObject obj = new AllocateObject(address, allocateSize);
-                        load = false;
-                        allocateSize = 0;
-                        maxSize = 0;
-                        address = 0;
-                        return obj;
+                    synchronized (this) {
+                        if (syncStatus != SyncStatus.SYNC) {
+                            MemoryObject obj = new AllocateObject(address, allocateSize);
+                            load = false;
+                            allocateSize = 0;
+                            maxSize = 0;
+                            address = 0;
+                            return obj;
+                        }
                     }
                 default:
                     return null;
@@ -206,6 +215,11 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         } finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    public void clearAfterClose() {
+
     }
 
     protected abstract class ReadBuffer implements Buffer {
@@ -243,6 +257,11 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         @Override
         public long getAddress() {
             return address;
+        }
+
+        @Override
+        public void clearAfterClose() {
+            listener.remove(BaseBuffer.this, BaseDeAllocator.Builder.READ);
         }
 
         @Override
@@ -364,6 +383,12 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         public Level getLevel() {
             return Level.READ;
         }
+
+        @Override
+        public int getLength() {
+            checkRead0();
+            return maxSize;
+        }
     }
 
     protected abstract class WriteBuffer implements BufferW {
@@ -384,21 +409,27 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
         public WriteBuffer() {
             sync = false;
-            switch (level) {
-                case READ:
-                case CLEAN:
-                    if (maxSize > 0 && address > 0 && allocateSize > 0) {
-                        int offset = Maths.log2(maxSize);
-                        setCurrentCapacity(offset);
-                        currentMaxSize = maxSize;
-                        writeCurrentPosition = maxSize - 1;
-                        MemoryManager.INSTANCE.flip(allocateSize, true);
-                    }
-                default:
+            if (direct) {
+                maxOffset = 31;
+                maxSize = Integer.MAX_VALUE;
+            } else {
+                switch (level) {
+                    case READ:
+                    case CLEAN:
+                        if (maxSize > 0 && address > 0 && allocateSize > 0) {
+                            int offset = Maths.log2(maxSize);
+                            setCurrentCapacity(offset);
+                            currentMaxSize = maxSize;
+                            writeCurrentPosition = maxSize - 1;
+                            MemoryManager.INSTANCE.flip(allocateSize, true);
+                        }
+                    default:
+                }
+                maxSize = 1 << maxOffset;
+                JobFinishedManager.getInstance().addTask(uri);
             }
-            maxSize = 1 << maxOffset;
             level = Level.WRITE;
-            JobFinishedManager.getInstance().addTask(uri);
+
         }
 
         @Override
@@ -433,6 +464,8 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     if (!direct) {
                         flip();
                     }
+                } else {
+                    syncStatus = SyncStatus.UNSUPPORTED;
                 }
             }
         }
@@ -452,7 +485,11 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                         level = Level.CLEAN;
                         syncStatus = SyncStatus.UNSUPPORTED;
                         if (clear) {
-                            listener.remove(BaseBuffer.this, BaseDeAllocator.Builder.WRITE);
+                            if (direct) {
+                                listener.remove(BaseBuffer.this, BaseDeAllocator.Builder.WRITE);
+                            } else {
+                                listener.remove(BaseBuffer.this, BaseDeAllocator.Builder.READ);
+                            }
                         }
                     } catch (StreamCloseException e) {
                         flushed = false;
@@ -480,6 +517,8 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     flip();
                 }
                 forceWrite(direct);
+            } else {
+                syncStatus = SyncStatus.UNSUPPORTED;
             }
         }
 
@@ -626,6 +665,21 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         }
 
         @Override
+        public void clearAfterClose() {
+            syncStatus = SyncStatus.SYNC;
+            if (level == Level.WRITE) {
+                sync = true;
+                if (!direct) {
+                    flip();
+                }
+                forceWrite(true);
+            } else {
+                syncStatus = SyncStatus.UNSUPPORTED;
+                listener.remove(BaseBuffer.this, BaseDeAllocator.Builder.READ);
+            }
+        }
+
+        @Override
         public boolean resentAccess() {
             return access;
         }
@@ -643,6 +697,11 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         @Override
         public MemoryObject getFreeObject() {
             return BaseBuffer.this.getFreeObject();
+        }
+
+        @Override
+        public int getLength() {
+            return writeCurrentPosition + 1;
         }
     }
 

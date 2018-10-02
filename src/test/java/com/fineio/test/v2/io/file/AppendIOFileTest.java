@@ -1,16 +1,16 @@
 package com.fineio.test.v2.io.file;
 
+import com.fineio.FineIO;
+import com.fineio.io.ByteBuffer;
+import com.fineio.io.CharBuffer;
+import com.fineio.io.FloatBuffer;
+import com.fineio.io.IntBuffer;
+import com.fineio.io.LongBuffer;
+import com.fineio.io.ShortBuffer;
 import com.fineio.io.file.FileBlock;
+import com.fineio.io.file.IOFile;
 import com.fineio.storage.AbstractConnector;
 import com.fineio.storage.Connector;
-import com.fineio.v2.FineIO;
-import com.fineio.v2.io.ByteBuffer;
-import com.fineio.v2.io.CharBuffer;
-import com.fineio.v2.io.FloatBuffer;
-import com.fineio.v2.io.IntBuffer;
-import com.fineio.v2.io.LongBuffer;
-import com.fineio.v2.io.ShortBuffer;
-import com.fineio.v2.io.file.IOFile;
 import junit.framework.TestCase;
 
 import java.io.ByteArrayInputStream;

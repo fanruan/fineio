@@ -1,25 +1,18 @@
 package com.fineio.test.v2.io.buffer;
 
+import com.fineio.FineIO;
 import com.fineio.base.Bits;
+import com.fineio.cache.CacheManager;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
+import com.fineio.io.ByteBuffer;
+import com.fineio.io.CharBuffer;
+import com.fineio.io.DoubleBuffer;
+import com.fineio.io.FloatBuffer;
+import com.fineio.io.IntBuffer;
+import com.fineio.io.LongBuffer;
+import com.fineio.io.ShortBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
-import com.fineio.v2.FineIO;
-import com.fineio.v2.io.AbstractBuffer;
-import com.fineio.v2.io.ByteBuffer;
-import com.fineio.v2.io.CharBuffer;
-import com.fineio.v2.io.DoubleBuffer;
-import com.fineio.v2.io.FloatBuffer;
-import com.fineio.v2.io.IntBuffer;
-import com.fineio.v2.io.LongBuffer;
-import com.fineio.v2.io.ShortBuffer;
-import com.fineio.v2.io.read.ByteReadBuffer;
-import com.fineio.v2.io.read.CharReadBuffer;
-import com.fineio.v2.io.read.DoubleReadBuffer;
-import com.fineio.v2.io.read.FloatReadBuffer;
-import com.fineio.v2.io.read.IntReadBuffer;
-import com.fineio.v2.io.read.LongReadBuffer;
-import com.fineio.v2.io.read.ShortReadBuffer;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.easymock.IMocksControl;
@@ -39,17 +32,6 @@ import static junit.framework.TestCase.assertTrue;
  * @date 2018/6/1
  */
 public class BufferTest {
-    private static <T extends AbstractBuffer> T createBuffer(Class<T> clazz, Object connector, Object block, int offset) {
-        try {
-            Constructor<T> constructor = clazz.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
-            constructor.setAccessible(true);
-            return constructor.newInstance(connector, block, offset);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     private byte[] createRandomByte(int off) {
         int len = 1 << off;
         byte[] arrays = new byte[len];
@@ -92,8 +74,8 @@ public class BufferTest {
     }
 
     private void byteTest(byte[] value, Connector connector, FileBlock block, int off) {
-        ByteBuffer buffer = createBuffer(ByteBuffer.class, connector, block, off);
-        ByteReadBuffer readOnlyBuffer = buffer.readOnlyBuffer();
+        ByteBuffer buffer = CacheManager.DataType.BYTE.createBuffer(connector, block, off);
+        ByteBuffer.ByteReadBuffer readOnlyBuffer = buffer.asRead();
         byte r = 0;
         for (int k = 0; k < value.length; k++) {
             r += value[k];
@@ -111,7 +93,7 @@ public class BufferTest {
         }
         assertTrue(exp);
 //        buffer.clear();
-        readOnlyBuffer.close();
+        readOnlyBuffer.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -121,8 +103,8 @@ public class BufferTest {
 
     private void intTest(byte[] value, Connector connector, FileBlock block, int off) {
         boolean exp;
-        IntBuffer ib = createBuffer(IntBuffer.class, connector, block, off - 2);
-        IntReadBuffer readOnlyBuffer = ib.readOnlyBuffer();
+        IntBuffer ib = CacheManager.DataType.INT.createBuffer(connector, block, off);
+        IntBuffer.IntReadBuffer readOnlyBuffer = ib.asRead();
         int v1 = 0;
         for (int k = 0, klen = value.length; k < klen; k += 4) {
             v1 += Bits.getInt(value, k);
@@ -140,7 +122,7 @@ public class BufferTest {
         }
         assertTrue(exp);
 //        ib.clear();
-        readOnlyBuffer.close();
+        readOnlyBuffer.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -151,8 +133,8 @@ public class BufferTest {
 
     private void floatTest(byte[] value, Connector connector, FileBlock block, int off) {
         boolean exp;
-        FloatBuffer ib = createBuffer(FloatBuffer.class, connector, block, off - 2);
-        FloatReadBuffer readOnlyBuffer = ib.readOnlyBuffer();
+        FloatBuffer ib = CacheManager.DataType.FLOAT.createBuffer(connector, block, off);
+        FloatBuffer.FloatReadBuffer readOnlyBuffer = ib.asRead();
         float v1 = 0;
         for (int k = 0, klen = value.length; k < klen; k += 4) {
             v1 += Bits.getFloat(value, k);
@@ -170,7 +152,7 @@ public class BufferTest {
         }
         assertTrue(exp);
 //        ib.clear();
-        readOnlyBuffer.close();
+        readOnlyBuffer.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -180,8 +162,8 @@ public class BufferTest {
 
     private void doubleTest(byte[] value, Connector connector, FileBlock block, int off) {
         boolean exp;
-        DoubleBuffer db = createBuffer(DoubleBuffer.class, connector, block, off - 3);
-        DoubleReadBuffer readOnlyBuffer = db.readOnlyBuffer();
+        DoubleBuffer db = CacheManager.DataType.DOUBLE.createBuffer(connector, block, off);
+        DoubleBuffer.DoubleReadBuffer readOnlyBuffer = db.asRead();
         double d1 = 0;
         for (int k = 0, klen = value.length; k < klen; k += 8) {
             d1 += Bits.getDouble(value, k);
@@ -200,7 +182,7 @@ public class BufferTest {
         assertTrue(exp);
 //        db.clear();
 //        db.force();
-        readOnlyBuffer.close();
+        readOnlyBuffer.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -210,8 +192,8 @@ public class BufferTest {
 
     private void charTest(byte[] value, Connector connector, FileBlock block, int off) {
         boolean exp;
-        CharBuffer cb = createBuffer(CharBuffer.class, connector, block, off - 1);
-        CharReadBuffer readOnlyBuffer = cb.readOnlyBuffer();
+        CharBuffer cb = CacheManager.DataType.CHAR.createBuffer(connector, block, off);
+        CharBuffer.CharReadBuffer readOnlyBuffer = cb.asRead();
         char c1 = 0;
         for (int k = 0, klen = value.length; k < klen; k += 2) {
             c1 += Bits.getChar(value, k);
@@ -230,7 +212,7 @@ public class BufferTest {
         assertTrue(exp);
 //        cb.clear();
 //        cb.force();
-        readOnlyBuffer.close();
+        readOnlyBuffer.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -241,8 +223,8 @@ public class BufferTest {
 
     private void shortTest(byte[] value, Connector connector, FileBlock block, int off) {
         boolean exp;
-        ShortBuffer cb = createBuffer(ShortBuffer.class, connector, block, off - 1);
-        ShortReadBuffer readOnlyBuffer = cb.readOnlyBuffer();
+        ShortBuffer cb = CacheManager.DataType.SHORT.createBuffer(connector, block, off);
+        ShortBuffer.ShortReadBuffer readOnlyBuffer = cb.asRead();
         short c1 = 0;
         for (int k = 0, klen = value.length; k < klen; k += 2) {
             c1 += Bits.getChar(value, k);
@@ -261,7 +243,7 @@ public class BufferTest {
         assertTrue(exp);
 //        cb.clear();
 //        cb.force();
-        readOnlyBuffer.close();
+        readOnlyBuffer.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -272,8 +254,8 @@ public class BufferTest {
 
     private void longTest(byte[] value, Connector connector, FileBlock block, int off) {
         boolean exp;
-        LongBuffer db = createBuffer(LongBuffer.class, connector, block, off - 3);
-        LongReadBuffer readOnlyBuffer = db.readOnlyBuffer();
+        LongBuffer db = CacheManager.DataType.LONG.createBuffer(connector, block, off);
+        LongBuffer.LongReadBuffer readOnlyBuffer = db.asRead();
         long d1 = 0;
         for (int k = 0, klen = value.length; k < klen; k += 8) {
             d1 += Bits.getLong(value, k);
@@ -292,7 +274,7 @@ public class BufferTest {
         assertTrue(exp);
 //        db.clear();
 //        db.force();
-        readOnlyBuffer.close();
+        readOnlyBuffer.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -323,8 +305,8 @@ public class BufferTest {
             }
         }).anyTimes();
         control.replay();
-        final ByteBuffer buffer = createBuffer(ByteBuffer.class, connector, block, 10);
-        final ByteReadBuffer byteReadOnlyBuffer = buffer.readOnlyBuffer();
+        final ByteBuffer buffer = CacheManager.DataType.BYTE.createBuffer(connector, block, 10);
+        final ByteBuffer.ByteReadBuffer byteReadOnlyBuffer = buffer.asRead();
         Thread[] t = new Thread[1000];
         for (int i = 0; i < t.length; i++) {
             if ((i & 1) == 0) {
@@ -340,7 +322,7 @@ public class BufferTest {
                 t[i] = new Thread() {
                     public void run() {
                         for (int k = 0; k < value.length; k++) {
-                            byteReadOnlyBuffer.clear();
+                            byteReadOnlyBuffer.close();
                         }
                     }
                 };
@@ -353,7 +335,7 @@ public class BufferTest {
             t[i].join();
         }
         for (int k = 0; k < value.length; k++) {
-            byteReadOnlyBuffer.close();
+            byteReadOnlyBuffer.clearAfterClose();
         }
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);

@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.LockSupport;
 
 /**
@@ -24,7 +23,7 @@ public final class JobFinishedManager {
     private ExecutorService consume = FineIOExecutors.newSingleThreadExecutor(JobFinishedManager.class);
     private volatile static JobFinishedManager instance;
     public TaskMap map = new TaskMap();
-    private Semaphore semaphore = new Semaphore(1);
+    private Object lock = new Object();
 
     public static JobFinishedManager getInstance() {
         if (instance == null) {
@@ -46,7 +45,9 @@ public final class JobFinishedManager {
                         while (!map.isEmpty() && map.firstKey().getType() == TaskKey.KeyType.DONE) {
                             ((Runnable) map.poll()).run();
                         }
-                        semaphore.acquire();
+                        synchronized (lock) {
+                            lock.wait();
+                        }
                     }
                 } catch (Exception e) {
                     FineIOLoggers.getLogger().error(e);
@@ -55,11 +56,17 @@ public final class JobFinishedManager {
         });
     }
 
+    private void notifyJob() {
+        synchronized (lock) {
+            lock.notify();
+        }
+    }
+
     void submit(final Future<Pair<URI, Boolean>> future) throws ExecutionException, InterruptedException {
         Pair<URI, Boolean> uri = future.get();
         map.remove(new FinishOneTaskKey(uri.getKey()));
         LockSupport.parkNanos(100 * 1000);
-        semaphore.release();
+        notifyJob();
     }
 
     public void addTask(URI uri) {
@@ -77,14 +84,14 @@ public final class JobFinishedManager {
         public void addTask(URI uri) {
             TaskKey key = new FinishOneTaskKey(uri);
             queue.add(new Pair<TaskKey, Object>(key, uri));
-            semaphore.release();
+            notifyJob();
         }
 
         public void finish(final Runnable runnable) {
             TaskKey key = new DoneTaskKey();
 //            linkedList.add(key);
             queue.add(new Pair<TaskKey, Object>(key, runnable));
-            semaphore.release();
+            notifyJob();
         }
 
         public TaskKey firstKey() {

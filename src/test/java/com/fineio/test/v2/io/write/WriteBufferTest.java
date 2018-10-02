@@ -1,35 +1,21 @@
 package com.fineio.test.v2.io.write;
 
+import com.fineio.FineIO;
+import com.fineio.cache.CacheManager;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
+import com.fineio.io.Buffer;
+import com.fineio.io.ByteBuffer;
+import com.fineio.io.CharBuffer;
+import com.fineio.io.DoubleBuffer;
+import com.fineio.io.FloatBuffer;
+import com.fineio.io.IntBuffer;
+import com.fineio.io.LongBuffer;
+import com.fineio.io.ShortBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.memory.MemoryUtils;
-import com.fineio.storage.Connector;
 import com.fineio.test.file.FineWriteIOTest;
-import com.fineio.v2.FineIO;
-import com.fineio.v2.io.BaseBuffer;
-import com.fineio.v2.io.Buffer;
-import com.fineio.v2.io.ByteBuffer;
-import com.fineio.v2.io.CharBuffer;
-import com.fineio.v2.io.DoubleBuffer;
-import com.fineio.v2.io.FloatBuffer;
-import com.fineio.v2.io.IntBuffer;
-import com.fineio.v2.io.LongBuffer;
-import com.fineio.v2.io.ShortBuffer;
-import com.fineio.v2.io.edit.ByteEditBuffer;
-import com.fineio.v2.io.file.IOFile;
-import com.fineio.v2.io.write.ByteWriteBuffer;
-import com.fineio.v2.io.write.CharWriteBuffer;
-import com.fineio.v2.io.write.DoubleWriteBuffer;
-import com.fineio.v2.io.write.FloatWriteBuffer;
-import com.fineio.v2.io.write.IntWriteBuffer;
-import com.fineio.v2.io.write.LongWriteBuffer;
-import com.fineio.v2.io.write.ShortWriteBuffer;
-import com.fineio.v2.io.write.WriteOnlyBuffer;
 import junit.framework.TestCase;
 
-import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 
@@ -37,24 +23,6 @@ import java.net.URI;
  * Created by daniel on 2017/2/20.
  */
 public class WriteBufferTest extends TestCase {
-
-
-    private static <T extends WriteOnlyBuffer> T getWriteBuffer(IOFile<?> writeIOFile, Class<T> clazz) {
-        try {
-            Method method = IOFile.class.getDeclaredMethod("createBuffer", Class.class, int.class);
-            method.setAccessible(true);
-            return (T) method.invoke(writeIOFile, clazz, 0);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
 
     private byte[] createRandomByte(int off) {
         int len = 1 << off;
@@ -123,9 +91,7 @@ public class WriteBufferTest extends TestCase {
     public void testByteWrite() throws Exception {
         int len = 20;
         byte[] bytes = createRandomByte(len);
-        Constructor<ByteBuffer> constructor = ByteBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
-        constructor.setAccessible(true);
-        ByteWriteBuffer bb = constructor.newInstance(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).writeOnlyBuffer();
+        ByteBuffer.ByteWriteBuffer bb = CacheManager.DataType.BYTE.createBuffer(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
         for (int i = 0; i < bytes.length; i++) {
             bb.put(i, bytes[i]);
         }
@@ -143,32 +109,7 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
-        Method flip = bb.getClass().getSuperclass().getDeclaredMethod("flip");
-        flip.setAccessible(true);
-        flip.invoke(bb);
-        ByteEditBuffer bb2 = constructor.newInstance(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).editBuffer();
-
-        for (int i = 0; i < bytes.length; i++) {
-            bb2.put(bytes[i]);
-        }
-
-        for (int i = 0; i < bytes.length; i++) {
-            assertEquals(bytes[i], bb2.get(i));
-        }
-
-        byte[] bytesRes1 = new byte[bytes.length];
-        byte[] bytesRes2 = new byte[bytes.length];
-        InputStream is = getInputStream((BaseBuffer) bb);
-        assertEquals(bytes.length, is.read(bytesRes1));
-        InputStream is2 = getInputStream((BaseBuffer) bb2);
-        assertEquals(bytes.length, is2.read(bytesRes2));
-
-        for (int i = 0; i < bytes.length; i++) {
-            assertEquals(bytes[i], bytesRes1[i]);
-            assertEquals(bytes[i], bytesRes2[i]);
-        }
-        bb.forceAndClear();
-        bb2.forceAndClear();
+        bb.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -176,28 +117,10 @@ public class WriteBufferTest extends TestCase {
         assertEquals(FineIO.getWriteWaitCount(), 0);
     }
 
-    private InputStream getInputStream(BaseBuffer sb) {
-        try {
-            Method m = BaseBuffer.class.getDeclaredMethod("getInputStream");
-            m.setAccessible(true);
-            return (InputStream) m.invoke(sb);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
     public void testCharWrite() throws Exception {
         int len = 20;
         char[] bytes = createRandomChar(len);
-        Constructor<CharBuffer> constructor = CharBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
-        constructor.setAccessible(true);
-        CharWriteBuffer bb = constructor.newInstance(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).writeOnlyBuffer();
+        CharBuffer.CharWriteBuffer bb = CacheManager.DataType.CHAR.createBuffer(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
         for (int i = 0; i < bytes.length; i++) {
             bb.put(i, bytes[i]);
         }
@@ -214,7 +137,7 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
-        bb.forceAndClear();
+        bb.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -225,9 +148,7 @@ public class WriteBufferTest extends TestCase {
     public void testCharWriteDESC() throws Exception {
         int len = 20;
         char[] bytes = createRandomChar(len);
-        Constructor<CharBuffer> constructor = CharBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
-        constructor.setAccessible(true);
-        CharWriteBuffer bb = constructor.newInstance(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).writeOnlyBuffer();
+        CharBuffer.CharWriteBuffer bb = CacheManager.DataType.CHAR.createBuffer(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
         for (int i = bytes.length; i > 0; i--) {
             bb.put(i - 1, bytes[i - 1]);
         }
@@ -244,7 +165,7 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
-        bb.forceAndClear();
+        bb.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -257,9 +178,7 @@ public class WriteBufferTest extends TestCase {
     public void testDoubleWriteDESC() throws Exception {
         int len = 20;
         double[] bytes = createRandomDouble(len);
-        Constructor<DoubleBuffer> constructor = DoubleBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
-        constructor.setAccessible(true);
-        DoubleWriteBuffer bb = constructor.newInstance(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).writeOnlyBuffer();
+        DoubleBuffer.DoubleWriteBuffer bb = CacheManager.DataType.DOUBLE.createBuffer(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
         for (int i = bytes.length; i > 0; i--) {
             bb.put(i - 1, bytes[i - 1]);
         }
@@ -277,7 +196,7 @@ public class WriteBufferTest extends TestCase {
         }
         assertTrue(exp);
 
-        bb.forceAndClear();
+        bb.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -289,9 +208,7 @@ public class WriteBufferTest extends TestCase {
     public void testDoubleWrite() throws Exception {
         int len = 20;
         double[] bytes = createRandomDouble(len);
-        Constructor<DoubleBuffer> constructor = DoubleBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
-        constructor.setAccessible(true);
-        DoubleWriteBuffer bb = constructor.newInstance(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).writeOnlyBuffer();
+        DoubleBuffer.DoubleWriteBuffer bb = CacheManager.DataType.DOUBLE.createBuffer(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
         for (int i = 0; i < bytes.length; i++) {
             bb.put(i, bytes[i]);
         }
@@ -308,7 +225,7 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
-        bb.forceAndClear();
+        bb.clearAfterClose();
         exp = false;
         try {
             bb.put(0, 1);
@@ -327,9 +244,7 @@ public class WriteBufferTest extends TestCase {
     public void testFloatWrite() throws Exception {
         int len = 20;
         float[] bytes = createRandomFloat(len);
-        Constructor<FloatBuffer> constructor = FloatBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
-        constructor.setAccessible(true);
-        FloatWriteBuffer bb = constructor.newInstance(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).writeOnlyBuffer();
+        FloatBuffer.FloatWriteBuffer bb = CacheManager.DataType.FLOAT.createBuffer(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
         for (int i = 0; i < bytes.length; i++) {
             bb.put(i, bytes[i]);
         }
@@ -346,7 +261,7 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
-        bb.forceAndClear();
+        bb.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -357,9 +272,7 @@ public class WriteBufferTest extends TestCase {
     public void testFloatWriteDESC() throws Exception {
         int len = 20;
         float[] bytes = createRandomFloat(len);
-        Constructor<FloatBuffer> constructor = FloatBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
-        constructor.setAccessible(true);
-        FloatWriteBuffer bb = constructor.newInstance(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).writeOnlyBuffer();
+        FloatBuffer.FloatWriteBuffer bb = CacheManager.DataType.FLOAT.createBuffer(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
         for (int i = bytes.length; i > 0; i--) {
             bb.put(i - 1, bytes[i - 1]);
         }
@@ -376,7 +289,7 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
-        bb.forceAndClear();
+        bb.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -388,9 +301,7 @@ public class WriteBufferTest extends TestCase {
     public void testIntWrite() throws Exception {
         int len = 20;
         int[] bytes = createRandomInt(len);
-        Constructor<IntBuffer> constructor = IntBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
-        constructor.setAccessible(true);
-        IntWriteBuffer bb = constructor.newInstance(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).writeOnlyBuffer();
+        IntBuffer.IntWriteBuffer bb = CacheManager.DataType.INT.createBuffer(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
         for (int i = 0; i < bytes.length; i++) {
             bb.put(i, bytes[i]);
         }
@@ -407,7 +318,7 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
-        bb.forceAndClear();
+        bb.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -418,9 +329,7 @@ public class WriteBufferTest extends TestCase {
     public void testIntWriteDESC() throws Exception {
         int len = 20;
         int[] bytes = createRandomInt(len);
-        Constructor<IntBuffer> constructor = IntBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
-        constructor.setAccessible(true);
-        IntWriteBuffer bb = constructor.newInstance(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).writeOnlyBuffer();
+        IntBuffer.IntWriteBuffer bb = CacheManager.DataType.INT.createBuffer(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
         for (int i = bytes.length; i > 0; i--) {
             bb.put(i - 1, bytes[i - 1]);
         }
@@ -437,7 +346,7 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
-        bb.forceAndClear();
+        bb.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -449,9 +358,7 @@ public class WriteBufferTest extends TestCase {
     public void testLongWrite() throws Exception {
         int len = 20;
         long[] bytes = createRandomLong(len);
-        Constructor<LongBuffer> constructor = LongBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
-        constructor.setAccessible(true);
-        LongWriteBuffer bb = constructor.newInstance(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).writeOnlyBuffer();
+        LongBuffer.LongWriteBuffer bb = CacheManager.DataType.LONG.createBuffer(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
         for (int i = 0; i < bytes.length; i++) {
             bb.put(i, bytes[i]);
         }
@@ -468,7 +375,7 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
-        bb.forceAndClear();
+        bb.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -479,9 +386,7 @@ public class WriteBufferTest extends TestCase {
     public void testLongWriteDESC() throws Exception {
         int len = 20;
         long[] bytes = createRandomLong(len);
-        Constructor<LongBuffer> constructor = LongBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
-        constructor.setAccessible(true);
-        LongWriteBuffer bb = constructor.newInstance(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).writeOnlyBuffer();
+        LongBuffer.LongWriteBuffer bb = CacheManager.DataType.LONG.createBuffer(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
         for (int i = bytes.length; i > 0; i--) {
             bb.put(i - 1, bytes[i - 1]);
         }
@@ -498,7 +403,7 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
-        bb.forceAndClear();
+        bb.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -509,9 +414,7 @@ public class WriteBufferTest extends TestCase {
     public void testShortWrite() throws Exception {
         int len = 20;
         short[] bytes = createRandomShort(len);
-        Constructor<ShortBuffer> constructor = ShortBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
-        constructor.setAccessible(true);
-        ShortWriteBuffer bb = constructor.newInstance(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).writeOnlyBuffer();
+        ShortBuffer.ShortWriteBuffer bb = CacheManager.DataType.SHORT.createBuffer(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
         for (int i = 0; i < bytes.length; i++) {
             bb.put(i, bytes[i]);
         }
@@ -528,7 +431,7 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
-        bb.forceAndClear();
+        bb.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
@@ -539,9 +442,7 @@ public class WriteBufferTest extends TestCase {
     public void testShortWriteDESC() throws Exception {
         int len = 20;
         short[] bytes = createRandomShort(len);
-        Constructor<ShortBuffer> constructor = ShortBuffer.class.getDeclaredConstructor(Connector.class, FileBlock.class, int.class);
-        constructor.setAccessible(true);
-        ShortWriteBuffer bb = constructor.newInstance(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).writeOnlyBuffer();
+        ShortBuffer.ShortWriteBuffer bb = CacheManager.DataType.SHORT.createBuffer(new FineWriteIOTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
         for (int i = bytes.length; i > 0; i--) {
             bb.put(i - 1, bytes[i - 1]);
         }
@@ -558,7 +459,7 @@ public class WriteBufferTest extends TestCase {
             exp = true;
         }
         assertTrue(exp);
-        bb.forceAndClear();
+        bb.clearAfterClose();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
         assertEquals(FineIO.getCurrentWriteMemorySize(), 0);

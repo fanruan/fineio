@@ -10,8 +10,8 @@ import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 import com.fineio.v1.cache.CacheManager;
 import com.fineio.v1.io.Buffer;
+import com.fineio.v1.io.Level;
 import com.fineio.v1.io.base.AbstractBuffer;
-import com.fineio.v2.cache.BufferPrivilege;
 
 import java.io.IOException;
 import java.net.URI;
@@ -240,8 +240,8 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     }
 
 
-    public BufferPrivilege getLevel() {
-        return BufferPrivilege.WRITABLE;
+    public Level getLevel() {
+        return Level.WRITE;
     }
 
 }

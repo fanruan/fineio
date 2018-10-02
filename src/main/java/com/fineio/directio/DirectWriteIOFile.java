@@ -42,7 +42,8 @@ public final class DirectWriteIOFile<T extends Buffer> extends DirectIOFile<T> {
     @Override
     protected void closeChild() {
         if (buffer != null) {
-            buffer.close();
+            buffer.clearAfterClose();
+            buffer = null;
         }
     }
 

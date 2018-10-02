@@ -100,7 +100,7 @@ public enum MemoryManager {
                 }
             }
         });
-        gcTrigger.scheduleAtFixedRate(new CleanOneTask(), 30, 30, TimeUnit.SECONDS);
+//        gcTrigger.scheduleAtFixedRate(new CleanOneTask(), 30, 30, TimeUnit.SECONDS);
         releaseLimitThread.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {

@@ -335,11 +335,13 @@ public abstract class IOFile<B extends Buffer> {
     }
 
     public void close() {
-        if (null != buffers) {
-            for (int i = 0; i < buffers.length; i++) {
-                if (null != buffers[i]) {
-                    buffers[i].close();
-                    buffers[i] = null;
+        synchronized (this) {
+            if (null != buffers) {
+                for (int i = 0; i < buffers.length; i++) {
+                    if (null != buffers[i]) {
+                        buffers[i].close();
+                        buffers[i] = null;
+                    }
                 }
             }
         }
@@ -361,5 +363,9 @@ public abstract class IOFile<B extends Buffer> {
     protected void finalize() {
         //防止没有执行close导致内存泄露
         close();
+    }
+
+    public final String getPath() {
+        return uri.getPath();
     }
 }

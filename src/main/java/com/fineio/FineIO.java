@@ -30,6 +30,9 @@ import java.net.URI;
  * @date 2018/9/20
  */
 public final class FineIO {
+
+    public static boolean DEBUG = false;
+
     /**
      * 创建IO文件
      *
@@ -47,8 +50,18 @@ public final class FineIO {
      *
      * @param logger
      */
-    public static void setLogger(FineIOLogger logger) {
+    public static void setLogger(FineIOLogger logger, boolean debug) {
+        DEBUG = debug;
         FineIOLoggers.setLogger(logger);
+    }
+
+    /**
+     * 设置Logger
+     *
+     * @param logger
+     */
+    public static void setLogger(FineIOLogger logger) {
+        setLogger(logger, false);
     }
 
     /**
