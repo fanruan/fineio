@@ -9,6 +9,7 @@ import com.fineio.io.LongBuffer;
 import com.fineio.io.ShortBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.IOFile;
+import com.fineio.io.file.writer.JobFinishedManager;
 import com.fineio.storage.AbstractConnector;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
@@ -23,6 +24,7 @@ import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * @author yee
@@ -134,7 +136,7 @@ public class WriteIOFileTest extends TestCase {
             FineIO.put(file, doubles[i]);
         }
         file.close();
-        IOFile read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_DOUBLE);
+        final IOFile read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_DOUBLE);
         for (int i = 0; i < doubles.length; i++) {
             assertEquals(doubles[i], FineIO.getDouble(read, i));
         }
@@ -144,24 +146,7 @@ public class WriteIOFileTest extends TestCase {
             v += FineIO.getDouble(read, i);
         }
         System.out.println((System.currentTimeMillis() - t) + " ms");
-        read.close();
-        IOFile edit = FineIO.createIOFile(connector, u, FineIO.MODEL.EDIT_DOUBLE);
-        int change = doubles.length / 2;
-        doubles[change] = -100000000 * Math.random();
-        FineIO.put(edit, change, doubles[change]);
-        edit.close();
-        read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_DOUBLE);
-        assertEquals(FineIO.getDouble(read, change), doubles[change]);
-
-        assertTrue(FineIO.getCurrentMemorySize() > 0);
-        assertTrue(FineIO.getCurrentReadMemorySize() > 0);
-        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
-        read.close();
-        assertEquals(FineIO.getCurrentMemorySize(), 0);
-        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
-        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
-        assertEquals(FineIO.getReadWaitCount(), 0);
-        assertEquals(FineIO.getWriteWaitCount(), 0);
+        checkMemory(read);
     }
 
     public void testWriteLong() throws Exception {
@@ -173,7 +158,7 @@ public class WriteIOFileTest extends TestCase {
             FineIO.put(file, values[i]);
         }
         file.close();
-        IOFile read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_LONG);
+        final IOFile read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_LONG);
         for (int i = 0; i < values.length; i++) {
             assertEquals(values[i], FineIO.getLong(read, i));
         }
@@ -183,23 +168,7 @@ public class WriteIOFileTest extends TestCase {
             v += FineIO.getLong(read, i);
         }
         System.out.println((System.currentTimeMillis() - t) + " ms");
-        read.close();
-        IOFile<LongBuffer> edit = FineIO.createIOFile(connector, u, FineIO.MODEL.EDIT_LONG);
-        int change = values.length / 2;
-        values[change] = Double.doubleToLongBits(-100000000 * Math.random());
-        FineIO.put(edit, change, values[change]);
-        edit.close();
-        read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_LONG);
-        assertEquals(FineIO.getLong(read, change), values[change]);
-        assertTrue(FineIO.getCurrentMemorySize() > 0);
-        assertTrue(FineIO.getCurrentReadMemorySize() > 0);
-        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
-        read.close();
-        assertEquals(FineIO.getCurrentMemorySize(), 0);
-        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
-        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
-        assertEquals(FineIO.getReadWaitCount(), 0);
-        assertEquals(FineIO.getWriteWaitCount(), 0);
+        checkMemory(read);
     }
 
     public void testWriteChar() throws Exception {
@@ -211,7 +180,7 @@ public class WriteIOFileTest extends TestCase {
             FineIO.put(file, values[i]);
         }
         file.close();
-        IOFile read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_CHAR);
+        final IOFile read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_CHAR);
         for (int i = 0; i < values.length; i++) {
             assertEquals(values[i], FineIO.getChar(read, i));
         }
@@ -221,23 +190,7 @@ public class WriteIOFileTest extends TestCase {
             v += FineIO.getChar(read, i);
         }
         System.out.println((System.currentTimeMillis() - t) + " ms");
-        read.close();
-        IOFile<CharBuffer> edit = FineIO.createIOFile(connector, u, FineIO.MODEL.EDIT_CHAR);
-        int change = values.length / 2;
-        values[change] = (char) Double.doubleToLongBits(-100000000 * Math.random());
-        FineIO.put(edit, change, values[change]);
-        edit.close();
-        read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_CHAR);
-        assertEquals(FineIO.getChar(read, change), values[change]);
-        assertTrue(FineIO.getCurrentMemorySize() > 0);
-        assertTrue(FineIO.getCurrentReadMemorySize() > 0);
-        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
-        read.close();
-        assertEquals(FineIO.getCurrentMemorySize(), 0);
-        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
-        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
-        assertEquals(FineIO.getReadWaitCount(), 0);
-        assertEquals(FineIO.getWriteWaitCount(), 0);
+        checkMemory(read);
     }
 
     public void testWriteInt() throws Exception {
@@ -249,7 +202,7 @@ public class WriteIOFileTest extends TestCase {
             FineIO.put(file, values[i]);
         }
         file.close();
-        IOFile read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_INT);
+        final IOFile read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_INT);
         for (int i = 0; i < values.length; i++) {
             assertEquals(values[i], FineIO.getInt(read, i));
         }
@@ -259,23 +212,7 @@ public class WriteIOFileTest extends TestCase {
             v += FineIO.getInt(read, i);
         }
         System.out.println((System.currentTimeMillis() - t) + " ms");
-        read.close();
-        IOFile<IntBuffer> edit = FineIO.createIOFile(connector, u, FineIO.MODEL.EDIT_INT);
-        int change = values.length / 2;
-        values[change] = (int) Double.doubleToLongBits(-100000000 * Math.random());
-        FineIO.put(edit, change, values[change]);
-        edit.close();
-        read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_INT);
-        assertEquals(FineIO.getInt(read, change), values[change]);
-        assertTrue(FineIO.getCurrentMemorySize() > 0);
-        assertTrue(FineIO.getCurrentReadMemorySize() > 0);
-        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
-        read.close();
-        assertEquals(FineIO.getCurrentMemorySize(), 0);
-        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
-        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
-        assertEquals(FineIO.getReadWaitCount(), 0);
-        assertEquals(FineIO.getWriteWaitCount(), 0);
+        checkMemory(read);
     }
 
     public void testWriteFloat() throws Exception {
@@ -287,7 +224,7 @@ public class WriteIOFileTest extends TestCase {
             FineIO.put(file, values[i]);
         }
         file.close();
-        IOFile read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_FLOAT);
+        final IOFile read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_FLOAT);
         for (int i = 0; i < values.length; i++) {
             assertEquals(values[i], FineIO.getFloat(read, i));
         }
@@ -297,23 +234,7 @@ public class WriteIOFileTest extends TestCase {
             v += FineIO.getFloat(read, i);
         }
         System.out.println((System.currentTimeMillis() - t) + " ms");
-        read.close();
-        IOFile<FloatBuffer> edit = FineIO.createIOFile(connector, u, FineIO.MODEL.EDIT_FLOAT);
-        int change = values.length / 2;
-        values[change] = (float) Double.doubleToLongBits(-100000000 * Math.random());
-        FineIO.put(edit, change, values[change]);
-        edit.close();
-        read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_FLOAT);
-        assertEquals(FineIO.getFloat(read, change), values[change]);
-        assertTrue(FineIO.getCurrentMemorySize() > 0);
-        assertTrue(FineIO.getCurrentReadMemorySize() > 0);
-        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
-        read.close();
-        assertEquals(FineIO.getCurrentMemorySize(), 0);
-        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
-        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
-        assertEquals(FineIO.getReadWaitCount(), 0);
-        assertEquals(FineIO.getWriteWaitCount(), 0);
+        checkMemory(read);
     }
 
     public void testWriteShort() throws Exception {
@@ -325,7 +246,7 @@ public class WriteIOFileTest extends TestCase {
             FineIO.put(file, values[i]);
         }
         file.close();
-        IOFile read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_SHORT);
+        final IOFile read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_SHORT);
         for (int i = 0; i < values.length; i++) {
             assertEquals(values[i], FineIO.getShort(read, i));
         }
@@ -335,23 +256,7 @@ public class WriteIOFileTest extends TestCase {
             v += FineIO.getShort(read, i);
         }
         System.out.println((System.currentTimeMillis() - t) + " ms");
-        read.close();
-        IOFile<ShortBuffer> edit = FineIO.createIOFile(connector, u, FineIO.MODEL.EDIT_SHORT);
-        int change = values.length / 2;
-        values[change] = (short) Double.doubleToLongBits(-100000000 * Math.random());
-        FineIO.put(edit, change, values[change]);
-        edit.close();
-        read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_SHORT);
-        assertEquals(FineIO.getShort(read, change), values[change]);
-        assertTrue(FineIO.getCurrentMemorySize() > 0);
-        assertTrue(FineIO.getCurrentReadMemorySize() > 0);
-        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
-        read.close();
-        assertEquals(FineIO.getCurrentMemorySize(), 0);
-        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
-        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
-        assertEquals(FineIO.getReadWaitCount(), 0);
-        assertEquals(FineIO.getWriteWaitCount(), 0);
+        checkMemory(read);
     }
 
     public void testWriteByte() throws Exception {
@@ -363,7 +268,7 @@ public class WriteIOFileTest extends TestCase {
             FineIO.put(file, values[i]);
         }
         file.close();
-        IOFile read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_BYTE);
+        final IOFile read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_BYTE);
         for (int i = 0; i < values.length; i++) {
             assertEquals(values[i], FineIO.getByte(read, i));
         }
@@ -373,23 +278,31 @@ public class WriteIOFileTest extends TestCase {
             v += FineIO.getByte(read, i);
         }
         System.out.println((System.currentTimeMillis() - t) + " ms");
-        read.close();
-        IOFile<ByteBuffer> edit = FineIO.createIOFile(connector, u, FineIO.MODEL.EDIT_BYTE);
-        int change = values.length / 2;
-        values[change] = (byte) Double.doubleToLongBits(-100000000 * Math.random());
-        FineIO.put(edit, change, values[change]);
-        edit.close();
-        read = FineIO.createIOFile(connector, u, FineIO.MODEL.READ_BYTE);
-        assertEquals(FineIO.getByte(read, change), values[change]);
-        assertTrue(FineIO.getCurrentMemorySize() > 0);
-        assertTrue(FineIO.getCurrentReadMemorySize() > 0);
-        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
-        read.close();
-        assertEquals(FineIO.getCurrentMemorySize(), 0);
-        assertEquals(FineIO.getCurrentReadMemorySize(), 0);
-        assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
-        assertEquals(FineIO.getReadWaitCount(), 0);
-        assertEquals(FineIO.getWriteWaitCount(), 0);
+        checkMemory(read);
+
+    }
+
+    private void checkMemory(final IOFile read) throws InterruptedException {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final boolean[] check = new boolean[]{true};
+        JobFinishedManager.getInstance().finish(new Runnable() {
+            @Override
+            public void run() {
+                read.close();
+                try {
+                    assertEquals(FineIO.getCurrentMemorySize(), 0);
+                    assertEquals(FineIO.getCurrentReadMemorySize(), 0);
+                    assertEquals(FineIO.getCurrentWriteMemorySize(), 0);
+                    assertEquals(FineIO.getReadWaitCount(), 0);
+                    assertEquals(FineIO.getWriteWaitCount(), 0);
+                } catch (Throwable e) {
+                    check[0] = false;
+                }
+                latch.countDown();
+            }
+        });
+        latch.await();
+        assertTrue(check[0]);
     }
 
     public static class MemoryConnector extends AbstractConnector {

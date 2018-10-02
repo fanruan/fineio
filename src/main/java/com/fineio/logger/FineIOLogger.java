@@ -1,5 +1,7 @@
 package com.fineio.logger;
 
+import com.fineio.FineIO;
+
 /**
  * @author yee
  * @date 2018/7/12
@@ -42,7 +44,9 @@ public interface FineIOLogger {
 
         @Override
         public void debug(String msg) {
-            System.out.println("[DEBUG] " + msg);
+            if (FineIO.DEBUG) {
+                System.out.println("[DEBUG] " + msg);
+            }
         }
     };
 }

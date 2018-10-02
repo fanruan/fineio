@@ -1,14 +1,14 @@
 package com.fineio.directio;
 
 import com.fineio.io.Buffer;
-import com.fineio.io.FileModel;
-import com.fineio.io.write.WriteOnlyBuffer;
+import com.fineio.io.file.FileModel;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
 
 /**
- * Created by daniel on 2017/2/10.
+ * @author yee
+ * @date 2018/10/2
  */
 public final class DirectWriteIOFile<T extends Buffer> extends DirectIOFile<T> {
 
@@ -33,7 +33,7 @@ public final class DirectWriteIOFile<T extends Buffer> extends DirectIOFile<T> {
     protected Buffer initBuffer() {
         if (buffer == null) {
             synchronized (this) {
-                buffer = model.createBufferForWrite(connector, uri);
+                buffer = model.createBuffer(connector, uri).asWrite();
             }
         }
         return buffer;
@@ -42,7 +42,8 @@ public final class DirectWriteIOFile<T extends Buffer> extends DirectIOFile<T> {
     @Override
     protected void closeChild() {
         if (buffer != null) {
-            ((WriteOnlyBuffer) buffer).force();
+            buffer.clearAfterClose();
+            buffer = null;
         }
     }
 

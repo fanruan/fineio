@@ -1,6 +1,5 @@
 package com.fineio.v1.io.write;
 
-import com.fineio.cache.BufferPrivilege;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.StreamCloseException;
 import com.fineio.io.base.Job;
@@ -11,6 +10,7 @@ import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 import com.fineio.v1.cache.CacheManager;
 import com.fineio.v1.io.Buffer;
+import com.fineio.v1.io.Level;
 import com.fineio.v1.io.base.AbstractBuffer;
 
 import java.io.IOException;
@@ -240,8 +240,8 @@ public abstract class WriteBuffer extends AbstractBuffer implements Write {
     }
 
 
-    public BufferPrivilege getLevel() {
-        return BufferPrivilege.WRITABLE;
+    public Level getLevel() {
+        return Level.WRITE;
     }
 
 }

@@ -1,72 +1,55 @@
 package com.fineio.io;
 
-import com.fineio.cache.BufferPrivilege;
+
+import com.fineio.cache.SyncStatus;
+import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
+import com.fineio.memory.manager.obj.MemoryObject;
 
 import java.net.URI;
 
 /**
  * @author yee
- * @date 2018/5/30
+ * @date 2018/9/19
  */
 public interface Buffer {
-    /**
-     * 获取Buffer地址
-     *
-     * @return
-     */
+    Level getLevel();
+
+    SyncStatus getSyncStatus();
+
     long getAddress();
 
-    /**
-     * 最大可访问size
-     *
-     * @return
-     */
-    int getMaxSize();
-
-    int getAllocateSize();
-
-    boolean isDirect();
-
-    int getOffset();
-
-    void close();
-
-//    clear接口不开放了
-//    void clear();
-
-    int getStatus();
-
-    /**
-     * 是否被访问状态
-     *
-     * @return
-     */
-    boolean recentAccess();
-
-    /**
-     * 重置access
-     */
-    void resetAccess();
-
-    void closeWithOutSync();
-
-    BufferPrivilege getBufferPrivilege();
-
-    /**
-     * 获取byte大小
-     *
-     * @return
-     */
-    int getByteSize();
-
-
-    /**
-     * 获取类型可用长度
-     *
-     * @return
-     */
-    int getLength();
+    long getAllocateSize();
 
     URI getUri();
 
+    boolean isDirect();
+
+    boolean isClose();
+
+    void close();
+
+    void clearAfterClose();
+
+    boolean resentAccess();
+
+    void resetAccess();
+
+    void unLoad();
+
+    int getLength();
+
+    MemoryObject getFreeObject();
+
+    <B extends Buffer> B asRead();
+
+    <B extends Buffer> B asWrite();
+
+    <B extends Buffer> B asAppend();
+
+    interface Listener {
+        void remove(Buffer buffer, BaseDeAllocator.Builder builder);
+
+        void update(Buffer buffer);
+    }
 }
+

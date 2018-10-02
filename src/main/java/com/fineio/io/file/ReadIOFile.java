@@ -1,83 +1,94 @@
 package com.fineio.io.file;
 
-import com.fineio.cache.BufferPrivilege;
+import com.fineio.io.BaseBuffer;
 import com.fineio.io.Buffer;
-import com.fineio.io.FileModel;
-import com.fineio.logger.FineIOLoggers;
+import com.fineio.io.file.writer.JobFinishedManager;
+import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
+import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.storage.Connector;
 
-import java.io.IOException;
 import java.net.URI;
 
 /**
- * Created by daniel on 2017/2/9.
+ * @author yee
+ * @date 2018/9/20
  */
-public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
-
+public final class ReadIOFile<B extends Buffer> extends BaseReadIOFile<B> {
     ReadIOFile(Connector connector, URI uri, FileModel model) {
         super(connector, uri, model);
     }
 
-    /**
-     * 创建File方法
-     *
-     * @param connector 连接器
-     * @param uri       子路径
-     * @param model     子类型
-     * @param <E>       继承ReadBuffer的子类型
-     * @return
-     */
-    public static final <E extends Buffer> ReadIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
+    @Override
+    protected FileLevel getFileLevel() {
+        return FileLevel.READ;
+    }
+
+    public static final <E extends BaseBuffer> ReadIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
         return new ReadIOFile<E>(connector, uri, model);
     }
 
     @Override
-    protected Buffer createBuffer(int index) {
-        return model.createBufferForRead(connector, createIndexBlock(index), block_size_offset);
-    }
-
-    @Override
-    protected BufferPrivilege getLevel() {
-        return BufferPrivilege.READABLE;
-    }
-
-
-    @Override
-    protected void writeHeader() {
-    }
-
-    @Override
-    protected void closeChild(boolean clear) {
-        if (buffers != null) {
-            for (int i = 0; i < buffers.length; i++) {
-                if (buffers[i] != null && null != buffers[i].get()) {
-                    buffers[i].get().close();
-                    buffers[i] = null;
-                }
+    protected Buffer initBuffer(int index) {
+        synchronized (this) {
+            if (null == buffers[index]) {
+                BaseBuffer buffer = model.createBuffer(connector, createIndexBlock(index), block_size_offset);
+                buffers[index] = buffer.asRead();
             }
+            return buffers[index];
         }
     }
 
     /**
-     * 复制
+     * 删除操作
      *
      * @return
      */
-    public boolean copyTo(URI destUri) {
-        synchronized (this) {
-            try {
-                if (buffers != null) {
-                    URI destURI = URI.create(destUri.getPath() + "/");
-                    connector.copy(createHeadBlock(), new FileBlock(destURI, FileConstants.HEAD));
-                    for (int i = 0; i < buffers.length; i++) {
-                        connector.copy(createIndexBlock(i), new FileBlock(destURI, String.valueOf(i)));
+    public void delete() {
+
+        JobFinishedManager.getInstance().finish(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (this) {
+                    boolean delete = connector.delete(createHeadBlock());
+                    if (buffers != null) {
+                        for (int i = 0; i < buffers.length; i++) {
+                            //内存泄露
+                            if (!released && buffers[i] != null) {
+                                MemoryObject object = buffers[i].getFreeObject();
+                                if (null != object) {
+                                    BaseDeAllocator.Builder.READ.build().deAllocate(object);
+                                    buffers[i].unLoad();
+                                }
+                                buffers[i] = null;
+                            }
+                            boolean v = connector.delete(createIndexBlock(i));
+                            if (delete) {
+                                delete = v;
+                            }
+                        }
                     }
-                    return true;
+                    connector.delete(new FileBlock(uri));
+                    URI parentURI = uri;
+                    while (null != (parentURI = connector.deleteParent(new FileBlock(parentURI)))) {
+                    }
+                    released = true;
                 }
-            } catch (IOException e) {
-                FineIOLoggers.getLogger().error(e);
             }
-            return false;
+        });
+
+    }
+
+    @Override
+    public void close() {
+        synchronized (this) {
+            if (null != buffers) {
+                for (int i = 0; i < buffers.length; i++) {
+                    if (null != buffers[i]) {
+                        buffers[i].clearAfterClose();
+                        buffers[i] = null;
+                    }
+                }
+            }
         }
     }
 }

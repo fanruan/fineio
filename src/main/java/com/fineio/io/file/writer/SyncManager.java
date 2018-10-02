@@ -6,13 +6,13 @@ import com.fineio.io.base.Job;
 import com.fineio.io.base.JobAssist;
 import com.fineio.io.file.writer.task.Pair;
 import com.fineio.logger.FineIOLoggers;
+import com.fineio.thread.FineIOExecutors;
 
 import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -80,7 +80,7 @@ public final class SyncManager {
 
     private volatile AtomicInteger working_jobs = new AtomicInteger(0);
 
-    private ExecutorService executor = Executors.newCachedThreadPool();
+    private ExecutorService executor = FineIOExecutors.newFixedThreadPool(threads, SyncManager.class);
 
     private volatile  JobContainer map = new JobContainer();
 
@@ -123,7 +123,7 @@ public final class SyncManager {
         });
     }
 
-    private Thread watch_thread = new Thread() {
+    private Thread watch_thread = new Thread("FineIO-SyncManager-Demon") {
         public void run() {
             while (true) {
                 while (isWait()) {

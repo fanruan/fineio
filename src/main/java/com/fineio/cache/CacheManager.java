@@ -1,212 +1,181 @@
 package com.fineio.cache;
 
-import com.fineio.cache.pool.BufferPool;
-import com.fineio.cache.pool.PoolMode;
-import com.fineio.io.AbstractBuffer;
-import com.fineio.io.Buffer;
 
-import java.lang.ref.Reference;
-import java.lang.ref.ReferenceQueue;
+import com.fineio.cache.creator.BufferCreator;
+import com.fineio.io.Buffer;
+import com.fineio.io.ByteBuffer;
+import com.fineio.io.CharBuffer;
+import com.fineio.io.DoubleBuffer;
+import com.fineio.io.FloatBuffer;
+import com.fineio.io.IntBuffer;
+import com.fineio.io.Level;
+import com.fineio.io.LongBuffer;
+import com.fineio.io.ShortBuffer;
+import com.fineio.io.file.FileBlock;
+import com.fineio.memory.manager.deallocator.DeAllocator;
+import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
+import com.fineio.memory.manager.manager.MemoryManager;
+import com.fineio.memory.manager.obj.MemoryObject;
+import com.fineio.storage.Connector;
+
 import java.net.URI;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author yee
- * @date 2018/5/31
+ * @date 2018/9/19
  */
-public class CacheManager {
-    private volatile static CacheManager instance;
-    public static final int MAX_AUTO_FREE_COUNT = 3;
+public final class CacheManager {
 
-    private ConcurrentHashMap<PoolMode, BufferPool> poolMap;
-    private MemoryHandler memoryHandler;
-    public ReferenceQueue<? extends Buffer> referenceQueue;
-    private AtomicLong maxExistsBuffer;
-    private AtomicInteger limitCount = new AtomicInteger(0);
-    private MemoryHandler.GcCallBack callBack;
+    private static final BufferCreator<ByteBuffer> BYTE_CREATOR = BufferCreator.Builder.BYTE.build();
+    private static final BufferCreator<IntBuffer> INT_CREATOR = BufferCreator.Builder.INT.build();
+    private static final BufferCreator<LongBuffer> LONG_CREATOR = BufferCreator.Builder.LONG.build();
+    private static final BufferCreator<DoubleBuffer> DOUBLE_CREATOR = BufferCreator.Builder.DOUBLE.build();
+    private static final BufferCreator<ShortBuffer> SHORT_CREATOR = BufferCreator.Builder.SHORT.build();
+    private static final BufferCreator<CharBuffer> CHAR_CREATOR = BufferCreator.Builder.CHAR.build();
+    private static final BufferCreator<FloatBuffer> FLOAT_CREATOR = BufferCreator.Builder.FLOAT.build();
 
-
-    private CacheManager() {
-        callBack = createGCCallBack();
-        memoryHandler = MemoryHandler.newInstance(callBack);
-        long maxSize = MemoryHandler.getMaxMemory() >> 22;
-        maxExistsBuffer = new AtomicLong(maxSize);
-        referenceQueue = new ReferenceQueue<Buffer>();
-        poolMap = new ConcurrentHashMap<PoolMode, BufferPool>();
+    static {
+        MemoryManager.INSTANCE.registerCleaner(createCleaner());
     }
 
-    public static CacheManager getInstance() {
-        if (instance == null) {
-            synchronized (CacheManager.class) {
-                if (instance == null) {
-                    instance = new CacheManager();
-                }
-            }
-        }
-        return instance;
-    }
+    private static final MemoryManager.Cleaner createCleaner() {
+        return new MemoryManager.Cleaner() {
+            private DeAllocator deAllocator = BaseDeAllocator.Builder.READ.build();
 
-    public static void clear() {
-        synchronized (CacheManager.class) {
-//            instance = null;
-            CacheManager cm = null;
-            if (null != instance) {
-                cm = instance;
-                instance = null;
-            }
-            if (null != cm) {
-                cm.memoryHandler.clear();
-                Iterator<Map.Entry<PoolMode, BufferPool>> iterator = cm.poolMap.entrySet().iterator();
-                while (iterator.hasNext()) {
-                    iterator.next().getValue().clear();
-                }
-                cm = null;
-            }
-        }
-    }
-
-    public long allocateRead(long size) {
-        return memoryHandler.allocateRead(size);
-    }
-
-    public long allocateEdit(long address, long oldSize, long newSize) {
-        return memoryHandler.allocateEdit(address, oldSize, newSize);
-    }
-
-    public long allocateWrite(long address, long oldSize, long newSize) {
-        return memoryHandler.allocateWrite(address, oldSize, newSize);
-    }
-
-    private MemoryHandler.GcCallBack createGCCallBack() {
-        return new MemoryHandler.GcCallBack() {
             @Override
-            public boolean gc() {
-                Iterator<Map.Entry<PoolMode, BufferPool>> iterator = poolMap.entrySet().iterator();
+            public boolean clean() {
                 boolean result = false;
-                while (iterator.hasNext()) {
-                    BufferPool pool = iterator.next().getValue();
-                    AbstractBuffer buffer = (AbstractBuffer) pool.poll();
-                    if (null != buffer) {
-                        buffer.closeWithOutSync();
-                        Reference<? extends Buffer> ref = null;
-                        while (null != (ref = referenceQueue.poll())) {
-                            synchronized (ref) {
-                                ref.clear();
-                                ref = null;
-                            }
-                        }
-                        result = true;
-                        break;
-                    }
-                }
-                System.gc();
+                result |= clean(BYTE_CREATOR);
+                result |= clean(INT_CREATOR);
+                result |= clean(LONG_CREATOR);
+                result |= clean(DOUBLE_CREATOR);
+                result |= clean(SHORT_CREATOR);
+                result |= clean(CHAR_CREATOR);
+                result |= clean(FLOAT_CREATOR);
                 return result;
             }
 
             @Override
-            public void forceGC() {
-                Iterator<Map.Entry<PoolMode, BufferPool>> iterator = poolMap.entrySet().iterator();
-                while (iterator.hasNext()) {
-                    BufferPool pool = iterator.next().getValue();
-                    List<AbstractBuffer> list = pool.pollAllCleanable();
-                    if (!list.isEmpty()) {
-                        for (AbstractBuffer buffer : list) {
-                            synchronized (buffer) {
-                                if (buffer.getBufferPrivilege() == BufferPrivilege.CLEANABLE) {
-                                    buffer.closeWithOutSync();
-                                    Reference<? extends Buffer> ref = null;
-                                    while (null != (ref = referenceQueue.poll())) {
-                                        synchronized (ref) {
-                                            ref.clear();
-                                            ref = null;
-                                        }
-                                    }
-                                } else {
-                                    pool.registerBuffer(buffer);
-                                }
-                            }
-                        }
-                        break;
+            public boolean cleanAllCleanable() {
+                boolean result = false;
+                result |= BYTE_CREATOR.cleanBuffers(Level.CLEAN);
+                result |= INT_CREATOR.cleanBuffers(Level.CLEAN);
+                result |= LONG_CREATOR.cleanBuffers(Level.CLEAN);
+                result |= DOUBLE_CREATOR.cleanBuffers(Level.CLEAN);
+                result |= SHORT_CREATOR.cleanBuffers(Level.CLEAN);
+                result |= CHAR_CREATOR.cleanBuffers(Level.CLEAN);
+                result |= FLOAT_CREATOR.cleanBuffers(Level.CLEAN);
+                return result;
+            }
+
+            @Override
+            public void cleanReadable() {
+                BYTE_CREATOR.cleanBuffers(Level.READ);
+                INT_CREATOR.cleanBuffers(Level.READ);
+                LONG_CREATOR.cleanBuffers(Level.READ);
+                DOUBLE_CREATOR.cleanBuffers(Level.READ);
+                SHORT_CREATOR.cleanBuffers(Level.READ);
+                CHAR_CREATOR.cleanBuffers(Level.READ);
+                FLOAT_CREATOR.cleanBuffers(Level.READ);
+            }
+
+            private boolean clean(BufferCreator creator) {
+                Buffer buffer = creator.poll();
+                if (null != buffer) {
+                    MemoryObject obj = buffer.getFreeObject();
+                    if (null != obj) {
+                        deAllocator.deAllocate(obj);
+                        buffer.unLoad();
+                        return true;
                     }
                 }
-                System.gc();
+                return false;
             }
         };
     }
 
-    public <B extends AbstractBuffer> B getBuffer(PoolMode mode, URI uri) {
-        synchronized (this) {
-            BufferPool<B> pool = poolMap.get(mode);
-            if (null == pool) {
-                pool = new BufferPool(mode, referenceQueue);
-                poolMap.put(mode, pool);
-            }
-            return pool.getBuffer(uri);
-        }
-    }
-
-    public void registerBuffer(PoolMode mode, Buffer buffer) {
-        if (mode.isAssignableFrom(buffer.getClass())) {
-            if (maxExistsBuffer.get() > 0) {
-                maxExistsBuffer.decrementAndGet();
-                poolMap.get(mode).registerBuffer(buffer);
-            } else {
-                callBack.forceGC();
-                registerBuffer(mode, buffer);
+    public enum DataType {
+        /**
+         *
+         */
+        BYTE {
+            @Override
+            public ByteBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
+                return BYTE_CREATOR.createBuffer(connector, fileBlock, maxOffset);
             }
 
-        }
-    }
-
-    public void resetTimer(long t) {
-        Iterator<Map.Entry<PoolMode, BufferPool>> iterator = poolMap.entrySet().iterator();
-        while (iterator.hasNext()) {
-            iterator.next().getValue().resetTimer(t);
-        }
-    }
-
-    public long getCurrentMemorySize() {
-        return memoryHandler.getReadSize() + memoryHandler.getWriteSize();
-    }
-
-    public long getReadSize() {
-        return memoryHandler.getReadSize();
-    }
-
-    public long getWriteSize() {
-        return memoryHandler.getWriteSize();
-    }
-
-    public long getReadWaitCount() {
-        return memoryHandler.getReadWaitCount();
-    }
-
-    public long getWriteWaitCount() {
-        return memoryHandler.getWriteWaitCount();
-    }
-
-    public void removeBuffer(PoolMode mode, AbstractBuffer buffer) {
-        synchronized (this) {
-            BufferPool<Buffer> pool = poolMap.get(mode);
-            if (null == pool) {
-                pool = new BufferPool(mode, referenceQueue);
-                poolMap.put(mode, pool);
-            } else {
-                poolMap.get(mode).remove(buffer);
+            @Override
+            public ByteBuffer createBuffer(Connector connector, URI uri) {
+                return BYTE_CREATOR.createBuffer(connector, uri);
             }
-        }
-    }
+        },
+        INT {
+            @Override
+            public IntBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
+                return INT_CREATOR.createBuffer(connector, fileBlock, maxOffset);
+            }
 
-    public void returnMemory(Buffer buffer, BufferPrivilege bufferPrivilege, boolean positive) {
-        memoryHandler.returnMemory(buffer, bufferPrivilege, positive);
-        if (!positive) {
-            maxExistsBuffer.incrementAndGet();
-        }
-    }
+            @Override
+            public IntBuffer createBuffer(Connector connector, URI uri) {
+                return INT_CREATOR.createBuffer(connector, uri);
+            }
+        }, LONG {
+            @Override
+            public LongBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
+                return LONG_CREATOR.createBuffer(connector, fileBlock, maxOffset);
+            }
 
+            @Override
+            public LongBuffer createBuffer(Connector connector, URI uri) {
+                return LONG_CREATOR.createBuffer(connector, uri);
+            }
+        }, DOUBLE {
+            @Override
+            public DoubleBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
+                return DOUBLE_CREATOR.createBuffer(connector, fileBlock, maxOffset);
+            }
+
+            @Override
+            public DoubleBuffer createBuffer(Connector connector, URI uri) {
+                return DOUBLE_CREATOR.createBuffer(connector, uri);
+            }
+        },
+        SHORT {
+            @Override
+            public ShortBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
+                return SHORT_CREATOR.createBuffer(connector, fileBlock, maxOffset);
+            }
+
+            @Override
+            public ShortBuffer createBuffer(Connector connector, URI uri) {
+                return SHORT_CREATOR.createBuffer(connector, uri);
+            }
+        },
+        CHAR {
+            @Override
+            public CharBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
+                return CHAR_CREATOR.createBuffer(connector, fileBlock, maxOffset);
+            }
+
+            @Override
+            public CharBuffer createBuffer(Connector connector, URI uri) {
+                return CHAR_CREATOR.createBuffer(connector, uri);
+            }
+        },
+        FLOAT {
+            @Override
+            public FloatBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
+                return FLOAT_CREATOR.createBuffer(connector, fileBlock, maxOffset);
+            }
+
+            @Override
+            public FloatBuffer createBuffer(Connector connector, URI uri) {
+                return FLOAT_CREATOR.createBuffer(connector, uri);
+            }
+        };
+
+        public abstract <B extends Buffer> B createBuffer(Connector connector, FileBlock fileBlock, int maxOffset);
+
+        public abstract <B extends Buffer> B createBuffer(Connector connector, URI uri);
+    }
 }
