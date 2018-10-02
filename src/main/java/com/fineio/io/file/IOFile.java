@@ -301,7 +301,7 @@ public abstract class IOFile<B extends Buffer> {
     }
 
     protected final FileBlock createHeadBlock() {
-        return new FileBlock(uri, "head");
+        return new FileBlock(uri, FileConstants.HEAD);
     }
 
     /**
