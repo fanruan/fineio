@@ -3,6 +3,7 @@ package com.fineio.io.edit;
 import com.fineio.io.IntBuffer;
 import com.fineio.io.file.EditModel;
 import com.fineio.io.file.FileBlock;
+import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -15,17 +16,17 @@ public final class IntEditBuffer extends EditBuffer implements IntBuffer {
         MODEL = new EditModel<IntBuffer>() {
             @Override
             protected final IntEditBuffer createBuffer(final Connector connector, final FileBlock fileBlock, final int n) {
-                return new IntEditBuffer(connector, fileBlock, n, null);
+                return new IntEditBuffer(connector, fileBlock, n);
             }
 
             @Override
             public final IntEditBuffer createBuffer(final Connector connector, final URI uri) {
-                return new IntEditBuffer(connector, uri, null);
+                return new IntEditBuffer(connector, uri);
             }
 
             @Override
             protected final byte offset() {
-                return 2;
+                return MemoryConstants.OFFSET_INT;
             }
         };
     }
@@ -40,7 +41,7 @@ public final class IntEditBuffer extends EditBuffer implements IntBuffer {
 
     @Override
     protected int getLengthOffset() {
-        return 2;
+        return MemoryConstants.OFFSET_INT;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.fineio.io.edit;
 import com.fineio.io.DoubleBuffer;
 import com.fineio.io.file.EditModel;
 import com.fineio.io.file.FileBlock;
+import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -15,17 +16,17 @@ public final class DoubleEditBuffer extends EditBuffer implements DoubleBuffer {
         MODEL = new EditModel<DoubleBuffer>() {
             @Override
             protected final DoubleEditBuffer createBuffer(final Connector connector, final FileBlock fileBlock, final int n) {
-                return new DoubleEditBuffer(connector, fileBlock, n, null);
+                return new DoubleEditBuffer(connector, fileBlock, n);
             }
 
             @Override
             public final DoubleEditBuffer createBuffer(final Connector connector, final URI uri) {
-                return new DoubleEditBuffer(connector, uri, null);
+                return new DoubleEditBuffer(connector, uri);
             }
 
             @Override
             protected final byte offset() {
-                return 3;
+                return MemoryConstants.OFFSET_DOUBLE;
             }
         };
     }
@@ -40,7 +41,7 @@ public final class DoubleEditBuffer extends EditBuffer implements DoubleBuffer {
 
     @Override
     protected int getLengthOffset() {
-        return 3;
+        return MemoryConstants.OFFSET_DOUBLE;
     }
 
     @Override

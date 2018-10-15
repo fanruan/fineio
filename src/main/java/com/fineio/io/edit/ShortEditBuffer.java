@@ -3,6 +3,7 @@ package com.fineio.io.edit;
 import com.fineio.io.ShortBuffer;
 import com.fineio.io.file.EditModel;
 import com.fineio.io.file.FileBlock;
+import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -15,17 +16,17 @@ public final class ShortEditBuffer extends EditBuffer implements ShortBuffer {
         MODEL = new EditModel<ShortBuffer>() {
             @Override
             protected final ShortEditBuffer createBuffer(final Connector connector, final FileBlock fileBlock, final int n) {
-                return new ShortEditBuffer(connector, fileBlock, n, null);
+                return new ShortEditBuffer(connector, fileBlock, n);
             }
 
             @Override
             public final ShortEditBuffer createBuffer(final Connector connector, final URI uri) {
-                return new ShortEditBuffer(connector, uri, null);
+                return new ShortEditBuffer(connector, uri);
             }
 
             @Override
             protected final byte offset() {
-                return 1;
+                return MemoryConstants.OFFSET_SHORT;
             }
         };
     }
@@ -40,7 +41,7 @@ public final class ShortEditBuffer extends EditBuffer implements ShortBuffer {
 
     @Override
     protected int getLengthOffset() {
-        return 1;
+        return MemoryConstants.OFFSET_SHORT;
     }
 
     @Override

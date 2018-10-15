@@ -3,6 +3,7 @@ package com.fineio.io.edit;
 import com.fineio.io.CharBuffer;
 import com.fineio.io.file.EditModel;
 import com.fineio.io.file.FileBlock;
+import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -15,17 +16,17 @@ public final class CharEditBuffer extends EditBuffer implements CharBuffer {
         MODEL = new EditModel<CharBuffer>() {
             @Override
             protected final CharEditBuffer createBuffer(final Connector connector, final FileBlock fileBlock, final int n) {
-                return new CharEditBuffer(connector, fileBlock, n, null);
+                return new CharEditBuffer(connector, fileBlock, n);
             }
 
             @Override
             public final CharEditBuffer createBuffer(final Connector connector, final URI uri) {
-                return new CharEditBuffer(connector, uri, null);
+                return new CharEditBuffer(connector, uri);
             }
 
             @Override
             protected final byte offset() {
-                return 1;
+                return MemoryConstants.OFFSET_CHAR;
             }
         };
     }
@@ -40,7 +41,7 @@ public final class CharEditBuffer extends EditBuffer implements CharBuffer {
 
     @Override
     protected int getLengthOffset() {
-        return 1;
+        return MemoryConstants.OFFSET_CHAR;
     }
 
     @Override

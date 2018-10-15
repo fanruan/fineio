@@ -3,6 +3,7 @@ package com.fineio.io.read;
 import com.fineio.io.ShortBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.ReadModel;
+import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -15,7 +16,7 @@ public final class ShortReadBuffer extends ReadBuffer implements ShortBuffer {
         MODEL = new ReadModel<ShortBuffer>() {
             @Override
             protected final ShortReadBuffer createBuffer(final Connector connector, final FileBlock fileBlock, final int n) {
-                return new ShortReadBuffer(connector, fileBlock, n, null);
+                return new ShortReadBuffer(connector, fileBlock, n);
             }
 
             @Override
@@ -25,7 +26,7 @@ public final class ShortReadBuffer extends ReadBuffer implements ShortBuffer {
 
             @Override
             protected final byte offset() {
-                return 1;
+                return MemoryConstants.OFFSET_SHORT;
             }
         };
     }
@@ -40,7 +41,7 @@ public final class ShortReadBuffer extends ReadBuffer implements ShortBuffer {
 
     @Override
     protected int getLengthOffset() {
-        return 1;
+        return MemoryConstants.OFFSET_SHORT;
     }
 
     @Override

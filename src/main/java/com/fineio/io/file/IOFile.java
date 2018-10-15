@@ -133,7 +133,7 @@ public abstract class IOFile<E extends Buffer> {
 
     protected final void createBufferArray(final int blocks) {
         this.blocks = blocks;
-        this.buffers = new Buffer[blocks];
+        this.buffers = (E[]) new Buffer[blocks];
     }
 
     private boolean inRange(final int n) {

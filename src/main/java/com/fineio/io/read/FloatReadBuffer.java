@@ -3,6 +3,7 @@ package com.fineio.io.read;
 import com.fineio.io.FloatBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.ReadModel;
+import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -15,17 +16,17 @@ public final class FloatReadBuffer extends ReadBuffer implements FloatBuffer {
         MODEL = new ReadModel<FloatBuffer>() {
             @Override
             protected final FloatReadBuffer createBuffer(final Connector connector, final FileBlock fileBlock, final int n) {
-                return new FloatReadBuffer(connector, fileBlock, n, null);
+                return new FloatReadBuffer(connector, fileBlock, n);
             }
 
             @Override
             public final FloatReadBuffer createBuffer(final Connector connector, final URI uri) {
-                return new FloatReadBuffer(connector, uri, null);
+                return new FloatReadBuffer(connector, uri);
             }
 
             @Override
             protected final byte offset() {
-                return 2;
+                return MemoryConstants.OFFSET_FLOAT;
             }
         };
     }
@@ -40,7 +41,7 @@ public final class FloatReadBuffer extends ReadBuffer implements FloatBuffer {
 
     @Override
     protected int getLengthOffset() {
-        return 2;
+        return MemoryConstants.OFFSET_FLOAT;
     }
 
     @Override

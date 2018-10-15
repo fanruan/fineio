@@ -3,6 +3,7 @@ package com.fineio.io.write;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.WriteModel;
+import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -15,17 +16,17 @@ public final class LongWriteBuffer extends WriteBuffer implements LongBuffer {
         MODEL = new WriteModel<LongBuffer>() {
             @Override
             protected final LongWriteBuffer createBuffer(final Connector connector, final FileBlock fileBlock, final int n) {
-                return new LongWriteBuffer(connector, fileBlock, n, null);
+                return new LongWriteBuffer(connector, fileBlock, n);
             }
 
             @Override
             public final LongWriteBuffer createBuffer(final Connector connector, final URI uri) {
-                return new LongWriteBuffer(connector, uri, null);
+                return new LongWriteBuffer(connector, uri);
             }
 
             @Override
             protected final byte offset() {
-                return 3;
+                return MemoryConstants.OFFSET_LONG;
             }
         };
     }
@@ -40,7 +41,7 @@ public final class LongWriteBuffer extends WriteBuffer implements LongBuffer {
 
     @Override
     protected int getLengthOffset() {
-        return 3;
+        return MemoryConstants.OFFSET_LONG;
     }
 
     @Override

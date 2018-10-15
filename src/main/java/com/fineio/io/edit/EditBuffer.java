@@ -6,7 +6,6 @@ import com.fineio.cache.LEVEL;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.FileCloseException;
 import com.fineio.io.Buffer;
-import com.fineio.io.base.AbstractBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.write.WriteBuffer;
 import com.fineio.memory.MemoryUtils;
@@ -233,7 +232,7 @@ public abstract class EditBuffer extends WriteBuffer implements Edit {
     private class VirtualAccessor extends Accessor {
         @Override
         public void invoke() {
-            final int n = EditBuffer.this.max_size << AbstractBuffer.this.getLengthOffset();
+            final int n = EditBuffer.this.max_size << getLengthOffset();
             this.bytes = new byte[n];
             this.off = 0;
             InputStream read = null;

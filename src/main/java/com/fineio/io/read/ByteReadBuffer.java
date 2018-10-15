@@ -3,6 +3,7 @@ package com.fineio.io.read;
 import com.fineio.io.ByteBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.ReadModel;
+import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -15,17 +16,17 @@ public final class ByteReadBuffer extends ReadBuffer implements ByteBuffer {
         MODEL = new ReadModel<ByteBuffer>() {
             @Override
             protected final ByteReadBuffer createBuffer(final Connector connector, final FileBlock fileBlock, final int n) {
-                return new ByteReadBuffer(connector, fileBlock, n, null);
+                return new ByteReadBuffer(connector, fileBlock, n);
             }
 
             @Override
             public final ByteReadBuffer createBuffer(final Connector connector, final URI uri) {
-                return new ByteReadBuffer(connector, uri, null);
+                return new ByteReadBuffer(connector, uri);
             }
 
             @Override
             protected final byte offset() {
-                return 0;
+                return MemoryConstants.OFFSET_BYTE;
             }
         };
     }
@@ -40,7 +41,7 @@ public final class ByteReadBuffer extends ReadBuffer implements ByteBuffer {
 
     @Override
     protected int getLengthOffset() {
-        return 0;
+        return MemoryConstants.OFFSET_BYTE;
     }
 
     @Override

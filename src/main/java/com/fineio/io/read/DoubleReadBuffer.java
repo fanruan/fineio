@@ -3,6 +3,7 @@ package com.fineio.io.read;
 import com.fineio.io.DoubleBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.ReadModel;
+import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
 
@@ -15,17 +16,17 @@ public final class DoubleReadBuffer extends ReadBuffer implements DoubleBuffer {
         MODEL = new ReadModel<DoubleBuffer>() {
             @Override
             protected final DoubleReadBuffer createBuffer(final Connector connector, final FileBlock fileBlock, final int n) {
-                return new DoubleReadBuffer(connector, fileBlock, n, null);
+                return new DoubleReadBuffer(connector, fileBlock, n);
             }
 
             @Override
             public final DoubleReadBuffer createBuffer(final Connector connector, final URI uri) {
-                return new DoubleReadBuffer(connector, uri, null);
+                return new DoubleReadBuffer(connector, uri);
             }
 
             @Override
             protected final byte offset() {
-                return 3;
+                return MemoryConstants.OFFSET_DOUBLE;
             }
         };
     }
@@ -40,7 +41,7 @@ public final class DoubleReadBuffer extends ReadBuffer implements DoubleBuffer {
 
     @Override
     protected int getLengthOffset() {
-        return 3;
+        return MemoryConstants.OFFSET_DOUBLE;
     }
 
     @Override
