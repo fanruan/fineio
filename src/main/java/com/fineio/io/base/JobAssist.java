@@ -4,61 +4,57 @@ import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-/**
- * Created by daniel on 2017/2/23.
- */
 public class JobAssist {
-
-
     private BufferKey key;
     private Job job;
-    private volatile  boolean finished = false;
-
+    private volatile boolean finished;
     private List<JobAssist> linkedJob;
 
-    public JobAssist(BufferKey key, Job job) {
+    public JobAssist(final BufferKey key, final Job job) {
+        this.finished = false;
         this.key = key;
         this.job = job;
     }
 
-    //for test
-    public JobAssist(Connector connector, FileBlock block, Job job) {
-        this.key = new BufferKey(connector, block);
+    public JobAssist(final Connector connector, final FileBlock fileBlock, final Job job) {
+        this.finished = false;
+        this.key = new BufferKey(connector, fileBlock);
         this.job = job;
     }
 
     public BufferKey getKey() {
-        return key;
+        return this.key;
     }
 
     public void doJob() {
-        job.doJob();
+        this.job.doJob();
     }
 
-    public void registerLinkJob(JobAssist jobAssist) {
+    public void registerLinkJob(final JobAssist jobAssist) {
         synchronized (this) {
-            if(finished){
+            if (this.finished) {
                 jobAssist.notifyJobs();
             }
-            if (linkedJob == null) {
-                linkedJob = new ArrayList<JobAssist>();
+            if (this.linkedJob == null) {
+                this.linkedJob = new ArrayList<JobAssist>();
             }
-            linkedJob.add(jobAssist);
+            this.linkedJob.add(jobAssist);
         }
     }
 
-    public void notifyJobs(){
-        synchronized (this){
+    public void notifyJobs() {
+        synchronized (this) {
             this.notifyAll();
-            if(linkedJob != null){
-                for(JobAssist assist : linkedJob){
-                    assist.notifyJobs();
+            if (this.linkedJob != null) {
+                final Iterator<JobAssist> iterator = this.linkedJob.iterator();
+                while (iterator.hasNext()) {
+                    iterator.next().notifyJobs();
                 }
             }
-            finished = true;
+            this.finished = true;
         }
     }
-
 }

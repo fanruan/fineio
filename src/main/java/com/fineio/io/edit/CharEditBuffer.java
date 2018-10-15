@@ -1,11 +1,69 @@
 package com.fineio.io.edit;
 
-import com.fineio.io.read.CharReadBuffer;
-import com.fineio.io.write.CharWriteBuffer;
+import com.fineio.io.CharBuffer;
+import com.fineio.io.file.EditModel;
+import com.fineio.io.file.FileBlock;
+import com.fineio.memory.MemoryUtils;
+import com.fineio.storage.Connector;
 
-/**
- * @author yee
- * @date 2018/6/1
- */
-public interface CharEditBuffer extends CharReadBuffer, CharWriteBuffer, EditBuffer {
+import java.net.URI;
+
+public final class CharEditBuffer extends EditBuffer implements CharBuffer {
+    public static final EditModel MODEL;
+
+    static {
+        MODEL = new EditModel<CharBuffer>() {
+            @Override
+            protected final CharEditBuffer createBuffer(final Connector connector, final FileBlock fileBlock, final int n) {
+                return new CharEditBuffer(connector, fileBlock, n, null);
+            }
+
+            @Override
+            public final CharEditBuffer createBuffer(final Connector connector, final URI uri) {
+                return new CharEditBuffer(connector, uri, null);
+            }
+
+            @Override
+            protected final byte offset() {
+                return 1;
+            }
+        };
+    }
+
+    private CharEditBuffer(final Connector connector, final FileBlock fileBlock, final int n) {
+        super(connector, fileBlock, n);
+    }
+
+    private CharEditBuffer(final Connector connector, final URI uri) {
+        super(connector, uri);
+    }
+
+    @Override
+    protected int getLengthOffset() {
+        return 1;
+    }
+
+    @Override
+    public final char get(final int n) {
+        this.checkIndex(n);
+        return MemoryUtils.getChar(this.address, n);
+    }
+
+    @Override
+    public final void put(final char c) {
+        this.put(++this.max_position, c);
+    }
+
+    @Override
+    public final void put(final int n, final char c) {
+        this.ensureCapacity(n);
+        this.judeChange(n, c);
+        MemoryUtils.put(this.address, n, c);
+    }
+
+    private void judeChange(final int n, final char c) {
+        if (!this.changed && c != this.get(n)) {
+            this.changed = true;
+        }
+    }
 }

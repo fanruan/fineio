@@ -1,18 +1,13 @@
 package com.fineio.io.base;
 
-/**
- * Created by daniel on 2017/2/24.
- */
 public abstract class StreamCloseChecker implements Checker {
-
     private int status;
 
-    protected StreamCloseChecker(int status) {
+    protected StreamCloseChecker(final int status) {
         this.status = status;
     }
 
     protected int getStatus() {
-        return status;
+        return this.status;
     }
-
 }

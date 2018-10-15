@@ -1,61 +1,50 @@
 package com.fineio.io.file;
 
-import com.fineio.cache.BufferPrivilege;
 import com.fineio.io.Buffer;
-import com.fineio.io.FileModel;
-import com.fineio.io.write.WriteOnlyBuffer;
+import com.fineio.io.ByteBuffer;
+import com.fineio.io.CharBuffer;
+import com.fineio.io.DoubleBuffer;
+import com.fineio.io.FloatBuffer;
+import com.fineio.io.IntBuffer;
+import com.fineio.io.LongBuffer;
+import com.fineio.io.ShortBuffer;
+import com.fineio.io.write.ByteWriteBuffer;
+import com.fineio.io.write.CharWriteBuffer;
+import com.fineio.io.write.DoubleWriteBuffer;
+import com.fineio.io.write.FloatWriteBuffer;
+import com.fineio.io.write.IntWriteBuffer;
+import com.fineio.io.write.LongWriteBuffer;
+import com.fineio.io.write.ShortWriteBuffer;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
 
-/**
- * Created by daniel on 2017/2/10.
- */
 public final class WriteIOFile<T extends Buffer> extends IOFile<T> {
+    public static final WriteModel<ByteBuffer> BYTE;
+    public static final WriteModel<DoubleBuffer> DOUBLE;
+    public static final WriteModel<LongBuffer> LONG;
+    public static final WriteModel<IntBuffer> INT;
+    public static final WriteModel<FloatBuffer> FLOAT;
+    public static final WriteModel<CharBuffer> CHAR;
+    public static final WriteModel<ShortBuffer> SHORT;
 
-    WriteIOFile(Connector connector, URI uri, FileModel model) {
-        super(connector, uri, model);
-        this.block_size_offset = (byte) (connector.getBlockOffset() - model.offset());
-        single_block_len = (1L << block_size_offset) - 1;
+    static {
+        BYTE = ByteWriteBuffer.MODEL;
+        DOUBLE = DoubleWriteBuffer.MODEL;
+        LONG = LongWriteBuffer.MODEL;
+        INT = IntWriteBuffer.MODEL;
+        FLOAT = FloatWriteBuffer.MODEL;
+        CHAR = CharWriteBuffer.MODEL;
+        SHORT = ShortWriteBuffer.MODEL;
     }
 
-    /**
-     * 创建File方法
-     *
-     * @param connector 连接器
-     * @param uri       子路径
-     * @param model     子类型
-     * @param <E>       继承ReadBuffer的子类型
-     * @return
-     */
-    public static final <E extends Buffer> WriteIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
-        return new WriteIOFile<E>(connector, uri, model);
+    WriteIOFile(final Connector connector, final URI uri, final WriteModel<T> writeModel) {
+        super(connector, uri, writeModel);
+        this.block_size_offset = (byte) (connector.getBlockOffset() - writeModel.offset());
+        this.single_block_len = (1L << this.block_size_offset) - 1L;
     }
 
-    @Override
-    protected Buffer createBuffer(int index) {
-        return model.createBufferForWrite(connector, createIndexBlock(index), block_size_offset);
+    public static final <E extends Buffer> WriteIOFile<E> createFineIO(final Connector connector, final URI uri, final WriteModel<E> writeModel) {
+        return new WriteIOFile<E>(connector, uri, writeModel);
     }
-
-    @Override
-    protected BufferPrivilege getLevel() {
-        return BufferPrivilege.WRITABLE;
-    }
-
-    @Override
-    protected void closeChild(boolean clear) {
-        if (buffers != null) {
-            for (int i = 0; i < buffers.length; i++) {
-                if (buffers[i] != null && null != buffers[i].get()) {
-                    if (clear) {
-                        ((WriteOnlyBuffer) buffers[i].get()).forceAndClear();
-                    } else {
-                        ((WriteOnlyBuffer) buffers[i].get()).force();
-                    }
-                    buffers[i] = null;
-                }
-            }
-        }
-    }
-
 }

@@ -1,6 +1,6 @@
 package com.fineio.test.cache;
 
-import com.fineio.v1.cache.CacheLinkedMap;
+import com.fineio.cache.CacheLinkedMap;
 import junit.framework.TestCase;
 
 import java.util.Iterator;

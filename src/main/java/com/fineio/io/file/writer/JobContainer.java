@@ -11,87 +11,78 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * Created by daniel on 2017/2/23.
- */
 public class JobContainer {
-    private Queue<JobAssist> jobs = new ConcurrentLinkedQueue<JobAssist>();
-    private Map<BufferKey, JobAssist> watchMap = new ConcurrentHashMap<BufferKey, JobAssist>();
+    private Queue<JobAssist> jobs;
+    private Map<BufferKey, JobAssist> watchMap;
+    private Lock lock;
 
-    private Lock lock = new ReentrantLock();
+    public JobContainer() {
+        this.jobs = new ConcurrentLinkedQueue<JobAssist>();
+        this.watchMap = new ConcurrentHashMap<BufferKey, JobAssist>();
+        this.lock = new ReentrantLock();
+    }
 
-
-    public boolean put(JobAssist job) {
+    public boolean put(final JobAssist jobAssist) {
         try {
-            lock.lock();
-            JobAssist jobAssist = watchMap.get(job.getKey());
-            if(jobAssist != null) {
-                //如果非空那么也要激活相同的请求
-                jobAssist.registerLinkJob(job);
-            } else {
-                addJob(job);
-                return true;
+            this.lock.lock();
+            final JobAssist jobAssist2 = this.watchMap.get(jobAssist.getKey());
+            if (jobAssist2 != null) {
+                jobAssist2.registerLinkJob(jobAssist);
+                return false;
             }
-            return false;
+            this.addJob(jobAssist);
+            return true;
         } finally {
-            lock.unlock();
+            this.lock.unlock();
         }
     }
 
     public boolean isEmpty() {
-        try {
-//            lock.lock();
-            return jobs.isEmpty();
-        } finally {
-//            lock.unlock();
-        }
+        return this.jobs.isEmpty();
     }
 
     public JobAssist get() {
         try {
-            lock.lock();
-            if(isEmpty()){
+            this.lock.lock();
+            if (this.isEmpty()) {
                 return null;
             }
-            JobAssist jobAssist = jobs.poll();
-            watchMap.remove(jobAssist.getKey());
+            final JobAssist jobAssist = this.jobs.poll();
+            this.watchMap.remove(jobAssist.getKey());
             return jobAssist;
         } finally {
-            lock.unlock();
+            this.lock.unlock();
         }
     }
 
-
-    public void waitJob(JobAssist jobAssist) {
-        waitJob(jobAssist, null);
+    public void waitJob(final JobAssist jobAssist) {
+        this.waitJob(jobAssist, null);
     }
 
-
-    public void waitJob(JobAssist jobAssist, Job callbackJob) {
-        if(jobAssist == null){
+    public void waitJob(final JobAssist jobAssist, final Job job) {
+        if (jobAssist == null) {
             return;
         }
-        lock.lock();
-        JobAssist job =  watchMap.get(jobAssist.getKey());
-        if(job == null){
-            job = jobAssist;
-            addJob(job);
-            if(callbackJob != null) {
-                callbackJob.doJob();
+        this.lock.lock();
+        JobAssist jobAssist2 = this.watchMap.get(jobAssist.getKey());
+        if (jobAssist2 == null) {
+            jobAssist2 = jobAssist;
+            this.addJob(jobAssist2);
+            if (job != null) {
+                job.doJob();
             }
         }
-        synchronized (job){
+        synchronized (jobAssist2) {
             try {
-                //这里unlock是为了避免addJob之后直接被get方法夺走从而导致wait的对象已经被拿去执行
-                lock.unlock();
-                job.wait();
-            } catch (InterruptedException e) {
+                this.lock.unlock();
+                jobAssist2.wait();
+            } catch (InterruptedException ex) {
             }
         }
     }
 
-    private void addJob(JobAssist job) {
-        jobs.add(job);
-        watchMap.put(job.getKey(), job);
+    private void addJob(final JobAssist jobAssist) {
+        this.jobs.add(jobAssist);
+        this.watchMap.put(jobAssist.getKey(), jobAssist);
     }
 }

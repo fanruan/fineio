@@ -1,83 +1,52 @@
 package com.fineio.io.file;
 
-import com.fineio.cache.BufferPrivilege;
 import com.fineio.io.Buffer;
-import com.fineio.io.FileModel;
-import com.fineio.logger.FineIOLoggers;
+import com.fineio.io.ByteBuffer;
+import com.fineio.io.CharBuffer;
+import com.fineio.io.DoubleBuffer;
+import com.fineio.io.FloatBuffer;
+import com.fineio.io.IntBuffer;
+import com.fineio.io.LongBuffer;
+import com.fineio.io.ShortBuffer;
+import com.fineio.io.read.ByteReadBuffer;
+import com.fineio.io.read.CharReadBuffer;
+import com.fineio.io.read.DoubleReadBuffer;
+import com.fineio.io.read.FloatReadBuffer;
+import com.fineio.io.read.IntReadBuffer;
+import com.fineio.io.read.LongReadBuffer;
+import com.fineio.io.read.ShortReadBuffer;
 import com.fineio.storage.Connector;
 
-import java.io.IOException;
 import java.net.URI;
 
-/**
- * Created by daniel on 2017/2/9.
- */
 public final class ReadIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
+    public static final ReadModel<ByteBuffer> BYTE;
+    public static final ReadModel<DoubleBuffer> DOUBLE;
+    public static final ReadModel<LongBuffer> LONG;
+    public static final ReadModel<IntBuffer> INT;
+    public static final ReadModel<FloatBuffer> FLOAT;
+    public static final ReadModel<CharBuffer> CHAR;
+    public static final ReadModel<ShortBuffer> SHORT;
 
-    ReadIOFile(Connector connector, URI uri, FileModel model) {
-        super(connector, uri, model);
+    static {
+        BYTE = ByteReadBuffer.MODEL;
+        DOUBLE = DoubleReadBuffer.MODEL;
+        LONG = LongReadBuffer.MODEL;
+        INT = IntReadBuffer.MODEL;
+        FLOAT = FloatReadBuffer.MODEL;
+        CHAR = CharReadBuffer.MODEL;
+        SHORT = ShortReadBuffer.MODEL;
     }
 
-    /**
-     * 创建File方法
-     *
-     * @param connector 连接器
-     * @param uri       子路径
-     * @param model     子类型
-     * @param <E>       继承ReadBuffer的子类型
-     * @return
-     */
-    public static final <E extends Buffer> ReadIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
-        return new ReadIOFile<E>(connector, uri, model);
+    private ReadIOFile(final Connector connector, final URI uri, final ReadModel<T> readModel) {
+        super(connector, uri, readModel);
     }
-
-    @Override
-    protected Buffer createBuffer(int index) {
-        return model.createBufferForRead(connector, createIndexBlock(index), block_size_offset);
-    }
-
-    @Override
-    protected BufferPrivilege getLevel() {
-        return BufferPrivilege.READABLE;
-    }
-
 
     @Override
     protected void writeHeader() {
     }
 
-    @Override
-    protected void closeChild(boolean clear) {
-        if (buffers != null) {
-            for (int i = 0; i < buffers.length; i++) {
-                if (buffers[i] != null && null != buffers[i].get()) {
-                    buffers[i].get().close();
-                    buffers[i] = null;
-                }
-            }
-        }
-    }
-
-    /**
-     * 复制
-     *
-     * @return
-     */
-    public boolean copyTo(URI destUri) {
-        synchronized (this) {
-            try {
-                if (buffers != null) {
-                    URI destURI = URI.create(destUri.getPath() + "/");
-                    connector.copy(createHeadBlock(), new FileBlock(destURI, FileConstants.HEAD));
-                    for (int i = 0; i < buffers.length; i++) {
-                        connector.copy(createIndexBlock(i), new FileBlock(destURI, String.valueOf(i)));
-                    }
-                    return true;
-                }
-            } catch (IOException e) {
-                FineIOLoggers.getLogger().error(e);
-            }
-            return false;
-        }
+    public static final <E extends Buffer> ReadIOFile<E> createFineIO(final Connector connector, final URI uri, final ReadModel<E> readModel) {
+        return new ReadIOFile<E>(connector, uri, readModel);
     }
 }

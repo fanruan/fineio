@@ -1,28 +1,28 @@
 package com.fineio.test;
 
+import com.fineio.FineIO;
 import com.fineio.base.Bits;
+import com.fineio.directio.DirectEditIOFile;
+import com.fineio.directio.DirectReadIOFile;
+import com.fineio.directio.DirectWriteIOFile;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.IOSetException;
+import com.fineio.io.ByteBuffer;
+import com.fineio.io.CharBuffer;
+import com.fineio.io.DoubleBuffer;
+import com.fineio.io.FloatBuffer;
+import com.fineio.io.IntBuffer;
+import com.fineio.io.LongBuffer;
+import com.fineio.io.ShortBuffer;
+import com.fineio.io.file.EditIOFile;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.FileConstants;
+import com.fineio.io.file.IOFile;
+import com.fineio.io.file.ReadIOFile;
+import com.fineio.io.file.WriteIOFile;
 import com.fineio.storage.Connector;
 import com.fineio.test.file.FineWriteIOTest;
 import com.fineio.test.io.MemoryLeakTest;
-import com.fineio.v1.FineIO;
-import com.fineio.v1.directio.DirectEditIOFile;
-import com.fineio.v1.directio.DirectReadIOFile;
-import com.fineio.v1.directio.DirectWriteIOFile;
-import com.fineio.v1.io.ByteBuffer;
-import com.fineio.v1.io.CharBuffer;
-import com.fineio.v1.io.DoubleBuffer;
-import com.fineio.v1.io.FloatBuffer;
-import com.fineio.v1.io.IntBuffer;
-import com.fineio.v1.io.LongBuffer;
-import com.fineio.v1.io.ShortBuffer;
-import com.fineio.v1.io.file.EditIOFile;
-import com.fineio.v1.io.file.IOFile;
-import com.fineio.v1.io.file.ReadIOFile;
-import com.fineio.v1.io.file.WriteIOFile;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
@@ -63,7 +63,6 @@ public class FineIOTest extends TestCase {
         assertTrue(exp);
         assertEquals(30, FineIO.getSyncThreads());
         MemoryLeakTest.assertZeroMemory();
-        FineIO.setSyncThreads(counts);
     }
 
     public void testCreateReadIOFile() throws Exception {
