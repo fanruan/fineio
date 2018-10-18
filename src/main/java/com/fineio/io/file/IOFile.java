@@ -243,7 +243,7 @@ public abstract class IOFile<E extends Buffer> {
             try {
                 if (this.buffers != null) {
                     final URI create = URI.create(uri.getPath() + "/");
-                    this.connector.copy(this.createHeadBlock(), new FileBlock(create, "head"));
+                    this.connector.copy(this.createHeadBlock(), new FileBlock(create, FileConstants.HEAD));
                     for (int i = 0; i < this.buffers.length; ++i) {
                         this.connector.copy(this.createIndexBlock(i), new FileBlock(create, String.valueOf(i)));
                     }
@@ -278,7 +278,7 @@ public abstract class IOFile<E extends Buffer> {
 
     protected void writeHeader() {
         final FileBlock headBlock = this.createHeadBlock();
-        final byte[] array = new byte[9];
+        final byte[] array = new byte[HEAD_LEN];
         Bits.putInt(array, 0, (this.buffers == null) ? 0 : this.buffers.length);
         array[8] = (byte) (this.block_size_offset + this.model.offset());
         try {

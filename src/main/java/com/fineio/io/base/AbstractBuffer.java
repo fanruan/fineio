@@ -73,7 +73,8 @@ public abstract class AbstractBuffer implements BaseBuffer {
 
     protected void beforeStatusChange() {
         this.status.addAndGet(1);
-        while (this.waitHelper++ < this.waitHelper + 1024) {
+        int count = this.waitHelper + MAX_COUNT;
+        while (this.waitHelper++ < count) {
         }
         this.waitHelper = 0;
     }
