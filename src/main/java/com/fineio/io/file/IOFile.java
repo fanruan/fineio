@@ -170,8 +170,8 @@ public abstract class IOFile<E extends Buffer> {
 
     protected void checkWrite(final int bufferWriteIndex) {
         if (this.bufferWriteIndex != bufferWriteIndex) {
-            if (this.bufferWriteIndex != -1) {
-                this.buffers[this.bufferWriteIndex].write();
+            if (bufferWriteIndex != -1) {
+                this.buffers[bufferWriteIndex].write();
             }
             this.bufferWriteIndex = bufferWriteIndex;
         }
@@ -182,12 +182,12 @@ public abstract class IOFile<E extends Buffer> {
             return 0;
         }
         final int n = this.buffers.length - 1;
-        return this.buffers[n].full() ? this.triggerWrite(n + 1) : n;
+        return this.buffers[n].full() ? this.triggerWrite(n) : n;
     }
 
     private final int triggerWrite(final int n) {
         this.checkWrite(n);
-        return n;
+        return n + 1;
     }
 
     private final int gp(final long pos) {
