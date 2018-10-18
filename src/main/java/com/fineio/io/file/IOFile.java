@@ -182,7 +182,7 @@ public abstract class IOFile<E extends Buffer> {
             return 0;
         }
         final int n = this.buffers.length - 1;
-        return this.buffers[n].full() ? this.triggerWrite(n + 1) : n;
+        return this.buffers[n].full() ? this.triggerWrite(n) + 1 : n;
     }
 
     private final int triggerWrite(final int n) {
