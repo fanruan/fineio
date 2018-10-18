@@ -28,88 +28,88 @@ public abstract class DirectIOFile<E extends Buffer> {
         this.model = model;
     }
 
-    public static void put(final DirectIOFile<DoubleBuffer> directIOFile, final double n) {
-        directIOFile.getBuffer().put(n);
+    public static void put(final DirectIOFile<DoubleBuffer> file, final double n) {
+        file.getBuffer().put(n);
     }
 
-    public static void put(final DirectIOFile<ByteBuffer> directIOFile, final byte b) {
-        directIOFile.getBuffer().put(b);
+    public static void put(final DirectIOFile<ByteBuffer> file, final byte b) {
+        file.getBuffer().put(b);
     }
 
-    public static void put(final DirectIOFile<CharBuffer> directIOFile, final char c) {
-        directIOFile.getBuffer().put(c);
+    public static void put(final DirectIOFile<CharBuffer> file, final char c) {
+        file.getBuffer().put(c);
     }
 
-    public static void put(final DirectIOFile<FloatBuffer> directIOFile, final float n) {
-        directIOFile.getBuffer().put(n);
+    public static void put(final DirectIOFile<FloatBuffer> file, final float n) {
+        file.getBuffer().put(n);
     }
 
-    public static void put(final DirectIOFile<LongBuffer> directIOFile, final long n) {
-        directIOFile.getBuffer().put(n);
+    public static void put(final DirectIOFile<LongBuffer> file, final long n) {
+        file.getBuffer().put(n);
     }
 
-    public static void put(final DirectIOFile<IntBuffer> directIOFile, final int n) {
-        directIOFile.getBuffer().put(n);
+    public static void put(final DirectIOFile<IntBuffer> file, final int n) {
+        file.getBuffer().put(n);
     }
 
-    public static void put(final DirectIOFile<ShortBuffer> directIOFile, final short n) {
-        directIOFile.getBuffer().put(n);
+    public static void put(final DirectIOFile<ShortBuffer> file, final short n) {
+        file.getBuffer().put(n);
     }
 
-    public static void put(final DirectIOFile<DoubleBuffer> directIOFile, final int n, final double n2) {
-        directIOFile.getBuffer().put(n, n2);
+    public static void put(final DirectIOFile<DoubleBuffer> file, final int n, final double value) {
+        file.getBuffer().put(n, value);
     }
 
-    public static void put(final DirectIOFile<ByteBuffer> directIOFile, final int n, final byte b) {
-        directIOFile.getBuffer().put(n, b);
+    public static void put(final DirectIOFile<ByteBuffer> file, final int n, final byte b) {
+        file.getBuffer().put(n, b);
     }
 
-    public static void put(final DirectIOFile<CharBuffer> directIOFile, final int n, final char c) {
-        directIOFile.getBuffer().put(n, c);
+    public static void put(final DirectIOFile<CharBuffer> file, final int n, final char c) {
+        file.getBuffer().put(n, c);
     }
 
-    public static void put(final DirectIOFile<FloatBuffer> directIOFile, final int n, final float n2) {
-        directIOFile.getBuffer().put(n, n2);
+    public static void put(final DirectIOFile<FloatBuffer> file, final int n, final float value) {
+        file.getBuffer().put(n, value);
     }
 
-    public static void put(final DirectIOFile<LongBuffer> directIOFile, final int n, final long n2) {
-        directIOFile.getBuffer().put(n, n2);
+    public static void put(final DirectIOFile<LongBuffer> file, final int n, final long value) {
+        file.getBuffer().put(n, value);
     }
 
-    public static void put(final DirectIOFile<IntBuffer> directIOFile, final int n, final int n2) {
-        directIOFile.getBuffer().put(n, n2);
+    public static void put(final DirectIOFile<IntBuffer> file, final int n, final int value) {
+        file.getBuffer().put(n, value);
     }
 
-    public static void put(final DirectIOFile<ShortBuffer> directIOFile, final int n, final short n2) {
-        directIOFile.getBuffer().put(n, n2);
+    public static void put(final DirectIOFile<ShortBuffer> file, final int n, final short value) {
+        file.getBuffer().put(n, value);
     }
 
-    public static final long getLong(final DirectIOFile<LongBuffer> directIOFile, final int n) {
-        return directIOFile.getBuffer().get(n);
+    public static final long getLong(final DirectIOFile<LongBuffer> file, final int n) {
+        return file.getBuffer().get(n);
     }
 
-    public static final int getInt(final DirectIOFile<IntBuffer> directIOFile, final int n) {
-        return directIOFile.getBuffer().get(n);
+    public static final int getInt(final DirectIOFile<IntBuffer> file, final int n) {
+        return file.getBuffer().get(n);
     }
 
-    public static final char getChar(final DirectIOFile<CharBuffer> directIOFile, final int n) {
-        return directIOFile.getBuffer().get(n);
+    public static final char getChar(final DirectIOFile<CharBuffer> file, final int n) {
+        return file.getBuffer().get(n);
     }
 
-    public static final double getDouble(final DirectIOFile<DoubleBuffer> directIOFile, final int n) {
-        return directIOFile.getBuffer().get(n);
+    public static final double getDouble(final DirectIOFile<DoubleBuffer> file, final int n) {
+        return file.getBuffer().get(n);
     }
 
-    public static final float getFloat(final DirectIOFile<FloatBuffer> directIOFile, final int n) {
-        return directIOFile.getBuffer().get(n);
+    public static final float getFloat(final DirectIOFile<FloatBuffer> file, final int n) {
+        return file.getBuffer().get(n);
     }
 
-    public static final byte getByte(final DirectIOFile<ByteBuffer> directIOFile, final int n) {
-        return directIOFile.getBuffer().get(n);
+    public static final byte getByte(final DirectIOFile<ByteBuffer> file, final int n) {
+        return file.getBuffer().get(n);
     }
 
-    public static final short getShort(final DirectIOFile<ShortBuffer> directIOFile, final long n) {
-        return directIOFile.getBuffer().get((int) n);
+    public static final short getShort(final DirectIOFile<ShortBuffer> file, final long n) {
+        return file.getBuffer().get((int) n);
     }
 
     public String getPath() {

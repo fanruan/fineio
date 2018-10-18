@@ -39,88 +39,88 @@ public abstract class IOFile<E extends Buffer> {
         this.model = model;
     }
 
-    public static void put(final IOFile<DoubleBuffer> ioFile, final double n) {
-        ioFile.getBuffer(ioFile.checkBuffer(ioFile.gi())).put(n);
+    public static void put(final IOFile<DoubleBuffer> file, final double value) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(value);
     }
 
-    public static void put(final IOFile<ByteBuffer> ioFile, final byte b) {
-        ioFile.getBuffer(ioFile.checkBuffer(ioFile.gi())).put(b);
+    public static void put(final IOFile<ByteBuffer> file, final byte value) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(value);
     }
 
-    public static void put(final IOFile<CharBuffer> ioFile, final char c) {
-        ioFile.getBuffer(ioFile.checkBuffer(ioFile.gi())).put(c);
+    public static void put(final IOFile<CharBuffer> file, final char value) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(value);
     }
 
-    public static void put(final IOFile<FloatBuffer> ioFile, final float n) {
-        ioFile.getBuffer(ioFile.checkBuffer(ioFile.gi())).put(n);
+    public static void put(final IOFile<FloatBuffer> file, final float value) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(value);
     }
 
-    public static void put(final IOFile<LongBuffer> ioFile, final long n) {
-        ioFile.getBuffer(ioFile.checkBuffer(ioFile.gi())).put(n);
+    public static void put(final IOFile<LongBuffer> file, final long value) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(value);
     }
 
-    public static void put(final IOFile<IntBuffer> ioFile, final int n) {
-        ioFile.getBuffer(ioFile.checkBuffer(ioFile.gi())).put(n);
+    public static void put(final IOFile<IntBuffer> file, final int value) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(value);
     }
 
-    public static void put(final IOFile<ShortBuffer> ioFile, final short n) {
-        ioFile.getBuffer(ioFile.checkBuffer(ioFile.gi())).put(n);
+    public static void put(final IOFile<ShortBuffer> file, final short value) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(value);
     }
 
-    public static void put(final IOFile<DoubleBuffer> ioFile, final long n, final double n2) {
-        ioFile.getBuffer(ioFile.checkBuffer(ioFile.giw(n))).put(ioFile.gp(n), n2);
+    public static void put(final IOFile<DoubleBuffer> file, final long pos, final double value) {
+        file.getBuffer(file.checkBuffer(file.giw(pos))).put(file.gp(pos), value);
     }
 
-    public static void put(final IOFile<ByteBuffer> ioFile, final long n, final byte b) {
-        ioFile.getBuffer(ioFile.checkBuffer(ioFile.giw(n))).put(ioFile.gp(n), b);
+    public static void put(final IOFile<ByteBuffer> file, final long pos, final byte value) {
+        file.getBuffer(file.checkBuffer(file.giw(pos))).put(file.gp(pos), value);
     }
 
-    public static void put(final IOFile<CharBuffer> ioFile, final long n, final char c) {
-        ioFile.getBuffer(ioFile.checkBuffer(ioFile.giw(n))).put(ioFile.gp(n), c);
+    public static void put(final IOFile<CharBuffer> file, final long pos, final char value) {
+        file.getBuffer(file.checkBuffer(file.giw(pos))).put(file.gp(pos), value);
     }
 
-    public static void put(final IOFile<FloatBuffer> ioFile, final long n, final float n2) {
-        ioFile.getBuffer(ioFile.checkBuffer(ioFile.giw(n))).put(ioFile.gp(n), n2);
+    public static void put(final IOFile<FloatBuffer> file, final long pos, final float value) {
+        file.getBuffer(file.checkBuffer(file.giw(pos))).put(file.gp(pos), value);
     }
 
-    public static void put(final IOFile<LongBuffer> ioFile, final long n, final long n2) {
-        ioFile.getBuffer(ioFile.checkBuffer(ioFile.giw(n))).put(ioFile.gp(n), n2);
+    public static void put(final IOFile<LongBuffer> file, final long pos, final long value) {
+        file.getBuffer(file.checkBuffer(file.giw(pos))).put(file.gp(pos), value);
     }
 
-    public static void put(final IOFile<IntBuffer> ioFile, final long n, final int n2) {
-        ioFile.getBuffer(ioFile.checkBuffer(ioFile.giw(n))).put(ioFile.gp(n), n2);
+    public static void put(final IOFile<IntBuffer> file, final long pos, final int value) {
+        file.getBuffer(file.checkBuffer(file.giw(pos))).put(file.gp(pos), value);
     }
 
-    public static void put(final IOFile<ShortBuffer> ioFile, final long n, final short n2) {
-        ioFile.getBuffer(ioFile.checkBuffer(ioFile.giw(n))).put(ioFile.gp(n), n2);
+    public static void put(final IOFile<ShortBuffer> file, final long pos, final short value) {
+        file.getBuffer(file.checkBuffer(file.giw(pos))).put(file.gp(pos), value);
     }
 
-    public static final long getLong(final IOFile<LongBuffer> ioFile, final long n) {
-        return ioFile.getBuffer(ioFile.gi(n)).get(ioFile.gp(n));
+    public static final long getLong(final IOFile<LongBuffer> file, final long pos) {
+        return file.getBuffer(file.gi(pos)).get(file.gp(pos));
     }
 
-    public static final int getInt(final IOFile<IntBuffer> ioFile, final long n) {
-        return ioFile.getBuffer(ioFile.gi(n)).get(ioFile.gp(n));
+    public static final int getInt(final IOFile<IntBuffer> file, final long pos) {
+        return file.getBuffer(file.gi(pos)).get(file.gp(pos));
     }
 
-    public static final char getChar(final IOFile<CharBuffer> ioFile, final long n) {
-        return ioFile.getBuffer(ioFile.gi(n)).get(ioFile.gp(n));
+    public static final char getChar(final IOFile<CharBuffer> file, final long pos) {
+        return file.getBuffer(file.gi(pos)).get(file.gp(pos));
     }
 
-    public static final double getDouble(final IOFile<DoubleBuffer> ioFile, final long n) {
-        return ioFile.getBuffer(ioFile.gi(n)).get(ioFile.gp(n));
+    public static final double getDouble(final IOFile<DoubleBuffer> file, final long pos) {
+        return file.getBuffer(file.gi(pos)).get(file.gp(pos));
     }
 
-    public static final float getFloat(final IOFile<FloatBuffer> ioFile, final long n) {
-        return ioFile.getBuffer(ioFile.gi(n)).get(ioFile.gp(n));
+    public static final float getFloat(final IOFile<FloatBuffer> file, final long pos) {
+        return file.getBuffer(file.gi(pos)).get(file.gp(pos));
     }
 
-    public static final byte getByte(final IOFile<ByteBuffer> ioFile, final long n) {
-        return ioFile.getBuffer(ioFile.gi(n)).get(ioFile.gp(n));
+    public static final byte getByte(final IOFile<ByteBuffer> file, final long pos) {
+        return file.getBuffer(file.gi(pos)).get(file.gp(pos));
     }
 
-    public static final short getShort(final IOFile<ShortBuffer> ioFile, final long n) {
-        return ioFile.getBuffer(ioFile.gi(n)).get(ioFile.gp(n));
+    public static final short getShort(final IOFile<ShortBuffer> file, final long pos) {
+        return file.getBuffer(file.gi(pos)).get(file.gp(pos));
     }
 
     public String getPath() {
@@ -156,16 +156,16 @@ public abstract class IOFile<E extends Buffer> {
         return n;
     }
 
-    protected int gi(final long n) {
-        return (int) (n >> this.block_size_offset);
+    protected int gi(final long pos) {
+        return (int) (pos >> this.block_size_offset);
     }
 
-    protected int giw(final long n) {
-        final int n2 = (int) (n >> this.block_size_offset);
-        if (n2 > 0) {
-            this.checkWrite(n2);
+    protected int giw(final long pos) {
+        final int value = (int) (pos >> this.block_size_offset);
+        if (value > 0) {
+            this.checkWrite(value);
         }
-        return n2;
+        return value;
     }
 
     protected void checkWrite(final int bufferWriteIndex) {
@@ -190,8 +190,8 @@ public abstract class IOFile<E extends Buffer> {
         return n;
     }
 
-    private final int gp(final long n) {
-        return (int) (n & this.single_block_len);
+    private final int gp(final long pos) {
+        return (int) (pos & this.single_block_len);
     }
 
     private final E getBuffer(final int n) {
