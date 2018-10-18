@@ -1,16 +1,16 @@
 package com.fineio.test.io.read;
 
+import com.fineio.FineIO;
 import com.fineio.base.Bits;
+import com.fineio.io.DoubleBuffer;
+import com.fineio.io.base.AbstractBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.FileConstants;
+import com.fineio.io.file.ReadIOFile;
+import com.fineio.io.read.ByteReadBuffer;
+import com.fineio.io.read.DoubleReadBuffer;
+import com.fineio.io.read.IntReadBuffer;
 import com.fineio.storage.Connector;
-import com.fineio.v1.FineIO;
-import com.fineio.v1.io.DoubleBuffer;
-import com.fineio.v1.io.base.AbstractBuffer;
-import com.fineio.v1.io.file.ReadIOFile;
-import com.fineio.v1.io.read.ByteReadBuffer;
-import com.fineio.v1.io.read.DoubleReadBuffer;
-import com.fineio.v1.io.read.IntReadBuffer;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.easymock.IMocksControl;
@@ -205,13 +205,13 @@ public class PerformanceTest {
         for(int k = 0, klen = (bytes.length >> 3); k < klen; k++){
             d +=db.get(k);
         }
-        System.out.println("first get double:" + (System.currentTimeMillis() - t) + "ms result:" + d);
+        System.out.println("first get double:" + (System.currentTimeMillis() - t) + "ms result：" + d);
         t = System.currentTimeMillis();
         d = 0;
         for(int k = 0, klen = (bytes.length >> 3); k < klen; k++){
             d +=db.get(k);
         }
-        System.out.println("second get double:" + (System.currentTimeMillis() - t) + "ms result:" + d);
+        System.out.println("second get double:" + (System.currentTimeMillis() - t) + "ms result：" + d);
     }
 
     private static void intTest(byte[] bytes, Connector connector, FileBlock block) {
@@ -221,13 +221,13 @@ public class PerformanceTest {
         for(int k = 0, klen = (bytes.length >> 2); k < klen; k++){
             v +=ib.get(k);
         }
-        System.out.println("first get int:" + (System.currentTimeMillis() - t) + "ms result:" + v);
+        System.out.println("first get int:" + (System.currentTimeMillis() - t) + "ms result：" + v);
         t = System.currentTimeMillis();
         v = 0;
         for(int k = 0, klen = (bytes.length >> 2); k < klen; k++){
             v +=ib.get(k);
         }
-        System.out.println("second get int:" + (System.currentTimeMillis() - t) + "ms result:" + v);
+        System.out.println("second get int:" + (System.currentTimeMillis() - t) + "ms result：" + v);
         ib.clear();
     }
 
@@ -238,13 +238,13 @@ public class PerformanceTest {
         for(int i = 0; i < bytes.length; i++){
             r += buffer.get(i);
         }
-        System.out.println("first get byte:" + (System.currentTimeMillis() - t) + "ms result:" + r);
+        System.out.println("first get byte:" + (System.currentTimeMillis() - t) + "ms result：" + r);
         t = System.currentTimeMillis();
         r = 0;
         for(int i = 0; i < bytes.length; i++){
             r += buffer.get(i);
         }
-        System.out.println("second get byte:" + (System.currentTimeMillis() - t) + "ms result:" + r);
+        System.out.println("second get byte:" + (System.currentTimeMillis() - t) + "ms result：" + r);
         buffer.clear();
     }
 

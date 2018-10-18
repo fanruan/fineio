@@ -1,52 +1,49 @@
 package com.fineio.directio;
 
 import com.fineio.io.Buffer;
-import com.fineio.io.FileModel;
-import com.fineio.io.edit.EditBuffer;
+import com.fineio.io.ByteBuffer;
+import com.fineio.io.CharBuffer;
+import com.fineio.io.DoubleBuffer;
+import com.fineio.io.FloatBuffer;
+import com.fineio.io.IntBuffer;
+import com.fineio.io.LongBuffer;
+import com.fineio.io.ShortBuffer;
+import com.fineio.io.edit.ByteEditBuffer;
+import com.fineio.io.edit.CharEditBuffer;
+import com.fineio.io.edit.DoubleEditBuffer;
+import com.fineio.io.edit.FloatEditBuffer;
+import com.fineio.io.edit.IntEditBuffer;
+import com.fineio.io.edit.LongEditBuffer;
+import com.fineio.io.edit.ShortEditBuffer;
+import com.fineio.io.file.EditModel;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
 
-/**
- * Created by daniel on 2017/2/10.
- */
-@Deprecated
 public final class DirectEditIOFile<T extends Buffer> extends DirectIOFile<T> {
+    public static final EditModel<ByteBuffer> BYTE;
+    public static final EditModel<DoubleBuffer> DOUBLE;
+    public static final EditModel<LongBuffer> LONG;
+    public static final EditModel<IntBuffer> INT;
+    public static final EditModel<FloatBuffer> FLOAT;
+    public static final EditModel<CharBuffer> CHAR;
+    public static final EditModel<ShortBuffer> SHORT;
 
-
-    DirectEditIOFile(Connector connector, URI uri, FileModel model) {
-        super(connector, uri, model);
+    static {
+        BYTE = ByteEditBuffer.MODEL;
+        DOUBLE = DoubleEditBuffer.MODEL;
+        LONG = LongEditBuffer.MODEL;
+        INT = IntEditBuffer.MODEL;
+        FLOAT = FloatEditBuffer.MODEL;
+        CHAR = CharEditBuffer.MODEL;
+        SHORT = ShortEditBuffer.MODEL;
     }
 
-    /**
-     * 创建File方法
-     *
-     * @param connector 连接器
-     * @param uri       子路径
-     * @param model     子类型
-     * @param <E>       继承EditBuffer的子类型
-     * @return
-     */
-    public static final <E extends Buffer> DirectEditIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
-        return new DirectEditIOFile<E>(connector, uri, model);
+    DirectEditIOFile(final Connector connector, final URI uri, final EditModel<T> editModel) {
+        super(connector, uri, editModel);
     }
 
-    @Override
-    protected Buffer initBuffer() {
-        if (buffer == null) {
-            synchronized (this) {
-                buffer = model.createBufferForEdit(connector, uri);
-            }
-        }
-        return buffer;
+    public static final <E extends Buffer> DirectEditIOFile<E> createFineIO(final Connector connector, final URI uri, final EditModel<E> editModel) {
+        return new DirectEditIOFile<E>(connector, uri, editModel);
     }
-
-    @Override
-    protected void closeChild() {
-        if (buffer != null) {
-            ((EditBuffer) buffer).force();
-        }
-    }
-
-
 }

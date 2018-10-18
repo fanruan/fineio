@@ -1,18 +1,17 @@
 package com.fineio.test.cache;
 
-import com.fineio.cache.BufferPrivilege;
+import com.fineio.FineIO;
+import com.fineio.cache.CacheManager;
+import com.fineio.cache.LEVEL;
 import com.fineio.exception.FileCloseException;
 import com.fineio.exception.MemorySetException;
+import com.fineio.io.Buffer;
 import com.fineio.memory.MemoryConf;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.test.io.MemoryLeakTest;
-import com.fineio.v1.FineIO;
-import com.fineio.v1.cache.CacheManager;
-import com.fineio.v1.io.Buffer;
 import junit.framework.TestCase;
 
 import java.lang.reflect.Field;
-import java.net.URI;
 
 /**
  * Created by daniel on 2017/3/6.
@@ -132,8 +131,8 @@ public class CacheManagerTest extends TestCase {
         }
 
 
-        public BufferPrivilege getLevel() {
-            return BufferPrivilege.READABLE;
+        public LEVEL getLevel() {
+            return LEVEL.READ;
         }
 
         public boolean recentAccess() {
@@ -156,11 +155,6 @@ public class CacheManagerTest extends TestCase {
         @Override
         public int getLength() {
             return cap;
-        }
-
-        @Override
-        public URI getUri() {
-            return null;
         }
     }
 

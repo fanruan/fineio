@@ -1,7 +1,7 @@
 package com.fineio.test.cache;
 
+import com.fineio.cache.CacheObject;
 import com.fineio.test.io.MemoryLeakTest;
-import com.fineio.v1.cache.CacheObject;
 import junit.framework.TestCase;
 
 /**

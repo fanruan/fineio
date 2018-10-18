@@ -1,18 +1,18 @@
 package com.fineio.test.io.read;
 
+import com.fineio.FineIO;
 import com.fineio.base.Bits;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
+import com.fineio.io.base.AbstractBuffer;
 import com.fineio.io.file.FileBlock;
+import com.fineio.io.read.ByteReadBuffer;
+import com.fineio.io.read.CharReadBuffer;
+import com.fineio.io.read.DoubleReadBuffer;
+import com.fineio.io.read.FloatReadBuffer;
+import com.fineio.io.read.IntReadBuffer;
+import com.fineio.io.read.LongReadBuffer;
+import com.fineio.io.read.ShortReadBuffer;
 import com.fineio.storage.Connector;
-import com.fineio.v1.FineIO;
-import com.fineio.v1.io.base.AbstractBuffer;
-import com.fineio.v1.io.read.ByteReadBuffer;
-import com.fineio.v1.io.read.CharReadBuffer;
-import com.fineio.v1.io.read.DoubleReadBuffer;
-import com.fineio.v1.io.read.FloatReadBuffer;
-import com.fineio.v1.io.read.IntReadBuffer;
-import com.fineio.v1.io.read.LongReadBuffer;
-import com.fineio.v1.io.read.ShortReadBuffer;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;

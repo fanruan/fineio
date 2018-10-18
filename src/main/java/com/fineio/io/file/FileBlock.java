@@ -1,78 +1,60 @@
 package com.fineio.io.file;
 
-
-import java.io.File;
 import java.net.URI;
 
-/**
- * Created by daniel on 2017/2/9.
- */
 public final class FileBlock {
-    private final static String EMPTY = "";
-
+    private static final String EMPTY = "";
     private URI uri;
-
     private String fileName;
 
-    /**
-     * 空就代表文件夹把
-     * @param uri
-     * @param fileName
-     */
-    public FileBlock(URI uri, String fileName){
+    public FileBlock(final URI uri, final String fileName) {
         this.uri = uri;
         this.fileName = fileName;
     }
 
-    /**
-     * 空就代表文件夹把
-     * @param uri
-     */
-    public FileBlock(URI uri){
+    public FileBlock(final URI uri) {
         this.uri = uri;
-        this.fileName = EMPTY;
-    }
-
-    public String toString() {
-        return (uri == null ? "":uri.toString())+ (fileName == null ? "": fileName);
-    }
-
-    /**
-     * parent的URI
-     * @return
-     */
-    public URI getParentUri() {
-        return  uri;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    /**
-     * 实际URI
-     * @return
-     */
-    public URI getBlockURI(){
-        return uri.resolve(fileName);
+        this.fileName = "";
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public String toString() {
+        return ((this.uri == null) ? "" : this.uri.toString()) + ((this.fileName == null) ? "" : this.fileName);
+    }
 
-        FileBlock block = (FileBlock) o;
+    public URI getParentUri() {
+        return this.uri;
+    }
 
-        if (uri != null ? !uri.equals(block.uri) : block.uri != null) return false;
-        return fileName != null ? fileName.equals(block.fileName) : block.fileName == null;
+    public String getFileName() {
+        return this.fileName;
+    }
 
+    public URI getBlockURI() {
+        return this.uri.resolve(this.fileName);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final FileBlock fileBlock = (FileBlock) o;
+        if (this.uri != null) {
+            if (this.uri.equals(fileBlock.uri)) {
+                return (this.fileName != null) ? this.fileName.equals(fileBlock.fileName) : (fileBlock.fileName == null);
+            }
+        } else if (fileBlock.uri == null) {
+            return (this.fileName != null) ? this.fileName.equals(fileBlock.fileName) : (fileBlock.fileName == null);
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        int result = uri != null ? uri.hashCode() : 0;
-        result = 31 * result + (fileName != null ? fileName.hashCode() : 0);
-        return result;
+        return 31 * ((this.uri != null) ? this.uri.hashCode() : 0) + ((this.fileName != null) ? this.fileName.hashCode() : 0);
     }
 }

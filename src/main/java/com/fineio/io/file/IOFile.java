@@ -1,78 +1,36 @@
 package com.fineio.io.file;
 
 import com.fineio.base.Bits;
-import com.fineio.cache.BufferPrivilege;
-import com.fineio.cache.CacheManager;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.IOSetException;
 import com.fineio.io.Buffer;
 import com.fineio.io.ByteBuffer;
 import com.fineio.io.CharBuffer;
 import com.fineio.io.DoubleBuffer;
-import com.fineio.io.FileModel;
 import com.fineio.io.FloatBuffer;
 import com.fineio.io.IntBuffer;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.ShortBuffer;
-import com.fineio.io.read.ByteReadBuffer;
-import com.fineio.io.read.CharReadBuffer;
-import com.fineio.io.read.DoubleReadBuffer;
-import com.fineio.io.read.FloatReadBuffer;
-import com.fineio.io.read.IntReadBuffer;
-import com.fineio.io.read.LongReadBuffer;
-import com.fineio.io.read.ShortReadBuffer;
-import com.fineio.io.write.ByteWriteBuffer;
-import com.fineio.io.write.CharWriteBuffer;
-import com.fineio.io.write.DoubleWriteBuffer;
-import com.fineio.io.write.FloatWriteBuffer;
-import com.fineio.io.write.IntWriteBuffer;
-import com.fineio.io.write.LongWriteBuffer;
-import com.fineio.io.write.ShortWriteBuffer;
-import com.fineio.io.write.WriteOnlyBuffer;
-import com.fineio.logger.FineIOLoggers;
-import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 
-import java.io.Closeable;
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
+import java.io.IOException;
 import java.net.URI;
 
-/**
- * @author yee
- * @date 2018/6/1
- */
-public abstract class IOFile<E extends Buffer> implements Closeable {
-    private final static int HEAD_LEN = MemoryConstants.STEP_LONG + 1;
-    /**
-     * 内部路径 key
-     */
+public abstract class IOFile<E extends Buffer> {
     protected URI uri;
-    /**
-     * 连接器
-     */
     protected Connector connector;
-    /**
-     * 分多少块
-     */
     protected int blocks;
-    /**
-     * 每块尺寸的大小的偏移量 2的N次方
-     */
     protected byte block_size_offset;
-    /**
-     * 读的类型
-     */
-    protected FileModel model;
-    /**
-     * 单个block的大小
-     */
+    private static final int HEAD_LEN = 9;
     protected long single_block_len;
-    protected volatile WeakReference<Buffer>[] buffers;
-    protected volatile boolean released = false;
-    private volatile int bufferWriteIndex = -1;
+    protected volatile E[] buffers;
+    private AbstractFileModel<E> model;
+    private volatile boolean released;
+    private volatile int bufferWriteIndex;
 
-    IOFile(Connector connector, URI uri, FileModel model) {
+    IOFile(final Connector connector, final URI uri, final AbstractFileModel<E> model) {
+        this.released = false;
+        this.bufferWriteIndex = -1;
         if (uri == null || connector == null || model == null) {
             throw new IOSetException("uri  or connector or model can't be null");
         }
@@ -81,425 +39,278 @@ public abstract class IOFile<E extends Buffer> implements Closeable {
         this.model = model;
     }
 
-    /**
-     * 连续写的方法，从当前已知的最大位置开始写
-     *
-     * @param file
-     * @param d
-     */
-
-    public static void put(IOFile<DoubleBuffer> file, double d) {
-        ((DoubleWriteBuffer) file.getBuffer(file.checkBuffer(file.gi()))).put(d);
+    public static void put(final IOFile<DoubleBuffer> file, final double value) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(value);
     }
 
-    /**
-     * 连续写的方法，从当前已知的最大位置开始写
-     *
-     * @param file
-     * @param d
-     */
-
-    public static void put(IOFile<ByteBuffer> file, byte d) {
-        ((ByteWriteBuffer) file.getBuffer(file.checkBuffer(file.gi()))).put(d);
+    public static void put(final IOFile<ByteBuffer> file, final byte value) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(value);
     }
 
-    /**
-     * 连续写的方法，从当前已知的最大位置开始写
-     *
-     * @param file
-     * @param d
-     */
-
-    public static void put(IOFile<CharBuffer> file, char d) {
-        ((CharWriteBuffer) file.getBuffer(file.checkBuffer(file.gi()))).put(d);
+    public static void put(final IOFile<CharBuffer> file, final char value) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(value);
     }
 
-    /**
-     * 连续写的方法，从当前已知的最大位置开始写
-     *
-     * @param file
-     * @param d
-     */
-
-    public static void put(IOFile<FloatBuffer> file, float d) {
-        ((FloatWriteBuffer) file.getBuffer(file.checkBuffer(file.gi()))).put(d);
+    public static void put(final IOFile<FloatBuffer> file, final float value) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(value);
     }
 
-    /**
-     * 连续写的方法，从当前已知的最大位置开始写
-     *
-     * @param file
-     * @param d
-     */
-
-    public static void put(IOFile<LongBuffer> file, long d) {
-        ((LongWriteBuffer) file.getBuffer(file.checkBuffer(file.gi()))).put(d);
+    public static void put(final IOFile<LongBuffer> file, final long value) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(value);
     }
 
-    /**
-     * 连续写的方法，从当前已知的最大位置开始写
-     *
-     * @param file
-     * @param d
-     */
-
-    public static void put(IOFile<IntBuffer> file, int d) {
-        ((IntWriteBuffer) file.getBuffer(file.checkBuffer(file.gi()))).put(d);
+    public static void put(final IOFile<IntBuffer> file, final int value) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(value);
     }
 
-    /**
-     * 连续写的方法，从当前已知的最大位置开始写
-     *
-     * @param file
-     * @param d
-     */
-
-    public static void put(IOFile<ShortBuffer> file, short d) {
-        ((ShortWriteBuffer) file.getBuffer(file.checkBuffer(file.gi()))).put(d);
+    public static void put(final IOFile<ShortBuffer> file, final short value) {
+        file.getBuffer(file.checkBuffer(file.gi())).put(value);
     }
 
-    /**
-     * 随机写
-     *
-     * @param p
-     * @param d
-     */
-    public void put(long p, double d) {
-        ((DoubleWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
+    public static void put(final IOFile<DoubleBuffer> file, final long pos, final double value) {
+        file.getBuffer(file.checkBuffer(file.giw(pos))).put(file.gp(pos), value);
     }
 
-    /**
-     * 随机写
-     *
-     * @param p
-     * @param d
-     */
-    public void put(long p, byte d) {
-        ((ByteWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
+    public static void put(final IOFile<ByteBuffer> file, final long pos, final byte value) {
+        file.getBuffer(file.checkBuffer(file.giw(pos))).put(file.gp(pos), value);
     }
 
-    /**
-     * 随机写
-     *
-     * @param p
-     * @param d
-     */
-    public void put(long p, char d) {
-        ((CharWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
+    public static void put(final IOFile<CharBuffer> file, final long pos, final char value) {
+        file.getBuffer(file.checkBuffer(file.giw(pos))).put(file.gp(pos), value);
     }
 
-    /**
-     * 随机写
-     *
-
-     * @param p
-     * @param d
-     */
-    public void put(long p, float d) {
-        ((FloatWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
+    public static void put(final IOFile<FloatBuffer> file, final long pos, final float value) {
+        file.getBuffer(file.checkBuffer(file.giw(pos))).put(file.gp(pos), value);
     }
 
-    /**
-     * 随机写
-     *
-     * @param p
-     * @param d
-     */
-    public void put(long p, long d) {
-        ((LongWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
+    public static void put(final IOFile<LongBuffer> file, final long pos, final long value) {
+        file.getBuffer(file.checkBuffer(file.giw(pos))).put(file.gp(pos), value);
     }
 
-    /**
-     * 随机写
-     *
-     * @param p
-     * @param d
-     */
-    public void put(long p, int d) {
-        ((IntWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
+    public static void put(final IOFile<IntBuffer> file, final long pos, final int value) {
+        file.getBuffer(file.checkBuffer(file.giw(pos))).put(file.gp(pos), value);
     }
 
-    /**
-     * 随机写
-     *
-     * @param p
-     * @param d
-     */
-    public void put(long p, short d) {
-        ((ShortWriteBuffer) this.getBuffer(this.checkBuffer(this.giw(p)))).put(this.gp(p), d);
+    public static void put(final IOFile<ShortBuffer> file, final long pos, final short value) {
+        file.getBuffer(file.checkBuffer(file.giw(pos))).put(file.gp(pos), value);
     }
 
-    /**
-     * 随机读
-     *
-     * @param file
-     * @param p
-     * @return
-     */
-    public final static long getLong(IOFile<LongBuffer> file, long p) {
-        return ((LongReadBuffer) file.getBuffer(file.gi(p))).get(file.gp(p));
+    public static final long getLong(final IOFile<LongBuffer> file, final long pos) {
+        return file.getBuffer(file.gi(pos)).get(file.gp(pos));
     }
 
-    /**
-     * 随机读
-     *
-     * @param file
-     * @param p
-     * @return
-     */
-    public final static int getInt(IOFile<IntBuffer> file, long p) {
-        return ((IntReadBuffer) file.getBuffer(file.gi(p))).get(file.gp(p));
+    public static final int getInt(final IOFile<IntBuffer> file, final long pos) {
+        return file.getBuffer(file.gi(pos)).get(file.gp(pos));
     }
 
-    /**
-     * 随机读
-     *
-     * @param file
-     * @param p
-     * @return
-     */
-    public final static char getChar(IOFile<CharBuffer> file, long p) {
-        return ((CharReadBuffer) file.getBuffer(file.gi(p))).get(file.gp(p));
+    public static final char getChar(final IOFile<CharBuffer> file, final long pos) {
+        return file.getBuffer(file.gi(pos)).get(file.gp(pos));
     }
 
-    /**
-     * 随机读
-     *
-     * @param file
-     * @param p
-     * @return
-     */
-    public final static double getDouble(IOFile<DoubleBuffer> file, long p) {
-        return ((DoubleReadBuffer) file.getBuffer(file.gi(p))).get(file.gp(p));
+    public static final double getDouble(final IOFile<DoubleBuffer> file, final long pos) {
+        return file.getBuffer(file.gi(pos)).get(file.gp(pos));
     }
 
-    /**
-     * 随机读
-     *
-     * @param file
-     * @param p
-     * @return
-     */
-    public final static float getFloat(IOFile<FloatBuffer> file, long p) {
-        return ((FloatReadBuffer) file.getBuffer(file.gi(p))).get(file.gp(p));
+    public static final float getFloat(final IOFile<FloatBuffer> file, final long pos) {
+        return file.getBuffer(file.gi(pos)).get(file.gp(pos));
     }
 
-    /**
-     * 随机读
-     *
-     * @param file
-     * @param p
-     * @return
-     */
-    public final static byte getByte(IOFile<ByteBuffer> file, long p) {
-        return ((ByteReadBuffer) file.getBuffer(file.gi(p))).get(file.gp(p));
+    public static final byte getByte(final IOFile<ByteBuffer> file, final long pos) {
+        return file.getBuffer(file.gi(pos)).get(file.gp(pos));
     }
 
-    /**
-     * 随机读
-     *
-     * @param file
-     * @param p
-     * @return
-     */
-    public final static short getShort(IOFile<ShortBuffer> file, long p) {
-        return ((ShortReadBuffer) file.getBuffer(file.gi(p))).get(file.gp(p));
+    public static final short getShort(final IOFile<ShortBuffer> file, final long pos) {
+        return file.getBuffer(file.gi(pos)).get(file.gp(pos));
     }
 
-    /**
-     * 获取设置的path
-     */
     public String getPath() {
-        return uri.getPath();
+        return this.uri.getPath();
     }
 
     protected final FileBlock createHeadBlock() {
-        return new FileBlock(uri, FileConstants.HEAD);
+        return new FileBlock(this.uri, "head");
     }
 
-    //触发写
-    final int giw(long p) {
-        int len = (int) (p >> block_size_offset);
-        if (len > 0) {
-            checkWrite(len);
+    protected final void createBufferArray(final int blocks) {
+        this.blocks = blocks;
+        this.buffers = (E[]) new Buffer[blocks];
+    }
+
+    private boolean inRange(final int n) {
+        return this.buffers != null && this.buffers.length > n;
+    }
+
+    protected final int checkBuffer(final int n) {
+        if (n < 0) {
+            throw new BufferIndexOutOfBoundsException((long) n);
         }
-        return len;
+        return this.inRange(n) ? n : this.createBufferArrayInRange(n);
     }
 
-    final void checkWrite(int len) {
-        if (bufferWriteIndex != len) {
-            if (bufferWriteIndex != -1) {
-                ((WriteOnlyBuffer) buffers[bufferWriteIndex].get()).write();
-            }
-            bufferWriteIndex = len;
-        }
-    }
-
-    final int gi() {
-        if (buffers == null || buffers.length == 0) {
-            return 0;
-        }
-        int len = buffers.length - 1;
-        WriteOnlyBuffer buffer = null;
-        if (null == buffers[len] || null == buffers[len].get()) {
-            buffer = (WriteOnlyBuffer) initBuffer(len);
-        } else {
-            buffer = (WriteOnlyBuffer) buffers[len].get();
-        }
-        return buffer.full() ? triggerWrite(len + 1) : len;
-    }
-
-    final int triggerWrite(int len) {
-        checkWrite(len);
-        return len;
-    }
-
-    /**
-     * 注意所有写方法并不支持多线程操作，仅读的方法支持
-     *
-     * @param size
-     */
-    protected final void createBufferArray(int size) {
-        this.blocks = size;
-        this.buffers = new WeakReference[size];
-    }
-
-    private boolean inRange(int index) {
-        return buffers != null && buffers.length > index;
-    }
-
-    protected final int checkBuffer(int index) {
-        if (index < 0) {
-            throw new BufferIndexOutOfBoundsException(index);
-        }
-        return inRange(index) ? index : createBufferArrayInRange(index);
-    }
-
-    private int createBufferArrayInRange(int index) {
-        WeakReference<Buffer>[] buffers = this.buffers;
-        createBufferArray(index + 1);
+    private int createBufferArrayInRange(final int n) {
+        final Buffer[] buffers = this.buffers;
+        this.createBufferArray(n + 1);
         if (buffers != null) {
             System.arraycopy(buffers, 0, this.buffers, 0, buffers.length);
         }
-        return index;
+        return n;
     }
 
-    //读
-    protected int gi(long p) {
-        return (int) (p >> block_size_offset);
+    protected int gi(final long pos) {
+        return (int) (pos >> this.block_size_offset);
     }
 
-    protected final int gp(long p) {
-        return (int) (p & single_block_len);
+    protected int giw(final long pos) {
+        final int value = (int) (pos >> this.block_size_offset);
+        if (value > 0) {
+            this.checkWrite(value);
+        }
+        return value;
     }
 
-    protected final Buffer getBuffer(int index) {
-        if (buffers[checkIndex(index)] != null) {
-            synchronized (buffers[index]) {
-                if (null != buffers[index].get()) {
-                    return buffers[index].get();
+    protected void checkWrite(final int bufferWriteIndex) {
+        if (this.bufferWriteIndex != bufferWriteIndex) {
+            if (this.bufferWriteIndex != -1) {
+                this.buffers[this.bufferWriteIndex].write();
+            }
+            this.bufferWriteIndex = bufferWriteIndex;
+        }
+    }
+
+    private final int gi() {
+        if (this.buffers == null || this.buffers.length == 0) {
+            return 0;
+        }
+        final int n = this.buffers.length - 1;
+        return this.buffers[n].full() ? this.triggerWrite(n) : n;
+    }
+
+    private final int triggerWrite(final int n) {
+        if (this.bufferWriteIndex != n) {
+            this.buffers[n].write();
+            this.bufferWriteIndex = n;
+        }
+        return n + 1;
+    }
+
+    private final int gp(final long pos) {
+        return (int) (pos & this.single_block_len);
+    }
+
+    private final E getBuffer(final int n) {
+        return ((this.buffers[this.checkIndex(n)] != null) ? this.buffers[n] : this.initBuffer(n));
+    }
+
+    private int checkIndex(final int n) {
+        if (n > -1 && n < this.blocks) {
+            return n;
+        }
+        throw new BufferIndexOutOfBoundsException((long) n);
+    }
+
+    private E initBuffer(final int n) {
+        synchronized (this) {
+            if (this.buffers[n] == null) {
+                this.buffers[n] = this.createBuffer(n);
+            }
+            return this.buffers[n];
+        }
+    }
+
+    public boolean delete() {
+        synchronized (this) {
+            boolean delete = this.connector.delete(this.createHeadBlock());
+            if (this.buffers != null) {
+                for (int i = 0; i < this.buffers.length; ++i) {
+                    if (!this.released && this.buffers[i] != null) {
+                        this.buffers[i].closeWithOutSync();
+                        this.buffers[i] = null;
+                    }
+                    final boolean delete2 = this.connector.delete(this.createIndexBlock(i));
+                    if (delete) {
+                        delete = delete2;
+                    }
                 }
             }
-        }
-        return initBuffer(index);
-    }
-
-    private int checkIndex(int index) {
-        if (index > -1 && index < blocks) {
-            return index;
-        }
-        throw new BufferIndexOutOfBoundsException(index);
-    }
-
-    private Buffer initBuffer(int index) {
-        synchronized (this) {
-        if (buffers[index] == null || buffers[index].get() == null) {
-            buffers[index] = new WeakReference<Buffer>(createBuffer(index), (ReferenceQueue<? super Buffer>) CacheManager.getInstance().referenceQueue);
+            final boolean delete3 = this.connector.delete(new FileBlock(this.uri));
+            if (delete) {
+                delete = delete3;
             }
-        return buffers[index].get();
+            this.released = true;
+            return delete;
         }
     }
 
-    protected abstract Buffer createBuffer(int index);
+    public boolean copyTo(final URI uri) {
+        synchronized (this) {
+            try {
+                if (this.buffers != null) {
+                    final URI create = URI.create(uri.getPath() + "/");
+                    this.connector.copy(this.createHeadBlock(), new FileBlock(create, FileConstants.HEAD));
+                    for (int i = 0; i < this.buffers.length; ++i) {
+                        this.connector.copy(this.createIndexBlock(i), new FileBlock(create, String.valueOf(i)));
+                    }
+                    return true;
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            return false;
+        }
+    }
 
-    /**
-     * 判断是否存在
-     *
-     * @return
-     */
     public boolean exists() {
         synchronized (this) {
-            boolean exists = connector.exists(createHeadBlock());
-            boolean v = connector.exists(createIndexBlock(0));
+            boolean exists = this.connector.exists(this.createHeadBlock());
+            final boolean exists2 = this.connector.exists(this.createIndexBlock(0));
             if (exists) {
-                exists = v;
+                exists = exists2;
             }
-            released = true;
+            this.released = true;
             return exists;
         }
     }
 
-    protected abstract BufferPrivilege getLevel();
-
-    protected FileBlock createIndexBlock(int index) {
-        return new FileBlock(uri, String.valueOf(index));
+    private final FileBlock createIndexBlock(final int n) {
+        return new FileBlock(this.uri, String.valueOf(n));
     }
 
-    final FileModel getModel() {
-        return model;
+    private E createBuffer(final int n) {
+        return this.model.createBuffer(this.connector, this.createIndexBlock(n), this.block_size_offset);
     }
 
     protected void writeHeader() {
-        FileBlock block = createHeadBlock();
-        byte[] bytes = new byte[HEAD_LEN];
-        Bits.putInt(bytes, 0, buffers == null ? 0 : buffers.length);
-        bytes[MemoryConstants.STEP_LONG] = (byte) (block_size_offset + model.offset());
+        final FileBlock headBlock = this.createHeadBlock();
+        final byte[] array = new byte[HEAD_LEN];
+        Bits.putInt(array, 0, (this.buffers == null) ? 0 : this.buffers.length);
+        array[8] = (byte) (this.block_size_offset + this.model.offset());
         try {
-            connector.write(block, bytes);
-        } catch (Throwable e) {
-            FineIOLoggers.getLogger().error(e);
+            this.connector.write(headBlock, array);
+        } catch (Throwable t) {
+            t.printStackTrace();
         }
-    }
-
-    protected void finalize() {
-        //防止没有执行close导致内存泄露
-        close();
     }
 
     @Override
+    protected void finalize() {
+        this.close();
+    }
+
     public void close() {
         synchronized (this) {
-            if (released) {
+            if (this.released) {
                 return;
             }
-            writeHeader();
-            closeChild(false);
-            released = true;
-        }
-    }
-
-    public void closeAndClear() {
-        synchronized (this) {
-            if (released) {
-                return;
-            }
-            writeHeader();
-            closeChild(true);
-            released = true;
-        }
-    }
-
-    public long fileSize() {
-        long size = 0;
-        if (buffers != null) {
-            for (WeakReference<Buffer> buffer : buffers) {
-                if (null != buffer && null != buffer.get()) {
-                    size += buffer.get().getAllocateSize();
+            this.writeHeader();
+            if (this.buffers != null) {
+                for (int i = 0; i < this.buffers.length; ++i) {
+                    if (this.buffers[i] != null) {
+                        this.buffers[i].force();
+                        this.buffers[i] = null;
+                    }
                 }
             }
+            this.released = true;
         }
-        return size;
     }
-
-    protected abstract void closeChild(boolean clear);
 }

@@ -9,7 +9,7 @@ import java.lang.management.ManagementFactory;
  */
 public final class MemoryHelper {
 
-    public static long getMaxMemory() {
+    static long getMaxMemory() {
         try {
             OperatingSystemMXBean mb = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
             long max = mb.getTotalPhysicalMemorySize();
@@ -20,7 +20,7 @@ public final class MemoryHelper {
         }
     }
 
-    public static long getFreeMemory() {
+    static long getFreeMemory() {
         try {
             OperatingSystemMXBean mb = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
             return mb.getFreePhysicalMemorySize();

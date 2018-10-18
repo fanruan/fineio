@@ -3,49 +3,37 @@ package com.fineio.io.base;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 
-/**
- * Created by daniel on 2017/3/7.
- */
 public final class BufferKey {
-
-    /**
-     * 不可改变的对象
-     */
     private final Connector connector;
-
     private final FileBlock block;
 
-    public BufferKey(Connector connector, FileBlock block) {
+    BufferKey(final Connector connector, final FileBlock block) {
         this.connector = connector;
         this.block = block;
     }
 
-    public Connector getConnector(){
-        return connector;
+    public Connector getConnector() {
+        return this.connector;
     }
 
     public FileBlock getBlock() {
-        return block;
+        return this.block;
     }
 
-
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        BufferKey bufferKey = (BufferKey) o;
-        return connector == bufferKey.connector
-                && (block != null ? block.equals(bufferKey.block) : bufferKey.block == null);
+        final BufferKey bufferKey = (BufferKey) o;
+        return this.connector == bufferKey.connector && ((this.block == null) ? (bufferKey.block == null) : this.block.equals(bufferKey.block));
     }
 
     @Override
     public int hashCode() {
-        int result = connector != null ? connector.hashCode() : 0;
-        result = 31 * result + (block != null ? block.hashCode() : 0);
-        return result;
+        return 31 * ((this.connector != null) ? this.connector.hashCode() : 0) + ((this.block != null) ? this.block.hashCode() : 0);
     }
 }

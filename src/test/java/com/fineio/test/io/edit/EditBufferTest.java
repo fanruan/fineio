@@ -1,19 +1,19 @@
 package com.fineio.test.io.edit;
 
+import com.fineio.FineIO;
 import com.fineio.base.Bits;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
+import com.fineio.io.base.AbstractBuffer;
+import com.fineio.io.edit.ByteEditBuffer;
+import com.fineio.io.edit.CharEditBuffer;
+import com.fineio.io.edit.DoubleEditBuffer;
+import com.fineio.io.edit.FloatEditBuffer;
+import com.fineio.io.edit.IntEditBuffer;
+import com.fineio.io.edit.LongEditBuffer;
+import com.fineio.io.edit.ShortEditBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.test.file.FineWriteIOTest;
-import com.fineio.v1.FineIO;
-import com.fineio.v1.io.base.AbstractBuffer;
-import com.fineio.v1.io.edit.ByteEditBuffer;
-import com.fineio.v1.io.edit.CharEditBuffer;
-import com.fineio.v1.io.edit.DoubleEditBuffer;
-import com.fineio.v1.io.edit.FloatEditBuffer;
-import com.fineio.v1.io.edit.IntEditBuffer;
-import com.fineio.v1.io.edit.LongEditBuffer;
-import com.fineio.v1.io.edit.ShortEditBuffer;
 import junit.framework.TestCase;
 
 import java.lang.reflect.Constructor;

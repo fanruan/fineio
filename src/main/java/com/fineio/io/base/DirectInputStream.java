@@ -5,80 +5,76 @@ import com.fineio.memory.MemoryUtils;
 
 import java.io.InputStream;
 
-/**
- * Created by daniel on 2017/2/23.
- */
 public final class DirectInputStream extends InputStream {
-    private final static int EOF = -1;
-
-    private int p = 0;
+    private static final int EOF = -1;
+    private int p;
     private long address;
     private int size;
     private Checker checker;
 
-    public DirectInputStream(long address, int size, Checker checker) {
+    DirectInputStream(final long address, final int size, final Checker checker) {
+        this.p = 0;
         this.address = address;
         this.size = size;
         this.checker = checker;
     }
 
-    /**
-     * 流长度
-     * @return
-     */
-    public long size(){
-        return size;
+    public long size() {
+        return this.size;
     }
 
-    public final int read(byte b[], int off, int len) {
-        if (doLenCheck(b, off, len)){
+    @Override
+    public final int read(final byte[] array, final int n, final int n2) {
+        if (this.doLenCheck(array, n, n2)) {
             return 0;
         }
-        return readMemory(b, off, len);
+        return this.readMemory(array, n, n2);
     }
 
-    private  final int readMemory(byte[] b, int off, int len) {
-        return readInner(b, off, getLen(len,off));
+    private final int readMemory(final byte[] array, final int n, final int n2) {
+        return this.readInner(array, n, this.getLen(n2, n));
     }
 
-    private final int readInner(byte[] b, int off, int len) {
-        return len == 0 ? EOF : ri(b, off, len);
+    private final int readInner(final byte[] array, final int n, final int n2) {
+        return (n2 == 0) ? -1 : this.ri(array, n, n2);
     }
 
-    private final int ri(byte[] b, int off, int len) {
-        MemoryUtils.readMemory(b, off, address + p, len);
-        p+=len;
-        return len;
+    private final int ri(final byte[] array, final int n, final int n2) {
+        MemoryUtils.readMemory(array, n, this.address + this.p, n2);
+        this.p += n2;
+        return n2;
     }
 
-    private final boolean doLenCheck(byte[] b, int off, int len) {
-        doCheck();
-        if (b == null) {
+    private final boolean doLenCheck(final byte[] array, final int n, final int n2) {
+        this.doCheck();
+        if (array == null) {
             throw new NullPointerException();
-        } else if (off < 0 || len < 0 || len > b.length - off) {
+        }
+        if (n < 0 || n2 < 0 || n2 > array.length - n) {
             throw new IndexOutOfBoundsException();
-        } else return len == 0;
+        }
+        return n2 == 0;
     }
 
-    private final int getLen(int len,int off) {
-        int left = size - p - off;
-        if(left < len) {
-            len = left;
+    private final int getLen(int n, final int n2) {
+        final int n3 = this.size - this.p - n2;
+        if (n3 < n) {
+            n = n3;
         }
-        if(len < 0){
-            len = 0;
+        if (n < 0) {
+            n = 0;
         }
-        return len;
+        return n;
     }
 
     @Override
     public final int read() {
-        doCheck();
-        return p == size ? EOF : (MemoryUtils.getByte(address, p++)&0xff);
+        this.doCheck();
+        return (this.p == this.size) ? -1 : (MemoryUtils.getByte(this.address, this.p++) & 0xFF);
     }
 
     private final void doCheck() {
-        if(checker != null && !checker.check()) {
+        if (this.checker != null && !this.checker.check()) {
             throw new StreamCloseException();
         }
     }

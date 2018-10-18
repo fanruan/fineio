@@ -1,61 +1,48 @@
 package com.fineio.io.file;
 
-import com.fineio.cache.BufferPrivilege;
 import com.fineio.io.Buffer;
-import com.fineio.io.FileModel;
-import com.fineio.io.edit.EditBuffer;
+import com.fineio.io.ByteBuffer;
+import com.fineio.io.CharBuffer;
+import com.fineio.io.DoubleBuffer;
+import com.fineio.io.FloatBuffer;
+import com.fineio.io.IntBuffer;
+import com.fineio.io.LongBuffer;
+import com.fineio.io.ShortBuffer;
+import com.fineio.io.edit.ByteEditBuffer;
+import com.fineio.io.edit.CharEditBuffer;
+import com.fineio.io.edit.DoubleEditBuffer;
+import com.fineio.io.edit.FloatEditBuffer;
+import com.fineio.io.edit.IntEditBuffer;
+import com.fineio.io.edit.LongEditBuffer;
+import com.fineio.io.edit.ShortEditBuffer;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
 
-/**
- * Created by daniel on 2017/2/10.
- */
-@Deprecated
 public final class EditIOFile<T extends Buffer> extends AbstractReadIOFile<T> {
+    public static final EditModel<ByteBuffer> BYTE;
+    public static final EditModel<DoubleBuffer> DOUBLE;
+    public static final EditModel<LongBuffer> LONG;
+    public static final EditModel<IntBuffer> INT;
+    public static final EditModel<FloatBuffer> FLOAT;
+    public static final EditModel<CharBuffer> CHAR;
+    public static final EditModel<ShortBuffer> SHORT;
 
-    EditIOFile(Connector connector, URI uri, FileModel model) {
-        super(connector, uri, model);
+    static {
+        BYTE = ByteEditBuffer.MODEL;
+        DOUBLE = DoubleEditBuffer.MODEL;
+        LONG = LongEditBuffer.MODEL;
+        INT = IntEditBuffer.MODEL;
+        FLOAT = FloatEditBuffer.MODEL;
+        CHAR = CharEditBuffer.MODEL;
+        SHORT = ShortEditBuffer.MODEL;
     }
 
-    /**
-     * 创建File方法
-     *
-     * @param connector 连接器
-     * @param uri       子路径
-     * @param model     子类型
-     * @param <E>       继承EditBuffer的子类型
-     * @return
-     */
-    public static final <E extends Buffer> EditIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
-        return new EditIOFile<E>(connector, uri, model);
+    EditIOFile(final Connector connector, final URI uri, final EditModel<T> editModel) {
+        super(connector, uri, editModel);
     }
 
-    @Override
-    protected Buffer createBuffer(int index) {
-        return model.createBufferForEdit(connector, createIndexBlock(index), block_size_offset);
+    public static final <E extends Buffer> EditIOFile<E> createFineIO(final Connector connector, final URI uri, final EditModel<E> editModel) {
+        return new EditIOFile<E>(connector, uri, editModel);
     }
-
-    @Override
-    protected BufferPrivilege getLevel() {
-        return BufferPrivilege.EDITABLE;
-    }
-
-    @Override
-    protected void closeChild(boolean clear) {
-        if (buffers != null) {
-            for (int i = 0; i < buffers.length; i++) {
-                if (buffers[i] != null && null != buffers[i].get()) {
-                    if (clear) {
-                        ((EditBuffer) buffers[i].get()).forceAndClear();
-                    } else {
-                        ((EditBuffer) buffers[i].get()).force();
-                    }
-                    buffers[i] = null;
-                }
-            }
-        }
-    }
-
-
 }

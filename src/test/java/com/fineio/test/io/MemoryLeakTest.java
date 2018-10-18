@@ -1,12 +1,12 @@
 package com.fineio.test.io;
 
+import com.fineio.FineIO;
+import com.fineio.cache.CacheLinkedMap;
+import com.fineio.cache.CacheManager;
+import com.fineio.io.FloatBuffer;
 import com.fineio.io.file.FileBlock;
+import com.fineio.io.file.IOFile;
 import com.fineio.storage.Connector;
-import com.fineio.v1.FineIO;
-import com.fineio.v1.cache.CacheLinkedMap;
-import com.fineio.v1.cache.CacheManager;
-import com.fineio.v1.io.FloatBuffer;
-import com.fineio.v1.io.file.IOFile;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;

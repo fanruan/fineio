@@ -4,324 +4,166 @@ import com.fineio.io.Buffer;
 import com.fineio.io.ByteBuffer;
 import com.fineio.io.CharBuffer;
 import com.fineio.io.DoubleBuffer;
-import com.fineio.io.FileModel;
 import com.fineio.io.FloatBuffer;
 import com.fineio.io.IntBuffer;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.ShortBuffer;
-import com.fineio.io.read.ByteReadBuffer;
-import com.fineio.io.read.CharReadBuffer;
-import com.fineio.io.read.DoubleReadBuffer;
-import com.fineio.io.read.FloatReadBuffer;
-import com.fineio.io.read.IntReadBuffer;
-import com.fineio.io.read.LongReadBuffer;
-import com.fineio.io.read.ShortReadBuffer;
-import com.fineio.io.write.ByteWriteBuffer;
-import com.fineio.io.write.CharWriteBuffer;
-import com.fineio.io.write.DoubleWriteBuffer;
-import com.fineio.io.write.FloatWriteBuffer;
-import com.fineio.io.write.IntWriteBuffer;
-import com.fineio.io.write.LongWriteBuffer;
-import com.fineio.io.write.ShortWriteBuffer;
+import com.fineio.io.file.AbstractFileModel;
+import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
 
-/**
- * Created by daniel on 2017/4/25.
- * 不支持大文件，建议使用小于64M文件
- */
 public abstract class DirectIOFile<E extends Buffer> {
     protected Connector connector;
     protected URI uri;
-    protected volatile Buffer buffer;
+    protected volatile E buffer;
+    private AbstractFileModel<E> model;
+    private volatile boolean released;
 
-    protected FileModel model;
-    protected volatile boolean released = false;
-
-    protected DirectIOFile(Connector connector, URI uri, FileModel model) {
+    protected DirectIOFile(final Connector connector, final URI uri, final AbstractFileModel<E> model) {
+        this.released = false;
         this.connector = connector;
         this.uri = uri;
         this.model = model;
     }
 
-    /**
-     * 连续写的方法，从当前已知的最大位置开始写
-     *
-     * @param file
-     * @param d
-     */
-
-    public static void put(DirectIOFile<DoubleBuffer> file, double d) {
-        ((DoubleWriteBuffer) file.getBuffer()).put(d);
+    public static void put(final DirectIOFile<DoubleBuffer> file, final double n) {
+        file.getBuffer().put(n);
     }
 
-    /**
-     * 连续写的方法，从当前已知的最大位置开始写
-     *
-     * @param file
-     * @param d
-     */
-
-    public static void put(DirectIOFile<ByteBuffer> file, byte d) {
-        ((ByteWriteBuffer) file.getBuffer()).put(d);
+    public static void put(final DirectIOFile<ByteBuffer> file, final byte b) {
+        file.getBuffer().put(b);
     }
 
-    /**
-     * 连续写的方法，从当前已知的最大位置开始写
-     *
-     * @param file
-     * @param d
-     */
-
-    public static void put(DirectIOFile<CharBuffer> file, char d) {
-        ((CharWriteBuffer) file.getBuffer()).put(d);
+    public static void put(final DirectIOFile<CharBuffer> file, final char c) {
+        file.getBuffer().put(c);
     }
 
-    /**
-     * 连续写的方法，从当前已知的最大位置开始写
-     *
-     * @param file
-     * @param d
-     */
-
-    public static void put(DirectIOFile<FloatBuffer> file, float d) {
-        ((FloatWriteBuffer) file.getBuffer()).put(d);
+    public static void put(final DirectIOFile<FloatBuffer> file, final float n) {
+        file.getBuffer().put(n);
     }
 
-    /**
-     * 连续写的方法，从当前已知的最大位置开始写
-     *
-     * @param file
-     * @param d
-     */
-
-    public static void put(DirectIOFile<LongBuffer> file, long d) {
-        ((LongWriteBuffer) file.getBuffer()).put(d);
+    public static void put(final DirectIOFile<LongBuffer> file, final long n) {
+        file.getBuffer().put(n);
     }
 
-    /**
-     * 连续写的方法，从当前已知的最大位置开始写
-     *
-     * @param file
-     * @param d
-     */
-
-    public static void put(DirectIOFile<IntBuffer> file, int d) {
-        ((IntWriteBuffer) file.getBuffer()).put(d);
+    public static void put(final DirectIOFile<IntBuffer> file, final int n) {
+        file.getBuffer().put(n);
     }
 
-    /**
-     * 连续写的方法，从当前已知的最大位置开始写
-     *
-     * @param file
-     * @param d
-     */
-
-    public static void put(DirectIOFile<ShortBuffer> file, short d) {
-        ((ShortWriteBuffer) file.getBuffer()).put(d);
+    public static void put(final DirectIOFile<ShortBuffer> file, final short n) {
+        file.getBuffer().put(n);
     }
 
-
-    /**
-     * 随机写
-     *
-     * @param file
-     * @param p
-     * @param d
-     */
-    public static void put(DirectIOFile<DoubleBuffer> file, int p, double d) {
-        ((DoubleWriteBuffer) file.getBuffer()).put(p, d);
+    public static void put(final DirectIOFile<DoubleBuffer> file, final int n, final double value) {
+        file.getBuffer().put(n, value);
     }
 
-    /**
-     * 随机写
-     *
-     * @param file
-     * @param p
-     * @param d
-     */
-    public static void put(DirectIOFile<ByteBuffer> file, int p, byte d) {
-        ((ByteWriteBuffer) file.getBuffer()).put(p, d);
+    public static void put(final DirectIOFile<ByteBuffer> file, final int n, final byte b) {
+        file.getBuffer().put(n, b);
     }
 
-    /**
-     * 随机写
-     *
-     * @param file
-     * @param p
-     * @param d
-     */
-    public static void put(DirectIOFile<CharBuffer> file, int p, char d) {
-        ((CharWriteBuffer) file.getBuffer()).put(p, d);
+    public static void put(final DirectIOFile<CharBuffer> file, final int n, final char c) {
+        file.getBuffer().put(n, c);
     }
 
-    /**
-     * 随机写
-     *
-     * @param file
-     * @param p
-     * @param d
-     */
-    public static void put(DirectIOFile<FloatBuffer> file, int p, float d) {
-        ((FloatWriteBuffer) file.getBuffer()).put(p, d);
+    public static void put(final DirectIOFile<FloatBuffer> file, final int n, final float value) {
+        file.getBuffer().put(n, value);
     }
 
-    /**
-     * 随机写
-     *
-     * @param file
-     * @param p
-     * @param d
-     */
-    public static void put(DirectIOFile<LongBuffer> file, int p, long d) {
-        ((LongWriteBuffer) file.getBuffer()).put(p, d);
+    public static void put(final DirectIOFile<LongBuffer> file, final int n, final long value) {
+        file.getBuffer().put(n, value);
     }
 
-    /**
-     * 随机写
-     *
-     * @param file
-     * @param p
-     * @param d
-     */
-    public static void put(DirectIOFile<IntBuffer> file, int p, int d) {
-        ((IntWriteBuffer) file.getBuffer()).put(p, d);
+    public static void put(final DirectIOFile<IntBuffer> file, final int n, final int value) {
+        file.getBuffer().put(n, value);
     }
 
-    /**
-     * 随机写
-     *
-     * @param file
-     * @param p
-     * @param d
-     */
-    public static void put(DirectIOFile<ShortBuffer> file, int p, short d) {
-        ((ShortWriteBuffer) file.getBuffer()).put(p, d);
+    public static void put(final DirectIOFile<ShortBuffer> file, final int n, final short value) {
+        file.getBuffer().put(n, value);
     }
 
-    /**
-     * 随机读
-     *
-     * @param file
-     * @param p
-     * @return
-     */
-    public final static long getLong(DirectIOFile<LongBuffer> file, int p) {
-        return ((LongReadBuffer) file.getBuffer()).get(p);
+    public static final long getLong(final DirectIOFile<LongBuffer> file, final int n) {
+        return file.getBuffer().get(n);
     }
 
-    /**
-     * 随机读
-     *
-     * @param file
-     * @param p
-     * @return
-     */
-    public final static int getInt(DirectIOFile<IntBuffer> file, int p) {
-        return ((IntReadBuffer) file.getBuffer()).get(p);
+    public static final int getInt(final DirectIOFile<IntBuffer> file, final int n) {
+        return file.getBuffer().get(n);
     }
 
-    /**
-     * 随机读
-     *
-     * @param file
-     * @param p
-     * @return
-     */
-    public final static char getChar(DirectIOFile<CharBuffer> file, int p) {
-        return ((CharReadBuffer) file.getBuffer()).get(p);
+    public static final char getChar(final DirectIOFile<CharBuffer> file, final int n) {
+        return file.getBuffer().get(n);
     }
 
-    /**
-     * 随机读
-     *
-     * @param file
-     * @param p
-     * @return
-     */
-    public final static double getDouble(DirectIOFile<DoubleBuffer> file, int p) {
-        return ((DoubleReadBuffer) file.getBuffer()).get(p);
+    public static final double getDouble(final DirectIOFile<DoubleBuffer> file, final int n) {
+        return file.getBuffer().get(n);
     }
 
-    /**
-     * 随机读
-     *
-     * @param file
-     * @param p
-     * @return
-     */
-    public final static float getFloat(DirectIOFile<FloatBuffer> file, int p) {
-        return ((FloatReadBuffer) file.getBuffer()).get(p);
+    public static final float getFloat(final DirectIOFile<FloatBuffer> file, final int n) {
+        return file.getBuffer().get(n);
     }
 
-    /**
-     * 随机读
-     *
-     * @param file
-     * @param p
-     * @return
-     */
-    public final static byte getByte(DirectIOFile<ByteBuffer> file, int p) {
-        return ((ByteReadBuffer) file.getBuffer()).get(p);
+    public static final byte getByte(final DirectIOFile<ByteBuffer> file, final int n) {
+        return file.getBuffer().get(n);
     }
 
-    /**
-     * 随机读
-     *
-     * @param file
-     * @param p
-     * @return
-     */
-    public final static short getShort(DirectIOFile<ShortBuffer> file, int p) {
-        return ((ShortReadBuffer) file.getBuffer()).get(p);
+    public static final short getShort(final DirectIOFile<ShortBuffer> file, final long n) {
+        return file.getBuffer().get((int) n);
     }
 
-    /**
-     * 获取设置的path
-     */
     public String getPath() {
-        return uri.getPath();
+        return this.uri.getPath();
+    }
+    
+    private E getBuffer() {
+        return (this.buffer != null) ? this.buffer : this.initBuffer();
     }
 
-    private Buffer getBuffer() {
-        return buffer != null ? buffer : initBuffer();
-    }
-
-    /**
-     * 获取文件指定类型的长度
-     *
-     * @return
-     */
     public int length() {
-        return getBuffer().getLength();
+        return this.getBuffer().getLength();
     }
 
-    /**
-     * 获取文件指byte的长度
-     *
-     * @return
-     */
     public int byteLength() {
-        return getBuffer().getByteSize();
+        return this.getBuffer().getByteSize();
     }
 
-    protected abstract Buffer initBuffer();
+    protected E initBuffer() {
+        if (this.buffer == null) {
+            synchronized (this) {
+                this.buffer = this.model.createBuffer(this.connector, this.uri);
+            }
+        }
+        return this.buffer;
+    }
 
+    @Override
     protected void finalize() {
-        //防止没有执行close导致内存泄露
-        close();
+        this.close();
     }
 
     public void close() {
         synchronized (this) {
-            if (released) {
+            if (this.released) {
                 return;
             }
-            closeChild();
-            released = true;
+            if (this.buffer != null) {
+                this.buffer.force();
+            }
+            this.released = true;
         }
     }
 
-    protected abstract void closeChild();
+    public boolean delete() {
+        synchronized (this) {
+            if (!this.released) {
+                if (this.buffer != null) {
+                    this.buffer.closeWithOutSync();
+                    this.buffer = null;
+                }
+                this.released = true;
+            }
+        }
+        return this.connector.delete(new FileBlock(this.uri));
+    }
 }
