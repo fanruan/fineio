@@ -107,7 +107,7 @@ public abstract class IOFile<B extends Buffer> {
         } else {
             int len = buffers.length;
             if (((BufferW) buffers[len - 1]).full()) {
-                result = triggerWrite(len);
+                result = triggerWrite(len - 1);
             } else {
                 result = len - 1;
             }
@@ -278,9 +278,12 @@ public abstract class IOFile<B extends Buffer> {
         return buffers != null && buffers.length > index;
     }
 
-    private final int triggerWrite(int len) {
-        checkWrite(len);
-        return len;
+    private final int triggerWrite(int n) {
+        if (this.bufferWriteIndex != n) {
+            ((BufferW) this.buffers[n]).write();
+            this.bufferWriteIndex = n;
+        }
+        return n + 1;
     }
 
     protected final Buffer getBuffer(int i) {
