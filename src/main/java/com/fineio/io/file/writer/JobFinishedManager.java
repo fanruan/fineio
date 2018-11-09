@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.locks.LockSupport;
 
 /**
@@ -73,8 +74,10 @@ public final class JobFinishedManager {
         map.addTask(uri);
     }
 
-    public void finish(final Runnable runnable) {
-        map.finish(runnable);
+    public Future<Void> finish(Runnable runnable) {
+        FutureTask<Void> futureTask = new FutureTask<Void>(runnable, null);
+        map.finish(futureTask);
+        return futureTask;
     }
 
     public class TaskMap {
