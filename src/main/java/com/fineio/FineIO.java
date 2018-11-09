@@ -24,6 +24,7 @@ import com.fineio.memory.manager.manager.MemoryManager;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
+import java.util.concurrent.Future;
 
 /**
  * @author yee
@@ -69,8 +70,8 @@ public final class FineIO {
      *
      * @param runnable
      */
-    public static void doWhenFinished(Runnable runnable) {
-        JobFinishedManager.getInstance().finish(runnable);
+    public static Future<Void> doWhenFinished(Runnable runnable) {
+        return JobFinishedManager.getInstance().finish(runnable);
     }
 
     /**
