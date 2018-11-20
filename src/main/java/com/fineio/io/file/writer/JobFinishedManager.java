@@ -23,7 +23,7 @@ import java.util.concurrent.FutureTask;
  */
 public final class JobFinishedManager {
     private ExecutorCompletionService<Job> service =
-            new ExecutorCompletionService(FineIOExecutors.newSingleThreadExecutor("JobFinishedManager-complete"));
+            new ExecutorCompletionService<Job>(FineIOExecutors.newSingleThreadExecutor("JobFinishedManager-complete"));
     private ExecutorService consume = FineIOExecutors.newSingleThreadExecutor(JobFinishedManager.class);
     private volatile static JobFinishedManager instance;
     private Queue<Pair<TaskKey, Object>> queue = new ConcurrentLinkedQueue<Pair<TaskKey, Object>>();
