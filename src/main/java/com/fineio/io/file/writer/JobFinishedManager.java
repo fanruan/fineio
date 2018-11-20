@@ -1,5 +1,6 @@
 package com.fineio.io.file.writer;
 
+import com.fineio.io.base.Job;
 import com.fineio.io.file.writer.task.DoneTaskKey;
 import com.fineio.io.file.writer.task.FinishOneTaskKey;
 import com.fineio.io.file.writer.task.Pair;
@@ -8,23 +9,25 @@ import com.fineio.logger.FineIOLoggers;
 import com.fineio.thread.FineIOExecutors;
 
 import java.net.URI;
-import java.util.Iterator;
+import java.util.Queue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.locks.LockSupport;
 
 /**
  * @author yee
  * @date 2018/7/12
  */
 public final class JobFinishedManager {
+    private ExecutorCompletionService<Job> service =
+            new ExecutorCompletionService(FineIOExecutors.newSingleThreadExecutor("JobFinishedManager-complete"));
     private ExecutorService consume = FineIOExecutors.newSingleThreadExecutor(JobFinishedManager.class);
     private volatile static JobFinishedManager instance;
-    public TaskMap map = new TaskMap();
-    private Object lock = new Object();
+    private Queue<Pair<TaskKey, Object>> queue = new ConcurrentLinkedQueue<Pair<TaskKey, Object>>();
+
 
     public static JobFinishedManager getInstance() {
         if (instance == null) {
@@ -41,94 +44,65 @@ public final class JobFinishedManager {
         consume.execute(new Runnable() {
             @Override
             public void run() {
-                try {
-                    while (true) {
-                        while (!map.isEmpty() && map.firstKey().getType() == TaskKey.KeyType.DONE) {
-                            ((Runnable) map.poll()).run();
+                while (true) {
+                    try {
+                        service.take().get().doJob();
+                        Pair<TaskKey, Object> pair = null;
+                        while ((pair = queue.peek()) != null) {
+                            if (pair.getKey().getType().equals(TaskKey.KeyType.DONE)) {
+                                queue.remove(pair);
+                                ((Runnable) pair.getValue()).run();
+                                FineIOLoggers.getLogger().debug("Run finish Task");
+                            } else {
+                                break;
+                            }
                         }
-                        synchronized (lock) {
-                            lock.wait();
-                        }
+                    } catch (Exception e) {
+                        FineIOLoggers.getLogger().error(e);
                     }
-                } catch (Exception e) {
-                    FineIOLoggers.getLogger().error(e);
                 }
             }
         });
     }
 
-    private void notifyJob() {
-        synchronized (lock) {
-            lock.notify();
-        }
-    }
-
-    void submit(final Future<Pair<URI, Boolean>> future) throws ExecutionException, InterruptedException {
-        Pair<URI, Boolean> uri = future.get();
-        map.remove(new FinishOneTaskKey(uri.getKey()));
-        LockSupport.parkNanos(100 * 1000);
-        notifyJob();
+    void submit(final URI uri) {
+        service.submit(new Callable<Job>() {
+            @Override
+            public Job call() {
+                return new Job() {
+                    @Override
+                    public void doJob() {
+                        Pair<TaskKey, Object> pair = null;
+                        while ((pair = queue.peek()) != null) {
+                            if (pair.getKey().getType().equals(TaskKey.KeyType.DONE)) {
+                                queue.remove(pair);
+                                ((Runnable) pair.getValue()).run();
+                                FineIOLoggers.getLogger().debug("Run finish Task");
+                            } else if (uri.equals(pair.getValue())) {
+                                queue.remove(pair);
+                                break;
+                            }
+                        }
+                    }
+                };
+            }
+        });
     }
 
     public void addTask(URI uri) {
-        map.addTask(uri);
+        queue.offer(new Pair<TaskKey, Object>(new FinishOneTaskKey(uri), uri));
+    }
+
+    public <T> Future<T> finish(Callable<T> runnable) {
+        FutureTask<T> task = new FutureTask<T>(runnable);
+        queue.offer(new Pair<TaskKey, Object>(new DoneTaskKey(), task));
+        return task;
     }
 
     public Future<Void> finish(Runnable runnable) {
-        FutureTask<Void> futureTask = new FutureTask<Void>(runnable, null);
-        map.finish(futureTask);
-        return futureTask;
+        FutureTask<Void> task = new FutureTask<Void>(runnable, null);
+        queue.offer(new Pair<TaskKey, Object>(new DoneTaskKey(), task));
+        return task;
     }
 
-    public class TaskMap {
-        private ConcurrentLinkedQueue<Pair<TaskKey, Object>> queue = new ConcurrentLinkedQueue<Pair<TaskKey, Object>>();
-//        private List<TaskKey> linkedList = Collections.synchronizedList(new ArrayList<TaskKey>());
-
-        public void addTask(URI uri) {
-            TaskKey key = new FinishOneTaskKey(uri);
-            queue.add(new Pair<TaskKey, Object>(key, uri));
-            notifyJob();
-        }
-
-        public void finish(final Runnable runnable) {
-            TaskKey key = new DoneTaskKey();
-//            linkedList.add(key);
-            queue.add(new Pair<TaskKey, Object>(key, runnable));
-            notifyJob();
-        }
-
-        public TaskKey firstKey() {
-            try {
-                Iterator<Pair<TaskKey, Object>> it = queue.iterator();
-                if (it.hasNext()) {
-                    return it.next().getKey();
-                }
-                return null;
-            } catch (Exception ignore) {
-                return null;
-            }
-        }
-
-        public Object poll() {
-            return queue.poll().getValue();
-        }
-
-        public void remove(TaskKey key) {
-            try {
-                Iterator<Pair<TaskKey, Object>> it = queue.iterator();
-                while (it.hasNext()) {
-                    Pair<TaskKey, Object> pair = it.next();
-                    if (key.equals(pair.getKey())) {
-                        it.remove();
-                        return;
-                    }
-                }
-            } catch (Exception ignore) {
-            }
-        }
-
-        public boolean isEmpty() {
-            return queue.isEmpty();
-        }
-    }
 }
