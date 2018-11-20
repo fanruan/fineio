@@ -90,11 +90,7 @@ public final class JobFinishedManager {
                             Iterator<Pair<TaskKey, Object>> iterator = queue.iterator();
                             while (iterator.hasNext()) {
                                 Pair<TaskKey, Object> pair = iterator.next();
-                                if (pair.getKey().getType().equals(TaskKey.KeyType.DONE)) {
-                                    iterator.remove();
-                                    ((Runnable) pair.getValue()).run();
-                                    FineIOLoggers.getLogger().debug("Run finish Task");
-                                } else if (uri.equals(pair.getValue())) {
+                                if (uri.equals(pair.getValue())) {
                                     iterator.remove();
                                     break;
                                 }
