@@ -51,6 +51,18 @@ public final class JobFinishedManager {
                 while (true) {
                     try {
                         service.take().get().doJob();
+                        synchronized (queue) {
+                            Pair<TaskKey, Object> pair = null;
+                            while ((pair = queue.peek()) != null) {
+                                if (pair.getKey().getType().equals(TaskKey.KeyType.DONE)) {
+                                    queue.poll();
+                                    ((Runnable) pair.getValue()).run();
+                                    FineIOLoggers.getLogger().debug("Run finish Task");
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
                     } catch (Exception e) {
                         FineIOLoggers.getLogger().error(e);
                     }
@@ -84,6 +96,7 @@ public final class JobFinishedManager {
                                     FineIOLoggers.getLogger().debug("Run finish Task");
                                 } else if (uri.equals(pair.getValue())) {
                                     iterator.remove();
+                                    break;
                                 }
                             }
                         }
