@@ -57,6 +57,7 @@ public final class JobFinishedManager {
                                 if (pair.getKey().getType().equals(TaskKey.KeyType.DONE)) {
                                     queue.poll();
                                     ((Runnable) pair.getValue()).run();
+                                    FineIOLoggers.getLogger().debug("Run finish Task");
                                 } else {
                                     break;
                                 }
