@@ -293,7 +293,7 @@ public abstract class IOFile<B extends Buffer> {
             }
             return initBuffer(i);
         } else {
-            throw new IndexOutOfBoundsException("" + i);
+            throw new IndexOutOfBoundsException(uri.getPath() + i);
         }
     }
 

@@ -24,6 +24,7 @@ import com.fineio.memory.manager.manager.MemoryManager;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 /**
@@ -72,6 +73,15 @@ public final class FineIO {
      */
     public static Future<Void> doWhenFinished(Runnable runnable) {
         return JobFinishedManager.getInstance().finish(runnable);
+    }
+
+    /**
+     * 前面的任务都结束了调用
+     *
+     * @param callable
+     */
+    public static <T> Future<T> doWhenFinished(Callable<T> callable) {
+        return JobFinishedManager.getInstance().finish(callable);
     }
 
     /**
