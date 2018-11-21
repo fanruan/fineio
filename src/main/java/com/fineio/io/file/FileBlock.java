@@ -1,7 +1,6 @@
 package com.fineio.io.file;
 
 
-import java.io.File;
 import java.net.URI;
 
 /**
@@ -54,6 +53,9 @@ public final class FileBlock {
      * @return
      */
     public URI getBlockURI(){
+        if (EMPTY.equals(fileName)) {
+            return uri;
+        }
         return uri.resolve(fileName);
     }
 
