@@ -31,7 +31,7 @@ public class JobFinishedManagerTest {
 
     @BeforeClass
     public static void before() {
-        int total = (int) (1 + Math.random() * 10000000);
+        int total = (int) (1 + Math.random() * 100);
         FineIOLoggers.getLogger().info("total " + total);
         for (int i = 0; i < total; i++) {
             URI uri = URI.create("uri_" + i);

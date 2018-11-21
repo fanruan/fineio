@@ -57,7 +57,6 @@ public final class JobFinishedManager {
                                 if (pair.getKey().getType().equals(TaskKey.KeyType.DONE)) {
                                     queue.poll();
                                     ((Runnable) pair.getValue()).run();
-//                                    FineIOLoggers.getLogger().error("JobFinish Run finish Task. Current size: " + queue.size());
                                 } else {
                                     break;
                                 }
@@ -91,7 +90,6 @@ public final class JobFinishedManager {
                             while (iterator.hasNext()) {
                                 Pair<TaskKey, Object> pair = iterator.next();
                                 if (uri.equals(pair.getValue())) {
-//                                    FineIOLoggers.getLogger().error("JobFinish submit " + uri);
                                     iterator.remove();
                                     break;
                                 }
@@ -104,7 +102,6 @@ public final class JobFinishedManager {
     }
 
     public void addTask(URI uri) {
-//        FineIOLoggers.getLogger().error("JobFinish addTask " + uri);
         synchronized (queue) {
             queue.offer(new Pair<TaskKey, Object>(new FinishOneTaskKey(uri), uri));
         }
