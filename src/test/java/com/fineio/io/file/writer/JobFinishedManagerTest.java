@@ -1,5 +1,9 @@
 package com.fineio.io.file.writer;
 
+import com.fineio.io.base.BufferKey;
+import com.fineio.io.base.Job;
+import com.fineio.io.base.JobAssist;
+import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -23,14 +27,25 @@ public class JobFinishedManagerTest {
 
     private static ExecutorService executorService = Executors.newFixedThreadPool(3);
     private static List<URI> uris = new ArrayList<URI>();
+    private static List<JobAssist> jobAssists = new ArrayList<JobAssist>();
 
     @BeforeClass
     public static void before() {
-        int total = (int) (1 + Math.random() * 100);
+        int total = (int) (1 + Math.random() * 10000000);
         FineIOLoggers.getLogger().info("total " + total);
         for (int i = 0; i < total; i++) {
             URI uri = URI.create("uri_" + i);
             uris.add(uri);
+            jobAssists.add(new JobAssist(new BufferKey(null, new FileBlock(uri)), new Job() {
+                @Override
+                public void doJob() {
+//                    try {
+//                        TimeUnit.MILLISECONDS.sleep(100);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+                }
+            }));
         }
 
     }
@@ -69,8 +84,8 @@ public class JobFinishedManagerTest {
                 executorService.execute(new Runnable() {
                     @Override
                     public void run() {
-                        for (URI uri : uris) {
-                            JobFinishedManager.getInstance().submit(uri);
+                        for (JobAssist jobAssist : jobAssists) {
+                            SyncManager.getInstance().force(jobAssist);
                         }
                     }
                 });

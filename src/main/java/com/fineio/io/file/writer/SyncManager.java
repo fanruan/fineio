@@ -165,6 +165,7 @@ public final class SyncManager {
                                     working_jobs.addAndGet(-1);
                                     wakeUpWatchTread();
                                 }
+//                                FineIOLoggers.getLogger().error("SyncManager submit " + uri);
                                 JobFinishedManager.getInstance().submit(uri);
                             }
                         });
