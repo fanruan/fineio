@@ -1,6 +1,5 @@
 package com.fineio.test.cache;
 
-import com.fineio.cache.BufferPrivilege;
 import com.fineio.exception.FileCloseException;
 import com.fineio.exception.MemorySetException;
 import com.fineio.memory.MemoryConf;
@@ -9,6 +8,7 @@ import com.fineio.test.io.MemoryLeakTest;
 import com.fineio.v1.FineIO;
 import com.fineio.v1.cache.CacheManager;
 import com.fineio.v1.io.Buffer;
+import com.fineio.v1.io.Level;
 import junit.framework.TestCase;
 
 import java.lang.reflect.Field;
@@ -132,8 +132,8 @@ public class CacheManagerTest extends TestCase {
         }
 
 
-        public BufferPrivilege getLevel() {
-            return BufferPrivilege.READABLE;
+        public Level getLevel() {
+            return Level.READ;
         }
 
         public boolean recentAccess() {

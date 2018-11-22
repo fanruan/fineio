@@ -1,11 +1,6 @@
 package com.fineio.io;
 
-import com.fineio.cache.CacheManager;
-import com.fineio.cache.pool.PoolMode;
-import com.fineio.io.edit.DoubleEditBuffer;
 import com.fineio.io.file.FileBlock;
-import com.fineio.io.read.DoubleReadBuffer;
-import com.fineio.io.write.DoubleWriteBuffer;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
@@ -14,88 +9,55 @@ import java.net.URI;
 
 /**
  * @author yee
- * @date 2018/5/30
+ * @date 2018/9/19
  */
-public class DoubleBuffer extends AbstractBuffer<DoubleReadBuffer, DoubleWriteBuffer, DoubleEditBuffer> {
-
-    static BufferModel MODE = new BufferModel<DoubleBuffer>() {
-
-        @Override
-        DoubleBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
-            DoubleBuffer buffer = CacheManager.getInstance().getBuffer(PoolMode.DOUBLE, block.getBlockURI());
-            if (null == buffer) {
-                buffer = new DoubleBuffer(connector, block, max_offset);
-                CacheManager.getInstance().registerBuffer(PoolMode.DOUBLE, buffer);
-            }
-            return buffer;
-        }
-
-        @Override
-        DoubleBuffer createBuffer(Connector connector, URI uri) {
-            return new DoubleBuffer(connector, uri);
-        }
-
-        @Override
-        byte offset() {
-            return MemoryConstants.OFFSET_DOUBLE;
-        }
-    };
-
-    protected DoubleBuffer(Connector connector, FileBlock block, int maxOffset) {
-        super(connector, block, maxOffset);
+public class DoubleBuffer extends BaseBuffer<DoubleBuffer.DoubleReadBuffer, DoubleBuffer.DoubleWriteBuffer> {
+    public DoubleBuffer(Connector connector, FileBlock block, int maxOffset, Listener listener) {
+        super(connector, block, maxOffset, listener);
     }
 
-    protected DoubleBuffer(Connector connector, URI uri) {
-        super(connector, uri);
+    public DoubleBuffer(Connector connector, URI uri, Listener listener) {
+        super(connector, uri, listener);
     }
 
     @Override
-    protected void exitPool() {
-        if (!directAccess) {
-            manager.removeBuffer(PoolMode.DOUBLE, this);
-        }
+    protected int getOffset() {
+        return MemoryConstants.OFFSET_DOUBLE;
     }
 
     @Override
-    protected DoubleReadBuffer createReadOnlyBuffer() {
-        return new DoubleBufferR();
-    }
-
-    @Override
-    protected DoubleWriteBuffer createWriteOnlyBuffer() {
+    public DoubleWriteBuffer asWrite() {
         return new DoubleBufferW();
     }
 
     @Override
-    protected DoubleEditBuffer createEditBuffer() {
-        return new DoubleBufferE();
+    public DoubleReadBuffer asRead() {
+        return new DoubleBufferR();
     }
 
-    @Override
-    public int getOffset() {
-        return MemoryConstants.OFFSET_DOUBLE;
+    public interface DoubleReadBuffer extends BufferR {
+        double get(int pos);
     }
 
-    private final class DoubleBufferR extends InnerReadBuffer implements DoubleReadBuffer {
+    public interface DoubleWriteBuffer extends BufferW {
+        void put(double value);
 
+        void put(int pos, double value);
+    }
+
+    private class DoubleBufferR extends ReadBuffer implements DoubleReadBuffer {
         @Override
         public double get(int pos) {
-            lock.lock();
-            try {
-                check(pos);
-                return MemoryUtils.getDouble(address, pos);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        protected PoolMode poolMode() {
-            return PoolMode.DOUBLE;
+            checkRead(pos);
+            return MemoryUtils.getDouble(readAddress, pos);
         }
     }
 
-    private final class DoubleBufferW extends InnerWriteBuffer implements DoubleWriteBuffer {
+    private class DoubleBufferW extends WriteBuffer implements DoubleWriteBuffer {
+        @Override
+        public void put(double value) {
+            put(++writeCurrentPosition, value);
+        }
 
         @Override
         public void put(int pos, double value) {
@@ -103,39 +65,6 @@ public class DoubleBuffer extends AbstractBuffer<DoubleReadBuffer, DoubleWriteBu
             MemoryUtils.put(address, pos, value);
         }
 
-        @Override
-        public void put(double value) {
-            put(++maxPosition, value);
-        }
-    }
-
-    @Deprecated
-    private final class DoubleBufferE extends InnerEditBuffer implements DoubleEditBuffer {
-
-        @Override
-        public double get(int pos) {
-            check(pos);
-            return MemoryUtils.getDouble(address, pos);
-        }
-
-        @Override
-        public void put(int pos, double value) {
-            ensureCapacity(pos);
-            judeChange(pos, value);
-            MemoryUtils.put(address, pos, value);
-        }
-
-        private void judeChange(int position, double b) {
-            if (!changed) {
-                if (0 != Double.compare(b, get(position))) {
-                    changed = true;
-                }
-            }
-        }
-
-        @Override
-        public void put(double value) {
-            put(++maxPosition, value);
-        }
     }
 }
+

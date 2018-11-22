@@ -1,61 +1,109 @@
 package com.fineio.io.file;
 
-import com.fineio.cache.BufferPrivilege;
+
+import com.fineio.io.BaseBuffer;
 import com.fineio.io.Buffer;
-import com.fineio.io.FileModel;
-import com.fineio.io.write.WriteOnlyBuffer;
+import com.fineio.io.ByteBuffer;
+import com.fineio.io.CharBuffer;
+import com.fineio.io.DoubleBuffer;
+import com.fineio.io.FloatBuffer;
+import com.fineio.io.IntBuffer;
+import com.fineio.io.LongBuffer;
+import com.fineio.io.ShortBuffer;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
 
 /**
- * Created by daniel on 2017/2/10.
+ * @author yee
+ * @date 2018/9/20
  */
-public final class WriteIOFile<T extends Buffer> extends IOFile<T> {
-
+public final class WriteIOFile<B extends Buffer> extends IOFile<B> {
     WriteIOFile(Connector connector, URI uri, FileModel model) {
         super(connector, uri, model);
         this.block_size_offset = (byte) (connector.getBlockOffset() - model.offset());
         single_block_len = (1L << block_size_offset) - 1;
     }
 
-    /**
-     * 创建File方法
-     *
-     * @param connector 连接器
-     * @param uri       子路径
-     * @param model     子类型
-     * @param <E>       继承ReadBuffer的子类型
-     * @return
-     */
-    public static final <E extends Buffer> WriteIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
+    @Override
+    protected FileLevel getFileLevel() {
+        return FileLevel.WRITE;
+    }
+
+    public static final <E extends BaseBuffer> WriteIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
         return new WriteIOFile<E>(connector, uri, model);
     }
 
     @Override
-    protected Buffer createBuffer(int index) {
-        return model.createBufferForWrite(connector, createIndexBlock(index), block_size_offset);
-    }
-
-    @Override
-    protected BufferPrivilege getLevel() {
-        return BufferPrivilege.WRITABLE;
-    }
-
-    @Override
-    protected void closeChild(boolean clear) {
-        if (buffers != null) {
-            for (int i = 0; i < buffers.length; i++) {
-                if (buffers[i] != null && null != buffers[i].get()) {
-                    if (clear) {
-                        ((WriteOnlyBuffer) buffers[i].get()).forceAndClear();
-                    } else {
-                        ((WriteOnlyBuffer) buffers[i].get()).force();
-                    }
-                    buffers[i] = null;
-                }
+    protected Buffer initBuffer(int index) {
+        synchronized (this) {
+            if (null == buffers[index]) {
+                BaseBuffer buffer = model.createBuffer(connector, createIndexBlock(index), block_size_offset);
+                buffers[index] = buffer.asWrite();
             }
+            return buffers[index];
         }
     }
 
+    @Override
+    public final void close() {
+        writeHeader();
+        super.close();
+    }
+
+    protected void put(long p, double d) {
+        int len = (int) (p >> this.block_size_offset);
+        if (len > 0) {
+            this.checkWrite(len);
+        }
+        ((DoubleBuffer.DoubleWriteBuffer) this.getBuffer(this.checkBuffer(len))).put((int) (p & this.single_block_len), d);
+    }
+
+    protected void put(long p, byte d) {
+        int len = (int) (p >> this.block_size_offset);
+        if (len > 0) {
+            this.checkWrite(len);
+        }
+        ((ByteBuffer.ByteWriteBuffer) this.getBuffer(this.checkBuffer(len))).put((int) (p & this.single_block_len), d);
+    }
+
+    protected void put(long p, int d) {
+        int len = (int) (p >> this.block_size_offset);
+        if (len > 0) {
+            this.checkWrite(len);
+        }
+        ((IntBuffer.IntWriteBuffer) this.getBuffer(this.checkBuffer(len))).put((int) (p & this.single_block_len), d);
+    }
+
+    protected void put(long p, long d) {
+        int len = (int) (p >> this.block_size_offset);
+        if (len > 0) {
+            this.checkWrite(len);
+        }
+        ((LongBuffer.LongWriteBuffer) this.getBuffer(this.checkBuffer(len))).put((int) (p & this.single_block_len), d);
+    }
+
+    protected void put(long p, short d) {
+        int len = (int) (p >> this.block_size_offset);
+        if (len > 0) {
+            this.checkWrite(len);
+        }
+        ((ShortBuffer.ShortWriteBuffer) this.getBuffer(this.checkBuffer(len))).put((int) (p & this.single_block_len), d);
+    }
+
+    protected void put(long p, char d) {
+        int len = (int) (p >> this.block_size_offset);
+        if (len > 0) {
+            this.checkWrite(len);
+        }
+        ((CharBuffer.CharWriteBuffer) this.getBuffer(this.checkBuffer(len))).put((int) (p & this.single_block_len), d);
+    }
+
+    protected void put(long p, float d) {
+        int len = (int) (p >> this.block_size_offset);
+        if (len > 0) {
+            this.checkWrite(len);
+        }
+        ((FloatBuffer.FloatWriteBuffer) this.getBuffer(this.checkBuffer(len))).put((int) (p & this.single_block_len), d);
+    }
 }

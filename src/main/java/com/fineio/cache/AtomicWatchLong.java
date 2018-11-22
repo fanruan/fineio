@@ -16,6 +16,13 @@ public class AtomicWatchLong {
         listener.add(watcher);
     }
 
+    public AtomicWatchLong() {
+    }
+
+    public AtomicWatchLong(Watcher listener) {
+        this.listener.add(listener);
+    }
+
     private void  triggerWatch(long v) {
         for(Watcher  w: listener) {
             w.watch(v);

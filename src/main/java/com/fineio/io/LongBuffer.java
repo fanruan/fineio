@@ -1,11 +1,6 @@
 package com.fineio.io;
 
-import com.fineio.cache.CacheManager;
-import com.fineio.cache.pool.PoolMode;
-import com.fineio.io.edit.LongEditBuffer;
 import com.fineio.io.file.FileBlock;
-import com.fineio.io.read.LongReadBuffer;
-import com.fineio.io.write.LongWriteBuffer;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.storage.Connector;
@@ -14,128 +9,61 @@ import java.net.URI;
 
 /**
  * @author yee
- * @date 2018/5/30
+ * @date 2018/9/19
  */
-public class LongBuffer extends AbstractBuffer<LongReadBuffer, LongWriteBuffer, LongEditBuffer> {
-
-    static BufferModel MODE = new BufferModel<LongBuffer>() {
-
-        @Override
-        LongBuffer createBuffer(Connector connector, FileBlock block, int max_offset) {
-            LongBuffer buffer = CacheManager.getInstance().getBuffer(PoolMode.LONG, block.getBlockURI());
-            if (null == buffer) {
-                buffer = new LongBuffer(connector, block, max_offset);
-                CacheManager.getInstance().registerBuffer(PoolMode.LONG, buffer);
-            }
-            return buffer;
-        }
-
-        @Override
-        LongBuffer createBuffer(Connector connector, URI uri) {
-            return new LongBuffer(connector, uri);
-        }
-
-        @Override
-        byte offset() {
-            return MemoryConstants.OFFSET_LONG;
-        }
-    };
-
-    protected LongBuffer(Connector connector, FileBlock block, int maxOffset) {
-        super(connector, block, maxOffset);
+public class LongBuffer extends BaseBuffer<LongBuffer.LongReadBuffer, LongBuffer.LongWriteBuffer> {
+    public LongBuffer(Connector connector, FileBlock block, int maxOffset, Listener listener) {
+        super(connector, block, maxOffset, listener);
     }
 
-    protected LongBuffer(Connector connector, URI uri) {
-        super(connector, uri);
+    public LongBuffer(Connector connector, URI uri, Listener listener) {
+        super(connector, uri, listener);
     }
 
     @Override
-    protected void exitPool() {
-        if (!directAccess) {
-            manager.removeBuffer(PoolMode.LONG, this);
-        }
+    protected int getOffset() {
+        return MemoryConstants.OFFSET_LONG;
     }
 
     @Override
-    protected LongReadBuffer createReadOnlyBuffer() {
-        return new LongBufferR();
-    }
-
-    @Override
-    protected LongWriteBuffer createWriteOnlyBuffer() {
+    public LongWriteBuffer asWrite() {
         return new LongBufferW();
     }
 
     @Override
-    protected LongEditBuffer createEditBuffer() {
-        return new LongBufferE();
+    public LongReadBuffer asRead() {
+        return new LongBufferR();
     }
 
-    @Override
-    public int getOffset() {
-        return MemoryConstants.OFFSET_LONG;
+    public interface LongReadBuffer extends BufferR {
+        long get(int pos);
     }
 
-    private final class LongBufferR extends InnerReadBuffer implements LongReadBuffer {
+    public interface LongWriteBuffer extends BufferW {
+        void put(long value);
 
+        void put(int pos, long value);
+    }
+
+    private class LongBufferR extends ReadBuffer implements LongReadBuffer {
         @Override
         public long get(int pos) {
-            lock.lock();
-            try {
-                check(pos);
-                return MemoryUtils.getLong(address, pos);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        protected PoolMode poolMode() {
-            return PoolMode.LONG;
+            checkRead(pos);
+            return MemoryUtils.getLong(readAddress, pos);
         }
     }
 
-    private final class LongBufferW extends InnerWriteBuffer implements LongWriteBuffer {
+    private class LongBufferW extends WriteBuffer implements LongWriteBuffer {
+        @Override
+        public void put(long value) {
+            put(++writeCurrentPosition, value);
+        }
 
         @Override
         public void put(int pos, long value) {
             ensureCapacity(pos);
             MemoryUtils.put(address, pos, value);
-        }
-
-        @Override
-        public void put(long value) {
-            put(++maxPosition, value);
-        }
-    }
-
-    @Deprecated
-    private final class LongBufferE extends InnerEditBuffer implements LongEditBuffer {
-
-        @Override
-        public long get(int pos) {
-            check(pos);
-            return MemoryUtils.getLong(address, pos);
-        }
-
-        @Override
-        public void put(int pos, long value) {
-            ensureCapacity(pos);
-            judeChange(pos, value);
-            MemoryUtils.put(address, pos, value);
-        }
-
-        private void judeChange(int position, long b) {
-            if (!changed) {
-                if (b != get(position)) {
-                    changed = true;
-                }
-            }
-        }
-
-        @Override
-        public void put(long value) {
-            put(++maxPosition, value);
         }
     }
 }
+

@@ -4,16 +4,13 @@ import com.fineio.exception.IOSetException;
 import com.fineio.io.base.BufferKey;
 import com.fineio.io.base.Job;
 import com.fineio.io.base.JobAssist;
-import com.fineio.io.file.writer.task.Pair;
 import com.fineio.logger.FineIOLoggers;
+import com.fineio.thread.FineIOExecutors;
 
 import java.net.URI;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -80,7 +77,7 @@ public final class SyncManager {
 
     private volatile AtomicInteger working_jobs = new AtomicInteger(0);
 
-    private ExecutorService executor = Executors.newCachedThreadPool();
+    private ExecutorService executor = FineIOExecutors.newFixedThreadPool(threads, SyncManager.class);
 
     private volatile  JobContainer map = new JobContainer();
 
@@ -123,7 +120,7 @@ public final class SyncManager {
         });
     }
 
-    private Thread watch_thread = new Thread() {
+    private Thread watch_thread = new Thread("FineIO-SyncManager-Demon") {
         public void run() {
             while (true) {
                 while (isWait()) {
@@ -149,16 +146,15 @@ public final class SyncManager {
                         runningThread.put(jobAssist.getKey(), jobAssist);
                         runningLock.unlock();
                         working_jobs.addAndGet(1);
-                        Future<Pair<URI, Boolean>> future = executor.submit(new Callable<Pair<URI, Boolean>>() {
-                            public Pair<URI, Boolean> call() {
+                        executor.submit(new Runnable() {
+                            @Override
+                            public void run() {
                                 URI uri = jobAssist.getKey().getBlock().getBlockURI();
-                                Pair<URI, Boolean> pair = new Pair<URI, Boolean>(uri, true);
                                 try {
                                     jobAssist.doJob();
                                 } catch (Throwable e) {
                                     //TODO对与失败的处理//比如磁盘满啊 之类
                                     FineIOLoggers.getLogger().error(e);
-                                    pair.setValue(false);
                                 } finally {
                                     runningLock.lock();
                                     JobAssist assist =  runningThread.remove(jobAssist.getKey());
@@ -169,14 +165,9 @@ public final class SyncManager {
                                     working_jobs.addAndGet(-1);
                                     wakeUpWatchTread();
                                 }
-                                return pair;
+                                JobFinishedManager.getInstance().submit(uri);
                             }
                         });
-                        try {
-                            JobFinishedManager.getInstance().submit(future);
-                        } catch (Exception e) {
-                            FineIOLoggers.getLogger().error(e);
-                        }
                     }
                 }
             }
