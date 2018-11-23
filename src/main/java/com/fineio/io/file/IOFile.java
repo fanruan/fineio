@@ -56,20 +56,30 @@ public abstract class IOFile<B extends Buffer> {
         this.model = model;
     }
 
+//    static void checkAppendIOFile(IOFile file) {
+//        if (file instanceof AppendIOFile) {
+//            throw new IllegalArgumentException(String.format("File %s is an append file", file.uri));
+//        }
+//    }
+
     public final static int getInt(IOFile<IntBuffer> file, long p) {
-        return ((IntBuffer.IntReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
+
+        return ((IntBuffer.IntReadBuffer) file.getBuffer(file.checkBufferForRead((int) (p >> file.block_size_offset)))).get((int) (p & file.single_block_len));
     }
 
     public final static long getLong(IOFile<LongBuffer> file, long p) {
-        return ((LongBuffer.LongReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
+
+        return ((LongBuffer.LongReadBuffer) file.getBuffer(file.checkBufferForRead((int) (p >> file.block_size_offset)))).get((int) (p & file.single_block_len));
     }
 
     public final static double getDouble(IOFile<DoubleBuffer> file, long p) {
-        return ((DoubleBuffer.DoubleReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
+
+        return ((DoubleBuffer.DoubleReadBuffer) file.getBuffer(file.checkBufferForRead((int) (p >> file.block_size_offset)))).get((int) (p & file.single_block_len));
     }
 
     public final static byte getByte(IOFile<ByteBuffer> file, long p) {
-        return ((ByteBuffer.ByteReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
+
+        return ((ByteBuffer.ByteReadBuffer) file.getBuffer(file.checkBufferForRead((int) (p >> file.block_size_offset)))).get((int) (p & file.single_block_len));
     }
 
     public final static void put(IOFile<IntBuffer> file, int d) {
@@ -235,15 +245,18 @@ public abstract class IOFile<B extends Buffer> {
     }
 
     public final static char getChar(IOFile<CharBuffer> file, long p) {
-        return ((CharBuffer.CharReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
+
+        return ((CharBuffer.CharReadBuffer) file.getBuffer(file.checkBufferForRead((int) (p >> file.block_size_offset)))).get((int) (p & file.single_block_len));
     }
 
     public final static float getFloat(IOFile<FloatBuffer> file, long p) {
-        return ((FloatBuffer.FloatReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
+
+        return ((FloatBuffer.FloatReadBuffer) file.getBuffer(file.checkBufferForRead((int) (p >> file.block_size_offset)))).get((int) (p & file.single_block_len));
     }
 
     public final static short getShort(IOFile<ShortBuffer> file, long p) {
-        return ((ShortBuffer.ShortReadBuffer) file.getBuffer((int) (p >> file.block_size_offset))).get((int) (p & file.single_block_len));
+
+        return ((ShortBuffer.ShortReadBuffer) file.getBuffer(file.checkBufferForRead((int) (p >> file.block_size_offset)))).get((int) (p & file.single_block_len));
     }
 
     public final static void put(IOFile<FloatBuffer> file, long p, float d) {
@@ -295,6 +308,16 @@ public abstract class IOFile<B extends Buffer> {
         } else {
             throw new IndexOutOfBoundsException(uri.getPath() + i);
         }
+    }
+
+    private int checkBufferForRead(int index) {
+        if (null == buffers) {
+            ((ReadIOFile) this).readHeader(model.offset());
+        }
+        if (buffers.length > index) {
+            return index;
+        }
+        throw new IndexOutOfBoundsException(uri.getPath() + index);
     }
 
     protected abstract Buffer initBuffer(int index);
