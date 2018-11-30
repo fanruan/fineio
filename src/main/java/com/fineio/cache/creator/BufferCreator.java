@@ -193,11 +193,11 @@ public abstract class BufferCreator<B extends Buffer> {
         };
     }
 
-    public B createBuffer(Connector connector, FileBlock block, int maxOffset) {
+    public B createBuffer(Connector connector, FileBlock block, int maxOffset, boolean async) {
         synchronized (this) {
             B buffer = keyMap.get(block.getBlockURI());
             if (null == buffer) {
-                buffer = create(connector, block, maxOffset);
+                buffer = create(connector, block, maxOffset, async);
                 bufferMap.put(buffer);
                 keyMap.put(block.getBlockURI(), buffer);
             } else {
@@ -208,13 +208,13 @@ public abstract class BufferCreator<B extends Buffer> {
 //        return create(connector, block, maxOffset);
     }
 
-    protected abstract B create(Connector connector, FileBlock block, int maxOffset);
+    protected abstract B create(Connector connector, FileBlock block, int maxOffset, boolean sync);
 
-    public B createBuffer(Connector connector, URI uri) {
-        return create(connector, uri);
+    public B createBuffer(Connector connector, URI uri, boolean sync) {
+        return create(connector, uri, sync);
     }
 
-    protected abstract B create(Connector connector, URI uri);
+    protected abstract B create(Connector connector, URI uri, boolean sync);
 
     synchronized
     public B poll() {
@@ -250,13 +250,13 @@ public abstract class BufferCreator<B extends Buffer> {
             public BufferCreator<ByteBuffer> build() {
                 return new BufferCreator<ByteBuffer>("byte") {
                     @Override
-                    protected ByteBuffer create(Connector connector, FileBlock block, int maxOffset) {
-                        return new ByteBuffer(connector, block, maxOffset, listener);
+                    protected ByteBuffer create(Connector connector, FileBlock block, int maxOffset, boolean sync) {
+                        return new ByteBuffer(connector, block, maxOffset, sync, listener);
                     }
 
                     @Override
-                    protected ByteBuffer create(Connector connector, URI uri) {
-                        return new ByteBuffer(connector, uri, listener);
+                    protected ByteBuffer create(Connector connector, URI uri, boolean sync) {
+                        return new ByteBuffer(connector, uri, sync, listener);
                     }
                 };
             }
@@ -269,13 +269,13 @@ public abstract class BufferCreator<B extends Buffer> {
             public BufferCreator<IntBuffer> build() {
                 return new BufferCreator<IntBuffer>("int") {
                     @Override
-                    protected IntBuffer create(Connector connector, FileBlock block, int maxOffset) {
-                        return new IntBuffer(connector, block, maxOffset, listener);
+                    protected IntBuffer create(Connector connector, FileBlock block, int maxOffset, boolean sync) {
+                        return new IntBuffer(connector, block, maxOffset, sync, listener);
                     }
 
                     @Override
-                    protected IntBuffer create(Connector connector, URI uri) {
-                        return new IntBuffer(connector, uri, listener);
+                    protected IntBuffer create(Connector connector, URI uri, boolean sync) {
+                        return new IntBuffer(connector, uri, sync, listener);
                     }
                 };
             }
@@ -285,13 +285,13 @@ public abstract class BufferCreator<B extends Buffer> {
             public BufferCreator<LongBuffer> build() {
                 return new BufferCreator<LongBuffer>("long") {
                     @Override
-                    protected LongBuffer create(Connector connector, FileBlock block, int maxOffset) {
-                        return new LongBuffer(connector, block, maxOffset, listener);
+                    protected LongBuffer create(Connector connector, FileBlock block, int maxOffset, boolean sync) {
+                        return new LongBuffer(connector, block, maxOffset, sync, listener);
                     }
 
                     @Override
-                    protected LongBuffer create(Connector connector, URI uri) {
-                        return new LongBuffer(connector, uri, listener);
+                    protected LongBuffer create(Connector connector, URI uri, boolean sync) {
+                        return new LongBuffer(connector, uri, sync, listener);
                     }
                 };
             }
@@ -301,13 +301,13 @@ public abstract class BufferCreator<B extends Buffer> {
             public BufferCreator<FloatBuffer> build() {
                 return new BufferCreator<FloatBuffer>("float") {
                     @Override
-                    protected FloatBuffer create(Connector connector, FileBlock block, int maxOffset) {
-                        return new FloatBuffer(connector, block, maxOffset, listener);
+                    protected FloatBuffer create(Connector connector, FileBlock block, int maxOffset, boolean sync) {
+                        return new FloatBuffer(connector, block, maxOffset, sync, listener);
                     }
 
                     @Override
-                    protected FloatBuffer create(Connector connector, URI uri) {
-                        return new FloatBuffer(connector, uri, listener);
+                    protected FloatBuffer create(Connector connector, URI uri, boolean sync) {
+                        return new FloatBuffer(connector, uri, sync, listener);
                     }
                 };
             }
@@ -317,13 +317,13 @@ public abstract class BufferCreator<B extends Buffer> {
             public BufferCreator<CharBuffer> build() {
                 return new BufferCreator<CharBuffer>("char") {
                     @Override
-                    protected CharBuffer create(Connector connector, FileBlock block, int maxOffset) {
-                        return new CharBuffer(connector, block, maxOffset, listener);
+                    protected CharBuffer create(Connector connector, FileBlock block, int maxOffset, boolean sync) {
+                        return new CharBuffer(connector, block, maxOffset, sync, listener);
                     }
 
                     @Override
-                    protected CharBuffer create(Connector connector, URI uri) {
-                        return new CharBuffer(connector, uri, listener);
+                    protected CharBuffer create(Connector connector, URI uri, boolean sync) {
+                        return new CharBuffer(connector, uri, sync, listener);
                     }
                 };
             }
@@ -333,13 +333,13 @@ public abstract class BufferCreator<B extends Buffer> {
             public BufferCreator<ShortBuffer> build() {
                 return new BufferCreator<ShortBuffer>("short") {
                     @Override
-                    protected ShortBuffer create(Connector connector, FileBlock block, int maxOffset) {
-                        return new ShortBuffer(connector, block, maxOffset, listener);
+                    protected ShortBuffer create(Connector connector, FileBlock block, int maxOffset, boolean sync) {
+                        return new ShortBuffer(connector, block, maxOffset, sync, listener);
                     }
 
                     @Override
-                    protected ShortBuffer create(Connector connector, URI uri) {
-                        return new ShortBuffer(connector, uri, listener);
+                    protected ShortBuffer create(Connector connector, URI uri, boolean sync) {
+                        return new ShortBuffer(connector, uri, sync, listener);
                     }
                 };
             }
@@ -349,13 +349,13 @@ public abstract class BufferCreator<B extends Buffer> {
             public BufferCreator<DoubleBuffer> build() {
                 return new BufferCreator<DoubleBuffer>("double") {
                     @Override
-                    protected DoubleBuffer create(Connector connector, FileBlock block, int maxOffset) {
-                        return new DoubleBuffer(connector, block, maxOffset, listener);
+                    protected DoubleBuffer create(Connector connector, FileBlock block, int maxOffset, boolean sync) {
+                        return new DoubleBuffer(connector, block, maxOffset, sync, listener);
                     }
 
                     @Override
-                    protected DoubleBuffer create(Connector connector, URI uri) {
-                        return new DoubleBuffer(connector, uri, listener);
+                    protected DoubleBuffer create(Connector connector, URI uri, boolean sync) {
+                        return new DoubleBuffer(connector, uri, sync, listener);
                     }
                 };
             }

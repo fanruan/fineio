@@ -44,7 +44,11 @@ public final class FineIO {
      * @return
      */
     public static <F> F createIOFile(Connector connector, URI uri, FineIO.MODEL<F> model) {
-        return model.createIOFile(connector, uri);
+        return createIOFile(connector, uri, model, false);
+    }
+
+    public static <F> F createIOFile(Connector connector, URI uri, FineIO.MODEL<F> model, boolean sync) {
+        return model.createIOFile(connector, uri, sync);
     }
 
     /**
@@ -600,14 +604,14 @@ public final class FineIO {
         FineIO.MODEL<ReadIOFile<LongBuffer>> READ_LONG = new FineIO.MODEL<ReadIOFile<LongBuffer>>() {
 
             @Override
-            public ReadIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
+            public ReadIOFile<LongBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return ReadIOFile.createFineIO(connector, uri, FileModel.LONG);
             }
         };
         FineIO.MODEL<ReadIOFile<DoubleBuffer>> READ_DOUBLE = new FineIO.MODEL<ReadIOFile<DoubleBuffer>>() {
 
             @Override
-            public ReadIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
+            public ReadIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return ReadIOFile.createFineIO(connector, uri, FileModel.DOUBLE);
             }
         };
@@ -615,7 +619,7 @@ public final class FineIO {
         FineIO.MODEL<ReadIOFile<FloatBuffer>> READ_FLOAT = new FineIO.MODEL<ReadIOFile<FloatBuffer>>() {
 
             @Override
-            public ReadIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
+            public ReadIOFile<FloatBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return ReadIOFile.createFineIO(connector, uri, FileModel.FLOAT);
             }
         };
@@ -623,21 +627,21 @@ public final class FineIO {
         FineIO.MODEL<ReadIOFile<IntBuffer>> READ_INT = new FineIO.MODEL<ReadIOFile<IntBuffer>>() {
 
             @Override
-            public ReadIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
+            public ReadIOFile<IntBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return ReadIOFile.createFineIO(connector, uri, FileModel.INT);
             }
         };
         FineIO.MODEL<ReadIOFile<CharBuffer>> READ_CHAR = new FineIO.MODEL<ReadIOFile<CharBuffer>>() {
 
             @Override
-            public ReadIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
+            public ReadIOFile<CharBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return ReadIOFile.createFineIO(connector, uri, FileModel.CHAR);
             }
         };
         FineIO.MODEL<ReadIOFile<ByteBuffer>> READ_BYTE = new FineIO.MODEL<ReadIOFile<ByteBuffer>>() {
 
             @Override
-            public ReadIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
+            public ReadIOFile<ByteBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return ReadIOFile.createFineIO(connector, uri, FileModel.BYTE);
             }
         };
@@ -645,7 +649,7 @@ public final class FineIO {
         FineIO.MODEL<ReadIOFile<ShortBuffer>> READ_SHORT = new FineIO.MODEL<ReadIOFile<ShortBuffer>>() {
 
             @Override
-            public ReadIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
+            public ReadIOFile<ShortBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return ReadIOFile.createFineIO(connector, uri, FileModel.SHORT);
             }
         };
@@ -654,116 +658,116 @@ public final class FineIO {
         FineIO.MODEL<WriteIOFile<LongBuffer>> WRITE_LONG = new FineIO.MODEL<WriteIOFile<LongBuffer>>() {
 
             @Override
-            public WriteIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
-                return WriteIOFile.createFineIO(connector, uri, FileModel.LONG);
+            public WriteIOFile<LongBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return WriteIOFile.createFineIO(connector, uri, FileModel.LONG, sync);
             }
         };
         FineIO.MODEL<WriteIOFile<DoubleBuffer>> WRITE_DOUBLE = new FineIO.MODEL<WriteIOFile<DoubleBuffer>>() {
 
             @Override
-            public WriteIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
-                return WriteIOFile.createFineIO(connector, uri, FileModel.DOUBLE);
+            public WriteIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return WriteIOFile.createFineIO(connector, uri, FileModel.DOUBLE, sync);
             }
         };
         FineIO.MODEL<WriteIOFile<FloatBuffer>> WRITE_FLOAT = new FineIO.MODEL<WriteIOFile<FloatBuffer>>() {
 
             @Override
-            public WriteIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
-                return WriteIOFile.createFineIO(connector, uri, FileModel.FLOAT);
+            public WriteIOFile<FloatBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return WriteIOFile.createFineIO(connector, uri, FileModel.FLOAT, sync);
             }
         };
         FineIO.MODEL<WriteIOFile<IntBuffer>> WRITE_INT = new FineIO.MODEL<WriteIOFile<IntBuffer>>() {
 
             @Override
-            public WriteIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
-                return WriteIOFile.createFineIO(connector, uri, FileModel.INT);
+            public WriteIOFile<IntBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return WriteIOFile.createFineIO(connector, uri, FileModel.INT, sync);
             }
         };
         FineIO.MODEL<WriteIOFile<CharBuffer>> WRITE_CHAR = new FineIO.MODEL<WriteIOFile<CharBuffer>>() {
 
             @Override
-            public WriteIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
-                return WriteIOFile.createFineIO(connector, uri, FileModel.CHAR);
+            public WriteIOFile<CharBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return WriteIOFile.createFineIO(connector, uri, FileModel.CHAR, sync);
             }
         };
         FineIO.MODEL<WriteIOFile<ByteBuffer>> WRITE_BYTE = new FineIO.MODEL<WriteIOFile<ByteBuffer>>() {
 
             @Override
-            public WriteIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
-                return WriteIOFile.createFineIO(connector, uri, FileModel.BYTE);
+            public WriteIOFile<ByteBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return WriteIOFile.createFineIO(connector, uri, FileModel.BYTE, sync);
             }
         };
 
         FineIO.MODEL<WriteIOFile<ShortBuffer>> WRITE_SHORT = new FineIO.MODEL<WriteIOFile<ShortBuffer>>() {
 
             @Override
-            public WriteIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
-                return WriteIOFile.createFineIO(connector, uri, FileModel.SHORT);
+            public WriteIOFile<ShortBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return WriteIOFile.createFineIO(connector, uri, FileModel.SHORT, sync);
             }
         };
 
         FineIO.MODEL<AppendIOFile<LongBuffer>> APPEND_LONG = new FineIO.MODEL<AppendIOFile<LongBuffer>>() {
 
             @Override
-            public AppendIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
-                return AppendIOFile.createFineIO(connector, uri, FileModel.LONG);
+            public AppendIOFile<LongBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return AppendIOFile.createFineIO(connector, uri, FileModel.LONG, sync);
             }
         };
         FineIO.MODEL<AppendIOFile<DoubleBuffer>> APPEND_DOUBLE = new FineIO.MODEL<AppendIOFile<DoubleBuffer>>() {
 
             @Override
-            public AppendIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
-                return AppendIOFile.createFineIO(connector, uri, FileModel.DOUBLE);
+            public AppendIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return AppendIOFile.createFineIO(connector, uri, FileModel.DOUBLE, sync);
             }
         };
         FineIO.MODEL<AppendIOFile<FloatBuffer>> APPEND_FLOAT = new FineIO.MODEL<AppendIOFile<FloatBuffer>>() {
 
             @Override
-            public AppendIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
-                return AppendIOFile.createFineIO(connector, uri, FileModel.FLOAT);
+            public AppendIOFile<FloatBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return AppendIOFile.createFineIO(connector, uri, FileModel.FLOAT, sync);
             }
         };
         FineIO.MODEL<AppendIOFile<IntBuffer>> APPEND_INT = new FineIO.MODEL<AppendIOFile<IntBuffer>>() {
 
             @Override
-            public AppendIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
-                return AppendIOFile.createFineIO(connector, uri, FileModel.INT);
+            public AppendIOFile<IntBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return AppendIOFile.createFineIO(connector, uri, FileModel.INT, sync);
             }
         };
         FineIO.MODEL<AppendIOFile<CharBuffer>> APPEND_CHAR = new FineIO.MODEL<AppendIOFile<CharBuffer>>() {
 
             @Override
-            public AppendIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
-                return AppendIOFile.createFineIO(connector, uri, FileModel.CHAR);
+            public AppendIOFile<CharBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return AppendIOFile.createFineIO(connector, uri, FileModel.CHAR, sync);
             }
         };
         FineIO.MODEL<AppendIOFile<ByteBuffer>> APPEND_BYTE = new FineIO.MODEL<AppendIOFile<ByteBuffer>>() {
 
             @Override
-            public AppendIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
-                return AppendIOFile.createFineIO(connector, uri, FileModel.BYTE);
+            public AppendIOFile<ByteBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return AppendIOFile.createFineIO(connector, uri, FileModel.BYTE, sync);
             }
         };
 
         FineIO.MODEL<AppendIOFile<ShortBuffer>> APPEND_SHORT = new FineIO.MODEL<AppendIOFile<ShortBuffer>>() {
 
             @Override
-            public AppendIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
-                return AppendIOFile.createFineIO(connector, uri, FileModel.SHORT);
+            public AppendIOFile<ShortBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return AppendIOFile.createFineIO(connector, uri, FileModel.SHORT, sync);
             }
         };
 
         FineIO.MODEL<DirectReadIOFile<LongBuffer>> DIRECT_READ_LONG = new FineIO.MODEL<DirectReadIOFile<LongBuffer>>() {
 
             @Override
-            public DirectReadIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
+            public DirectReadIOFile<LongBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return DirectReadIOFile.createFineIO(connector, uri, FileModel.LONG);
             }
         };
         FineIO.MODEL<DirectReadIOFile<DoubleBuffer>> DIRECT_READ_DOUBLE = new FineIO.MODEL<DirectReadIOFile<DoubleBuffer>>() {
 
             @Override
-            public DirectReadIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
+            public DirectReadIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return DirectReadIOFile.createFineIO(connector, uri, FileModel.DOUBLE);
             }
         };
@@ -771,7 +775,7 @@ public final class FineIO {
         FineIO.MODEL<DirectReadIOFile<FloatBuffer>> DIRECT_READ_FLOAT = new FineIO.MODEL<DirectReadIOFile<FloatBuffer>>() {
 
             @Override
-            public DirectReadIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
+            public DirectReadIOFile<FloatBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return DirectReadIOFile.createFineIO(connector, uri, FileModel.FLOAT);
             }
         };
@@ -779,21 +783,21 @@ public final class FineIO {
         FineIO.MODEL<DirectReadIOFile<IntBuffer>> DIRECT_READ_INT = new FineIO.MODEL<DirectReadIOFile<IntBuffer>>() {
 
             @Override
-            public DirectReadIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
+            public DirectReadIOFile<IntBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return DirectReadIOFile.createFineIO(connector, uri, FileModel.INT);
             }
         };
         FineIO.MODEL<DirectReadIOFile<CharBuffer>> DIRECT_READ_CHAR = new FineIO.MODEL<DirectReadIOFile<CharBuffer>>() {
 
             @Override
-            public DirectReadIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
+            public DirectReadIOFile<CharBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return DirectReadIOFile.createFineIO(connector, uri, FileModel.CHAR);
             }
         };
         FineIO.MODEL<DirectReadIOFile<ByteBuffer>> DIRECT_READ_BYTE = new FineIO.MODEL<DirectReadIOFile<ByteBuffer>>() {
 
             @Override
-            public DirectReadIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
+            public DirectReadIOFile<ByteBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return DirectReadIOFile.createFineIO(connector, uri, FileModel.BYTE);
             }
         };
@@ -801,7 +805,7 @@ public final class FineIO {
         FineIO.MODEL<DirectReadIOFile<ShortBuffer>> DIRECT_READ_SHORT = new FineIO.MODEL<DirectReadIOFile<ShortBuffer>>() {
 
             @Override
-            public DirectReadIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
+            public DirectReadIOFile<ShortBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return DirectReadIOFile.createFineIO(connector, uri, FileModel.SHORT);
             }
         };
@@ -810,54 +814,54 @@ public final class FineIO {
         FineIO.MODEL<DirectWriteIOFile<LongBuffer>> DIRECT_WRITE_LONG = new FineIO.MODEL<DirectWriteIOFile<LongBuffer>>() {
 
             @Override
-            public DirectWriteIOFile<LongBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.LONG);
+            public DirectWriteIOFile<LongBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.LONG, sync);
             }
         };
         FineIO.MODEL<DirectWriteIOFile<DoubleBuffer>> DIRECT_WRITE_DOUBLE = new FineIO.MODEL<DirectWriteIOFile<DoubleBuffer>>() {
 
             @Override
-            public DirectWriteIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.DOUBLE);
+            public DirectWriteIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.DOUBLE, sync);
             }
         };
         FineIO.MODEL<DirectWriteIOFile<FloatBuffer>> DIRECT_WRITE_FLOAT = new FineIO.MODEL<DirectWriteIOFile<FloatBuffer>>() {
 
             @Override
-            public DirectWriteIOFile<FloatBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.FLOAT);
+            public DirectWriteIOFile<FloatBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.FLOAT, sync);
             }
         };
         FineIO.MODEL<DirectWriteIOFile<IntBuffer>> DIRECT_WRITE_INT = new FineIO.MODEL<DirectWriteIOFile<IntBuffer>>() {
 
             @Override
-            public DirectWriteIOFile<IntBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.INT);
+            public DirectWriteIOFile<IntBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.INT, sync);
             }
         };
         FineIO.MODEL<DirectWriteIOFile<CharBuffer>> DIRECT_WRITE_CHAR = new FineIO.MODEL<DirectWriteIOFile<CharBuffer>>() {
 
             @Override
-            public DirectWriteIOFile<CharBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.CHAR);
+            public DirectWriteIOFile<CharBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.CHAR, sync);
             }
         };
         FineIO.MODEL<DirectWriteIOFile<ByteBuffer>> DIRECT_WRITE_BYTE = new FineIO.MODEL<DirectWriteIOFile<ByteBuffer>>() {
 
             @Override
-            public DirectWriteIOFile<ByteBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.BYTE);
+            public DirectWriteIOFile<ByteBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.BYTE, sync);
             }
         };
 
         FineIO.MODEL<DirectWriteIOFile<ShortBuffer>> DIRECT_WRITE_SHORT = new FineIO.MODEL<DirectWriteIOFile<ShortBuffer>>() {
 
             @Override
-            public DirectWriteIOFile<ShortBuffer> createIOFile(Connector connector, URI uri) {
-                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.SHORT);
+            public DirectWriteIOFile<ShortBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
+                return DirectWriteIOFile.createFineIO(connector, uri, FileModel.SHORT, sync);
             }
         };
 
-        F createIOFile(Connector connector, URI uri);
+        F createIOFile(Connector connector, URI uri, boolean sync);
     }
 }

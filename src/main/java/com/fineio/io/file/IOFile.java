@@ -14,6 +14,8 @@ import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 
 import java.net.URI;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author yee
@@ -46,6 +48,7 @@ public abstract class IOFile<B extends Buffer> {
     protected volatile boolean released = false;
     protected volatile Buffer[] buffers;
     private volatile int bufferWriteIndex = -1;
+    public static Map<FileBlock, byte[]> HEAD_MAP = new ConcurrentHashMap<FileBlock, byte[]>();
 
     IOFile(Connector connector, URI uri, FileModel model) {
         if (uri == null || connector == null || model == null) {
@@ -117,7 +120,7 @@ public abstract class IOFile<B extends Buffer> {
         } else {
             int len = buffers.length;
             if (((BufferW) buffers[len - 1]).full()) {
-                result = triggerWrite(len - 1);
+                result = triggerWrite(len);
             } else {
                 result = len - 1;
             }
@@ -291,12 +294,9 @@ public abstract class IOFile<B extends Buffer> {
         return buffers != null && buffers.length > index;
     }
 
-    private final int triggerWrite(int n) {
-        if (this.bufferWriteIndex != n) {
-            ((BufferW) this.buffers[n]).write();
-            this.bufferWriteIndex = n;
-        }
-        return n + 1;
+    private final int triggerWrite(int len) {
+        checkWrite(len);
+        return len;
     }
 
     protected final Buffer getBuffer(int i) {
@@ -355,6 +355,7 @@ public abstract class IOFile<B extends Buffer> {
         Bits.putInt(bytes, 0, buffers == null ? 0 : buffers.length);
         bytes[STEP_LEN] = (byte) (block_size_offset + model.offset());
         try {
+            HEAD_MAP.put(block, bytes);
             connector.write(block, bytes);
         } catch (Throwable e) {
         }

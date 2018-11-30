@@ -12,12 +12,12 @@ import java.net.URI;
  * @date 2018/9/19
  */
 public class ShortBuffer extends BaseBuffer<ShortBuffer.ShortReadBuffer, ShortBuffer.ShortWriteBuffer> {
-    public ShortBuffer(Connector connector, FileBlock block, int maxOffset, Listener listener) {
-        super(connector, block, maxOffset, listener);
+    public ShortBuffer(Connector connector, URI uri, boolean syncWrite, Listener listener) {
+        super(connector, uri, syncWrite, listener);
     }
 
-    public ShortBuffer(Connector connector, URI uri, Listener listener) {
-        super(connector, uri, listener);
+    public ShortBuffer(Connector connector, FileBlock block, int maxOffset, boolean syncWrite, Listener listener) {
+        super(connector, block, maxOffset, syncWrite, listener);
     }
 
     @Override

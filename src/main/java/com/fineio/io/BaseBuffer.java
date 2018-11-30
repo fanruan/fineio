@@ -59,11 +59,13 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
     protected volatile MemoryObject memoryObject;
 
     private volatile boolean direct;
+    private final boolean syncWrite;
 
 
     private Lock lock = new ReentrantLock();
 
-    public BaseBuffer(Connector connector, URI uri, Listener listener) {
+    public BaseBuffer(Connector connector, URI uri, boolean syncWrite, Listener listener) {
+        this.syncWrite = syncWrite;
         level = Level.INITIAL;
         syncStatus = SyncStatus.UNSUPPORTED;
         bufferKey = new BufferKey(connector, new FileBlock(uri));
@@ -74,7 +76,8 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         this.maxSize = Integer.MAX_VALUE;
     }
 
-    public BaseBuffer(Connector connector, FileBlock block, int maxOffset, Listener listener) {
+    public BaseBuffer(Connector connector, FileBlock block, int maxOffset, boolean syncWrite, Listener listener) {
+        this.syncWrite = syncWrite;
         level = Level.INITIAL;
         syncStatus = SyncStatus.UNSUPPORTED;
         bufferKey = new BufferKey(connector, block);
@@ -460,7 +463,13 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                 lastWriteTime = t;
                 syncStatus = SyncStatus.SYNC;
                 if (level == Level.WRITE) {
-                    SyncManager.getInstance().triggerWork(createWriteJob(direct));
+                    JobAssist jobAssist = createWriteJob(direct);
+//                    SyncManager.getInstance().triggerWork(createWriteJob(direct));
+                    if (syncWrite) {
+                        jobAssist.doJob();
+                    } else {
+                        SyncManager.getInstance().triggerWork(jobAssist);
+                    }
                     if (!direct) {
                         flip();
                     }
@@ -526,7 +535,13 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             int i = 0;
             while (needFlush()) {
                 i++;
-                SyncManager.getInstance().force(createWriteJob(clear));
+                JobAssist jobAssist = createWriteJob(clear);
+                if (syncWrite) {
+                    jobAssist.doJob();
+                } else {
+                    SyncManager.getInstance().force(jobAssist);
+                }
+//                SyncManager.getInstance().force(createWriteJob(clear));
                 //尝试3次依然抛错就不写了 强制释放内存 TODO后续考虑对异常未保存文件处理
                 if (i > 3) {
                     flushed = true;
