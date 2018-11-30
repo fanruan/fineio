@@ -44,7 +44,7 @@ public final class FineIO {
      * @return
      */
     public static <F> F createIOFile(Connector connector, URI uri, FineIO.MODEL<F> model) {
-        return model.createIOFile(connector, uri, false);
+        return createIOFile(connector, uri, model, false);
     }
 
     public static <F> F createIOFile(Connector connector, URI uri, FineIO.MODEL<F> model, boolean sync) {
