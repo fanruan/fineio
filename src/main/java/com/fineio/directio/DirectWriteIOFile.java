@@ -11,9 +11,11 @@ import java.net.URI;
  * @date 2018/10/2
  */
 public final class DirectWriteIOFile<T extends Buffer> extends DirectIOFile<T> {
+    private final boolean sync;
 
-    DirectWriteIOFile(Connector connector, URI uri, FileModel model) {
+    DirectWriteIOFile(Connector connector, URI uri, FileModel model, boolean sync) {
         super(connector, uri, model);
+        this.sync = sync;
     }
 
     /**
@@ -25,15 +27,15 @@ public final class DirectWriteIOFile<T extends Buffer> extends DirectIOFile<T> {
      * @param <E>       继承ReadBuffer的子类型
      * @return
      */
-    public static final <E extends Buffer> DirectWriteIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
-        return new DirectWriteIOFile<E>(connector, uri, model);
+    public static final <E extends Buffer> DirectWriteIOFile<E> createFineIO(Connector connector, URI uri, FileModel model, boolean sync) {
+        return new DirectWriteIOFile<E>(connector, uri, model, sync);
     }
 
     @Override
     protected Buffer initBuffer() {
         if (buffer == null) {
             synchronized (this) {
-                buffer = model.createBuffer(connector, uri).asWrite();
+                buffer = model.createBuffer(connector, uri, sync).asWrite();
             }
         }
         return buffer;

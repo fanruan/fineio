@@ -24,8 +24,8 @@ public enum FileModel {
      */
     INT {
         @Override
-        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri) {
-            return CacheManager.DataType.INT.createBuffer(connector, uri);
+        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri, boolean sync) {
+            return CacheManager.DataType.INT.createBuffer(connector, uri, sync);
         }
 
         @Override
@@ -34,14 +34,14 @@ public enum FileModel {
         }
 
         @Override
-        public IntBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
-            return CacheManager.DataType.INT.createBuffer(connector, fileBlock, maxOffset);
+        public IntBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync) {
+            return CacheManager.DataType.INT.createBuffer(connector, fileBlock, maxOffset, sync);
         }
     },
     BYTE {
         @Override
-        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri) {
-            return CacheManager.DataType.BYTE.createBuffer(connector, uri);
+        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri, boolean sync) {
+            return CacheManager.DataType.BYTE.createBuffer(connector, uri, sync);
         }
 
         @Override
@@ -50,14 +50,14 @@ public enum FileModel {
         }
 
         @Override
-        public ByteBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
-            return CacheManager.DataType.BYTE.createBuffer(connector, fileBlock, maxOffset);
+        public ByteBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync) {
+            return CacheManager.DataType.BYTE.createBuffer(connector, fileBlock, maxOffset, sync);
         }
     },
     LONG {
         @Override
-        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri) {
-            return CacheManager.DataType.LONG.createBuffer(connector, uri);
+        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri, boolean sync) {
+            return CacheManager.DataType.LONG.createBuffer(connector, uri, sync);
         }
 
         @Override
@@ -66,14 +66,14 @@ public enum FileModel {
         }
 
         @Override
-        public LongBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
-            return CacheManager.DataType.LONG.createBuffer(connector, fileBlock, maxOffset);
+        public LongBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync) {
+            return CacheManager.DataType.LONG.createBuffer(connector, fileBlock, maxOffset, sync);
         }
     },
     SHORT {
         @Override
-        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri) {
-            return CacheManager.DataType.SHORT.createBuffer(connector, uri);
+        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri, boolean sync) {
+            return CacheManager.DataType.SHORT.createBuffer(connector, uri, sync);
         }
 
         @Override
@@ -82,14 +82,14 @@ public enum FileModel {
         }
 
         @Override
-        public ShortBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
-            return CacheManager.DataType.SHORT.createBuffer(connector, fileBlock, maxOffset);
+        public ShortBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync) {
+            return CacheManager.DataType.SHORT.createBuffer(connector, fileBlock, maxOffset, sync);
         }
     },
     FLOAT {
         @Override
-        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri) {
-            return CacheManager.DataType.FLOAT.createBuffer(connector, uri);
+        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri, boolean sync) {
+            return CacheManager.DataType.FLOAT.createBuffer(connector, uri, sync);
         }
 
         @Override
@@ -98,14 +98,14 @@ public enum FileModel {
         }
 
         @Override
-        public FloatBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
-            return CacheManager.DataType.FLOAT.createBuffer(connector, fileBlock, maxOffset);
+        public FloatBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync) {
+            return CacheManager.DataType.FLOAT.createBuffer(connector, fileBlock, maxOffset, sync);
         }
     },
     DOUBLE {
         @Override
-        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri) {
-            return CacheManager.DataType.DOUBLE.createBuffer(connector, uri);
+        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri, boolean sync) {
+            return CacheManager.DataType.DOUBLE.createBuffer(connector, uri, sync);
         }
 
         @Override
@@ -114,14 +114,14 @@ public enum FileModel {
         }
 
         @Override
-        public DoubleBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
-            return CacheManager.DataType.DOUBLE.createBuffer(connector, fileBlock, maxOffset);
+        public DoubleBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync) {
+            return CacheManager.DataType.DOUBLE.createBuffer(connector, fileBlock, maxOffset, sync);
         }
     },
     CHAR {
         @Override
-        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri) {
-            return CacheManager.DataType.CHAR.createBuffer(connector, uri);
+        public <B extends BaseBuffer> B createBuffer(Connector connector, URI uri, boolean sync) {
+            return CacheManager.DataType.CHAR.createBuffer(connector, uri, sync);
         }
 
         @Override
@@ -130,14 +130,14 @@ public enum FileModel {
         }
 
         @Override
-        public CharBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
-            return CacheManager.DataType.CHAR.createBuffer(connector, fileBlock, maxOffset);
+        public CharBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync) {
+            return CacheManager.DataType.CHAR.createBuffer(connector, fileBlock, maxOffset, sync);
         }
     };
 
-    public abstract <B extends BaseBuffer> B createBuffer(Connector connector, FileBlock fileBlock, int maxOffset);
+    public abstract <B extends BaseBuffer> B createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync);
 
-    public abstract <B extends BaseBuffer> B createBuffer(Connector connector, URI uri);
+    public abstract <B extends BaseBuffer> B createBuffer(Connector connector, URI uri, boolean sync);
 
     public abstract byte offset();
 }

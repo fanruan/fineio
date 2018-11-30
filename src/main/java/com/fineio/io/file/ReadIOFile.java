@@ -31,7 +31,7 @@ public final class ReadIOFile<B extends Buffer> extends BaseReadIOFile<B> {
     protected Buffer initBuffer(int index) {
         synchronized (this) {
             if (null == buffers[index]) {
-                BaseBuffer buffer = model.createBuffer(connector, createIndexBlock(index), block_size_offset);
+                BaseBuffer buffer = model.createBuffer(connector, createIndexBlock(index), block_size_offset, false);
                 buffers[index] = buffer.asRead();
             }
             return buffers[index];
