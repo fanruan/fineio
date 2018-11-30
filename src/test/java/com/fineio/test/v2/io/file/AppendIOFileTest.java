@@ -12,6 +12,8 @@ import com.fineio.io.file.IOFile;
 import com.fineio.storage.AbstractConnector;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
+import org.easymock.EasyMock;
+import org.easymock.IMocksControl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -31,13 +33,18 @@ public class AppendIOFileTest extends TestCase {
 
     public void testConstruct() throws Exception {
         final byte size = 26;
-        Connector connector = new MemoryConnector() {
-            public byte getBlockOffset() {
-                return size;
-            }
-        };
-        URI u = new URI("");
-        IOFile file = FineIO.createIOFile(connector, u, FineIO.MODEL.APPEND_BYTE);
+//        Connector connector = new MemoryConnector() {
+//            public byte getBlockOffset() {
+//                return size;
+//            }
+//        };
+        IMocksControl control = EasyMock.createControl();
+        Connector mockConnector = control.createMock(Connector.class);
+        EasyMock.expect(mockConnector.getBlockOffset()).andReturn(size).anyTimes();
+        control.replay();
+
+        URI u = new URI("testConstruct");
+        IOFile file = FineIO.createIOFile(mockConnector, u, FineIO.MODEL.APPEND_BYTE);
         Field field = IOFile.class.getDeclaredField("block_size_offset");
         field.setAccessible(true);
         assertEquals(size, ((Byte) field.get(file)).byteValue());

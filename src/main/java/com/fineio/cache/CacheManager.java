@@ -100,82 +100,90 @@ public final class CacheManager {
          */
         BYTE {
             @Override
-            public ByteBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
-                return BYTE_CREATOR.createBuffer(connector, fileBlock, maxOffset);
+            public ByteBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync) {
+                return BYTE_CREATOR.createBuffer(connector, fileBlock, maxOffset, sync);
             }
 
             @Override
-            public ByteBuffer createBuffer(Connector connector, URI uri) {
-                return BYTE_CREATOR.createBuffer(connector, uri);
+            public ByteBuffer createBuffer(Connector connector, URI uri, boolean sync) {
+                return BYTE_CREATOR.createBuffer(connector, uri, sync);
             }
         },
         INT {
             @Override
-            public IntBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
-                return INT_CREATOR.createBuffer(connector, fileBlock, maxOffset);
+            public IntBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync) {
+                return INT_CREATOR.createBuffer(connector, fileBlock, maxOffset, sync);
             }
 
             @Override
-            public IntBuffer createBuffer(Connector connector, URI uri) {
-                return INT_CREATOR.createBuffer(connector, uri);
+            public IntBuffer createBuffer(Connector connector, URI uri, boolean sync) {
+                return INT_CREATOR.createBuffer(connector, uri, sync);
             }
         }, LONG {
             @Override
-            public LongBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
-                return LONG_CREATOR.createBuffer(connector, fileBlock, maxOffset);
+            public LongBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync) {
+                return LONG_CREATOR.createBuffer(connector, fileBlock, maxOffset, sync);
             }
 
             @Override
-            public LongBuffer createBuffer(Connector connector, URI uri) {
-                return LONG_CREATOR.createBuffer(connector, uri);
+            public LongBuffer createBuffer(Connector connector, URI uri, boolean sync) {
+                return LONG_CREATOR.createBuffer(connector, uri, sync);
             }
         }, DOUBLE {
             @Override
-            public DoubleBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
-                return DOUBLE_CREATOR.createBuffer(connector, fileBlock, maxOffset);
+            public DoubleBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync) {
+                return DOUBLE_CREATOR.createBuffer(connector, fileBlock, maxOffset, sync);
             }
 
             @Override
-            public DoubleBuffer createBuffer(Connector connector, URI uri) {
-                return DOUBLE_CREATOR.createBuffer(connector, uri);
+            public DoubleBuffer createBuffer(Connector connector, URI uri, boolean sync) {
+                return DOUBLE_CREATOR.createBuffer(connector, uri, sync);
             }
         },
         SHORT {
             @Override
-            public ShortBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
-                return SHORT_CREATOR.createBuffer(connector, fileBlock, maxOffset);
+            public ShortBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync) {
+                return SHORT_CREATOR.createBuffer(connector, fileBlock, maxOffset, sync);
             }
 
             @Override
-            public ShortBuffer createBuffer(Connector connector, URI uri) {
-                return SHORT_CREATOR.createBuffer(connector, uri);
+            public ShortBuffer createBuffer(Connector connector, URI uri, boolean sync) {
+                return SHORT_CREATOR.createBuffer(connector, uri, sync);
             }
         },
         CHAR {
             @Override
-            public CharBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
-                return CHAR_CREATOR.createBuffer(connector, fileBlock, maxOffset);
+            public CharBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync) {
+                return CHAR_CREATOR.createBuffer(connector, fileBlock, maxOffset, sync);
             }
 
             @Override
-            public CharBuffer createBuffer(Connector connector, URI uri) {
-                return CHAR_CREATOR.createBuffer(connector, uri);
+            public CharBuffer createBuffer(Connector connector, URI uri, boolean sync) {
+                return CHAR_CREATOR.createBuffer(connector, uri, sync);
             }
         },
         FLOAT {
             @Override
-            public FloatBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
-                return FLOAT_CREATOR.createBuffer(connector, fileBlock, maxOffset);
+            public FloatBuffer createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync) {
+                return FLOAT_CREATOR.createBuffer(connector, fileBlock, maxOffset, sync);
             }
 
             @Override
-            public FloatBuffer createBuffer(Connector connector, URI uri) {
-                return FLOAT_CREATOR.createBuffer(connector, uri);
+            public FloatBuffer createBuffer(Connector connector, URI uri, boolean sync) {
+                return FLOAT_CREATOR.createBuffer(connector, uri, sync);
             }
         };
 
-        public abstract <B extends Buffer> B createBuffer(Connector connector, FileBlock fileBlock, int maxOffset);
+        public abstract <B extends Buffer> B createBuffer(Connector connector, FileBlock fileBlock, int maxOffset, boolean sync);
 
-        public abstract <B extends Buffer> B createBuffer(Connector connector, URI uri);
+        public <B extends Buffer> B createBuffer(Connector connector, FileBlock fileBlock, int maxOffset) {
+            return createBuffer(connector, fileBlock, maxOffset, false);
+        }
+
+        public abstract <B extends Buffer> B createBuffer(Connector connector, URI uri, boolean sync);
+
+        public <B extends Buffer> B createBuffer(Connector connector, URI uri) {
+            return createBuffer(connector, uri, false);
+        }
     }
 }

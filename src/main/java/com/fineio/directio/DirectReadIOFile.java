@@ -27,7 +27,7 @@ public final class DirectReadIOFile<B extends Buffer> extends DirectIOFile<B> {
     protected Buffer initBuffer() {
         if (buffer == null) {
             synchronized (this) {
-                buffer = model.createBuffer(connector, uri).asRead();
+                buffer = model.createBuffer(connector, uri, false).asRead();
             }
         }
         return buffer;

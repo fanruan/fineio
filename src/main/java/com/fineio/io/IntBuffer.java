@@ -13,12 +13,12 @@ import java.net.URI;
  * @date 2018/9/19
  */
 public class IntBuffer extends BaseBuffer<IntBuffer.IntReadBuffer, IntBuffer.IntWriteBuffer> {
-    public IntBuffer(Connector connector, FileBlock block, int maxOffset, Listener listener) {
-        super(connector, block, maxOffset, listener);
+    public IntBuffer(Connector connector, URI uri, boolean syncWrite, Listener listener) {
+        super(connector, uri, syncWrite, listener);
     }
 
-    public IntBuffer(Connector connector, URI uri, Listener listener) {
-        super(connector, uri, listener);
+    public IntBuffer(Connector connector, FileBlock block, int maxOffset, boolean syncWrite, Listener listener) {
+        super(connector, block, maxOffset, syncWrite, listener);
     }
 
     @Override

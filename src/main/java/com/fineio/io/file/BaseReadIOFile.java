@@ -26,19 +26,22 @@ public abstract class BaseReadIOFile<B extends Buffer> extends IOFile<B> {
 
     protected void readHeader(byte offset) {
         InputStream is = null;
+        FileBlock head = createHeadBlock();
         try {
-            is = this.connector.read(createHeadBlock());
+            is = this.connector.read(head);
             if (is == null) {
                 //throw new BlockNotFoundException("block:" + uri.toString() +" not found!");
             }
             byte[] header = new byte[9];
             is.read(header);
-            int p = 0;
-            createBufferArray(Bits.getInt(header, p));
-            //先空个long的位置
-            p += IOFile.STEP_LEN;
-            block_size_offset = (byte) (header[p] - offset);
+            initBufferArray(offset, header);
+            HEAD_MAP.put(head, header);
         } catch (Throwable e) {
+            byte[] header = HEAD_MAP.get(head);
+            if (null != header) {
+                initBufferArray(offset, header);
+                return;
+            }
             throw new BlockNotFoundException("block:" + uri.toString() + " not found!");
 //            this.block_size_offset = (byte) (connector.getBlockOffset() - offset);
         } finally {
@@ -50,5 +53,13 @@ public abstract class BaseReadIOFile<B extends Buffer> extends IOFile<B> {
             }
             single_block_len = (1L << block_size_offset) - 1;
         }
+    }
+
+    private void initBufferArray(byte offset, byte[] header) {
+        int p = 0;
+        createBufferArray(Bits.getInt(header, p));
+        //先空个long的位置
+        p += IOFile.STEP_LEN;
+        block_size_offset = (byte) (header[p] - offset);
     }
 }

@@ -19,8 +19,11 @@ import java.net.URI;
  * @date 2018/9/20
  */
 public final class WriteIOFile<B extends Buffer> extends IOFile<B> {
-    WriteIOFile(Connector connector, URI uri, FileModel model) {
+    private final boolean sync;
+
+    WriteIOFile(Connector connector, URI uri, FileModel model, boolean sync) {
         super(connector, uri, model);
+        this.sync = sync;
         this.block_size_offset = (byte) (connector.getBlockOffset() - model.offset());
         single_block_len = (1L << block_size_offset) - 1;
     }
@@ -30,15 +33,15 @@ public final class WriteIOFile<B extends Buffer> extends IOFile<B> {
         return FileLevel.WRITE;
     }
 
-    public static final <E extends BaseBuffer> WriteIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
-        return new WriteIOFile<E>(connector, uri, model);
+    public static final <E extends BaseBuffer> WriteIOFile<E> createFineIO(Connector connector, URI uri, FileModel model, boolean sync) {
+        return new WriteIOFile<E>(connector, uri, model, sync);
     }
 
     @Override
     protected Buffer initBuffer(int index) {
         synchronized (this) {
             if (null == buffers[index]) {
-                BaseBuffer buffer = model.createBuffer(connector, createIndexBlock(index), block_size_offset);
+                BaseBuffer buffer = model.createBuffer(connector, createIndexBlock(index), block_size_offset, sync);
                 buffers[index] = buffer.asWrite();
             }
             return buffers[index];

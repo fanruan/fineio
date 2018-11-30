@@ -11,8 +11,11 @@ import java.net.URI;
  * @date 2018/9/20
  */
 public final class AppendIOFile<B extends Buffer> extends BaseReadIOFile<B> {
-    AppendIOFile(Connector connector, URI uri, FileModel model) {
+    private final boolean sync;
+
+    AppendIOFile(Connector connector, URI uri, FileModel model, boolean sync) {
         super(connector, uri, model);
+        this.sync = sync;
         int maxBlock = blocks - 1;
         if (maxBlock >= 0) {
             buffers[maxBlock] = initBuffer(maxBlock);
@@ -24,8 +27,8 @@ public final class AppendIOFile<B extends Buffer> extends BaseReadIOFile<B> {
         return FileLevel.APPEND;
     }
 
-    public static final <E extends BaseBuffer> AppendIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
-        return new AppendIOFile<E>(connector, uri, model);
+    public static final <E extends BaseBuffer> AppendIOFile<E> createFineIO(Connector connector, URI uri, FileModel model, boolean sync) {
+        return new AppendIOFile<E>(connector, uri, model, sync);
     }
 
     @Override
@@ -34,7 +37,7 @@ public final class AppendIOFile<B extends Buffer> extends BaseReadIOFile<B> {
         synchronized (this) {
             Buffer buffer = buffers[index];
             if (buffer == null) {
-                buffer = model.createBuffer(connector, createIndexBlock(index), block_size_offset);
+                buffer = model.createBuffer(connector, createIndexBlock(index), block_size_offset, sync);
             } else {
                 return buffer;
             }
