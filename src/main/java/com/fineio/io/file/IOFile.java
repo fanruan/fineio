@@ -10,6 +10,7 @@ import com.fineio.io.FloatBuffer;
 import com.fineio.io.IntBuffer;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.ShortBuffer;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 
@@ -33,6 +34,7 @@ public abstract class IOFile<B extends Buffer> {
      */
     protected Connector connector;
     protected FileModel model;
+    private volatile boolean close = false;
     /**
      * 分多少块
      */
@@ -350,26 +352,34 @@ public abstract class IOFile<B extends Buffer> {
     }
 
     protected final void writeHeader() {
-        FileBlock block = createHeadBlock();
-        byte[] bytes = new byte[HEAD_LEN];
-        Bits.putInt(bytes, 0, buffers == null ? 0 : buffers.length);
-        bytes[STEP_LEN] = (byte) (block_size_offset + model.offset());
-        try {
-            HEAD_MAP.put(block, bytes);
-            connector.write(block, bytes);
-        } catch (Throwable e) {
+        if (!close) {
+            FileBlock block = createHeadBlock();
+            byte[] bytes = new byte[HEAD_LEN];
+            Bits.putInt(bytes, 0, buffers == null ? 0 : buffers.length);
+            bytes[STEP_LEN] = (byte) (block_size_offset + model.offset());
+            try {
+                HEAD_MAP.put(block, bytes);
+                connector.write(block, bytes);
+//                FineIOLoggers.getLogger().error("FineIO write " + uri + " block size: " + buffers.length);
+            } catch (Throwable e) {
+                FineIOLoggers.getLogger().error(e);
+            }
         }
     }
 
     public void close() {
-        synchronized (this) {
-            if (null != buffers) {
-                for (int i = 0; i < buffers.length; i++) {
-                    if (null != buffers[i]) {
-                        buffers[i].close();
-                        buffers[i] = null;
+        if (!close) {
+            synchronized (this) {
+                if (!close && null != buffers) {
+                    for (int i = 0; i < buffers.length; i++) {
+                        if (null != buffers[i]) {
+                            buffers[i].close();
+                            buffers[i] = null;
+                        }
                     }
+                    close = true;
                 }
+
             }
         }
     }
