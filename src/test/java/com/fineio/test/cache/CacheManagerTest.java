@@ -75,9 +75,9 @@ public class CacheManagerTest extends TestCase {
         assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 0);
 //        exp = false;
         try {
-            MemoryConf.setTotalMemSize(FineIO.getMaxMemSizeForSet());
+            MemoryConf.setTotalMemSize(FineIO.getMaxMemSizeForSet() - 1);
         } catch (MemorySetException e) {
-            exp = true;
+//            exp = true;
         }
 //        assertFalse(exp);
         assertEquals(FineIO.getCurrentMemorySize(), 0);
