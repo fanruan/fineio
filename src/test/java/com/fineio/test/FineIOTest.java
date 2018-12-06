@@ -9,6 +9,7 @@ import com.fineio.storage.Connector;
 import com.fineio.test.file.FineWriteIOTest;
 import com.fineio.test.io.MemoryLeakTest;
 import com.fineio.v1.FineIO;
+import com.fineio.v1.cache.CacheManager;
 import com.fineio.v1.directio.DirectEditIOFile;
 import com.fineio.v1.directio.DirectReadIOFile;
 import com.fineio.v1.directio.DirectWriteIOFile;
@@ -40,6 +41,9 @@ import java.net.URI;
  */
 public class FineIOTest extends TestCase {
 
+    static {
+        CacheManager.clear();
+    }
 
     public void testThreads() {
         int counts = Runtime.getRuntime().availableProcessors() + 1;
