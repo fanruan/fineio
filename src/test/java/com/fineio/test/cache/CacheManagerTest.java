@@ -20,7 +20,7 @@ import java.net.URI;
 public class CacheManagerTest extends TestCase {
 
 
-    public void testCache(){
+    public void testCache() {
         CacheManager.clear();
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
@@ -37,7 +37,7 @@ public class CacheManagerTest extends TestCase {
         boolean exp = false;
         try {
             buffer.write();
-        } catch (FileCloseException e){
+        } catch (FileCloseException e) {
             exp = true;
         }
         assertTrue(exp);
@@ -52,19 +52,17 @@ public class CacheManagerTest extends TestCase {
         exp = false;
         try {
             buffer2.write();
-        } catch (FileCloseException e){
+        } catch (FileCloseException e) {
             exp = true;
         }
         assertTrue(exp);
-
-
 
 
         TestBuffer2 b2 = new TestBuffer2();
         b2.write();
         assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 1024);
         b2.clear();
-        TestBuffer2 b3= new TestBuffer2();
+        TestBuffer2 b3 = new TestBuffer2();
         b3.write();
         assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 1024);
         b3.clear();
