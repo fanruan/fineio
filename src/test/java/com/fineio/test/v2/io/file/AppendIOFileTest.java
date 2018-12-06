@@ -41,6 +41,8 @@ public class AppendIOFileTest extends TestCase {
         IMocksControl control = EasyMock.createControl();
         Connector mockConnector = control.createMock(Connector.class);
         EasyMock.expect(mockConnector.getBlockOffset()).andReturn(size).anyTimes();
+        mockConnector.write(EasyMock.isA(FileBlock.class), EasyMock.anyObject(byte[].class));
+        EasyMock.expectLastCall().anyTimes();
         control.replay();
 
         URI u = new URI("testConstruct");
