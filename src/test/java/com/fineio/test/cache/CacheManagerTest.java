@@ -1,6 +1,7 @@
 package com.fineio.test.cache;
 
 import com.fineio.exception.FileCloseException;
+import com.fineio.exception.MemorySetException;
 import com.fineio.memory.MemoryConf;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.test.io.MemoryLeakTest;
@@ -75,11 +76,11 @@ public class CacheManagerTest extends TestCase {
         b3.clear();
         assertEquals(CacheManager.getInstance().getCurrentMemorySize(), 0);
 //        exp = false;
-//        try {
-//            MemoryConf.setTotalMemSize(FineIO.getMaxMemSizeForSet());
-//        } catch (MemorySetException e) {
-//            exp = true;
-//        }
+        try {
+            MemoryConf.setTotalMemSize(FineIO.getMaxMemSizeForSet());
+        } catch (MemorySetException e) {
+            exp = true;
+        }
 //        assertFalse(exp);
         assertEquals(FineIO.getCurrentMemorySize(), 0);
         assertEquals(FineIO.getCurrentReadMemorySize(), 0);
