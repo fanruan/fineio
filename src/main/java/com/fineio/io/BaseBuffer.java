@@ -332,7 +332,19 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             }
         }
 
-        protected final void checkRead(int p) {
+        final void checkRead(int p) {
+            try {
+                checkReadWithException(p);
+            } catch (BufferIndexOutOfBoundsException e) {
+                synchronized (this) {
+                    clearAfterClose();
+                    load = false;
+                    checkReadWithException(p);
+                }
+            }
+        }
+
+        private void checkReadWithException(int p) {
             if (!load || maxSize == 0 || address == 0) {
                 load = false;
                 loadContent();
@@ -347,7 +359,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
         }
 
-        protected void loadContent() {
+        private void loadContent() {
             synchronized (this) {
                 level = Level.READ;
                 if (load) {
@@ -396,10 +408,10 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
     protected abstract class WriteBuffer implements BufferW {
         private static final int DEFAULT_CAPACITY_OFFSET = 10;
-        protected int currentMaxSize;
-        protected int currentMaxOffset = DEFAULT_CAPACITY_OFFSET;
-        protected volatile int writeCurrentPosition = -1;
-        protected volatile AtomicInteger status = new AtomicInteger(0);
+        volatile int writeCurrentPosition = -1;
+        private int currentMaxSize;
+        private int currentMaxOffset = DEFAULT_CAPACITY_OFFSET;
+        private volatile AtomicInteger status = new AtomicInteger(0);
         //20秒内响应一次写
         private volatile long PERIOD = 20000;
         /**
@@ -597,14 +609,14 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             }
         }
 
-        protected final void addCapacity(int position) {
+        private void addCapacity(int position) {
             while (position >= currentMaxSize) {
                 addCapacity();
             }
             setMaxPosition(position);
         }
 
-        private final void setMaxPosition(int position) {
+        private void setMaxPosition(int position) {
             if (!access) {
                 access = true;
             }
@@ -613,7 +625,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             }
         }
 
-        protected void addCapacity() {
+        private void addCapacity() {
             int len = this.currentMaxSize << getOffset();
             setCurrentCapacity(this.currentMaxOffset + 1);
             int newLen = this.currentMaxSize << getOffset();
@@ -634,7 +646,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             status.incrementAndGet();
         }
 
-        protected final void setCurrentCapacity(int offset) {
+        private void setCurrentCapacity(int offset) {
             this.currentMaxOffset = offset;
             this.currentMaxSize = 1 << offset;
         }
