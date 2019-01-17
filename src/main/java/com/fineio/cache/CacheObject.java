@@ -1,4 +1,4 @@
-package com.fineio.v1.cache;
+package com.fineio.cache;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;

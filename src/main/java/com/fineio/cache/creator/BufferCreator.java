@@ -1,6 +1,7 @@
 package com.fineio.cache.creator;
 
 
+import com.fineio.cache.CacheLinkedMap;
 import com.fineio.cache.SyncStatus;
 import com.fineio.io.Buffer;
 import com.fineio.io.ByteBuffer;
@@ -18,7 +19,6 @@ import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.memory.manager.obj.impl.AllocateObject;
 import com.fineio.storage.Connector;
 import com.fineio.thread.FineIOExecutors;
-import com.fineio.v1.cache.CacheLinkedMap;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
