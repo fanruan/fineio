@@ -600,6 +600,10 @@ public final class FineIO {
         return DirectIOFile.getShort(file, p);
     }
 
+    public static long getFreeMemory() {
+        return MemoryConf.getFreeMemory();
+    }
+
     public interface MODEL<F> {
         FineIO.MODEL<ReadIOFile<LongBuffer>> READ_LONG = new FineIO.MODEL<ReadIOFile<LongBuffer>>() {
 

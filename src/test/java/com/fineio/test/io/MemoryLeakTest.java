@@ -1,9 +1,9 @@
 package com.fineio.test.io;
 
+import com.fineio.cache.CacheLinkedMap;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.v1.FineIO;
-import com.fineio.v1.cache.CacheLinkedMap;
 import com.fineio.v1.cache.CacheManager;
 import com.fineio.v1.io.FloatBuffer;
 import com.fineio.v1.io.file.IOFile;

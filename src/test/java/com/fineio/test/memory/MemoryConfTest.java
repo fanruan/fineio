@@ -1,7 +1,7 @@
 package com.fineio.test.memory;
 
+import com.fineio.FineIO;
 import com.fineio.exception.MemorySetException;
-import com.fineio.v1.FineIO;
 import junit.framework.TestCase;
 
 /**
