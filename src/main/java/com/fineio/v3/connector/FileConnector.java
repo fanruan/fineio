@@ -16,6 +16,10 @@ import java.io.OutputStream;
  * @date 2019/4/15
  */
 public class FileConnector extends BaseConnector {
+    public FileConnector(int blockOffset) {
+        super(blockOffset);
+    }
+
     @Override
     public void write(InputStream is, FileKey file) throws IOException {
         File f = new File(file.getDir());
@@ -50,10 +54,5 @@ public class FileConnector extends BaseConnector {
         try (OutputStream output = new FileOutputStream(file.getPath())) {
             output.write(data);
         }
-    }
-
-    @Override
-    public byte getBlockOffset() {
-        return 22;
     }
 }

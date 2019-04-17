@@ -36,6 +36,6 @@ public interface Connector {
     /**
      *
      */
-    byte getBlockOffset();
+    int getBlockOffset();
 
 }

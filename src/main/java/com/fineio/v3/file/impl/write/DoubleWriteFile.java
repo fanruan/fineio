@@ -17,12 +17,16 @@ public class DoubleWriteFile extends WriteFile<DoubleDirectBuffer> {
 
     public void putDouble(long pos, double value) {
         checkPos(pos);
-        getBuffer(nthBuf(pos)).putDouble(nthVal(pos), value);
+        int nthBuf = nthBuf(pos);
+        syncBufIfNeed(nthBuf);
+        getBuffer(nthBuf).putDouble(nthVal(pos), value);
     }
 
     @Override
     protected DoubleDirectBuffer getBuffer(int nthBuf) {
         return buffers.computeIfAbsent(nthBuf,
-                i -> new DoubleDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i))));
+                i -> new DoubleDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i)),
+                        1 << (connector.getBlockOffset() - offset.getOffset())
+                ));
     }
 }

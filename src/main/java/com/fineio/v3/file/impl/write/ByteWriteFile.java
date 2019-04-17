@@ -18,12 +18,16 @@ public class ByteWriteFile extends WriteFile<ByteDirectBuffer> {
 
     public void putByte(long pos, byte value) {
         checkPos(pos);
-        getBuffer(nthBuf(pos)).putByte(nthVal(pos), value);
+        int nthBuf = nthBuf(pos);
+        syncBufIfNeed(nthBuf);
+        getBuffer(nthBuf).putByte(nthVal(pos), value);
     }
 
     @Override
     protected ByteDirectBuffer getBuffer(int nthBuf) {
         return buffers.computeIfAbsent(nthBuf,
-                i -> new ByteDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i))));
+                i -> new ByteDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i)),
+                        1 << (connector.getBlockOffset() - offset.getOffset())
+                ));
     }
 }

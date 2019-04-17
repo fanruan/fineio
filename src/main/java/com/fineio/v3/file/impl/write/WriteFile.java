@@ -15,6 +15,8 @@ import java.util.Iterator;
  * @author yee
  */
 abstract class WriteFile<B extends DirectBuffer> extends File<B> {
+    private int curBuf = -1;
+
     WriteFile(FileKey fileKey, Offset offset, Connector connector) {
         super(fileKey, offset, connector);
     }
@@ -23,17 +25,32 @@ abstract class WriteFile<B extends DirectBuffer> extends File<B> {
         connector.delete(fileKey);
     }
 
+    void syncBufIfNeed(int nthBuf) {
+        if (curBuf == -1) {
+            curBuf = nthBuf;
+        } else if (curBuf != nthBuf) {
+            syncBuf(getBuffer(curBuf));
+            buffers.remove(curBuf);
+
+            curBuf = nthBuf;
+        }
+    }
+
     @Override
     public void close() {
         if (closed.compareAndSet(false, true)) {
             for (Iterator<B> itr = buffers.values().iterator(); itr.hasNext(); ) {
                 try {
-                    FileSync.get().submit(new FileSyncJob(itr.next(), connector));
+                    syncBuf(itr.next());
                     itr.remove();
                 } catch (Exception e) {
                     FineIOLoggers.getLogger().error(e);
                 }
             }
         }
+    }
+
+    private void syncBuf(B buf) {
+        FileSync.get().submit(new FileSyncJob(buf, connector));
     }
 }

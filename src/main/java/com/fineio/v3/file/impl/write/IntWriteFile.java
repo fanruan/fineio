@@ -17,12 +17,16 @@ public class IntWriteFile extends WriteFile<IntDirectBuffer> {
 
     public void putInt(long pos, int value) {
         checkPos(pos);
-        getBuffer(nthBuf(pos)).putInt(nthVal(pos), value);
+        int nthBuf = nthBuf(pos);
+        syncBufIfNeed(nthBuf);
+        getBuffer(nthBuf).putInt(nthVal(pos), value);
     }
 
     @Override
     protected IntDirectBuffer getBuffer(int nthBuf) {
         return buffers.computeIfAbsent(nthBuf,
-                i -> new IntDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i))));
+                i -> new IntDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i)),
+                        1 << (connector.getBlockOffset() - offset.getOffset())
+                ));
     }
 }

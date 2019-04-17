@@ -2,7 +2,6 @@ package com.fineio.v3.buffer.impl;
 
 import com.fineio.v3.buffer.BufferClosedException;
 import com.fineio.v3.buffer.BufferOutOfBoundException;
-import com.fineio.v3.buffer.BufferTooBigException;
 import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.MemoryUtils;
@@ -26,6 +25,10 @@ abstract class BaseDirectBuffer implements DirectBuffer {
      * 如8个byte，8个int
      */
     private int size;
+    /**
+     * 写时能增长到的最大容量
+     */
+    private int maxCap;
 
     private final FileKey fileKey;
 
@@ -33,11 +36,27 @@ abstract class BaseDirectBuffer implements DirectBuffer {
 
     private final AtomicBoolean closed = new AtomicBoolean(false);
 
-    BaseDirectBuffer(FileKey fileKey, Offset offset) {
+    /**
+     * for write, may grow cap
+     *
+     * @param fileKey file key
+     * @param offset  offset
+     * @param maxCap  max cap
+     */
+    BaseDirectBuffer(FileKey fileKey, Offset offset, int maxCap) {
         this(MemoryUtils.allocate(16 << offset.getOffset()), 16, fileKey, offset);
         this.size = 0;
+        this.maxCap = maxCap;
     }
 
+    /**
+     * for read, won't grow cap
+     *
+     * @param address address
+     * @param cap     cap
+     * @param fileKey file key
+     * @param offset  offset
+     */
     BaseDirectBuffer(long address, int cap, FileKey fileKey, Offset offset) {
         this.fileKey = fileKey;
         this.offset = offset;
@@ -60,12 +79,11 @@ abstract class BaseDirectBuffer implements DirectBuffer {
         for (; newCap < pos && newCap > 0; ) {
             newCap <<= 1;
         }
-        if (newCap <= 0) {
-            throw new BufferTooBigException();
+        if (newCap > cap && newCap <= maxCap) {
+            // TODO: 2019/4/12 anchore 反正这里要扩容buffer
+            address = MemoryUtils.reallocate(address, newCap << offset.getOffset());
+            cap = newCap;
         }
-        // TODO: 2019/4/12 anchore 反正这里要扩容buffer
-        address = MemoryUtils.reallocate(address, newCap << offset.getOffset());
-        cap = newCap;
     }
 
     void checkPos(int pos) {

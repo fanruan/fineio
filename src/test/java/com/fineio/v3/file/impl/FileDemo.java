@@ -12,8 +12,9 @@ import com.fineio.v3.file.impl.write.IntWriteFile;
 import com.fineio.v3.file.impl.write.LongWriteFile;
 import org.junit.Test;
 
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 
 import static org.junit.Assert.assertEquals;
 
@@ -23,14 +24,13 @@ import static org.junit.Assert.assertEquals;
  */
 public class FileDemo {
     private FileKey key = new FileKey(System.getProperty("user.dir"), "1");
-    private FileConnector connector = new FileConnector();
-    private int n = 1024;
-    private Random r = new Random();
+    private FileConnector connector = new FileConnector(10);
+    private int n = 1 << 10;
 
     @Test
     public void testByte() throws Exception {
         ByteWriteFile byteWriteFile = new ByteWriteFile(key, connector);
-        r.ints(-128, 128).distinct().limit(256).forEach(i -> byteWriteFile.putByte(i + 128, (byte) i));
+        IntStream.range(-128, 128).forEachOrdered(i -> byteWriteFile.putByte(i + 128, (byte) i));
         byteWriteFile.close();
 
         TimeUnit.SECONDS.sleep(1);
@@ -44,7 +44,7 @@ public class FileDemo {
     @Test
     public void testInt() throws Exception {
         IntWriteFile intWriteFile = new IntWriteFile(key, connector);
-        r.ints(0, n).distinct().limit(n).forEach(i -> intWriteFile.putInt(i, i));
+        IntStream.range(0, n).forEachOrdered(i -> intWriteFile.putInt(i, i));
         intWriteFile.close();
 
         TimeUnit.SECONDS.sleep(1);
@@ -58,7 +58,7 @@ public class FileDemo {
     @Test
     public void testLong() throws Exception {
         LongWriteFile longWriteFile = new LongWriteFile(key, connector);
-        r.longs(0, n).distinct().limit(n).forEach(i -> longWriteFile.putLong(i, i));
+        LongStream.range(0, n).forEachOrdered(i -> longWriteFile.putLong(i, i));
         longWriteFile.close();
 
         TimeUnit.SECONDS.sleep(1);
@@ -72,7 +72,7 @@ public class FileDemo {
     @Test
     public void testDouble() throws Exception {
         DoubleWriteFile doubleWriteFile = new DoubleWriteFile(key, connector);
-        r.longs(0, n).distinct().limit(n).forEach(i -> doubleWriteFile.putDouble(i, i));
+        LongStream.range(0, n).forEachOrdered(i -> doubleWriteFile.putDouble(i, i));
         doubleWriteFile.close();
 
         TimeUnit.SECONDS.sleep(1);

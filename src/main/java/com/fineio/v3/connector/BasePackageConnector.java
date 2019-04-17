@@ -18,8 +18,11 @@ public abstract class BasePackageConnector extends BaseConnector implements Pack
 
     /**
      * Default constructor
+     *
+     * @param blockOffset
      */
-    public BasePackageConnector() {
+    public BasePackageConnector(int blockOffset) {
+        super(blockOffset);
     }
 
     /**

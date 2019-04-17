@@ -17,12 +17,16 @@ public class LongWriteFile extends WriteFile<LongDirectBuffer> {
 
     public void putLong(long pos, long value) {
         checkPos(pos);
-        getBuffer(nthBuf(pos)).putLong(nthVal(pos), value);
+        int nthBuf = nthBuf(pos);
+        syncBufIfNeed(nthBuf);
+        getBuffer(nthBuf).putLong(nthVal(pos), value);
     }
 
     @Override
     protected LongDirectBuffer getBuffer(int nthBuf) {
         return buffers.computeIfAbsent(nthBuf,
-                i -> new LongDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i))));
+                i -> new LongDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i)),
+                        1 << (connector.getBlockOffset() - offset.getOffset())
+                ));
     }
 }
