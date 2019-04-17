@@ -1,6 +1,6 @@
 package com.fineio.v3.connector;
 
-import com.fineio.v3.file.FileBlock;
+import com.fineio.v3.file.FileKey;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,24 +14,24 @@ public interface Connector {
      * @param is
      * @param file
      */
-    void write(InputStream is, FileBlock file) throws IOException;
+    void write(InputStream is, FileKey file) throws IOException;
 
-    void write(byte[] data, FileBlock file) throws IOException;
-
-    /**
-     * @param file
-     */
-    void read(FileBlock file) throws IOException;
+    void write(byte[] data, FileKey file) throws IOException;
 
     /**
      * @param file
      */
-    boolean delete(FileBlock file);
+    InputStream read(FileKey file) throws IOException;
 
     /**
      * @param file
      */
-    boolean exists(FileBlock file);
+    boolean delete(FileKey file);
+
+    /**
+     * @param file
+     */
+    boolean exists(FileKey file);
 
     /**
      *

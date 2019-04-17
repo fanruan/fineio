@@ -1,7 +1,8 @@
 package com.fineio.v3.connector;
 
-import com.fineio.v3.file.FileBlock;
+import com.fineio.v3.file.FileKey;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -20,7 +21,7 @@ public abstract class BaseConnector implements Connector {
      * @param file
      */
     @Override
-    public void write(InputStream is, FileBlock file) {
+    public void write(InputStream is, FileKey file) throws IOException {
         // TODO implement here
     }
 
@@ -28,15 +29,16 @@ public abstract class BaseConnector implements Connector {
      * @param file
      */
     @Override
-    public void read(FileBlock file) {
+    public InputStream read(FileKey file) throws IOException {
         // TODO implement here
+        return null;
     }
 
     /**
      * @param file
      */
     @Override
-    public boolean delete(FileBlock file) {
+    public boolean delete(FileKey file) {
         return false;
     }
 
@@ -44,7 +46,7 @@ public abstract class BaseConnector implements Connector {
      * @param file
      */
     @Override
-    public boolean exists(FileBlock file) {
+    public boolean exists(FileKey file) {
         return false;
     }
 }

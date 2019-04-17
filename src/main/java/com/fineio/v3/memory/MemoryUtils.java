@@ -11,7 +11,6 @@ import java.lang.reflect.Field;
 public class MemoryUtils {
 
     private static Unsafe unsafe;
-    private static final long ARRAY_BASE_OFFSET = (long) (unsafe != null ? unsafe.arrayBaseOffset(byte[].class) : 0);
 
     static {
         try {
@@ -46,7 +45,7 @@ public class MemoryUtils {
      * @param size    目标长度
      */
     public static void copyMemory(byte[] src, long off, long address, long size) {
-        unsafe.copyMemory(src, ARRAY_BASE_OFFSET + off, null, address, size);
+        unsafe.copyMemory(src, Unsafe.ARRAY_BYTE_BASE_OFFSET + off, null, address, size);
     }
 
 
@@ -69,7 +68,7 @@ public class MemoryUtils {
      * @param size
      */
     public static void readMemory(byte[] dest, long off, long address, long size) {
-        unsafe.copyMemory(null, address, dest, ARRAY_BASE_OFFSET + off, size);
+        unsafe.copyMemory(null, address, dest, Unsafe.ARRAY_BYTE_BASE_OFFSET + off, size);
     }
 
     /**
@@ -105,7 +104,7 @@ public class MemoryUtils {
     public static void arraycopy(byte[] src, int srcPos,
                                  byte[] dest, int destPos,
                                  int length) {
-        unsafe.copyMemory(src, ARRAY_BASE_OFFSET + srcPos, dest, ARRAY_BASE_OFFSET + destPos, length);
+        unsafe.copyMemory(src, Unsafe.ARRAY_BYTE_BASE_OFFSET + srcPos, dest, Unsafe.ARRAY_BYTE_BASE_OFFSET + destPos, length);
     }
 
     /**
@@ -127,7 +126,7 @@ public class MemoryUtils {
      * @param size
      */
     public static void copyMemory(byte[] src, byte[] dest, int size) {
-        unsafe.copyMemory(src, ARRAY_BASE_OFFSET, dest, ARRAY_BASE_OFFSET, size);
+        unsafe.copyMemory(src, Unsafe.ARRAY_BYTE_BASE_OFFSET, dest, Unsafe.ARRAY_BYTE_BASE_OFFSET, size);
     }
 
 
@@ -204,7 +203,7 @@ public class MemoryUtils {
      * @return
      */
     public static int getInt(long s, long offset) {
-        return unsafe.getInt(s + (offset << Offset.INT.offset));
+        return unsafe.getInt(s + (offset << Offset.INT.getOffset()));
     }
 
     /**
@@ -215,7 +214,7 @@ public class MemoryUtils {
      * @return
      */
     public static void put(long s, long offset, int v) {
-        unsafe.putInt(s + (offset << Offset.INT.offset), v);
+        unsafe.putInt(s + (offset << Offset.INT.getOffset()), v);
     }
 
     /**
@@ -226,7 +225,7 @@ public class MemoryUtils {
      * @return
      */
     public static long getLong(long s, long offset) {
-        return unsafe.getLong(s + (offset << Offset.LONG.offset));
+        return unsafe.getLong(s + (offset << Offset.LONG.getOffset()));
     }
 
     /**
@@ -237,7 +236,7 @@ public class MemoryUtils {
      * @return
      */
     public static void put(long s, long offset, long v) {
-        unsafe.putLong(s + (offset << Offset.LONG.offset), v);
+        unsafe.putLong(s + (offset << Offset.LONG.getOffset()), v);
     }
 
     /**
@@ -248,7 +247,7 @@ public class MemoryUtils {
      * @return
      */
     public static char getChar(long s, long offset) {
-        return unsafe.getChar(s + (offset << Offset.CHAR.offset));
+        return unsafe.getChar(s + (offset << Offset.CHAR.getOffset()));
     }
 
     /**
@@ -259,7 +258,7 @@ public class MemoryUtils {
      * @return
      */
     public static void put(long s, long offset, char v) {
-        unsafe.putChar(s + (offset << Offset.CHAR.offset), v);
+        unsafe.putChar(s + (offset << Offset.CHAR.getOffset()), v);
     }
 
     /**
@@ -270,7 +269,7 @@ public class MemoryUtils {
      * @return
      */
     public static short getShort(long s, long offset) {
-        return unsafe.getShort(s + (offset << Offset.SHORT.offset));
+        return unsafe.getShort(s + (offset << Offset.SHORT.getOffset()));
     }
 
     /**
@@ -281,7 +280,7 @@ public class MemoryUtils {
      * @return
      */
     public static void put(long s, long offset, short v) {
-        unsafe.putShort(s + (offset << Offset.SHORT.offset), v);
+        unsafe.putShort(s + (offset << Offset.SHORT.getOffset()), v);
     }
 
     /**
@@ -292,7 +291,7 @@ public class MemoryUtils {
      * @return
      */
     public static float getFloat(long s, long offset) {
-        return unsafe.getFloat(s + (offset << Offset.FLOAT.offset));
+        return unsafe.getFloat(s + (offset << Offset.FLOAT.getOffset()));
     }
 
     /**
@@ -303,7 +302,7 @@ public class MemoryUtils {
      * @return
      */
     public static void put(long s, long offset, float v) {
-        unsafe.putFloat(s + (offset << Offset.FLOAT.offset), v);
+        unsafe.putFloat(s + (offset << Offset.FLOAT.getOffset()), v);
     }
 
     /**
@@ -314,7 +313,7 @@ public class MemoryUtils {
      * @return
      */
     public static double getDouble(long s, long offset) {
-        return unsafe.getDouble(s + (offset << Offset.DOUBLE.offset));
+        return unsafe.getDouble(s + (offset << Offset.DOUBLE.getOffset()));
     }
 
     /**
@@ -325,6 +324,6 @@ public class MemoryUtils {
      * @return
      */
     public static void put(long s, long offset, double v) {
-        unsafe.putDouble(s + (offset << Offset.DOUBLE.offset), v);
+        unsafe.putDouble(s + (offset << Offset.DOUBLE.getOffset()), v);
     }
 }

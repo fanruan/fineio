@@ -8,14 +8,19 @@ public enum Offset {
     //
     BYTE(0), CHAR(1), SHORT(1), INT(2), FLOAT(2), LONG(3), DOUBLE(3);
 
-    public int offset;
-    private int step;
+    private final int offset;
+    private final int step;
 
     Offset(int offset) {
         this.offset = offset;
         this.step = 1 << offset;
     }
 
+    public int getOffset() {
+        return offset;
+    }
+
     public int getStep() {
         return step;
-    }}
+    }
+}
