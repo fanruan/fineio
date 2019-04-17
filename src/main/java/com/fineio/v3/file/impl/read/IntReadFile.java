@@ -22,6 +22,6 @@ public class IntReadFile extends ReadFile<IntDirectBuffer> {
 
     @Override
     IntDirectBuffer newDirectBuf(long address, int size, FileKey fileKey) {
-        return new IntDirectBuf(address, size, fileKey, offset);
+        return new IntDirectBuf(address, size, fileKey);
     }
 }

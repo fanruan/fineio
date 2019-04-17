@@ -15,8 +15,8 @@ public class IntDirectBuf extends BaseDirectBuffer implements IntDirectBuffer {
      *
      * @param fileKey file key
      */
-    public IntDirectBuf(FileKey fileKey, Offset offset) {
-        super(fileKey, offset);
+    public IntDirectBuf(FileKey fileKey) {
+        super(fileKey, Offset.INT);
     }
 
     /**
@@ -26,8 +26,8 @@ public class IntDirectBuf extends BaseDirectBuffer implements IntDirectBuffer {
      * @param cap     容量
      * @param fileKey file key
      */
-    public IntDirectBuf(long address, int cap, FileKey fileKey, Offset offset) {
-        super(address, cap, fileKey, offset);
+    public IntDirectBuf(long address, int cap, FileKey fileKey) {
+        super(address, cap, fileKey, Offset.INT);
     }
 
     @Override

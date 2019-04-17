@@ -23,6 +23,6 @@ public class LongWriteFile extends WriteFile<LongDirectBuffer> {
     @Override
     protected LongDirectBuffer getBuffer(int nthBuf) {
         return buffers.computeIfAbsent(nthBuf,
-                i -> new LongDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i)), offset));
+                i -> new LongDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i))));
     }
 }

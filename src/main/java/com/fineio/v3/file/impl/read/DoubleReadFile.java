@@ -22,6 +22,6 @@ public class DoubleReadFile extends ReadFile<DoubleDirectBuffer> {
 
     @Override
     DoubleDirectBuffer newDirectBuf(long address, int size, FileKey fileKey) {
-        return new DoubleDirectBuf(address, size, fileKey, offset);
+        return new DoubleDirectBuf(address, size, fileKey);
     }
 }

@@ -23,6 +23,6 @@ public class IntWriteFile extends WriteFile<IntDirectBuffer> {
     @Override
     protected IntDirectBuffer getBuffer(int nthBuf) {
         return buffers.computeIfAbsent(nthBuf,
-                i -> new IntDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i)), offset));
+                i -> new IntDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i))));
     }
 }

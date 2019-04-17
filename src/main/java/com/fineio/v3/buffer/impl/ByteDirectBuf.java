@@ -15,8 +15,8 @@ public class ByteDirectBuf extends BaseDirectBuffer implements ByteDirectBuffer 
      *
      * @param fileKey file key
      */
-    public ByteDirectBuf(FileKey fileKey, Offset offset) {
-        super(fileKey, offset);
+    public ByteDirectBuf(FileKey fileKey) {
+        super(fileKey, Offset.BYTE);
     }
 
     /**
@@ -26,8 +26,8 @@ public class ByteDirectBuf extends BaseDirectBuffer implements ByteDirectBuffer 
      * @param cap     容量
      * @param fileKey file key
      */
-    public ByteDirectBuf(long address, int cap, FileKey fileKey, Offset offset) {
-        super(address, cap, fileKey, offset);
+    public ByteDirectBuf(long address, int cap, FileKey fileKey) {
+        super(address, cap, fileKey, Offset.BYTE);
     }
 
     @Override

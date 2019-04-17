@@ -23,6 +23,6 @@ public class DoubleWriteFile extends WriteFile<DoubleDirectBuffer> {
     @Override
     protected DoubleDirectBuffer getBuffer(int nthBuf) {
         return buffers.computeIfAbsent(nthBuf,
-                i -> new DoubleDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i)), offset));
+                i -> new DoubleDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i))));
     }
 }

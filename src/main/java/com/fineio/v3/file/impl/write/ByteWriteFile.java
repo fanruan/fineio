@@ -24,6 +24,6 @@ public class ByteWriteFile extends WriteFile<ByteDirectBuffer> {
     @Override
     protected ByteDirectBuffer getBuffer(int nthBuf) {
         return buffers.computeIfAbsent(nthBuf,
-                i -> new ByteDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i)), offset));
+                i -> new ByteDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i))));
     }
 }

@@ -22,6 +22,6 @@ public class ByteReadFile extends ReadFile<ByteDirectBuffer> {
 
     @Override
     ByteDirectBuffer newDirectBuf(long address, int size, FileKey fileKey) {
-        return new ByteDirectBuf(address, size, fileKey, offset);
+        return new ByteDirectBuf(address, size, fileKey);
     }
 }

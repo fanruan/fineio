@@ -15,8 +15,8 @@ public class DoubleDirectBuf extends BaseDirectBuffer implements DoubleDirectBuf
      *
      * @param fileKey file key
      */
-    public DoubleDirectBuf(FileKey fileKey, Offset offset) {
-        super(fileKey, offset);
+    public DoubleDirectBuf(FileKey fileKey) {
+        super(fileKey, Offset.DOUBLE);
     }
 
     /**
@@ -26,8 +26,8 @@ public class DoubleDirectBuf extends BaseDirectBuffer implements DoubleDirectBuf
      * @param cap     容量
      * @param fileKey file key
      */
-    public DoubleDirectBuf(long address, int cap, FileKey fileKey, Offset offset) {
-        super(address, cap, fileKey, offset);
+    public DoubleDirectBuf(long address, int cap, FileKey fileKey) {
+        super(address, cap, fileKey, Offset.DOUBLE);
     }
 
     @Override
