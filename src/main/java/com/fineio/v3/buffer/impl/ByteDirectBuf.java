@@ -26,8 +26,8 @@ public class ByteDirectBuf extends BaseDirectBuffer implements ByteDirectBuffer 
      * @param cap     容量
      * @param fileKey file key
      */
-    public ByteDirectBuf(long address, int cap, FileKey fileKey) {
-        super(address, cap, fileKey, Offset.BYTE);
+    public ByteDirectBuf(long address, int cap, FileKey fileKey, int maxCap) {
+        super(address, cap, fileKey, Offset.BYTE, maxCap);
     }
 
     @Override

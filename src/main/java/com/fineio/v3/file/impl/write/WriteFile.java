@@ -14,11 +14,14 @@ import java.util.Iterator;
 /**
  * @author yee
  */
-abstract class WriteFile<B extends DirectBuffer> extends File<B> {
+public abstract class WriteFile<B extends DirectBuffer> extends File<B> {
     private int curBuf = -1;
 
-    WriteFile(FileKey fileKey, Offset offset, Connector connector) {
+    private final boolean asyncWrite;
+
+    WriteFile(FileKey fileKey, Offset offset, Connector connector, boolean asyncWrite) {
         super(fileKey, offset, connector);
+        this.asyncWrite = asyncWrite;
     }
 
     void delete() {
@@ -51,6 +54,15 @@ abstract class WriteFile<B extends DirectBuffer> extends File<B> {
     }
 
     private void syncBuf(B buf) {
-        FileSync.get().submit(new FileSyncJob(buf, connector));
+        FileSyncJob job = new FileSyncJob(buf, connector);
+        if (asyncWrite) {
+            FileSync.get().submit(job);
+        } else {
+            try {
+                job.run();
+            } catch (Exception e) {
+                FineIOLoggers.getLogger().error(e);
+            }
+        }
     }
 }

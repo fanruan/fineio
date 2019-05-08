@@ -11,8 +11,16 @@ import com.fineio.v3.memory.Offset;
  * @date 2019/4/3
  */
 public class IntWriteFile extends WriteFile<IntDirectBuffer> {
-    public IntWriteFile(FileKey fileKey, Connector connector) {
-        super(fileKey, Offset.INT, connector);
+    public IntWriteFile(FileKey fileKey, Connector connector, boolean asyncWrite) {
+        super(fileKey, Offset.INT, connector, asyncWrite);
+    }
+
+    public static IntWriteFile ofAsync(FileKey fileKey, Connector connector) {
+        return new IntWriteFile(fileKey, connector, true);
+    }
+
+    public static IntWriteFile ofSync(FileKey fileKey, Connector connector) {
+        return new IntWriteFile(fileKey, connector, false);
     }
 
     public void putInt(long pos, int value) {

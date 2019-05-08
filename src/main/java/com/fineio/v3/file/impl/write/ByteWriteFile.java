@@ -12,8 +12,16 @@ import com.fineio.v3.memory.Offset;
  */
 
 public class ByteWriteFile extends WriteFile<ByteDirectBuffer> {
-    public ByteWriteFile(FileKey fileKey, Connector connector) {
-        super(fileKey, Offset.BYTE, connector);
+    public ByteWriteFile(FileKey fileKey, Connector connector, boolean asyncWrite) {
+        super(fileKey, Offset.BYTE, connector, asyncWrite);
+    }
+
+    public static ByteWriteFile ofAsync(FileKey fileKey, Connector connector) {
+        return new ByteWriteFile(fileKey, connector, true);
+    }
+
+    public static ByteWriteFile ofSync(FileKey fileKey, Connector connector) {
+        return new ByteWriteFile(fileKey, connector, false);
     }
 
     public void putByte(long pos, byte value) {

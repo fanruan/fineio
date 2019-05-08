@@ -26,8 +26,8 @@ public class LongDirectBuf extends BaseDirectBuffer implements LongDirectBuffer 
      * @param cap     容量
      * @param fileKey file key
      */
-    public LongDirectBuf(long address, int cap, FileKey fileKey) {
-        super(address, cap, fileKey, Offset.LONG);
+    public LongDirectBuf(long address, int cap, FileKey fileKey, int maxCap) {
+        super(address, cap, fileKey, Offset.LONG, maxCap);
     }
 
     @Override

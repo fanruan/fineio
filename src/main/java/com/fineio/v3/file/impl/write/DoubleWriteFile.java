@@ -11,8 +11,16 @@ import com.fineio.v3.memory.Offset;
  * @date 2019/4/3
  */
 public class DoubleWriteFile extends WriteFile<DoubleDirectBuffer> {
-    public DoubleWriteFile(FileKey fileKey, Connector connector) {
-        super(fileKey, Offset.DOUBLE, connector);
+    public DoubleWriteFile(FileKey fileKey, Connector connector, boolean asyncWrite) {
+        super(fileKey, Offset.DOUBLE, connector, asyncWrite);
+    }
+
+    public static DoubleWriteFile ofAsync(FileKey fileKey, Connector connector) {
+        return new DoubleWriteFile(fileKey, connector, true);
+    }
+
+    public static DoubleWriteFile ofSync(FileKey fileKey, Connector connector) {
+        return new DoubleWriteFile(fileKey, connector, false);
     }
 
     public void putDouble(long pos, double value) {
