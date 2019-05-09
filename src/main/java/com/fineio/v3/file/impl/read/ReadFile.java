@@ -29,7 +29,8 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> {
     private B loadBuffer(int nthBuf) {
         // TODO: 2019/4/16 anchore 先拿cache，拿不到就生成buffer，put进cache
         Long address = null;
-        try (InputStream input = new BufferedInputStream(connector.read(new FileKey(fileKey.getPath(), String.valueOf(nthBuf))))) {
+        FileKey nthFileKey = new FileKey(fileKey.getPath(), String.valueOf(nthBuf));
+        try (InputStream input = new BufferedInputStream(connector.read(nthFileKey))) {
             int avail = input.available();
             address = MemoryUtils.allocate(avail);
             long ptr = address;
@@ -37,7 +38,7 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> {
             for (int read; (read = input.read(bytes)) != -1; ptr += read) {
                 MemoryUtils.copyMemory(bytes, ptr, read);
             }
-            return newDirectBuf(address, (int) ((ptr - address) >> offset.getOffset()), fileKey);
+            return newDirectBuf(address, (int) ((ptr - address) >> offset.getOffset()), nthFileKey);
         } catch (Throwable e) {
             if (address != null) {
                 MemoryUtils.free(address);

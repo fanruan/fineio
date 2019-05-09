@@ -11,8 +11,16 @@ import com.fineio.v3.memory.Offset;
  * @date 2019/4/3
  */
 public class LongWriteFile extends WriteFile<LongDirectBuffer> {
-    public LongWriteFile(FileKey fileKey, Connector connector) {
-        super(fileKey, Offset.LONG, connector);
+    public LongWriteFile(FileKey fileKey, Connector connector, boolean asyncWrite) {
+        super(fileKey, Offset.LONG, connector, asyncWrite);
+    }
+
+    public static LongWriteFile ofAsync(FileKey fileKey, Connector connector) {
+        return new LongWriteFile(fileKey, connector, true);
+    }
+
+    public static LongWriteFile ofSync(FileKey fileKey, Connector connector) {
+        return new LongWriteFile(fileKey, connector, false);
     }
 
     public void putLong(long pos, long value) {

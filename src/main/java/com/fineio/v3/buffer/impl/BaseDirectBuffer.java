@@ -44,24 +44,27 @@ abstract class BaseDirectBuffer implements DirectBuffer {
      * @param maxCap  max cap
      */
     BaseDirectBuffer(FileKey fileKey, Offset offset, int maxCap) {
-        this(MemoryUtils.allocate(16 << offset.getOffset()), 16, fileKey, offset);
+        this(MemoryUtils.allocate(16 << offset.getOffset()), 16, fileKey, offset, maxCap);
         this.size = 0;
-        this.maxCap = maxCap;
     }
 
     /**
-     * for read, won't grow cap
+     * for read, won't grow cap, cap = maxCap
+     * <p>
+     * for append, write after read
      *
      * @param address address
      * @param cap     cap
      * @param fileKey file key
      * @param offset  offset
+     * @param maxCap  maxCap
      */
-    BaseDirectBuffer(long address, int cap, FileKey fileKey, Offset offset) {
+    BaseDirectBuffer(long address, int cap, FileKey fileKey, Offset offset, int maxCap) {
         this.fileKey = fileKey;
         this.offset = offset;
         this.address = address;
         this.cap = cap;
+        this.maxCap = maxCap;
         this.size = cap;
     }
 
@@ -76,7 +79,7 @@ abstract class BaseDirectBuffer implements DirectBuffer {
             return;
         }
         int newCap = cap << 1;
-        for (; newCap < pos && newCap > 0; ) {
+        for (; newCap <= pos && newCap > 0; ) {
             newCap <<= 1;
         }
         if (newCap > cap && newCap <= maxCap) {

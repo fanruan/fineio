@@ -22,6 +22,6 @@ public class LongReadFile extends ReadFile<LongDirectBuffer> {
 
     @Override
     LongDirectBuffer newDirectBuf(long address, int size, FileKey fileKey) {
-        return new LongDirectBuf(address, size, fileKey);
+        return new LongDirectBuf(address, size, fileKey, size);
     }
 }
