@@ -4,8 +4,9 @@ import com.fineio.v3.buffer.BufferClosedException;
 import com.fineio.v3.buffer.BufferOutOfBoundException;
 import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.file.FileKey;
-import com.fineio.v3.memory.MemoryUtils;
+import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.Offset;
+import com.fineio.v3.type.FileMode;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -36,6 +37,8 @@ abstract class BaseDirectBuffer implements DirectBuffer {
 
     private final AtomicBoolean closed = new AtomicBoolean(false);
 
+    private FileMode mode;
+
     /**
      * for write, may grow cap
      *
@@ -44,7 +47,7 @@ abstract class BaseDirectBuffer implements DirectBuffer {
      * @param maxCap  max cap
      */
     BaseDirectBuffer(FileKey fileKey, Offset offset, int maxCap) {
-        this(MemoryUtils.allocate(16 << offset.getOffset()), 16, fileKey, offset, maxCap);
+        this(MemoryManager.INSTANCE.allocate(16 << offset.getOffset(), FileMode.WRITE), 16, fileKey, offset, maxCap, FileMode.WRITE);
         this.size = 0;
     }
 
@@ -59,13 +62,14 @@ abstract class BaseDirectBuffer implements DirectBuffer {
      * @param offset  offset
      * @param maxCap  maxCap
      */
-    BaseDirectBuffer(long address, int cap, FileKey fileKey, Offset offset, int maxCap) {
+    BaseDirectBuffer(long address, int cap, FileKey fileKey, Offset offset, int maxCap, FileMode mode) {
         this.fileKey = fileKey;
         this.offset = offset;
         this.address = address;
         this.cap = cap;
         this.maxCap = maxCap;
         this.size = cap;
+        this.mode = mode;
     }
 
     void ensureOpen() {
@@ -84,7 +88,7 @@ abstract class BaseDirectBuffer implements DirectBuffer {
         }
         if (newCap > cap && newCap <= maxCap) {
             // TODO: 2019/4/12 anchore 反正这里要扩容buffer
-            address = MemoryUtils.reallocate(address, newCap << offset.getOffset());
+            address = MemoryManager.INSTANCE.allocate(address, cap << offset.getOffset(), newCap << offset.getOffset());
             cap = newCap;
         }
     }
@@ -120,7 +124,7 @@ abstract class BaseDirectBuffer implements DirectBuffer {
     public void close() {
         if (closed.compareAndSet(false, true)) {
             // TODO: 2019/4/12 anchore 反正这里要释放内存
-            MemoryUtils.free(address);
+            MemoryManager.INSTANCE.release(address, size, mode);
         }
     }
 }

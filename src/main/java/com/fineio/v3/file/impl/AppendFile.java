@@ -5,7 +5,9 @@ import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.connector.Connector;
 import com.fineio.v3.file.FileKey;
 import com.fineio.v3.file.impl.write.WriteFile;
+import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.MemoryUtils;
+import com.fineio.v3.type.FileMode;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -55,7 +57,7 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> {
             Long address = null;
             try (InputStream input = new BufferedInputStream(writeFile.connector.read(lastPosFileKey))) {
                 int avail = input.available();
-                address = MemoryUtils.allocate(avail);
+                address = MemoryManager.INSTANCE.allocate(avail, FileMode.APPEND);
                 long ptr = address;
                 byte[] bytes = new byte[1024];
                 for (int read; (read = input.read(bytes)) != -1; ptr += read) {
