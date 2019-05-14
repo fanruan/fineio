@@ -30,7 +30,7 @@ public enum MemoryManager {
     public long allocate(long size, FileMode mode) {
         mode.getLock().lock();
         try {
-            Condition condition = mode.getLock().newCondition();
+            Condition condition = mode.getCondition();
             if (mode == FileMode.READ) {
                 return allocator.allocate(size, condition);
             }
@@ -46,7 +46,7 @@ public enum MemoryManager {
     public long allocate(long address, long oldSize, long newSize) {
         FileMode.WRITE.getLock().lock();
         try {
-            return reAllocator.reallocate(address, oldSize, newSize, FileMode.WRITE.getLock().newCondition());
+            return reAllocator.reallocate(address, oldSize, newSize, FileMode.WRITE.getCondition());
         } catch (InterruptedException e) {
             FineIOLoggers.getLogger().warn(e);
             FileMode.WRITE.getLock().unlock();
@@ -60,7 +60,7 @@ public enum MemoryManager {
     public void release(long address, long size, FileMode mode) {
         mode.getLock().lock();
         try {
-            Condition condition = mode.getLock().newCondition();
+            Condition condition = mode.getCondition();
             if (mode == FileMode.READ) {
                 allocator.release(address, size, condition);
             } else {

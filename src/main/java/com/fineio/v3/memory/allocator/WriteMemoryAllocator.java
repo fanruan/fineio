@@ -36,7 +36,7 @@ public class WriteMemoryAllocator extends BaseMemoryAllocator implements MemoryR
                     MemoryUtils.fill0(reallocate + addSize, addSize);
                     return reallocate;
                 }
-                if (condition.await(10, TimeUnit.MINUTES)) {
+                if (!condition.await(10, TimeUnit.MINUTES)) {
                     throw new OutOfMemoryError("Cannot allocate memory size " + addSize + " for 10 min. Max memory is " + limitMemorySize);
                 }
             } while (true);

@@ -37,7 +37,7 @@ public class BaseMemoryAllocator implements MemoryAllocator {
                 memorySize.add(size);
                 return MemoryUtils.allocate(size);
             }
-            if (condition.await(10, TimeUnit.MINUTES)) {
+            if (!condition.await(10, TimeUnit.MINUTES)) {
                 throw new OutOfMemoryError("Cannot allocate memory size " + size + " for 10 min. Max memory is " + limitMemorySize);
             }
         } while (true);
