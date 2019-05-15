@@ -1,5 +1,7 @@
 package com.fineio.v3.memory.allocator;
 
+import com.fineio.v3.exception.OutOfDirectMemoryException;
+
 import java.util.concurrent.locks.Condition;
 
 /**
@@ -12,7 +14,7 @@ public interface MemoryAllocator {
      * @param size
      * @param condition
      */
-    long allocate(long size, Condition condition) throws InterruptedException;
+    long allocate(long size, Condition condition) throws OutOfDirectMemoryException;
 
     /**
      * 释放内存

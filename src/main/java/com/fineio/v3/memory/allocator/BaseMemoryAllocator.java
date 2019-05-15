@@ -1,5 +1,6 @@
 package com.fineio.v3.memory.allocator;
 
+import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.MemoryUtils;
 
 import java.util.concurrent.TimeUnit;
@@ -31,14 +32,18 @@ public class BaseMemoryAllocator implements MemoryAllocator {
      * @param condition
      */
     @Override
-    public long allocate(long size, Condition condition) throws InterruptedException {
+    public long allocate(long size, Condition condition) throws OutOfDirectMemoryException {
         do {
             if (memorySize.sum() + size < limitMemorySize) {
                 memorySize.add(size);
                 return MemoryUtils.allocate(size);
             }
-            if (!condition.await(10, TimeUnit.MINUTES)) {
-                throw new OutOfMemoryError("Cannot allocate memory size " + size + " for 10 min. Max memory is " + limitMemorySize);
+            try {
+                if (!condition.await(10, TimeUnit.MINUTES)) {
+                    throw new OutOfDirectMemoryException("Cannot allocate memory size " + size + " for 10 min. Max memory is " + limitMemorySize);
+                }
+            } catch (InterruptedException e) {
+                throw new OutOfDirectMemoryException(e);
             }
         } while (true);
     }
