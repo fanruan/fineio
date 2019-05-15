@@ -8,17 +8,24 @@ import java.util.concurrent.locks.Condition;
 public interface MemoryAllocator {
 
     /**
+     * 申请内存
      * @param size
      * @param condition
      */
     long allocate(long size, Condition condition) throws InterruptedException;
 
     /**
+     * 释放内存
      * @param address
      * @param size
      */
     void release(long address, long size, Condition condition);
 
+    /**
+     * 当前内存大小
+     *
+     * @return
+     */
     long getMemory();
 
 }
