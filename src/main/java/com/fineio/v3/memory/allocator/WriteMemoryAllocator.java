@@ -39,7 +39,7 @@ public class WriteMemoryAllocator extends BaseMemoryAllocator implements MemoryR
                 }
                 try {
                     if (!condition.await(10, TimeUnit.MINUTES)) {
-                        throw new OutOfMemoryError("Cannot allocate memory size " + addSize + " for 10 min. Max memory is " + limitMemorySize);
+                        throw new OutOfDirectMemoryException("Cannot allocate memory size " + addSize + " for 10 min. Max memory is " + limitMemorySize);
                     }
                 } catch (InterruptedException e) {
                     throw new OutOfDirectMemoryException(e);
