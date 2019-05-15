@@ -10,5 +10,6 @@ public class OutOfDirectMemoryException extends Exception {
     }
 
     public OutOfDirectMemoryException(String s) {
+        super(s);
     }
 }
