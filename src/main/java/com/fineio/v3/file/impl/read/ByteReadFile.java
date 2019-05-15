@@ -5,6 +5,7 @@ import com.fineio.v3.buffer.impl.ByteDirectBuf;
 import com.fineio.v3.connector.Connector;
 import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.Offset;
+import com.fineio.v3.type.FileMode;
 
 /**
  * @author anchore
@@ -22,6 +23,6 @@ public class ByteReadFile extends ReadFile<ByteDirectBuffer> {
 
     @Override
     ByteDirectBuffer newDirectBuf(long address, int size, FileKey fileKey) {
-        return new ByteDirectBuf(address, size, fileKey, size);
+        return new ByteDirectBuf(address, size, fileKey, size, FileMode.READ);
     }
 }

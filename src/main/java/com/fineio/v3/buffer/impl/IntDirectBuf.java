@@ -4,6 +4,7 @@ import com.fineio.v3.buffer.IntDirectBuffer;
 import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
+import com.fineio.v3.type.FileMode;
 
 /**
  * @author anchore
@@ -26,8 +27,8 @@ public class IntDirectBuf extends BaseDirectBuffer implements IntDirectBuffer {
      * @param cap     容量
      * @param fileKey file key
      */
-    public IntDirectBuf(long address, int cap, FileKey fileKey, int maxCap) {
-        super(address, cap, fileKey, Offset.INT, maxCap);
+    public IntDirectBuf(long address, int cap, FileKey fileKey, int maxCap, FileMode mode) {
+        super(address, cap, fileKey, Offset.INT, maxCap, mode);
     }
 
     @Override

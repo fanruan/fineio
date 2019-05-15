@@ -6,8 +6,10 @@ import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.connector.Connector;
 import com.fineio.v3.file.FileKey;
 import com.fineio.v3.file.impl.File;
+import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
+import com.fineio.v3.type.FileMode;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
@@ -32,7 +34,7 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> {
         FileKey nthFileKey = new FileKey(fileKey.getPath(), String.valueOf(nthBuf));
         try (InputStream input = new BufferedInputStream(connector.read(nthFileKey))) {
             int avail = input.available();
-            address = MemoryUtils.allocate(avail);
+            address = MemoryManager.INSTANCE.allocate(avail, FileMode.READ);
             long ptr = address;
             byte[] bytes = new byte[1024];
             for (int read; (read = input.read(bytes)) != -1; ptr += read) {
