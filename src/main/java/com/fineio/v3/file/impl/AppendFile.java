@@ -57,7 +57,7 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> {
             Long address = null;
             try (InputStream input = new BufferedInputStream(writeFile.connector.read(lastPosFileKey))) {
                 int avail = input.available();
-                address = MemoryManager.INSTANCE.allocate(avail, FileMode.APPEND);
+                address = MemoryManager.INSTANCE.allocate(avail, FileMode.WRITE);
                 long ptr = address;
                 byte[] bytes = new byte[1024];
                 for (int read; (read = input.read(bytes)) != -1; ptr += read) {
