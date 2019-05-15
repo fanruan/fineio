@@ -1,5 +1,6 @@
 package com.fineio.v3.memory.allocator;
 
+import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.MemoryUtils;
 
 import java.util.concurrent.TimeUnit;
@@ -15,14 +16,14 @@ public class WriteMemoryAllocator extends BaseMemoryAllocator implements MemoryR
     }
 
     @Override
-    public long allocate(long size, Condition condition) throws InterruptedException {
+    public long allocate(long size, Condition condition) throws OutOfDirectMemoryException {
         long address = super.allocate(size, condition);
         MemoryUtils.fill0(address, size);
         return address;
     }
 
     @Override
-    public long reallocate(long address, long oldSize, long newSize, Condition condition) throws InterruptedException {
+    public long reallocate(long address, long oldSize, long newSize, Condition condition) throws OutOfDirectMemoryException {
         long addSize = newSize - oldSize;
         if (addSize < 0) {
             throw new IllegalArgumentException("new Size must grater than oldSize");
@@ -36,8 +37,12 @@ public class WriteMemoryAllocator extends BaseMemoryAllocator implements MemoryR
                     MemoryUtils.fill0(reallocate + addSize, addSize);
                     return reallocate;
                 }
-                if (!condition.await(10, TimeUnit.MINUTES)) {
-                    throw new OutOfMemoryError("Cannot allocate memory size " + addSize + " for 10 min. Max memory is " + limitMemorySize);
+                try {
+                    if (!condition.await(10, TimeUnit.MINUTES)) {
+                        throw new OutOfDirectMemoryException("Cannot allocate memory size " + addSize + " for 10 min. Max memory is " + limitMemorySize);
+                    }
+                } catch (InterruptedException e) {
+                    throw new OutOfDirectMemoryException(e);
                 }
             } while (true);
         }

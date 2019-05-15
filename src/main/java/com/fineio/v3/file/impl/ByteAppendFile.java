@@ -21,6 +21,6 @@ public class ByteAppendFile extends AppendFile<ByteWriteFile, ByteDirectBuffer> 
 
     @Override
     protected ByteDirectBuffer newDirectBuf(long address, int size, FileKey fileKey) {
-        return new ByteDirectBuf(address, size, fileKey, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()), FileMode.APPEND);
+        return new ByteDirectBuf(address, size, fileKey, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()), FileMode.WRITE);
     }
 }
