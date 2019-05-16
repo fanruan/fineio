@@ -55,8 +55,9 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> {
         FileKey lastPosFileKey = new FileKey(writeFile.fileKey.getPath(), String.valueOf(nthBuf));
         if (writeFile.connector.exists(lastPosFileKey)) {
             Long address = null;
+            int avail = 0;
             try (InputStream input = new BufferedInputStream(writeFile.connector.read(lastPosFileKey))) {
-                int avail = input.available();
+                avail = input.available();
                 address = MemoryManager.INSTANCE.allocate(avail, FileMode.WRITE);
                 long ptr = address;
                 byte[] bytes = new byte[1024];
@@ -66,7 +67,7 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> {
                 writeFile.buffers.put(nthBuf, newDirectBuf(address, (int) ((ptr - address) >> writeFile.offset.getOffset()), lastPosFileKey));
             } catch (Throwable e) {
                 if (address != null) {
-                    MemoryUtils.free(address);
+                    MemoryManager.INSTANCE.release(address, avail, FileMode.WRITE);
                 }
                 FineIOLoggers.getLogger().error(e);
             }
