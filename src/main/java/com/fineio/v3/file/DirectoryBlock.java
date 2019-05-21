@@ -1,6 +1,5 @@
 package com.fineio.v3.file;
 
-import java.net.URI;
 import java.util.List;
 
 /**
@@ -34,8 +33,8 @@ public class DirectoryBlock implements Block {
      *
      */
     @Override
-    public URI getPath() {
-        return URI.create(dirPath);
+    public String getPath() {
+        return dirPath;
     }
 
 }

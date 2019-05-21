@@ -1,0 +1,67 @@
+package com.fineio.v3.file.impl.write;
+
+import com.fineio.v3.buffer.DoubleDirectBuffer;
+import com.fineio.v3.buffer.impl.DoubleDirectBuf;
+import com.fineio.v3.connector.Connector;
+import com.fineio.v3.file.FileKey;
+import com.fineio.v3.type.FileMode;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.doNothing;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.spy;
+import static org.powermock.api.mockito.PowerMockito.verifyPrivate;
+import static org.powermock.api.mockito.PowerMockito.whenNew;
+
+/**
+ * @author anchore
+ * @date 2019/5/17
+ */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({DoubleWriteFile.class})
+public class DoubleWriteFileTest {
+
+    @Test
+    public void putDouble() throws Exception {
+        DoubleWriteFile wf = spy(DoubleWriteFile.ofSync(mock(FileKey.class), mock(Connector.class)));
+        DoubleDirectBuffer buf = mock(DoubleDirectBuffer.class);
+        doReturn(buf).when(wf).getBuffer(0);
+        doNothing().when(wf).syncBufIfNeed(anyInt());
+
+        wf.putDouble(0, 0);
+
+        verifyPrivate(wf).invoke("ensureOpen");
+        verifyPrivate(wf).invoke("checkPos", 0L);
+        verify(wf).syncBufIfNeed(0);
+        verify(buf).putDouble(0, 0);
+    }
+
+    @Test
+    public void getBuffer() throws Exception {
+        ConcurrentHashMap<Object, Object> buffers = spy(new ConcurrentHashMap<>());
+        whenNew(ConcurrentHashMap.class).withNoArguments().thenReturn(buffers);
+        DoubleDirectBuf buf = mock(DoubleDirectBuf.class);
+        FileKey fileKey = mock(FileKey.class);
+        FileKey childFileKey = mock(FileKey.class);
+        whenNew(FileKey.class).withArguments(fileKey.getPath(), "0").thenReturn(childFileKey);
+        whenNew(DoubleDirectBuf.class).withArguments(childFileKey, 1 << -3, FileMode.WRITE).thenReturn(buf);
+
+        DoubleWriteFile wf = DoubleWriteFile.ofSync(fileKey, mock(Connector.class));
+
+        assertEquals(buf, wf.getBuffer(0));
+
+        verify(buffers).computeIfAbsent(eq(0), any(Function.class));
+    }
+}

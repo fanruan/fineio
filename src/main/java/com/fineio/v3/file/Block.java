@@ -1,15 +1,13 @@
 package com.fineio.v3.file;
 
-import java.net.URI;
-
 /**
  *
  */
-public interface Block {
+interface Block {
 
     /**
      *
      */
-    URI getPath();
+    String getPath();
 
 }
