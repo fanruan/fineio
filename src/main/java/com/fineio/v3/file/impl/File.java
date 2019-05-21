@@ -2,6 +2,7 @@ package com.fineio.v3.file.impl;
 
 import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.connector.Connector;
+import com.fineio.v3.file.FileClosedException;
 import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.Offset;
 
@@ -39,6 +40,12 @@ public abstract class File<B extends DirectBuffer> implements Closeable {
 
     protected int nthVal(long pos) {
         return (int) (pos & ((1L << connector.getBlockOffset() - offset.getOffset()) - 1));
+    }
+
+    protected void ensureOpen() {
+        if (closed.get()) {
+            throw new FileClosedException(fileKey);
+        }
     }
 
     protected void checkPos(long pos) {

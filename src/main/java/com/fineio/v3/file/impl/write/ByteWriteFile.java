@@ -3,8 +3,10 @@ package com.fineio.v3.file.impl.write;
 import com.fineio.v3.buffer.ByteDirectBuffer;
 import com.fineio.v3.buffer.impl.ByteDirectBuf;
 import com.fineio.v3.connector.Connector;
+import com.fineio.v3.file.FileClosedException;
 import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.Offset;
+import com.fineio.v3.type.FileMode;
 
 /**
  * @author anchore
@@ -24,7 +26,8 @@ public class ByteWriteFile extends WriteFile<ByteDirectBuffer> {
         return new ByteWriteFile(fileKey, connector, false);
     }
 
-    public void putByte(long pos, byte value) {
+    public void putByte(long pos, byte value) throws FileClosedException, IllegalArgumentException {
+        ensureOpen();
         checkPos(pos);
         int nthBuf = nthBuf(pos);
         syncBufIfNeed(nthBuf);
@@ -35,7 +38,6 @@ public class ByteWriteFile extends WriteFile<ByteDirectBuffer> {
     protected ByteDirectBuffer getBuffer(int nthBuf) {
         return buffers.computeIfAbsent(nthBuf,
                 i -> new ByteDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i)),
-                        1 << (connector.getBlockOffset() - offset.getOffset())
-                ));
+                        1 << (connector.getBlockOffset() - offset.getOffset()), FileMode.WRITE));
     }
 }
