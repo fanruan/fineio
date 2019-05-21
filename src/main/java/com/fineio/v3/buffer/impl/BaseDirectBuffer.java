@@ -1,8 +1,10 @@
 package com.fineio.v3.buffer.impl;
 
+import com.fineio.v3.buffer.BufferAllocateFailedException;
 import com.fineio.v3.buffer.BufferClosedException;
 import com.fineio.v3.buffer.BufferOutOfBoundException;
 import com.fineio.v3.buffer.DirectBuffer;
+import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.Offset;
@@ -29,7 +31,7 @@ abstract class BaseDirectBuffer implements DirectBuffer {
     /**
      * 写时能增长到的最大容量
      */
-    private int maxCap;
+    private final int maxCap;
 
     private final FileKey fileKey;
 
@@ -37,7 +39,7 @@ abstract class BaseDirectBuffer implements DirectBuffer {
 
     private final AtomicBoolean closed = new AtomicBoolean(false);
 
-    private FileMode mode;
+    private final FileMode fileMode;
 
     /**
      * for write, may grow cap
@@ -46,9 +48,17 @@ abstract class BaseDirectBuffer implements DirectBuffer {
      * @param offset  offset
      * @param maxCap  max cap
      */
-    BaseDirectBuffer(FileKey fileKey, Offset offset, int maxCap) {
-        this(MemoryManager.INSTANCE.allocate(16 << offset.getOffset(), FileMode.WRITE), 16, fileKey, offset, maxCap, FileMode.WRITE);
+    BaseDirectBuffer(FileKey fileKey, Offset offset, int maxCap, FileMode fileMode) throws BufferAllocateFailedException {
+        this(allocate(16, offset, fileMode), 16, fileKey, offset, maxCap, fileMode);
         this.size = 0;
+    }
+
+    private static long allocate(int cap, Offset offset, FileMode fileMode) {
+        try {
+            return MemoryManager.INSTANCE.allocate(cap << offset.getOffset(), fileMode);
+        } catch (OutOfDirectMemoryException e) {
+            throw BufferAllocateFailedException.ofAllocate(cap << offset.getOffset(), e);
+        }
     }
 
     /**
@@ -62,14 +72,14 @@ abstract class BaseDirectBuffer implements DirectBuffer {
      * @param offset  offset
      * @param maxCap  maxCap
      */
-    BaseDirectBuffer(long address, int cap, FileKey fileKey, Offset offset, int maxCap, FileMode mode) {
+    BaseDirectBuffer(long address, int cap, FileKey fileKey, Offset offset, int maxCap, FileMode fileMode) {
         this.fileKey = fileKey;
         this.offset = offset;
         this.address = address;
         this.cap = cap;
         this.maxCap = maxCap;
         this.size = cap;
-        this.mode = mode;
+        this.fileMode = fileMode;
     }
 
     void ensureOpen() {
@@ -87,9 +97,18 @@ abstract class BaseDirectBuffer implements DirectBuffer {
             newCap <<= 1;
         }
         if (newCap > cap && newCap <= maxCap) {
-            // TODO: 2019/4/12 anchore 反正这里要扩容buffer
-            address = MemoryManager.INSTANCE.allocate(address, cap << offset.getOffset(), newCap << offset.getOffset());
+            reallocate(newCap);
             cap = newCap;
+        }
+    }
+
+    private void reallocate(int newCap) {
+        int oldSize = cap << offset.getOffset();
+        int newSize = newCap << offset.getOffset();
+        try {
+            address = MemoryManager.INSTANCE.allocate(address, oldSize, newSize);
+        } catch (OutOfDirectMemoryException e) {
+            throw BufferAllocateFailedException.ofReallocate(address, oldSize, newSize, e);
         }
     }
 
@@ -123,8 +142,7 @@ abstract class BaseDirectBuffer implements DirectBuffer {
     @Override
     public void close() {
         if (closed.compareAndSet(false, true)) {
-            // TODO: 2019/4/12 anchore 反正这里要释放内存
-            MemoryManager.INSTANCE.release(address, size, mode);
+            MemoryManager.INSTANCE.release(address, cap, fileMode);
         }
     }
 }
