@@ -1,6 +1,5 @@
 package com.fineio.v3.memory;
 
-import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.MemoryHelper;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.allocator.BaseMemoryAllocator;
@@ -45,11 +44,6 @@ public enum MemoryManager {
         FileMode.WRITE.getLock().lock();
         try {
             return reAllocator.reallocate(address, oldSize, newSize, FileMode.WRITE.getCondition());
-        } catch (OutOfDirectMemoryException e) {
-            FineIOLoggers.getLogger().warn(e);
-            FileMode.WRITE.getLock().unlock();
-            release(address, oldSize, FileMode.WRITE);
-            throw e;
         } finally {
             FileMode.WRITE.getLock().unlock();
         }

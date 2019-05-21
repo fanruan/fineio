@@ -1,5 +1,7 @@
 package com.fineio.v3.connector;
 
+import java.io.IOException;
+
 /**
  *
  */
@@ -8,11 +10,13 @@ public interface PackageManager {
     /**
      * @param dir
      */
-    void packageDir(String dir);
+    void packageDir(String dir) throws IOException;
 
     /**
-     * @param dir
+     *
+     * @param unPackDir
+     * @param resourceName
      */
-    void unPackageDir(String dir);
+    void unPackageDir(String unPackDir, String resourceName) throws IOException;
 
 }
