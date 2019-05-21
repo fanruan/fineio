@@ -1,5 +1,6 @@
 package com.fineio.v3.connector;
 
+import com.fineio.v3.file.Block;
 import com.fineio.v3.file.FileKey;
 
 import java.io.IOException;
@@ -26,16 +27,17 @@ public interface Connector {
     /**
      * @param file
      */
-    boolean delete(FileKey file);
+    boolean delete(Block file);
 
     /**
      * @param file
      */
-    boolean exists(FileKey file);
+    boolean exists(Block file);
 
     /**
      *
      */
     int getBlockOffset();
 
+    Block list(String file);
 }

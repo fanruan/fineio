@@ -1,9 +1,11 @@
 package com.fineio.v3.file;
 
+import java.io.File;
 import java.util.List;
 
 /**
  *
+ * @author yee
  */
 public class DirectoryBlock implements Block {
 
@@ -19,14 +21,16 @@ public class DirectoryBlock implements Block {
     /**
      * Default constructor
      */
-    public DirectoryBlock() {
+    public DirectoryBlock(String dirPath, List<Block> blocks) {
+        this.dirPath = dirPath;
+        this.files = blocks;
     }
 
     /**
      *
      */
-    public void getFiles() {
-        // TODO implement here
+    public List<Block> getFiles() {
+        return this.files;
     }
 
     /**
@@ -35,6 +39,11 @@ public class DirectoryBlock implements Block {
     @Override
     public String getPath() {
         return dirPath;
+    }
+
+    @Override
+    public String getName() {
+        return new File(dirPath).getName();
     }
 
 }
