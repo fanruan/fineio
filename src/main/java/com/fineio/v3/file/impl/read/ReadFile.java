@@ -30,10 +30,11 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> {
 
     private B loadBuffer(int nthBuf) {
         // TODO: 2019/4/16 anchore 先拿cache，拿不到就生成buffer，put进cache
-        Long address = null;
         FileKey nthFileKey = new FileKey(fileKey.getPath(), String.valueOf(nthBuf));
+        Long address = null;
+        int avail = 0;
         try (InputStream input = new BufferedInputStream(connector.read(nthFileKey))) {
-            int avail = input.available();
+            avail = input.available();
             address = MemoryManager.INSTANCE.allocate(avail, FileMode.READ);
             long ptr = address;
             byte[] bytes = new byte[1024];
@@ -43,7 +44,7 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> {
             return newDirectBuf(address, (int) ((ptr - address) >> offset.getOffset()), nthFileKey);
         } catch (Throwable e) {
             if (address != null) {
-                MemoryUtils.free(address);
+                MemoryManager.INSTANCE.release(address, avail, FileMode.READ);
             }
             FineIOLoggers.getLogger().error(e);
             return null;

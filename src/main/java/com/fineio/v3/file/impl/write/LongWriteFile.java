@@ -3,8 +3,10 @@ package com.fineio.v3.file.impl.write;
 import com.fineio.v3.buffer.LongDirectBuffer;
 import com.fineio.v3.buffer.impl.LongDirectBuf;
 import com.fineio.v3.connector.Connector;
+import com.fineio.v3.file.FileClosedException;
 import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.Offset;
+import com.fineio.v3.type.FileMode;
 
 /**
  * @author anchore
@@ -23,7 +25,8 @@ public class LongWriteFile extends WriteFile<LongDirectBuffer> {
         return new LongWriteFile(fileKey, connector, false);
     }
 
-    public void putLong(long pos, long value) {
+    public void putLong(long pos, long value) throws FileClosedException, IllegalArgumentException {
+        ensureOpen();
         checkPos(pos);
         int nthBuf = nthBuf(pos);
         syncBufIfNeed(nthBuf);
@@ -34,7 +37,6 @@ public class LongWriteFile extends WriteFile<LongDirectBuffer> {
     protected LongDirectBuffer getBuffer(int nthBuf) {
         return buffers.computeIfAbsent(nthBuf,
                 i -> new LongDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i)),
-                        1 << (connector.getBlockOffset() - offset.getOffset())
-                ));
+                        1 << (connector.getBlockOffset() - offset.getOffset()), FileMode.WRITE));
     }
 }

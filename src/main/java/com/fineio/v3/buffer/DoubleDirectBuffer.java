@@ -5,7 +5,10 @@ package com.fineio.v3.buffer;
  * @date 2019/4/11
  */
 public interface DoubleDirectBuffer extends DirectBuffer {
-    void putDouble(int pos, double val);
+    void putDouble(int pos, double val)
+            throws BufferClosedException, BufferAllocateFailedException,
+            BufferOutOfBoundException;
 
-    double getDouble(int pos);
+    double getDouble(int pos)
+            throws BufferClosedException, BufferOutOfBoundException;
 }
