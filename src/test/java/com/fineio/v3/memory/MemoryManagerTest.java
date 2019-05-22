@@ -3,6 +3,7 @@ package com.fineio.v3.memory;
 import com.fineio.FineIO;
 import com.fineio.logger.FineIOLogger;
 import com.fineio.memory.MemoryHelper;
+import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.allocator.BaseMemoryAllocator;
 import com.fineio.v3.memory.allocator.WriteMemoryAllocator;
 import com.fineio.v3.type.FileMode;
@@ -26,7 +27,7 @@ import static org.junit.Assert.assertEquals;
 public class MemoryManagerTest {
 
     @Test
-    public void allocateRead() throws NoSuchFieldException, IllegalAccessException {
+    public void allocateRead() throws NoSuchFieldException, IllegalAccessException, OutOfDirectMemoryException {
         long allocate = MemoryManager.INSTANCE.allocate(1024, FileMode.READ);
         Field allocator = MemoryManager.class.getDeclaredField("allocator");
         allocator.setAccessible(true);
@@ -37,7 +38,7 @@ public class MemoryManagerTest {
     }
 
     @Test
-    public void allocateWrite() throws NoSuchFieldException, IllegalAccessException {
+    public void allocateWrite() throws NoSuchFieldException, IllegalAccessException, OutOfDirectMemoryException {
         long allocate = MemoryManager.INSTANCE.allocate(1024, FileMode.WRITE);
         Field allocator = MemoryManager.class.getDeclaredField("reAllocator");
         allocator.setAccessible(true);
@@ -97,7 +98,12 @@ public class MemoryManagerTest {
 
         @Override
         public void run() {
-            long address = MemoryManager.INSTANCE.allocate(size, mode);
+            long address = 0;
+            try {
+                address = MemoryManager.INSTANCE.allocate(size, mode);
+            } catch (OutOfDirectMemoryException e) {
+                e.printStackTrace();
+            }
             try {
                 TimeUnit.SECONDS.sleep(2);
             } catch (InterruptedException e) {
