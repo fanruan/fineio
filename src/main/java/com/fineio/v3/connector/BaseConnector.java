@@ -16,6 +16,10 @@ public abstract class BaseConnector implements Connector {
         this.blockOffset = blockOffset;
     }
 
+    public BaseConnector() {
+        this(22);
+    }
+
     @Override
     public int getBlockOffset() {
         return blockOffset;

@@ -1,5 +1,7 @@
 package com.fineio.v3.connector;
 
+import com.fineio.v3.file.Block;
+import com.fineio.v3.file.DirectoryBlock;
 import com.fineio.v3.file.FileKey;
 
 import java.io.BufferedOutputStream;
@@ -10,6 +12,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author anchore
@@ -18,6 +22,9 @@ import java.io.OutputStream;
 public class FileConnector extends BaseConnector {
     public FileConnector(int blockOffset) {
         super(blockOffset);
+    }
+
+    public FileConnector() {
     }
 
     @Override
@@ -40,13 +47,30 @@ public class FileConnector extends BaseConnector {
     }
 
     @Override
-    public boolean delete(FileKey file) {
+    public boolean delete(Block file) {
         return new File(file.getPath()).delete();
     }
 
     @Override
-    public boolean exists(FileKey file) {
+    public boolean exists(Block file) {
         return new File(file.getPath()).exists();
+    }
+
+    @Override
+    public Block list(String file) {
+        File f = new File(file);
+        if (f.isDirectory()) {
+            List<Block> blocks = new ArrayList<>();
+            String[] list = f.list((dir, name) -> !(".".equals(name) || "..".equals(name)));
+            if (null != list) {
+                for (String s : list) {
+                    blocks.add(list(s));
+                }
+            }
+            return new DirectoryBlock(file, blocks);
+        } else {
+            return new FileKey(f.getParent(), f.getName());
+        }
     }
 
     @Override
