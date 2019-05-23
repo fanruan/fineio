@@ -33,9 +33,9 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> imple
 
     private void initLastPos() {
         Connector connector = writeFile.connector;
-        FileBlock FileBlock = new FileBlock(writeFile.fileBlock.getPath(), LAST_POS);
-        if (connector.exists(FileBlock)) {
-            try (InputStream input = connector.read(FileBlock)) {
+        FileBlock fileBlock = new FileBlock(writeFile.fileBlock.getPath(), LAST_POS);
+        if (connector.exists(fileBlock)) {
+            try (InputStream input = connector.read(fileBlock)) {
                 byte[] bytes = new byte[4];
                 if (input.read(bytes) == bytes.length) {
                     lastPos = ByteBuffer.wrap(bytes).getInt();
@@ -75,7 +75,7 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> imple
         }
     }
 
-    abstract B newDirectBuf(long address, int size, FileBlock FileBlock);
+    abstract B newDirectBuf(long address, int size, FileBlock fileBlock);
 
     @Override
     public void close() {

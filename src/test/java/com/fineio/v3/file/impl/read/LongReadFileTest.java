@@ -40,10 +40,10 @@ public class LongReadFileTest {
     public void newDirectBuf() throws Exception {
         LongReadFile rf = new LongReadFile(mock(FileBlock.class), mock(Connector.class));
 
-        FileBlock FileBlock = mock(FileBlock.class);
+        FileBlock fileBlock = mock(FileBlock.class);
         LongDirectBuf buf = mock(LongDirectBuf.class);
-        whenNew(LongDirectBuf.class).withArguments(1L, 16, FileBlock, 16, FileMode.READ).thenReturn(buf);
+        whenNew(LongDirectBuf.class).withArguments(1L, 16, fileBlock, 16, FileMode.READ).thenReturn(buf);
 
-        assertEquals(buf, rf.newDirectBuf(1L, 16, FileBlock));
+        assertEquals(buf, rf.newDirectBuf(1L, 16, fileBlock));
     }
 }

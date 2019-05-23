@@ -126,8 +126,8 @@ public class BaseDirectBufferTest {
 
     @Test
     public void getFileBlock() {
-        FileBlock FileBlock = mock(FileBlock.class);
-        assertEquals(FileBlock, new DirectBuffer(1, 16, FileBlock, Offset.BYTE, 1024, FileMode.READ).getFileBlock());
+        FileBlock fileBlock = mock(FileBlock.class);
+        assertEquals(fileBlock, new DirectBuffer(1, 16, fileBlock, Offset.BYTE, 1024, FileMode.READ).getFileBlock());
     }
 
     @Test
@@ -147,12 +147,12 @@ public class BaseDirectBufferTest {
     }
 
     static class DirectBuffer extends BaseDirectBuffer {
-        DirectBuffer(FileBlock FileBlock, Offset offset, int maxCap, FileMode fileMode) {
-            super(FileBlock, offset, maxCap, fileMode);
+        DirectBuffer(FileBlock fileBlock, Offset offset, int maxCap, FileMode fileMode) {
+            super(fileBlock, offset, maxCap, fileMode);
         }
 
-        DirectBuffer(long address, int cap, FileBlock FileBlock, Offset offset, int maxCap, FileMode fileMode) {
-            super(address, cap, FileBlock, offset, maxCap, fileMode);
+        DirectBuffer(long address, int cap, FileBlock fileBlock, Offset offset, int maxCap, FileMode fileMode) {
+            super(address, cap, fileBlock, offset, maxCap, fileMode);
         }
     }
 }

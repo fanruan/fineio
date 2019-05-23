@@ -20,8 +20,8 @@ import java.io.InputStream;
  * @date 2019/4/16
  */
 abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IReadFile<B> {
-    ReadFile(FileBlock FileBlock, Offset offset, Connector connector) {
-        super(FileBlock, offset, connector);
+    ReadFile(FileBlock fileBlock, Offset offset, Connector connector) {
+        super(fileBlock, offset, connector);
     }
 
     @Override
@@ -52,7 +52,7 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
         }
     }
 
-    abstract B newDirectBuf(long address, int size, FileBlock FileBlock);
+    abstract B newDirectBuf(long address, int size, FileBlock fileBlock);
 
     @Override
     public void close() {

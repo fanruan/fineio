@@ -51,10 +51,10 @@ public class LongAppendFileTest {
         setInternalState(wf, "connector", mock(Connector.class));
         setInternalState(wf, "offset", Offset.LONG);
 
-        FileBlock FileBlock = mock(FileBlock.class);
+        FileBlock fileBlock = mock(FileBlock.class);
         LongDirectBuf buf = mock(LongDirectBuf.class);
-        whenNew(LongDirectBuf.class).withArguments(1L, 1, FileBlock, 1 << -3, FileMode.WRITE).thenReturn(buf);
+        whenNew(LongDirectBuf.class).withArguments(1L, 1, fileBlock, 1 << -3, FileMode.WRITE).thenReturn(buf);
 
-        assertEquals(buf, af.newDirectBuf(1, 1, FileBlock));
+        assertEquals(buf, af.newDirectBuf(1, 1, fileBlock));
     }
 }

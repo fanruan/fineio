@@ -33,7 +33,7 @@ abstract class BaseDirectBuffer implements DirectBuffer {
      */
     private final int maxCap;
 
-    private final FileBlock FileBlock;
+    private final FileBlock fileBlock;
 
     private final Offset offset;
 
@@ -44,12 +44,12 @@ abstract class BaseDirectBuffer implements DirectBuffer {
     /**
      * for write, may grow cap
      *
-     * @param FileBlock file key
+     * @param fileBlock file key
      * @param offset  offset
      * @param maxCap  max cap
      */
-    BaseDirectBuffer(FileBlock FileBlock, Offset offset, int maxCap, FileMode fileMode) throws BufferAllocateFailedException {
-        this(allocate(16, offset, fileMode), 16, FileBlock, offset, maxCap, fileMode);
+    BaseDirectBuffer(FileBlock fileBlock, Offset offset, int maxCap, FileMode fileMode) throws BufferAllocateFailedException {
+        this(allocate(16, offset, fileMode), 16, fileBlock, offset, maxCap, fileMode);
         this.size = 0;
     }
 
@@ -68,12 +68,12 @@ abstract class BaseDirectBuffer implements DirectBuffer {
      *
      * @param address address
      * @param cap     cap
-     * @param FileBlock file key
+     * @param fileBlock file key
      * @param offset  offset
      * @param maxCap  maxCap
      */
-    BaseDirectBuffer(long address, int cap, FileBlock FileBlock, Offset offset, int maxCap, FileMode fileMode) {
-        this.FileBlock = FileBlock;
+    BaseDirectBuffer(long address, int cap, FileBlock fileBlock, Offset offset, int maxCap, FileMode fileMode) {
+        this.fileBlock = fileBlock;
         this.offset = offset;
         this.address = address;
         this.cap = cap;
@@ -136,7 +136,7 @@ abstract class BaseDirectBuffer implements DirectBuffer {
 
     @Override
     public FileBlock getFileBlock() {
-        return FileBlock;
+        return fileBlock;
     }
 
     @Override

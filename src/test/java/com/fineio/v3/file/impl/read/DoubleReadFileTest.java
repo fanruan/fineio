@@ -40,10 +40,10 @@ public class DoubleReadFileTest {
     public void newDirectBuf() throws Exception {
         DoubleReadFile rf = new DoubleReadFile(mock(FileBlock.class), mock(Connector.class));
 
-        FileBlock FileBlock = mock(FileBlock.class);
+        FileBlock fileBlock = mock(FileBlock.class);
         DoubleDirectBuf buf = mock(DoubleDirectBuf.class);
-        whenNew(DoubleDirectBuf.class).withArguments(1L, 16, FileBlock, 16, FileMode.READ).thenReturn(buf);
+        whenNew(DoubleDirectBuf.class).withArguments(1L, 16, fileBlock, 16, FileMode.READ).thenReturn(buf);
 
-        assertEquals(buf, rf.newDirectBuf(1L, 16, FileBlock));
+        assertEquals(buf, rf.newDirectBuf(1L, 16, fileBlock));
     }
 }

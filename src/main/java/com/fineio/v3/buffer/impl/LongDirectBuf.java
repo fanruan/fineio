@@ -14,10 +14,10 @@ public class LongDirectBuf extends BaseDirectBuffer implements LongDirectBuffer 
     /**
      * for write
      *
-     * @param FileBlock file key
+     * @param fileBlock file key
      */
-    public LongDirectBuf(FileBlock FileBlock, int maxCap, FileMode fileMode) {
-        super(FileBlock, Offset.LONG, maxCap, fileMode);
+    public LongDirectBuf(FileBlock fileBlock, int maxCap, FileMode fileMode) {
+        super(fileBlock, Offset.LONG, maxCap, fileMode);
     }
 
     /**
@@ -25,10 +25,10 @@ public class LongDirectBuf extends BaseDirectBuffer implements LongDirectBuffer 
      *
      * @param address 地址
      * @param cap     容量
-     * @param FileBlock file key
+     * @param fileBlock file key
      */
-    public LongDirectBuf(long address, int cap, FileBlock FileBlock, int maxCap, FileMode fileMode) {
-        super(address, cap, FileBlock, Offset.LONG, maxCap, fileMode);
+    public LongDirectBuf(long address, int cap, FileBlock fileBlock, int maxCap, FileMode fileMode) {
+        super(address, cap, fileBlock, Offset.LONG, maxCap, fileMode);
     }
 
     @Override

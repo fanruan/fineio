@@ -14,10 +14,10 @@ public class DoubleDirectBuf extends BaseDirectBuffer implements DoubleDirectBuf
     /**
      * for write
      *
-     * @param FileBlock file key
+     * @param fileBlock file key
      */
-    public DoubleDirectBuf(FileBlock FileBlock, int maxCap, FileMode fileMode) {
-        super(FileBlock, Offset.DOUBLE, maxCap, fileMode);
+    public DoubleDirectBuf(FileBlock fileBlock, int maxCap, FileMode fileMode) {
+        super(fileBlock, Offset.DOUBLE, maxCap, fileMode);
     }
 
     /**
@@ -25,10 +25,10 @@ public class DoubleDirectBuf extends BaseDirectBuffer implements DoubleDirectBuf
      *
      * @param address 地址
      * @param cap     容量
-     * @param FileBlock file key
+     * @param fileBlock file key
      */
-    public DoubleDirectBuf(long address, int cap, FileBlock FileBlock, int maxCap, FileMode fileMode) {
-        super(address, cap, FileBlock, Offset.DOUBLE, maxCap, fileMode);
+    public DoubleDirectBuf(long address, int cap, FileBlock fileBlock, int maxCap, FileMode fileMode) {
+        super(address, cap, fileBlock, Offset.DOUBLE, maxCap, fileMode);
     }
 
     @Override

@@ -13,8 +13,8 @@ import com.fineio.v3.type.FileMode;
  * @date 2019/4/12
  */
 public class DoubleReadFile extends ReadFile<DoubleDirectBuffer> {
-    public DoubleReadFile(FileBlock FileBlock, Connector connector) {
-        super(FileBlock, Offset.DOUBLE, connector);
+    public DoubleReadFile(FileBlock fileBlock, Connector connector) {
+        super(fileBlock, Offset.DOUBLE, connector);
     }
 
     public double getDouble(long pos) throws FileClosedException, IllegalArgumentException {
@@ -24,7 +24,7 @@ public class DoubleReadFile extends ReadFile<DoubleDirectBuffer> {
     }
 
     @Override
-    DoubleDirectBuffer newDirectBuf(long address, int size, FileBlock FileBlock) {
-        return new DoubleDirectBuf(address, size, FileBlock, size, FileMode.READ);
+    DoubleDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
+        return new DoubleDirectBuf(address, size, fileBlock, size, FileMode.READ);
     }
 }

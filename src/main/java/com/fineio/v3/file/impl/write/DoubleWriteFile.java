@@ -13,16 +13,16 @@ import com.fineio.v3.type.FileMode;
  * @date 2019/4/3
  */
 public class DoubleWriteFile extends WriteFile<DoubleDirectBuffer> {
-    public DoubleWriteFile(FileBlock FileBlock, Connector connector, boolean asyncWrite) {
-        super(FileBlock, Offset.DOUBLE, connector, asyncWrite);
+    public DoubleWriteFile(FileBlock fileBlock, Connector connector, boolean asyncWrite) {
+        super(fileBlock, Offset.DOUBLE, connector, asyncWrite);
     }
 
-    public static DoubleWriteFile ofAsync(FileBlock FileBlock, Connector connector) {
-        return new DoubleWriteFile(FileBlock, connector, true);
+    public static DoubleWriteFile ofAsync(FileBlock fileBlock, Connector connector) {
+        return new DoubleWriteFile(fileBlock, connector, true);
     }
 
-    public static DoubleWriteFile ofSync(FileBlock FileBlock, Connector connector) {
-        return new DoubleWriteFile(FileBlock, connector, false);
+    public static DoubleWriteFile ofSync(FileBlock fileBlock, Connector connector) {
+        return new DoubleWriteFile(fileBlock, connector, false);
     }
 
     public void putDouble(long pos, double value) throws FileClosedException, IllegalArgumentException {

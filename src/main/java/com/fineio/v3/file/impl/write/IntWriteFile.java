@@ -13,16 +13,16 @@ import com.fineio.v3.type.FileMode;
  * @date 2019/4/3
  */
 public class IntWriteFile extends WriteFile<IntDirectBuffer> {
-    public IntWriteFile(FileBlock FileBlock, Connector connector, boolean asyncWrite) {
-        super(FileBlock, Offset.INT, connector, asyncWrite);
+    public IntWriteFile(FileBlock fileBlock, Connector connector, boolean asyncWrite) {
+        super(fileBlock, Offset.INT, connector, asyncWrite);
     }
 
-    public static IntWriteFile ofAsync(FileBlock FileBlock, Connector connector) {
-        return new IntWriteFile(FileBlock, connector, true);
+    public static IntWriteFile ofAsync(FileBlock fileBlock, Connector connector) {
+        return new IntWriteFile(fileBlock, connector, true);
     }
 
-    public static IntWriteFile ofSync(FileBlock FileBlock, Connector connector) {
-        return new IntWriteFile(FileBlock, connector, false);
+    public static IntWriteFile ofSync(FileBlock fileBlock, Connector connector) {
+        return new IntWriteFile(fileBlock, connector, false);
     }
 
     public void putInt(long pos, int value) throws FileClosedException, IllegalArgumentException {

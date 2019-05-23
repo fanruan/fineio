@@ -111,56 +111,56 @@ public class IOAccessorImpl implements IOAccessor {
 
 
     private IFile createByte(Connector connector, URI uri, FileMode mode) {
-        FileBlock FileBlock = new FileBlock(uri.getPath(), "");
+        FileBlock fileBlock = new FileBlock(uri.getPath(), "");
         switch (mode) {
             case APPEND:
-                return new ByteAppendFile(new ByteWriteFile(FileBlock, connector, false));
+                return new ByteAppendFile(new ByteWriteFile(fileBlock, connector, false));
             case READ:
-                return new ByteReadFile(FileBlock, connector);
+                return new ByteReadFile(fileBlock, connector);
             case WRITE:
-                return new ByteWriteFile(FileBlock, connector, false);
+                return new ByteWriteFile(fileBlock, connector, false);
             default:
                 return null;
         }
     }
 
     private IFile createInt(Connector connector, URI uri, FileMode mode) {
-        FileBlock FileBlock = new FileBlock(uri.getPath(), "");
+        FileBlock fileBlock = new FileBlock(uri.getPath(), "");
         switch (mode) {
             case APPEND:
-                return new IntAppendFile(new IntWriteFile(FileBlock, connector, false));
+                return new IntAppendFile(new IntWriteFile(fileBlock, connector, false));
             case READ:
-                return new IntReadFile(FileBlock, connector);
+                return new IntReadFile(fileBlock, connector);
             case WRITE:
-                return new IntWriteFile(FileBlock, connector, false);
+                return new IntWriteFile(fileBlock, connector, false);
             default:
                 return null;
         }
     }
 
     private IFile createLong(Connector connector, URI uri, FileMode mode) {
-        FileBlock FileBlock = new FileBlock(uri.getPath(), "");
+        FileBlock fileBlock = new FileBlock(uri.getPath(), "");
         switch (mode) {
             case APPEND:
-                return new LongAppendFile(new LongWriteFile(FileBlock, connector, false));
+                return new LongAppendFile(new LongWriteFile(fileBlock, connector, false));
             case READ:
-                return new LongReadFile(FileBlock, connector);
+                return new LongReadFile(fileBlock, connector);
             case WRITE:
-                return new LongWriteFile(FileBlock, connector, false);
+                return new LongWriteFile(fileBlock, connector, false);
             default:
                 return null;
         }
     }
 
     private IFile createDouble(Connector connector, URI uri, FileMode mode) {
-        FileBlock FileBlock = new FileBlock(uri.getPath(), "");
+        FileBlock fileBlock = new FileBlock(uri.getPath(), "");
         switch (mode) {
             case APPEND:
-                return new DoubleAppendFile(new DoubleWriteFile(FileBlock, connector, false));
+                return new DoubleAppendFile(new DoubleWriteFile(fileBlock, connector, false));
             case READ:
-                return new DoubleReadFile(FileBlock, connector);
+                return new DoubleReadFile(fileBlock, connector);
             case WRITE:
-                return new DoubleWriteFile(FileBlock, connector, false);
+                return new DoubleWriteFile(fileBlock, connector, false);
             default:
                 return null;
         }

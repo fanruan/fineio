@@ -13,16 +13,16 @@ import com.fineio.v3.type.FileMode;
  * @date 2019/4/3
  */
 public class LongWriteFile extends WriteFile<LongDirectBuffer> {
-    public LongWriteFile(FileBlock FileBlock, Connector connector, boolean asyncWrite) {
-        super(FileBlock, Offset.LONG, connector, asyncWrite);
+    public LongWriteFile(FileBlock fileBlock, Connector connector, boolean asyncWrite) {
+        super(fileBlock, Offset.LONG, connector, asyncWrite);
     }
 
-    public static LongWriteFile ofAsync(FileBlock FileBlock, Connector connector) {
-        return new LongWriteFile(FileBlock, connector, true);
+    public static LongWriteFile ofAsync(FileBlock fileBlock, Connector connector) {
+        return new LongWriteFile(fileBlock, connector, true);
     }
 
-    public static LongWriteFile ofSync(FileBlock FileBlock, Connector connector) {
-        return new LongWriteFile(FileBlock, connector, false);
+    public static LongWriteFile ofSync(FileBlock fileBlock, Connector connector) {
+        return new LongWriteFile(fileBlock, connector, false);
     }
 
     public void putLong(long pos, long value) throws FileClosedException, IllegalArgumentException {

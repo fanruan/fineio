@@ -53,12 +53,12 @@ public class ByteWriteFileTest {
         ConcurrentHashMap<Object, Object> buffers = spy(new ConcurrentHashMap<>());
         whenNew(ConcurrentHashMap.class).withNoArguments().thenReturn(buffers);
         ByteDirectBuf buf = mock(ByteDirectBuf.class);
-        FileBlock FileBlock = mock(FileBlock.class);
+        FileBlock fileBlock = mock(FileBlock.class);
         FileBlock childFileBlock = mock(FileBlock.class);
-        whenNew(FileBlock.class).withArguments(FileBlock.getPath(), "0").thenReturn(childFileBlock);
+        whenNew(FileBlock.class).withArguments(fileBlock.getPath(), "0").thenReturn(childFileBlock);
         whenNew(ByteDirectBuf.class).withArguments(childFileBlock, 1, FileMode.WRITE).thenReturn(buf);
 
-        ByteWriteFile wf = ByteWriteFile.ofSync(FileBlock, mock(Connector.class));
+        ByteWriteFile wf = ByteWriteFile.ofSync(fileBlock, mock(Connector.class));
 
         assertEquals(buf, wf.getBuffer(0));
 

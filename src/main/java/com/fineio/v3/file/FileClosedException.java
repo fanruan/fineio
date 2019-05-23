@@ -7,7 +7,7 @@ import com.fineio.io.file.FileBlock;
  * @date 2019/5/21
  */
 public class FileClosedException extends RuntimeException {
-    public FileClosedException(FileBlock FileBlock) {
-        super(FileBlock.getPath());
+    public FileClosedException(FileBlock fileBlock) {
+        super(fileBlock.getPath());
     }
 }

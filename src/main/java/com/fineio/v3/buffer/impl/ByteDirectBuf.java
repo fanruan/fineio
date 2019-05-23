@@ -14,10 +14,10 @@ public class ByteDirectBuf extends BaseDirectBuffer implements ByteDirectBuffer 
     /**
      * for write
      *
-     * @param FileBlock file key
+     * @param fileBlock file key
      */
-    public ByteDirectBuf(FileBlock FileBlock, int maxCap, FileMode fileMode) {
-        super(FileBlock, Offset.BYTE, maxCap, fileMode);
+    public ByteDirectBuf(FileBlock fileBlock, int maxCap, FileMode fileMode) {
+        super(fileBlock, Offset.BYTE, maxCap, fileMode);
     }
 
     /**
@@ -25,10 +25,10 @@ public class ByteDirectBuf extends BaseDirectBuffer implements ByteDirectBuffer 
      *
      * @param address 地址
      * @param cap     容量
-     * @param FileBlock file key
+     * @param fileBlock file key
      */
-    public ByteDirectBuf(long address, int cap, FileBlock FileBlock, int maxCap, FileMode fileMode) {
-        super(address, cap, FileBlock, Offset.BYTE, maxCap, fileMode);
+    public ByteDirectBuf(long address, int cap, FileBlock fileBlock, int maxCap, FileMode fileMode) {
+        super(address, cap, fileBlock, Offset.BYTE, maxCap, fileMode);
     }
 
     @Override

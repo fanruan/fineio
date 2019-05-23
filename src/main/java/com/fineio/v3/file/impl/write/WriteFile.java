@@ -20,8 +20,8 @@ public abstract class WriteFile<B extends DirectBuffer> extends File<B> implemen
 
     private final boolean asyncWrite;
 
-    WriteFile(FileBlock FileBlock, Offset offset, Connector connector, boolean asyncWrite) {
-        super(FileBlock, offset, connector);
+    WriteFile(FileBlock fileBlock, Offset offset, Connector connector, boolean asyncWrite) {
+        super(fileBlock, offset, connector);
         this.asyncWrite = asyncWrite;
     }
 

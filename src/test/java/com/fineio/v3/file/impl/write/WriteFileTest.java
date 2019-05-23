@@ -42,12 +42,12 @@ public class WriteFileTest {
 
         Connector connector = mock(Connector.class);
         setInternalState(wf, "connector", connector);
-        FileBlock FileBlock = mock(FileBlock.class);
-        setInternalState(wf, "fileBlock", FileBlock);
+        FileBlock fileBlock = mock(FileBlock.class);
+        setInternalState(wf, "fileBlock", fileBlock);
 
         wf.delete();
 
-        verify(connector).delete(FileBlock);
+        verify(connector).delete(fileBlock);
     }
 
     @Test

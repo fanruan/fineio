@@ -95,8 +95,8 @@ public class AppendFileTest {
         setInternalState(af, "writeFile", wf);
         when(wf.nthVal(anyLong())).thenReturn(0, 1);
 
-        FileBlock FileBlock = mock(FileBlock.class);
-        setInternalState(wf, "fileBlock", FileBlock);
+        FileBlock fileBlock = mock(FileBlock.class);
+        setInternalState(wf, "fileBlock", fileBlock);
 
         Connector connector = mock(Connector.class);
         setInternalState(wf, "connector", connector);

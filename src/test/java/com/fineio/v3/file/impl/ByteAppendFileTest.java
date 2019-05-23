@@ -52,10 +52,10 @@ public class ByteAppendFileTest {
         setInternalState(wf, "connector", mock(Connector.class));
         setInternalState(wf, "offset", Offset.BYTE);
 
-        FileBlock FileBlock = mock(FileBlock.class);
+        FileBlock fileBlock = mock(FileBlock.class);
         ByteDirectBuf buf = mock(ByteDirectBuf.class);
-        whenNew(ByteDirectBuf.class).withArguments(1L, 1, FileBlock, 1, FileMode.WRITE).thenReturn(buf);
+        whenNew(ByteDirectBuf.class).withArguments(1L, 1, fileBlock, 1, FileMode.WRITE).thenReturn(buf);
 
-        assertEquals(buf, af.newDirectBuf(1, 1, FileBlock));
+        assertEquals(buf, af.newDirectBuf(1, 1, fileBlock));
     }
 }

@@ -51,6 +51,7 @@ public class WriteIOFileTest extends TestCase {
     public void testConstruct() throws Exception {
         final byte size = 26;
         Connector connector = new MemoryConnector() {
+            @Override
             public byte getBlockOffset() {
                 return size;
             }
@@ -310,7 +311,7 @@ public class WriteIOFileTest extends TestCase {
 
         private Map<FileBlock, byte[]> map = new ConcurrentHashMap<FileBlock, byte[]>();
 
-
+        @Override
         public InputStream read(FileBlock file) {
             byte[] b = map.get(file);
             if (b != null) {
@@ -319,7 +320,7 @@ public class WriteIOFileTest extends TestCase {
             return null;
         }
 
-
+        @Override
         public void write(FileBlock file, InputStream inputStream) {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             byte[] temp = new byte[1024];
@@ -334,7 +335,7 @@ public class WriteIOFileTest extends TestCase {
             map.put(file, byteArrayOutputStream.toByteArray());
         }
 
-
+        @Override
         public boolean delete(FileBlock block) {
             map.remove(block);
             return true;

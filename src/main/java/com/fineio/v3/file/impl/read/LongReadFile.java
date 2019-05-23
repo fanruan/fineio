@@ -13,8 +13,8 @@ import com.fineio.v3.type.FileMode;
  * @date 2019/4/12
  */
 public class LongReadFile extends ReadFile<LongDirectBuffer> {
-    public LongReadFile(FileBlock FileBlock, Connector connector) {
-        super(FileBlock, Offset.LONG, connector);
+    public LongReadFile(FileBlock fileBlock, Connector connector) {
+        super(fileBlock, Offset.LONG, connector);
     }
 
     public long getLong(long pos) throws FileClosedException, IllegalArgumentException {
@@ -24,7 +24,7 @@ public class LongReadFile extends ReadFile<LongDirectBuffer> {
     }
 
     @Override
-    LongDirectBuffer newDirectBuf(long address, int size, FileBlock FileBlock) {
-        return new LongDirectBuf(address, size, FileBlock, size, FileMode.READ);
+    LongDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
+        return new LongDirectBuf(address, size, fileBlock, size, FileMode.READ);
     }
 }

@@ -53,12 +53,12 @@ public class DoubleWriteFileTest {
         ConcurrentHashMap<Object, Object> buffers = spy(new ConcurrentHashMap<>());
         whenNew(ConcurrentHashMap.class).withNoArguments().thenReturn(buffers);
         DoubleDirectBuf buf = mock(DoubleDirectBuf.class);
-        FileBlock FileBlock = mock(FileBlock.class);
+        FileBlock fileBlock = mock(FileBlock.class);
         FileBlock childFileBlock = mock(FileBlock.class);
-        whenNew(FileBlock.class).withArguments(FileBlock.getPath(), "0").thenReturn(childFileBlock);
+        whenNew(FileBlock.class).withArguments(fileBlock.getPath(), "0").thenReturn(childFileBlock);
         whenNew(DoubleDirectBuf.class).withArguments(childFileBlock, 1 << -3, FileMode.WRITE).thenReturn(buf);
 
-        DoubleWriteFile wf = DoubleWriteFile.ofSync(FileBlock, mock(Connector.class));
+        DoubleWriteFile wf = DoubleWriteFile.ofSync(fileBlock, mock(Connector.class));
 
         assertEquals(buf, wf.getBuffer(0));
 

@@ -53,12 +53,12 @@ public class LongWriteFileTest {
         ConcurrentHashMap<Object, Object> buffers = spy(new ConcurrentHashMap<>());
         whenNew(ConcurrentHashMap.class).withNoArguments().thenReturn(buffers);
         LongDirectBuf buf = mock(LongDirectBuf.class);
-        FileBlock FileBlock = mock(FileBlock.class);
+        FileBlock fileBlock = mock(FileBlock.class);
         FileBlock childFileBlock = mock(FileBlock.class);
-        whenNew(FileBlock.class).withArguments(FileBlock.getPath(), "0").thenReturn(childFileBlock);
+        whenNew(FileBlock.class).withArguments(fileBlock.getPath(), "0").thenReturn(childFileBlock);
         whenNew(LongDirectBuf.class).withArguments(childFileBlock, 1 << -3, FileMode.WRITE).thenReturn(buf);
 
-        LongWriteFile wf = LongWriteFile.ofSync(FileBlock, mock(Connector.class));
+        LongWriteFile wf = LongWriteFile.ofSync(fileBlock, mock(Connector.class));
 
         assertEquals(buf, wf.getBuffer(0));
 

@@ -39,10 +39,11 @@ public interface Connector {
      *
      * @param block
      * @return
-     * @since 2.0
      */
     @Deprecated
-    boolean delete(FileBlock block);
+    default boolean delete(FileBlock block) {
+        return delete((Block) block);
+    }
 
     /**
      * 写文件时单个块的最大size偏移量
@@ -60,22 +61,21 @@ public interface Connector {
      *
      * @param block
      * @return
-     * @since 2.0
      */
     @Deprecated
-    boolean exists(FileBlock block);
+    default boolean exists(FileBlock block) {
+        return exists((Block) block);
+    }
 
     /**
      * @param block
      * @return
-     * @since 3.0
      */
     boolean delete(Block block);
 
     /**
      * @param block
      * @return
-     * @since 3.0
      */
     boolean exists(Block block);
 
@@ -93,6 +93,7 @@ public interface Connector {
      * @param destBlock
      * @return
      */
+    @Deprecated
     boolean copy(FileBlock srcBlock, FileBlock destBlock) throws IOException;
 
     /**
@@ -100,5 +101,6 @@ public interface Connector {
      * @param block
      * @return
      */
+    @Deprecated
     URI deleteParent(FileBlock block);
 }

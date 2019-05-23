@@ -51,10 +51,10 @@ public class IntAppendFileTest {
         setInternalState(wf, "connector", mock(Connector.class));
         setInternalState(wf, "offset", Offset.INT);
 
-        FileBlock FileBlock = mock(FileBlock.class);
+        FileBlock fileBlock = mock(FileBlock.class);
         IntDirectBuf buf = mock(IntDirectBuf.class);
-        whenNew(IntDirectBuf.class).withArguments(1L, 1, FileBlock, 1 << -2, FileMode.WRITE).thenReturn(buf);
+        whenNew(IntDirectBuf.class).withArguments(1L, 1, fileBlock, 1 << -2, FileMode.WRITE).thenReturn(buf);
 
-        assertEquals(buf, af.newDirectBuf(1, 1, FileBlock));
+        assertEquals(buf, af.newDirectBuf(1, 1, fileBlock));
     }
 }

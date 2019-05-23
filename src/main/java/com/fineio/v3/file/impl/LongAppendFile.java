@@ -20,7 +20,7 @@ public class LongAppendFile extends AppendFile<LongWriteFile, LongDirectBuffer> 
     }
 
     @Override
-    protected LongDirectBuffer newDirectBuf(long address, int size, FileBlock FileBlock) {
-        return new LongDirectBuf(address, size, FileBlock, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()), FileMode.WRITE);
+    protected LongDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
+        return new LongDirectBuf(address, size, fileBlock, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()), FileMode.WRITE);
     }
 }

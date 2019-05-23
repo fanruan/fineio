@@ -20,7 +20,7 @@ public class DoubleAppendFile extends AppendFile<DoubleWriteFile, DoubleDirectBu
     }
 
     @Override
-    protected DoubleDirectBuffer newDirectBuf(long address, int size, FileBlock FileBlock) {
-        return new DoubleDirectBuf(address, size, FileBlock, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()), FileMode.WRITE);
+    protected DoubleDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
+        return new DoubleDirectBuf(address, size, fileBlock, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()), FileMode.WRITE);
     }
 }

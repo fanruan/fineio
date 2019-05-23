@@ -14,16 +14,16 @@ import com.fineio.v3.type.FileMode;
  */
 
 public class ByteWriteFile extends WriteFile<ByteDirectBuffer> {
-    public ByteWriteFile(FileBlock FileBlock, Connector connector, boolean asyncWrite) {
-        super(FileBlock, Offset.BYTE, connector, asyncWrite);
+    public ByteWriteFile(FileBlock fileBlock, Connector connector, boolean asyncWrite) {
+        super(fileBlock, Offset.BYTE, connector, asyncWrite);
     }
 
-    public static ByteWriteFile ofAsync(FileBlock FileBlock, Connector connector) {
-        return new ByteWriteFile(FileBlock, connector, true);
+    public static ByteWriteFile ofAsync(FileBlock fileBlock, Connector connector) {
+        return new ByteWriteFile(fileBlock, connector, true);
     }
 
-    public static ByteWriteFile ofSync(FileBlock FileBlock, Connector connector) {
-        return new ByteWriteFile(FileBlock, connector, false);
+    public static ByteWriteFile ofSync(FileBlock fileBlock, Connector connector) {
+        return new ByteWriteFile(fileBlock, connector, false);
     }
 
     public void putByte(long pos, byte value) throws FileClosedException, IllegalArgumentException {
