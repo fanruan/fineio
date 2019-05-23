@@ -7,6 +7,7 @@ import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.allocator.BaseMemoryAllocator;
 import com.fineio.v3.memory.allocator.WriteMemoryAllocator;
 import com.fineio.v3.type.FileMode;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -25,6 +26,11 @@ import static org.junit.Assert.assertEquals;
  * @date 2019-05-13
  */
 public class MemoryManagerTest {
+
+    @BeforeClass
+    public static void beforeAll() {
+        MemoryManager.INSTANCE.clear();
+    }
 
     @Test
     public void allocateRead() throws NoSuchFieldException, IllegalAccessException, OutOfDirectMemoryException {
