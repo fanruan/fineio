@@ -10,6 +10,7 @@
     <properties>
         <mockito.version>2.8.9</mockito.version>
         <powermock.version>1.7.4</powermock.version>
+        <jmh.version>1.21</jmh.version>
     </properties>
     <packaging>jar</packaging>
 
@@ -97,6 +98,18 @@
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-mockito2</artifactId>
             <version>${powermock.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>${jmh.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>${jmh.version}</version>
             <scope>test</scope>
         </dependency>
 
