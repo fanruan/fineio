@@ -75,7 +75,7 @@ public class JavaVersion {
      * It is 55 (JDK 11)
      * if the JVM supports <code>java.util.Optional.isEmpty()</code>.
      */
-    public static final int MAJOR_VERSION;
+    private static final int MAJOR_VERSION;
 
     static {
         int ver = JAVA_3;
@@ -97,5 +97,10 @@ public class JavaVersion {
         } catch (Throwable t) {
         }
         MAJOR_VERSION = ver;
+    }
+
+
+    public static boolean isOverJava8() {
+        return MAJOR_VERSION >= JAVA_8;
     }
 }

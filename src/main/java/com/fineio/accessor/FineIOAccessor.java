@@ -26,7 +26,7 @@ public enum FineIOAccessor implements IOAccessor {
 
     FineIOAccessor() {
         int version = 2;
-        if (JavaVersion.MAJOR_VERSION >= JavaVersion.JAVA_8) {
+        if (JavaVersion.isOverJava8()) {
             version = 3;
         }
         try {
