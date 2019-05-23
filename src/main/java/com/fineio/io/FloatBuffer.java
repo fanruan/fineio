@@ -1,5 +1,6 @@
 package com.fineio.io;
 
+import com.fineio.accessor.buffer.FloatBuf;
 import com.fineio.io.file.FileBlock;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
@@ -11,7 +12,8 @@ import java.net.URI;
  * @author yee
  * @date 2018/9/19
  */
-public class FloatBuffer extends BaseBuffer<FloatBuffer.FloatReadBuffer, FloatBuffer.FloatWriteBuffer> {
+@Deprecated
+public class FloatBuffer extends BaseBuffer<FloatBuffer.FloatReadBuffer, FloatBuffer.FloatWriteBuffer> implements FloatBuf {
     public FloatBuffer(Connector connector, URI uri, boolean syncWrite, Listener listener) {
         super(connector, uri, syncWrite, listener);
     }
@@ -45,6 +47,7 @@ public class FloatBuffer extends BaseBuffer<FloatBuffer.FloatReadBuffer, FloatBu
         void put(int pos, float value);
     }
 
+    @Deprecated
     private class FloatBufferR extends ReadBuffer implements FloatReadBuffer {
         @Override
         public float get(int pos) {
@@ -53,6 +56,7 @@ public class FloatBuffer extends BaseBuffer<FloatBuffer.FloatReadBuffer, FloatBu
         }
     }
 
+    @Deprecated
     private class FloatBufferW extends WriteBuffer implements FloatWriteBuffer {
         @Override
         public void put(float value) {

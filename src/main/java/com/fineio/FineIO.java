@@ -31,6 +31,7 @@ import java.util.concurrent.Future;
  * @author yee
  * @date 2018/9/20
  */
+@Deprecated
 public final class FineIO {
 
     public static boolean DEBUG = false;

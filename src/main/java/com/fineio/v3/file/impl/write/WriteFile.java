@@ -1,5 +1,6 @@
 package com.fineio.v3.file.impl.write;
 
+import com.fineio.accessor.file.IWriteFile;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.connector.Connector;
@@ -14,7 +15,7 @@ import java.util.Iterator;
 /**
  * @author yee
  */
-public abstract class WriteFile<B extends DirectBuffer> extends File<B> {
+public abstract class WriteFile<B extends DirectBuffer> extends File<B> implements IWriteFile<B> {
     private int curBuf = -1;
 
     private final boolean asyncWrite;

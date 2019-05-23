@@ -26,7 +26,7 @@ public class FileSyncJob implements Runnable {
     @Override
     public void run() {
         try (InputStream input = new BufferedInputStream(new DirectMemoryInputStream(buffer.getAddress(), buffer.getSizeInBytes()))) {
-            connector.write(input, buffer.getFileKey());
+            connector.write(buffer.getFileKey(), input);
             // TODO: 2019/4/15 anchore 写完要通知cache该块已过期，重新load
             // TODO: 2019/4/17 anchore 或者直接把buffer加到cache，写后读的场景会更快吧
         } catch (IOException e) {

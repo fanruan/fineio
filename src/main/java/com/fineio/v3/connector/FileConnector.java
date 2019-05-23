@@ -1,6 +1,6 @@
 package com.fineio.v3.connector;
 
-import com.fineio.v3.file.Block;
+import com.fineio.accessor.Block;
 import com.fineio.v3.file.DirectoryBlock;
 import com.fineio.v3.file.FileKey;
 
@@ -20,7 +20,7 @@ import java.util.List;
  * @date 2019/4/15
  */
 public class FileConnector extends BaseConnector {
-    public FileConnector(int blockOffset) {
+    public FileConnector(byte blockOffset) {
         super(blockOffset);
     }
 
@@ -28,7 +28,7 @@ public class FileConnector extends BaseConnector {
     }
 
     @Override
-    public void write(InputStream is, FileKey file) throws IOException {
+    public void write(FileKey file, InputStream is) throws IOException {
         File f = new File(file.getDir());
         if (!f.exists()) {
             f.mkdirs();
@@ -47,12 +47,12 @@ public class FileConnector extends BaseConnector {
     }
 
     @Override
-    public boolean delete(Block file) {
+    public boolean delete(FileKey file) {
         return new File(file.getPath()).delete();
     }
 
     @Override
-    public boolean exists(Block file) {
+    public boolean exists(FileKey file) {
         return new File(file.getPath()).exists();
     }
 
@@ -74,7 +74,7 @@ public class FileConnector extends BaseConnector {
     }
 
     @Override
-    public void write(byte[] data, FileKey file) throws IOException {
+    public void write(FileKey file, byte[] data) throws IOException {
         try (OutputStream output = new FileOutputStream(file.getPath())) {
             output.write(data);
         }

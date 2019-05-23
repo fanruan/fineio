@@ -5,23 +5,23 @@ package com.fineio.v3.connector;
  */
 public abstract class BaseConnector implements Connector {
 
-    private final int blockOffset;
+    private final byte blockOffset;
 
     /**
      * Default constructor
      *
      * @param blockOffset
      */
-    public BaseConnector(int blockOffset) {
+    public BaseConnector(byte blockOffset) {
         this.blockOffset = blockOffset;
     }
 
     public BaseConnector() {
-        this(22);
+        this((byte) 22);
     }
 
     @Override
-    public int getBlockOffset() {
+    public byte getBlockOffset() {
         return blockOffset;
     }
 }

@@ -1,6 +1,7 @@
 package com.fineio.io;
 
 
+import com.fineio.accessor.buffer.IntBuf;
 import com.fineio.io.file.FileBlock;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
@@ -12,7 +13,7 @@ import java.net.URI;
  * @author yee
  * @date 2018/9/19
  */
-public class IntBuffer extends BaseBuffer<IntBuffer.IntReadBuffer, IntBuffer.IntWriteBuffer> {
+public class IntBuffer extends BaseBuffer<IntBuffer.IntReadBuffer, IntBuffer.IntWriteBuffer> implements IntBuf {
     public IntBuffer(Connector connector, URI uri, boolean syncWrite, Listener listener) {
         super(connector, uri, syncWrite, listener);
     }

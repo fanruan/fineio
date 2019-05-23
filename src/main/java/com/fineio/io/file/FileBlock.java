@@ -1,12 +1,14 @@
 package com.fineio.io.file;
 
 
+import com.fineio.accessor.Block;
+
 import java.net.URI;
 
 /**
  * Created by daniel on 2017/2/9.
  */
-public final class FileBlock {
+public final class FileBlock implements Block {
     private final static String EMPTY = "";
 
     private URI uri;
@@ -44,7 +46,8 @@ public final class FileBlock {
         return  uri;
     }
 
-    public String getFileName() {
+    @Override
+    public String getName() {
         return fileName;
     }
 
@@ -77,4 +80,10 @@ public final class FileBlock {
         result = 31 * result + (fileName != null ? fileName.hashCode() : 0);
         return result;
     }
+
+    @Override
+    public String getPath() {
+        return getBlockURI().getPath();
+    }
+
 }

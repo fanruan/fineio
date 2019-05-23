@@ -1,6 +1,8 @@
 package com.fineio.io.file;
 
 
+import com.fineio.accessor.buffer.Buf;
+import com.fineio.accessor.file.IWriteFile;
 import com.fineio.io.BaseBuffer;
 import com.fineio.io.Buffer;
 import com.fineio.io.ByteBuffer;
@@ -18,7 +20,7 @@ import java.net.URI;
  * @author yee
  * @date 2018/9/20
  */
-public final class WriteIOFile<B extends Buffer> extends IOFile<B> {
+public final class WriteIOFile<B extends Buf> extends IOFile<B> implements IWriteFile<B> {
     private final boolean sync;
 
     WriteIOFile(Connector connector, URI uri, FileModel model, boolean sync) {
@@ -33,7 +35,7 @@ public final class WriteIOFile<B extends Buffer> extends IOFile<B> {
         return FileLevel.WRITE;
     }
 
-    public static final <E extends BaseBuffer> WriteIOFile<E> createFineIO(Connector connector, URI uri, FileModel model, boolean sync) {
+    public static final <E extends Buf> WriteIOFile<E> createFineIO(Connector connector, URI uri, FileModel model, boolean sync) {
         return new WriteIOFile<E>(connector, uri, model, sync);
     }
 

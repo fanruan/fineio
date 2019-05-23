@@ -168,6 +168,6 @@ public class AppendFileTest {
 
         invokeMethod(af, "writeLastPos");
 
-        verify(connector).write(eq(new byte[4]), any(FileKey.class));
+        verify(connector).write(any(FileKey.class), eq(new byte[4]));
     }
 }

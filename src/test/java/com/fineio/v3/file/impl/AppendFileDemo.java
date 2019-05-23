@@ -23,7 +23,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class AppendFileDemo {
     private FileKey key = new FileKey(System.getProperty("user.dir"), "append");
-    private FileConnector connector = new FileConnector(10);
+    private FileConnector connector = new FileConnector((byte) 10);
     private int n = 1 << 10;
 
     @Before

@@ -1,5 +1,6 @@
 package com.fineio.v3.file.impl;
 
+import com.fineio.accessor.file.IFile;
 import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.connector.Connector;
 import com.fineio.v3.file.FileClosedException;
@@ -15,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author anchore
  * @date 2019/4/16
  */
-public abstract class File<B extends DirectBuffer> implements Closeable {
+public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B> {
     protected final FileKey fileKey;
 
     protected final Connector connector;

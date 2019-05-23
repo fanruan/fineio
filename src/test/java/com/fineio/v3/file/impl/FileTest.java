@@ -27,7 +27,7 @@ public class FileTest {
         File<?> f = mock(File.class, Mockito.CALLS_REAL_METHODS);
 
         Connector connector = mock(Connector.class);
-        when(connector.getBlockOffset()).thenReturn(10);
+        when(connector.getBlockOffset()).thenReturn((byte) 10);
         setInternalState(f, "connector", connector);
 
         setInternalState(f, "offset", Offset.BYTE);
@@ -41,7 +41,7 @@ public class FileTest {
         File<?> f = mock(File.class, Mockito.CALLS_REAL_METHODS);
 
         Connector connector = mock(Connector.class);
-        when(connector.getBlockOffset()).thenReturn(10);
+        when(connector.getBlockOffset()).thenReturn((byte) 10);
         setInternalState(f, "connector", connector);
 
         setInternalState(f, "offset", Offset.INT);

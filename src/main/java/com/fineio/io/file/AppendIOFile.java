@@ -1,6 +1,7 @@
 package com.fineio.io.file;
 
-import com.fineio.io.BaseBuffer;
+import com.fineio.accessor.buffer.Buf;
+import com.fineio.accessor.file.IAppendFile;
 import com.fineio.io.Buffer;
 import com.fineio.storage.Connector;
 
@@ -10,7 +11,7 @@ import java.net.URI;
  * @author yee
  * @date 2018/9/20
  */
-public final class AppendIOFile<B extends Buffer> extends BaseReadIOFile<B> {
+public final class AppendIOFile<B extends Buf> extends BaseReadIOFile<B> implements IAppendFile<B> {
     private final boolean sync;
 
     AppendIOFile(Connector connector, URI uri, FileModel model, boolean sync) {
@@ -27,7 +28,7 @@ public final class AppendIOFile<B extends Buffer> extends BaseReadIOFile<B> {
         return FileLevel.APPEND;
     }
 
-    public static final <E extends BaseBuffer> AppendIOFile<E> createFineIO(Connector connector, URI uri, FileModel model, boolean sync) {
+    public static final <E extends Buf> AppendIOFile<E> createFineIO(Connector connector, URI uri, FileModel model, boolean sync) {
         return new AppendIOFile<E>(connector, uri, model, sync);
     }
 

@@ -1,8 +1,8 @@
 package com.fineio.io.file;
 
+import com.fineio.accessor.buffer.Buf;
 import com.fineio.base.Bits;
 import com.fineio.exception.BlockNotFoundException;
-import com.fineio.io.Buffer;
 import com.fineio.storage.Connector;
 
 import java.io.IOException;
@@ -13,7 +13,7 @@ import java.net.URI;
  * @author yee
  * @date 2018/9/20
  */
-public abstract class BaseReadIOFile<B extends Buffer> extends IOFile<B> {
+public abstract class BaseReadIOFile<B extends Buf> extends IOFile<B> {
     BaseReadIOFile(Connector connector, URI uri, FileModel model) {
         super(connector, uri, model);
         try {

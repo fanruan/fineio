@@ -1,5 +1,6 @@
 package com.fineio.v3.file.impl;
 
+import com.fineio.accessor.file.IAppendFile;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.connector.Connector;
@@ -17,7 +18,7 @@ import java.nio.ByteBuffer;
 /**
  * @author yee
  */
-abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> {
+abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> implements IAppendFile<B> {
     private static final String LAST_POS = "last_pos";
 
     int lastPos;
@@ -76,6 +77,7 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> {
 
     abstract B newDirectBuf(long address, int size, FileKey fileKey);
 
+    @Override
     public void close() {
         try {
             writeFile.close();
@@ -87,7 +89,7 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> {
     private void writeLastPos() {
         byte[] bytes = ByteBuffer.allocate(4).putInt(lastPos).array();
         try {
-            writeFile.connector.write(bytes, new FileKey(writeFile.fileKey.getPath(), LAST_POS));
+            writeFile.connector.write(new FileKey(writeFile.fileKey.getPath(), LAST_POS), bytes);
         } catch (IOException e) {
             FineIOLoggers.getLogger().error(e);
         }

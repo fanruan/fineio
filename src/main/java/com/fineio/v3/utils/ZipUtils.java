@@ -1,9 +1,9 @@
 package com.fineio.v3.utils;
 
 
+import com.fineio.accessor.Block;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.Block;
 import com.fineio.v3.file.DirectoryBlock;
 import com.fineio.v3.file.FileKey;
 
@@ -44,7 +44,7 @@ public class ZipUtils {
         try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(inputStream))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null && !entry.isDirectory()) {
-                connector.write(inputStream, new FileKey(parent, entry.getName()));
+                connector.write(new FileKey(parent, entry.getName()), inputStream);
             }
             long end = System.currentTimeMillis();
             FineIOLoggers.getLogger().info(String.format("Unzip %s finished. Cost %d ms", parent, (end - start)));

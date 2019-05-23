@@ -22,7 +22,7 @@ public class FileBlockTest extends TestCase {
         assertNotSame(constructor.newInstance(a, "test"), constructor.newInstance(c, "test"));
         assertEquals(constructor.newInstance(a, "test").getParentUri(), a);
         assertEquals(constructor.newInstance(b, "test").getParentUri(), b);
-        assertEquals(constructor.newInstance(c, "test").getFileName(), "test");
+        assertEquals(constructor.newInstance(c, "test").getName(), "test");
     }
 
     public void testToString() throws  Exception {

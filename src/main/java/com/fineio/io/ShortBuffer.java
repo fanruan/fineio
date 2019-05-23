@@ -1,5 +1,6 @@
 package com.fineio.io;
 
+import com.fineio.accessor.buffer.ShortBuf;
 import com.fineio.io.file.FileBlock;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
@@ -11,7 +12,8 @@ import java.net.URI;
  * @author yee
  * @date 2018/9/19
  */
-public class ShortBuffer extends BaseBuffer<ShortBuffer.ShortReadBuffer, ShortBuffer.ShortWriteBuffer> {
+@Deprecated
+public class ShortBuffer extends BaseBuffer<ShortBuffer.ShortReadBuffer, ShortBuffer.ShortWriteBuffer> implements ShortBuf {
     public ShortBuffer(Connector connector, URI uri, boolean syncWrite, Listener listener) {
         super(connector, uri, syncWrite, listener);
     }
@@ -45,6 +47,7 @@ public class ShortBuffer extends BaseBuffer<ShortBuffer.ShortReadBuffer, ShortBu
         void put(int pos, short value);
     }
 
+    @Deprecated
     private class ShortBufferR extends ReadBuffer implements ShortReadBuffer {
         @Override
         public short get(int pos) {
@@ -53,6 +56,7 @@ public class ShortBuffer extends BaseBuffer<ShortBuffer.ShortReadBuffer, ShortBu
         }
     }
 
+    @Deprecated
     private class ShortBufferW extends WriteBuffer implements ShortWriteBuffer {
         @Override
         public void put(short value) {

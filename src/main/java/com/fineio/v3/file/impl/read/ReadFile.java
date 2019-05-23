@@ -1,6 +1,7 @@
 package com.fineio.v3.file.impl.read;
 
 
+import com.fineio.accessor.file.IReadFile;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.connector.Connector;
@@ -18,7 +19,7 @@ import java.io.InputStream;
  * @author anchore
  * @date 2019/4/16
  */
-abstract class ReadFile<B extends DirectBuffer> extends File<B> {
+abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IReadFile<B> {
     ReadFile(FileKey fileKey, Offset offset, Connector connector) {
         super(fileKey, offset, connector);
     }
