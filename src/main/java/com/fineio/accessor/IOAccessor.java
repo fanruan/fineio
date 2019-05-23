@@ -8,7 +8,7 @@ import com.fineio.accessor.file.IAppendFile;
 import com.fineio.accessor.file.IFile;
 import com.fineio.accessor.file.IReadFile;
 import com.fineio.accessor.file.IWriteFile;
-import com.fineio.accessor.store.IConnector;
+import com.fineio.storage.Connector;
 
 import java.net.URI;
 
@@ -17,7 +17,7 @@ import java.net.URI;
  * @date 2019-05-22
  */
 public interface IOAccessor {
-    <F extends IFile> F createFile(IConnector connector, URI uri, Model<F> model);
+    <F extends IFile> F createFile(Connector connector, URI uri, Model<F> model);
 
     <F extends IAppendFile<? extends ByteBuf>> void put(F file, byte value);
 

@@ -1,6 +1,6 @@
 package com.fineio.v3.buffer.impl;
 
-import com.fineio.v3.file.FileKey;
+import com.fineio.io.file.FileBlock;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
 import com.fineio.v3.type.FileMode;
@@ -31,7 +31,7 @@ public class ByteDirectBufTest {
         spy(BaseDirectBuffer.class);
         doReturn(1L).when(BaseDirectBuffer.class, "allocate", 16, Offset.BYTE, FileMode.WRITE);
 
-        ByteDirectBuf buf = spy(new ByteDirectBuf(mock(FileKey.class), 1024, FileMode.WRITE));
+        ByteDirectBuf buf = spy(new ByteDirectBuf(mock(FileBlock.class), 1024, FileMode.WRITE));
         mockStatic(MemoryUtils.class);
 
         buf.putByte(0, (byte) 0);
@@ -46,7 +46,7 @@ public class ByteDirectBufTest {
 
     @Test
     public void getByte() {
-        ByteDirectBuf buf = spy(new ByteDirectBuf(1, 16, mock(FileKey.class), 1024, FileMode.READ));
+        ByteDirectBuf buf = spy(new ByteDirectBuf(1, 16, mock(FileBlock.class), 1024, FileMode.READ));
         mockStatic(MemoryUtils.class);
         when(MemoryUtils.getByte(1, 0)).thenReturn((byte) 1);
 

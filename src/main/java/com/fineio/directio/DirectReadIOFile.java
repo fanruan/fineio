@@ -50,7 +50,7 @@ public final class DirectReadIOFile<B extends Buffer> extends DirectIOFile<B> {
                         closeChild();
                         released = true;
                     }
-                    connector.delete(new FileBlock(uri));
+                    connector.delete(new FileBlock(uri.getPath()));
                 }
             }
         });

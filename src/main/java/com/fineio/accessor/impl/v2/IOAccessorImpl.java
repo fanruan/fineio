@@ -10,7 +10,6 @@ import com.fineio.accessor.file.IAppendFile;
 import com.fineio.accessor.file.IFile;
 import com.fineio.accessor.file.IReadFile;
 import com.fineio.accessor.file.IWriteFile;
-import com.fineio.accessor.store.IConnector;
 import com.fineio.io.ByteBuffer;
 import com.fineio.io.DoubleBuffer;
 import com.fineio.io.IntBuffer;
@@ -32,7 +31,7 @@ import java.net.URI;
 public class IOAccessorImpl implements IOAccessor {
 
     @Override
-    public <F extends IFile> F createFile(IConnector connector, URI uri, Model<F> model) {
+    public <F extends IFile> F createFile(Connector connector, URI uri, Model<F> model) {
         return (F) create(connector, uri, model.getFileMode(), FileModel.valueOf(model.getDataType().name()));
 
     }
@@ -98,14 +97,14 @@ public class IOAccessorImpl implements IOAccessor {
         return IOFile.getDouble((IOFile<DoubleBuffer>) file, pos);
     }
 
-    private IFile create(IConnector connector, URI uri, FileMode mode, FileModel fileModel) {
+    private IFile create(Connector connector, URI uri, FileMode mode, FileModel fileModel) {
         switch (mode) {
             case WRITE:
-                return WriteIOFile.createFineIO((Connector) connector, uri, fileModel, true);
+                return WriteIOFile.createFineIO(connector, uri, fileModel, true);
             case READ:
-                return ReadIOFile.createFineIO((Connector) connector, uri, fileModel);
+                return ReadIOFile.createFineIO(connector, uri, fileModel);
             case APPEND:
-                return AppendIOFile.createFineIO((Connector) connector, uri, fileModel, true);
+                return AppendIOFile.createFineIO(connector, uri, fileModel, true);
             default:
                 return null;
         }

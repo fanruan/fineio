@@ -101,17 +101,17 @@ FineIO使用
 示例：
 创建一个long类型的写操作文件：
 
-    IOFile<LongBuffer> file = FineIO.createIOFile(connector, uri, MODEL.WRITE_LONG);
+    IOFile<LongBuffer> file = FineIO.createIOFile(connector, dir, MODEL.WRITE_LONG);
 
 创建一个byte类型的读操作文件：
 
-    IOFile<ByteBuffer> file = FineIO.createIOFile(connector, uri, MODEL.READ_BYTE);
+    IOFile<ByteBuffer> file = FineIO.createIOFile(connector, dir, MODEL.READ_BYTE);
 
 写虚拟文件
 写操作文仅支持MODEL类型是WRITE或者EDIT开头的文件 READ类型的文件不支持写操作
 连续写double值
 
-    IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, uri, MODEL.WRITE_DOUBLE);
+    IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, dir, MODEL.WRITE_DOUBLE);
      
     for(long i = 0;i < 1000000L;i++){
         FineIO.put(file, (double)i);
@@ -120,7 +120,7 @@ FineIO使用
 
 或者
 
-    IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, uri, MODEL.WRITE_DOUBLE);
+    IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, dir, MODEL.WRITE_DOUBLE);
      
     for(long i = 0;i < 1000000L;i++){
         FineIO.put(file, i, (double)i);
@@ -131,7 +131,7 @@ FineIO使用
 读虚拟文件
 读double方法示例：
 
-    IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, uri, MODEL.READ_DOUBLE);
+    IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, dir, MODEL.READ_DOUBLE);
     double result = 0;
     for(long i = 0; i < rowCount; i++){
         result += FineIO.getDouble(file, i);
@@ -142,7 +142,7 @@ FineIO使用
 编辑虚拟文件
 按double方式编辑一个文件示例：
 
-    IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, uri, MODEL.EDIT_DOUBLE);
+    IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, dir, MODEL.EDIT_DOUBLE);
     double result = 0;
     for(long i = 0; i < rowCount; i++){
         result += FineIO.getDouble(file, i);
@@ -156,7 +156,7 @@ FineIO使用
 删除文件
 删除文件示例：
 
-    IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, uri, MODEL.READ_DOUBLE);
+    IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, dir, MODEL.READ_DOUBLE);
     file.close();
     file.delete();
 

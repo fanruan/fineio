@@ -1,8 +1,8 @@
 package com.fineio.v3.file.impl;
 
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.impl.LongDirectBuf;
-import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.file.impl.write.LongWriteFile;
 import com.fineio.v3.memory.Offset;
 import com.fineio.v3.type.FileMode;
@@ -46,15 +46,15 @@ public class LongAppendFileTest {
         LongAppendFile af = mock(LongAppendFile.class);
         LongWriteFile wf = mock(LongWriteFile.class);
         setInternalState(af, "writeFile", wf);
-        doCallRealMethod().when(af, "newDirectBuf", anyLong(), anyInt(), any(FileKey.class));
+        doCallRealMethod().when(af, "newDirectBuf", anyLong(), anyInt(), any(FileBlock.class));
 
         setInternalState(wf, "connector", mock(Connector.class));
         setInternalState(wf, "offset", Offset.LONG);
 
-        FileKey fileKey = mock(FileKey.class);
+        FileBlock FileBlock = mock(FileBlock.class);
         LongDirectBuf buf = mock(LongDirectBuf.class);
-        whenNew(LongDirectBuf.class).withArguments(1L, 1, fileKey, 1 << -3, FileMode.WRITE).thenReturn(buf);
+        whenNew(LongDirectBuf.class).withArguments(1L, 1, FileBlock, 1 << -3, FileMode.WRITE).thenReturn(buf);
 
-        assertEquals(buf, af.newDirectBuf(1, 1, fileKey));
+        assertEquals(buf, af.newDirectBuf(1, 1, FileBlock));
     }
 }

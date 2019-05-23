@@ -327,11 +327,11 @@ public abstract class IOFile<B extends Buf> implements IFile<B> {
     protected abstract Buffer initBuffer(int index);
 
     protected FileBlock createIndexBlock(int index) {
-        return new FileBlock(uri, String.valueOf(index));
+        return new FileBlock(uri.getPath(), String.valueOf(index));
     }
 
     protected final FileBlock createHeadBlock() {
-        return new FileBlock(uri, FileConstants.HEAD);
+        return new FileBlock(uri.getPath(), FileConstants.HEAD);
     }
 
     /**

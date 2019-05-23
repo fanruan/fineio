@@ -1,9 +1,9 @@
 package com.fineio.v3.file.impl.write;
 
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.LongDirectBuffer;
 import com.fineio.v3.buffer.impl.LongDirectBuf;
-import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.type.FileMode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +35,7 @@ public class LongWriteFileTest {
 
     @Test
     public void putLong() throws Exception {
-        LongWriteFile wf = spy(LongWriteFile.ofSync(mock(FileKey.class), mock(Connector.class)));
+        LongWriteFile wf = spy(LongWriteFile.ofSync(mock(FileBlock.class), mock(Connector.class)));
         LongDirectBuffer buf = mock(LongDirectBuffer.class);
         doReturn(buf).when(wf).getBuffer(0);
         doNothing().when(wf).syncBufIfNeed(anyInt());
@@ -53,12 +53,12 @@ public class LongWriteFileTest {
         ConcurrentHashMap<Object, Object> buffers = spy(new ConcurrentHashMap<>());
         whenNew(ConcurrentHashMap.class).withNoArguments().thenReturn(buffers);
         LongDirectBuf buf = mock(LongDirectBuf.class);
-        FileKey fileKey = mock(FileKey.class);
-        FileKey childFileKey = mock(FileKey.class);
-        whenNew(FileKey.class).withArguments(fileKey.getPath(), "0").thenReturn(childFileKey);
-        whenNew(LongDirectBuf.class).withArguments(childFileKey, 1 << -3, FileMode.WRITE).thenReturn(buf);
+        FileBlock FileBlock = mock(FileBlock.class);
+        FileBlock childFileBlock = mock(FileBlock.class);
+        whenNew(FileBlock.class).withArguments(FileBlock.getPath(), "0").thenReturn(childFileBlock);
+        whenNew(LongDirectBuf.class).withArguments(childFileBlock, 1 << -3, FileMode.WRITE).thenReturn(buf);
 
-        LongWriteFile wf = LongWriteFile.ofSync(fileKey, mock(Connector.class));
+        LongWriteFile wf = LongWriteFile.ofSync(FileBlock, mock(Connector.class));
 
         assertEquals(buf, wf.getBuffer(0));
 

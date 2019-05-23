@@ -1,8 +1,8 @@
 package com.fineio.v3.file.impl;
 
+import com.fineio.io.file.FileBlock;
 import com.fineio.v3.buffer.ByteDirectBuffer;
 import com.fineio.v3.buffer.impl.ByteDirectBuf;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.file.impl.write.ByteWriteFile;
 import com.fineio.v3.type.FileMode;
 
@@ -20,7 +20,7 @@ public class ByteAppendFile extends AppendFile<ByteWriteFile, ByteDirectBuffer> 
     }
 
     @Override
-    protected ByteDirectBuffer newDirectBuf(long address, int size, FileKey fileKey) {
-        return new ByteDirectBuf(address, size, fileKey, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()), FileMode.WRITE);
+    protected ByteDirectBuffer newDirectBuf(long address, int size, FileBlock FileBlock) {
+        return new ByteDirectBuf(address, size, FileBlock, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()), FileMode.WRITE);
     }
 }

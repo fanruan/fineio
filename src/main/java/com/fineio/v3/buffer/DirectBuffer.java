@@ -1,7 +1,7 @@
 package com.fineio.v3.buffer;
 
 import com.fineio.accessor.buffer.Buf;
-import com.fineio.v3.file.FileKey;
+import com.fineio.io.file.FileBlock;
 
 import java.io.Closeable;
 
@@ -10,7 +10,7 @@ import java.io.Closeable;
  * @date 2019/4/16
  */
 public interface DirectBuffer extends Closeable, Buf {
-    FileKey getFileKey();
+    FileBlock getFileBlock();
 
     long getAddress();
 

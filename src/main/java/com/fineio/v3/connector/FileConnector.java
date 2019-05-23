@@ -1,8 +1,8 @@
 package com.fineio.v3.connector;
 
 import com.fineio.accessor.Block;
+import com.fineio.io.file.FileBlock;
 import com.fineio.v3.file.DirectoryBlock;
-import com.fineio.v3.file.FileKey;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class FileConnector extends BaseConnector {
     }
 
     @Override
-    public void write(FileKey file, InputStream is) throws IOException {
+    public void write(FileBlock file, InputStream is) throws IOException {
         File f = new File(file.getDir());
         if (!f.exists()) {
             f.mkdirs();
@@ -42,18 +43,28 @@ public class FileConnector extends BaseConnector {
     }
 
     @Override
-    public InputStream read(FileKey file) throws FileNotFoundException {
+    public InputStream read(FileBlock file) throws FileNotFoundException {
         return new FileInputStream(file.getPath());
     }
 
     @Override
-    public boolean delete(FileKey file) {
-        return new File(file.getPath()).delete();
+    public boolean delete(FileBlock file) {
+        return delete((Block) file);
     }
 
     @Override
-    public boolean exists(FileKey file) {
-        return new File(file.getPath()).exists();
+    public boolean exists(FileBlock file) {
+        return exists((Block) file);
+    }
+
+    @Override
+    public boolean delete(Block block) {
+        return new File(block.getPath()).delete();
+    }
+
+    @Override
+    public boolean exists(Block block) {
+        return new File(block.getPath()).exists();
     }
 
     @Override
@@ -69,12 +80,22 @@ public class FileConnector extends BaseConnector {
             }
             return new DirectoryBlock(file, blocks);
         } else {
-            return new FileKey(f.getParent(), f.getName());
+            return new FileBlock(f.getParent(), f.getName());
         }
     }
 
     @Override
-    public void write(FileKey file, byte[] data) throws IOException {
+    public boolean copy(FileBlock srcBlock, FileBlock destBlock) throws IOException {
+        return false;
+    }
+
+    @Override
+    public URI deleteParent(FileBlock block) {
+        return null;
+    }
+
+    @Override
+    public void write(FileBlock file, byte[] data) throws IOException {
         try (OutputStream output = new FileOutputStream(file.getPath())) {
             output.write(data);
         }

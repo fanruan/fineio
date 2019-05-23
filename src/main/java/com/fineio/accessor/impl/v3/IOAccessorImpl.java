@@ -10,9 +10,8 @@ import com.fineio.accessor.file.IAppendFile;
 import com.fineio.accessor.file.IFile;
 import com.fineio.accessor.file.IReadFile;
 import com.fineio.accessor.file.IWriteFile;
-import com.fineio.accessor.store.IConnector;
-import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.FileKey;
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.file.impl.ByteAppendFile;
 import com.fineio.v3.file.impl.DoubleAppendFile;
 import com.fineio.v3.file.impl.IntAppendFile;
@@ -35,7 +34,7 @@ import java.net.URI;
  */
 public class IOAccessorImpl implements IOAccessor {
     @Override
-    public <F extends IFile> F createFile(IConnector connector, URI uri, Model<F> model) {
+    public <F extends IFile> F createFile(Connector connector, URI uri, Model<F> model) {
         switch (model.getDataType()) {
             case INT:
                 return (F) createInt(connector, uri, model.getFileMode());
@@ -111,57 +110,57 @@ public class IOAccessorImpl implements IOAccessor {
     }
 
 
-    private IFile createByte(IConnector connector, URI uri, FileMode mode) {
-        FileKey fileKey = new FileKey(uri.getPath(), "");
+    private IFile createByte(Connector connector, URI uri, FileMode mode) {
+        FileBlock FileBlock = new FileBlock(uri.getPath(), "");
         switch (mode) {
             case APPEND:
-                return new ByteAppendFile(new ByteWriteFile(fileKey, (Connector) connector, false));
+                return new ByteAppendFile(new ByteWriteFile(FileBlock, connector, false));
             case READ:
-                return new ByteReadFile(fileKey, (Connector) connector);
+                return new ByteReadFile(FileBlock, connector);
             case WRITE:
-                return new ByteWriteFile(fileKey, (Connector) connector, false);
+                return new ByteWriteFile(FileBlock, connector, false);
             default:
                 return null;
         }
     }
 
-    private IFile createInt(IConnector connector, URI uri, FileMode mode) {
-        FileKey fileKey = new FileKey(uri.getPath(), "");
+    private IFile createInt(Connector connector, URI uri, FileMode mode) {
+        FileBlock FileBlock = new FileBlock(uri.getPath(), "");
         switch (mode) {
             case APPEND:
-                return new IntAppendFile(new IntWriteFile(fileKey, (Connector) connector, false));
+                return new IntAppendFile(new IntWriteFile(FileBlock, connector, false));
             case READ:
-                return new IntReadFile(fileKey, (Connector) connector);
+                return new IntReadFile(FileBlock, connector);
             case WRITE:
-                return new IntWriteFile(fileKey, (Connector) connector, false);
+                return new IntWriteFile(FileBlock, connector, false);
             default:
                 return null;
         }
     }
 
-    private IFile createLong(IConnector connector, URI uri, FileMode mode) {
-        FileKey fileKey = new FileKey(uri.getPath(), "");
+    private IFile createLong(Connector connector, URI uri, FileMode mode) {
+        FileBlock FileBlock = new FileBlock(uri.getPath(), "");
         switch (mode) {
             case APPEND:
-                return new LongAppendFile(new LongWriteFile(fileKey, (Connector) connector, false));
+                return new LongAppendFile(new LongWriteFile(FileBlock, connector, false));
             case READ:
-                return new LongReadFile(fileKey, (Connector) connector);
+                return new LongReadFile(FileBlock, connector);
             case WRITE:
-                return new LongWriteFile(fileKey, (Connector) connector, false);
+                return new LongWriteFile(FileBlock, connector, false);
             default:
                 return null;
         }
     }
 
-    private IFile createDouble(IConnector connector, URI uri, FileMode mode) {
-        FileKey fileKey = new FileKey(uri.getPath(), "");
+    private IFile createDouble(Connector connector, URI uri, FileMode mode) {
+        FileBlock FileBlock = new FileBlock(uri.getPath(), "");
         switch (mode) {
             case APPEND:
-                return new DoubleAppendFile(new DoubleWriteFile(fileKey, (Connector) connector, false));
+                return new DoubleAppendFile(new DoubleWriteFile(FileBlock, connector, false));
             case READ:
-                return new DoubleReadFile(fileKey, (Connector) connector);
+                return new DoubleReadFile(FileBlock, connector);
             case WRITE:
-                return new DoubleWriteFile(fileKey, (Connector) connector, false);
+                return new DoubleWriteFile(FileBlock, connector, false);
             default:
                 return null;
         }

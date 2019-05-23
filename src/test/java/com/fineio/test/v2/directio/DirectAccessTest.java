@@ -24,7 +24,7 @@ public class DirectAccessTest extends TestCase {
         for (int i = 0; i < len; i++) {
             byte[] b = new byte[i];
             Arrays.fill(b, (byte) i);
-            connector.write(new FileBlock(URI.create(String.valueOf(i))), b);
+            connector.write(new FileBlock(String.valueOf(i)), b);
         }
         DirectIOFile[] files = new DirectIOFile[len];
         for (int i = 0; i < len; i++) {

@@ -1,6 +1,6 @@
 package com.fineio.v3.buffer.impl;
 
-import com.fineio.v3.file.FileKey;
+import com.fineio.io.file.FileBlock;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
 import com.fineio.v3.type.FileMode;
@@ -31,7 +31,7 @@ public class DoubleDirectBufTest {
         spy(BaseDirectBuffer.class);
         doReturn(1L).when(BaseDirectBuffer.class, "allocate", 16, Offset.DOUBLE, FileMode.WRITE);
 
-        DoubleDirectBuf buf = spy(new DoubleDirectBuf(mock(FileKey.class), 1024, FileMode.WRITE));
+        DoubleDirectBuf buf = spy(new DoubleDirectBuf(mock(FileBlock.class), 1024, FileMode.WRITE));
         mockStatic(MemoryUtils.class);
 
         buf.putDouble(0, 0);
@@ -46,7 +46,7 @@ public class DoubleDirectBufTest {
 
     @Test
     public void getDouble() {
-        DoubleDirectBuf buf = spy(new DoubleDirectBuf(1, 16, mock(FileKey.class), 1024, FileMode.READ));
+        DoubleDirectBuf buf = spy(new DoubleDirectBuf(1, 16, mock(FileBlock.class), 1024, FileMode.READ));
         mockStatic(MemoryUtils.class);
         when(MemoryUtils.getDouble(1, 0)).thenReturn(1D);
 

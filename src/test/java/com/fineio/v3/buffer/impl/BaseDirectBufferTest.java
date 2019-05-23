@@ -1,11 +1,11 @@
 package com.fineio.v3.buffer.impl;
 
 import com.fineio.MockFinal;
+import com.fineio.io.file.FileBlock;
 import com.fineio.v3.buffer.BufferAllocateFailedException;
 import com.fineio.v3.buffer.BufferClosedException;
 import com.fineio.v3.buffer.BufferOutOfBoundException;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.Offset;
 import com.fineio.v3.memory.allocator.BaseMemoryAllocator;
@@ -43,7 +43,7 @@ public class BaseDirectBufferTest {
 
     @Test
     public void ensureOpen() {
-        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileKey.class), Offset.BYTE, 1024, FileMode.READ);
+        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024, FileMode.READ);
         // to be closed
         buf.ensureOpen();
 
@@ -62,7 +62,7 @@ public class BaseDirectBufferTest {
         WriteMemoryAllocator reAllocator = mock(WriteMemoryAllocator.class);
         setInternalState(MemoryManager.INSTANCE, "reAllocator", reAllocator);
 
-        DirectBuffer buf = new DirectBuffer(mock(FileKey.class), Offset.BYTE, 1024, FileMode.WRITE);
+        DirectBuffer buf = new DirectBuffer(mock(FileBlock.class), Offset.BYTE, 1024, FileMode.WRITE);
         // 256 -> 512
         buf.ensureCap(256);
 
@@ -84,7 +84,7 @@ public class BaseDirectBufferTest {
 
     @Test
     public void checkPos() {
-        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileKey.class), Offset.BYTE, 1024, FileMode.READ);
+        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024, FileMode.READ);
 
         buf.checkPos(1);
         try {
@@ -99,7 +99,7 @@ public class BaseDirectBufferTest {
 
     @Test
     public void updatePos() {
-        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileKey.class), Offset.BYTE, 1024, FileMode.READ);
+        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024, FileMode.READ);
 
         buf.updateSize(16);
         assertEquals(17, (int) Whitebox.getInternalState(buf, "size"));
@@ -110,24 +110,24 @@ public class BaseDirectBufferTest {
 
     @Test
     public void getAddress() throws Exception {
-        assertEquals(1, new DirectBuffer(1, 16, mock(FileKey.class), Offset.BYTE, 1024, FileMode.READ).getAddress());
+        assertEquals(1, new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024, FileMode.READ).getAddress());
 
         WriteMemoryAllocator reAllocator = mock(WriteMemoryAllocator.class);
         setInternalState(MemoryManager.INSTANCE, "reAllocator", reAllocator);
         when(reAllocator.allocate(16, FileMode.WRITE.getCondition())).thenReturn(1L);
 
-        assertEquals(1, new DirectBuffer(mock(FileKey.class), Offset.BYTE, 1024, FileMode.WRITE).getAddress());
+        assertEquals(1, new DirectBuffer(mock(FileBlock.class), Offset.BYTE, 1024, FileMode.WRITE).getAddress());
     }
 
     @Test
     public void getSizeInBytes() {
-        assertEquals(16, new DirectBuffer(1, 16, mock(FileKey.class), Offset.BYTE, 1024, FileMode.READ).getSizeInBytes());
+        assertEquals(16, new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024, FileMode.READ).getSizeInBytes());
     }
 
     @Test
-    public void getFileKey() {
-        FileKey fileKey = mock(FileKey.class);
-        assertEquals(fileKey, new DirectBuffer(1, 16, fileKey, Offset.BYTE, 1024, FileMode.READ).getFileKey());
+    public void getFileBlock() {
+        FileBlock FileBlock = mock(FileBlock.class);
+        assertEquals(FileBlock, new DirectBuffer(1, 16, FileBlock, Offset.BYTE, 1024, FileMode.READ).getFileBlock());
     }
 
     @Test
@@ -138,7 +138,7 @@ public class BaseDirectBufferTest {
         BaseMemoryAllocator allocator = mock(BaseMemoryAllocator.class);
         setInternalState(MemoryManager.INSTANCE, "allocator", allocator);
 
-        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileKey.class), Offset.BYTE, 1024, FileMode.READ);
+        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024, FileMode.READ);
         buf.close();
         buf.close();
 
@@ -147,12 +147,12 @@ public class BaseDirectBufferTest {
     }
 
     static class DirectBuffer extends BaseDirectBuffer {
-        DirectBuffer(FileKey fileKey, Offset offset, int maxCap, FileMode fileMode) {
-            super(fileKey, offset, maxCap, fileMode);
+        DirectBuffer(FileBlock FileBlock, Offset offset, int maxCap, FileMode fileMode) {
+            super(FileBlock, offset, maxCap, fileMode);
         }
 
-        DirectBuffer(long address, int cap, FileKey fileKey, Offset offset, int maxCap, FileMode fileMode) {
-            super(address, cap, fileKey, offset, maxCap, fileMode);
+        DirectBuffer(long address, int cap, FileBlock FileBlock, Offset offset, int maxCap, FileMode fileMode) {
+            super(address, cap, FileBlock, offset, maxCap, fileMode);
         }
     }
 }

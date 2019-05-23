@@ -1,6 +1,7 @@
 package com.fineio.v3.connector;
 
 import com.fineio.accessor.Block;
+import com.fineio.storage.Connector;
 import com.fineio.v3.utils.ZipUtils;
 
 import java.io.IOException;

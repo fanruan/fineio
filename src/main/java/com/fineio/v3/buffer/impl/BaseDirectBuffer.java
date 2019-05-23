@@ -1,11 +1,11 @@
 package com.fineio.v3.buffer.impl;
 
+import com.fineio.io.file.FileBlock;
 import com.fineio.v3.buffer.BufferAllocateFailedException;
 import com.fineio.v3.buffer.BufferClosedException;
 import com.fineio.v3.buffer.BufferOutOfBoundException;
 import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.Offset;
 import com.fineio.v3.type.FileMode;
@@ -33,7 +33,7 @@ abstract class BaseDirectBuffer implements DirectBuffer {
      */
     private final int maxCap;
 
-    private final FileKey fileKey;
+    private final FileBlock FileBlock;
 
     private final Offset offset;
 
@@ -44,12 +44,12 @@ abstract class BaseDirectBuffer implements DirectBuffer {
     /**
      * for write, may grow cap
      *
-     * @param fileKey file key
+     * @param FileBlock file key
      * @param offset  offset
      * @param maxCap  max cap
      */
-    BaseDirectBuffer(FileKey fileKey, Offset offset, int maxCap, FileMode fileMode) throws BufferAllocateFailedException {
-        this(allocate(16, offset, fileMode), 16, fileKey, offset, maxCap, fileMode);
+    BaseDirectBuffer(FileBlock FileBlock, Offset offset, int maxCap, FileMode fileMode) throws BufferAllocateFailedException {
+        this(allocate(16, offset, fileMode), 16, FileBlock, offset, maxCap, fileMode);
         this.size = 0;
     }
 
@@ -68,12 +68,12 @@ abstract class BaseDirectBuffer implements DirectBuffer {
      *
      * @param address address
      * @param cap     cap
-     * @param fileKey file key
+     * @param FileBlock file key
      * @param offset  offset
      * @param maxCap  maxCap
      */
-    BaseDirectBuffer(long address, int cap, FileKey fileKey, Offset offset, int maxCap, FileMode fileMode) {
-        this.fileKey = fileKey;
+    BaseDirectBuffer(long address, int cap, FileBlock FileBlock, Offset offset, int maxCap, FileMode fileMode) {
+        this.FileBlock = FileBlock;
         this.offset = offset;
         this.address = address;
         this.cap = cap;
@@ -135,8 +135,8 @@ abstract class BaseDirectBuffer implements DirectBuffer {
     }
 
     @Override
-    public FileKey getFileKey() {
-        return fileKey;
+    public FileBlock getFileBlock() {
+        return FileBlock;
     }
 
     @Override

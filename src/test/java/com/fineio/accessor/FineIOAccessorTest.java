@@ -5,14 +5,13 @@ import com.fineio.accessor.file.IAppendFile;
 import com.fineio.accessor.file.IFile;
 import com.fineio.accessor.file.IWriteFile;
 import com.fineio.accessor.impl.BaseModel;
-import com.fineio.accessor.store.IConnector;
+import com.fineio.io.file.FileBlock;
 import com.fineio.java.JavaVersion;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.ByteDirectBuffer;
 import com.fineio.v3.buffer.DoubleDirectBuffer;
 import com.fineio.v3.buffer.IntDirectBuffer;
 import com.fineio.v3.buffer.LongDirectBuffer;
-import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.file.impl.File;
 import com.fineio.v3.file.impl.read.ByteReadFile;
 import com.fineio.v3.file.impl.read.DoubleReadFile;
@@ -46,7 +45,7 @@ public class FineIOAccessorTest {
     public void createFile() {
         PowerMockito.mockStatic(JavaVersion.class);
         Mockito.when(JavaVersion.isOverJava8()).thenReturn(true);
-        IConnector mock = Mockito.mock(Connector.class);
+        Connector mock = Mockito.mock(Connector.class);
 
         IFile<ByteBuf> file = FineIOAccessor.INSTANCE.createFile(mock, URI.create("0"), BaseModel.ofByte());
         assertTrue(file instanceof File);
@@ -56,29 +55,29 @@ public class FineIOAccessorTest {
     public void put() throws IOException {
         PowerMockito.mockStatic(JavaVersion.class);
         Mockito.when(JavaVersion.isOverJava8()).thenReturn(true);
-        IConnector mock = Mockito.mock(Connector.class);
+        Connector mock = Mockito.mock(Connector.class);
         IFile<ByteBuf> file = FineIOAccessor.INSTANCE.createFile(mock, URI.create("0"), BaseModel.ofByte().asAppend());
         assertTrue(file instanceof IAppendFile);
         FineIOAccessor.INSTANCE.put((IAppendFile<ByteBuf>) file, (byte) 0);
         file.close();
-        Mockito.verify(mock).write(Mockito.any(Block.class), Mockito.any(InputStream.class));
+        Mockito.verify(mock).write(Mockito.any(FileBlock.class), Mockito.any(InputStream.class));
     }
 
     @Test
     public void put1() throws IOException {
         PowerMockito.mockStatic(JavaVersion.class);
         Mockito.when(JavaVersion.isOverJava8()).thenReturn(true);
-        IConnector mock = Mockito.mock(Connector.class);
+        Connector mock = Mockito.mock(Connector.class);
         IFile<ByteBuf> file = FineIOAccessor.INSTANCE.createFile(mock, URI.create("0"), BaseModel.ofByte().asWrite());
         assertTrue(file instanceof IWriteFile);
         FineIOAccessor.INSTANCE.put((IWriteFile<ByteBuf>) file, 0, (byte) 0);
         file.close();
-        Mockito.verify(mock).write(Mockito.any(Block.class), Mockito.any(InputStream.class));
+        Mockito.verify(mock).write(Mockito.any(FileBlock.class), Mockito.any(InputStream.class));
     }
 
     @Test
     public void getByte() throws Exception {
-        ByteReadFile rf = spy(new ByteReadFile(mock(FileKey.class), mock(Connector.class)));
+        ByteReadFile rf = spy(new ByteReadFile(mock(FileBlock.class), mock(Connector.class)));
 
         ByteDirectBuffer buf = Mockito.mock(ByteDirectBuffer.class);
         PowerMockito.doReturn(buf).when(rf, File.class.getDeclaredMethod("getBuffer", int.class)).withArguments(0);
@@ -92,7 +91,7 @@ public class FineIOAccessorTest {
 
     @Test
     public void getLong() throws Exception {
-        LongReadFile rf = spy(new LongReadFile(mock(FileKey.class), mock(Connector.class)));
+        LongReadFile rf = spy(new LongReadFile(mock(FileBlock.class), mock(Connector.class)));
 
         LongDirectBuffer buf = Mockito.mock(LongDirectBuffer.class);
         PowerMockito.doReturn(buf).when(rf, File.class.getDeclaredMethod("getBuffer", int.class)).withArguments(0);
@@ -106,7 +105,7 @@ public class FineIOAccessorTest {
 
     @Test
     public void getInt() throws Exception {
-        IntReadFile rf = spy(new IntReadFile(mock(FileKey.class), mock(Connector.class)));
+        IntReadFile rf = spy(new IntReadFile(mock(FileBlock.class), mock(Connector.class)));
 
         IntDirectBuffer buf = Mockito.mock(IntDirectBuffer.class);
         PowerMockito.doReturn(buf).when(rf, File.class.getDeclaredMethod("getBuffer", int.class)).withArguments(0);
@@ -120,7 +119,7 @@ public class FineIOAccessorTest {
 
     @Test
     public void getDouble() throws Exception {
-        DoubleReadFile rf = spy(new DoubleReadFile(mock(FileKey.class), mock(Connector.class)));
+        DoubleReadFile rf = spy(new DoubleReadFile(mock(FileBlock.class), mock(Connector.class)));
 
         DoubleDirectBuffer buf = Mockito.mock(DoubleDirectBuffer.class);
         PowerMockito.doReturn(buf).when(rf, File.class.getDeclaredMethod("getBuffer", int.class)).withArguments(0);

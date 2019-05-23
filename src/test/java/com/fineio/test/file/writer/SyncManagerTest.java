@@ -13,7 +13,6 @@ import org.easymock.IMocksControl;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -28,10 +27,10 @@ public class SyncManagerTest extends TestCase {
     volatile boolean end = false;
 
     public void  testMultiThread() throws Exception {
-        final Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        final Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(String.class, String.class);
         constructor.setAccessible(true);
         IMocksControl control = EasyMock.createControl();
-        final URI uri = new URI("");
+        final String uri = "";
         final Connector connector = control.createMock(Connector.class);
         control.replay();
         final int len = 1000;

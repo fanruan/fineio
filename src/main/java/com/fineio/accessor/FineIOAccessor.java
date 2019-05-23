@@ -9,8 +9,8 @@ import com.fineio.accessor.file.IFile;
 import com.fineio.accessor.file.IReadFile;
 import com.fineio.accessor.file.IWriteFile;
 import com.fineio.accessor.impl.v2.IOAccessorImpl;
-import com.fineio.accessor.store.IConnector;
 import com.fineio.java.JavaVersion;
+import com.fineio.storage.Connector;
 
 import java.net.URI;
 
@@ -37,7 +37,7 @@ public enum FineIOAccessor implements IOAccessor {
     }
 
     @Override
-    public <F extends IFile> F createFile(IConnector connector, URI uri, Model<F> model) {
+    public <F extends IFile> F createFile(Connector connector, URI uri, Model<F> model) {
         return accessor.createFile(connector, uri, model);
     }
 

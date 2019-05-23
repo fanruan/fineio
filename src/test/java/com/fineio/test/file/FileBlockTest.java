@@ -4,7 +4,6 @@ import com.fineio.io.file.FileBlock;
 import junit.framework.TestCase;
 
 import java.lang.reflect.Constructor;
-import java.net.URI;
 
 /**
  * Created by daniel on 2017/2/10.
@@ -12,23 +11,19 @@ import java.net.URI;
 public class FileBlockTest extends TestCase {
 
     public void testEquals() throws  Exception {
-        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(String.class, String.class);
         constructor.setAccessible(true);
-        URI a = new URI("a");
-        URI b = new URI("a");
-        URI c = new URI("c");
-        assertEquals(constructor.newInstance(a, "test"), constructor.newInstance(b, "test"));
-        assertNotSame(constructor.newInstance(a, "test"), constructor.newInstance(b, "test1"));
-        assertNotSame(constructor.newInstance(a, "test"), constructor.newInstance(c, "test"));
-        assertEquals(constructor.newInstance(a, "test").getParentUri(), a);
-        assertEquals(constructor.newInstance(b, "test").getParentUri(), b);
-        assertEquals(constructor.newInstance(c, "test").getName(), "test");
+        assertEquals(constructor.newInstance("a", "test"), constructor.newInstance("a", "test"));
+        assertNotSame(constructor.newInstance("a", "test"), constructor.newInstance("a", "test1"));
+        assertNotSame(constructor.newInstance("a", "test"), constructor.newInstance("c", "test"));
+        assertEquals(constructor.newInstance("a", "test").getDir(), "a");
+        assertEquals(constructor.newInstance("b", "test").getDir(), "b");
+        assertEquals(constructor.newInstance("c", "test").getName(), "test");
     }
 
     public void testToString() throws  Exception {
-        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(String.class, String.class);
         constructor.setAccessible(true);
-        URI a = new URI("a");
-        assertEquals(constructor.newInstance(a, "test").toString(), "a" + "test");
+        assertEquals(constructor.newInstance("a", "test").toString(), "a" + "test");
     }
 }

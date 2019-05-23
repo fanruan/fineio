@@ -1,7 +1,7 @@
 package com.fineio.v3.buffer.impl;
 
+import com.fineio.io.file.FileBlock;
 import com.fineio.v3.buffer.ByteDirectBuffer;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
 import com.fineio.v3.type.FileMode;
@@ -14,10 +14,10 @@ public class ByteDirectBuf extends BaseDirectBuffer implements ByteDirectBuffer 
     /**
      * for write
      *
-     * @param fileKey file key
+     * @param FileBlock file key
      */
-    public ByteDirectBuf(FileKey fileKey, int maxCap, FileMode fileMode) {
-        super(fileKey, Offset.BYTE, maxCap, fileMode);
+    public ByteDirectBuf(FileBlock FileBlock, int maxCap, FileMode fileMode) {
+        super(FileBlock, Offset.BYTE, maxCap, fileMode);
     }
 
     /**
@@ -25,10 +25,10 @@ public class ByteDirectBuf extends BaseDirectBuffer implements ByteDirectBuffer 
      *
      * @param address 地址
      * @param cap     容量
-     * @param fileKey file key
+     * @param FileBlock file key
      */
-    public ByteDirectBuf(long address, int cap, FileKey fileKey, int maxCap, FileMode fileMode) {
-        super(address, cap, fileKey, Offset.BYTE, maxCap, fileMode);
+    public ByteDirectBuf(long address, int cap, FileBlock FileBlock, int maxCap, FileMode fileMode) {
+        super(address, cap, FileBlock, Offset.BYTE, maxCap, fileMode);
     }
 
     @Override

@@ -1,8 +1,8 @@
 package com.fineio.v3.file.impl;
 
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.impl.ByteDirectBuf;
-import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.file.impl.write.ByteWriteFile;
 import com.fineio.v3.memory.Offset;
 import com.fineio.v3.type.FileMode;
@@ -47,15 +47,15 @@ public class ByteAppendFileTest {
         ByteAppendFile af = mock(ByteAppendFile.class);
         ByteWriteFile wf = mock(ByteWriteFile.class);
         setInternalState(af, "writeFile", wf);
-        doCallRealMethod().when(af, "newDirectBuf", anyLong(), anyInt(), any(FileKey.class));
+        doCallRealMethod().when(af, "newDirectBuf", anyLong(), anyInt(), any(FileBlock.class));
 
         setInternalState(wf, "connector", mock(Connector.class));
         setInternalState(wf, "offset", Offset.BYTE);
 
-        FileKey fileKey = mock(FileKey.class);
+        FileBlock FileBlock = mock(FileBlock.class);
         ByteDirectBuf buf = mock(ByteDirectBuf.class);
-        whenNew(ByteDirectBuf.class).withArguments(1L, 1, fileKey, 1, FileMode.WRITE).thenReturn(buf);
+        whenNew(ByteDirectBuf.class).withArguments(1L, 1, FileBlock, 1, FileMode.WRITE).thenReturn(buf);
 
-        assertEquals(buf, af.newDirectBuf(1, 1, fileKey));
+        assertEquals(buf, af.newDirectBuf(1, 1, FileBlock));
     }
 }

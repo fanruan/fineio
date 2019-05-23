@@ -1,10 +1,10 @@
 package com.fineio.v3.file.impl.write;
 
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.ByteDirectBuffer;
 import com.fineio.v3.buffer.impl.ByteDirectBuf;
-import com.fineio.v3.connector.Connector;
 import com.fineio.v3.file.FileClosedException;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.Offset;
 import com.fineio.v3.type.FileMode;
 
@@ -14,16 +14,16 @@ import com.fineio.v3.type.FileMode;
  */
 
 public class ByteWriteFile extends WriteFile<ByteDirectBuffer> {
-    public ByteWriteFile(FileKey fileKey, Connector connector, boolean asyncWrite) {
-        super(fileKey, Offset.BYTE, connector, asyncWrite);
+    public ByteWriteFile(FileBlock FileBlock, Connector connector, boolean asyncWrite) {
+        super(FileBlock, Offset.BYTE, connector, asyncWrite);
     }
 
-    public static ByteWriteFile ofAsync(FileKey fileKey, Connector connector) {
-        return new ByteWriteFile(fileKey, connector, true);
+    public static ByteWriteFile ofAsync(FileBlock FileBlock, Connector connector) {
+        return new ByteWriteFile(FileBlock, connector, true);
     }
 
-    public static ByteWriteFile ofSync(FileKey fileKey, Connector connector) {
-        return new ByteWriteFile(fileKey, connector, false);
+    public static ByteWriteFile ofSync(FileBlock FileBlock, Connector connector) {
+        return new ByteWriteFile(FileBlock, connector, false);
     }
 
     public void putByte(long pos, byte value) throws FileClosedException, IllegalArgumentException {
@@ -37,7 +37,7 @@ public class ByteWriteFile extends WriteFile<ByteDirectBuffer> {
     @Override
     protected ByteDirectBuffer getBuffer(int nthBuf) {
         return buffers.computeIfAbsent(nthBuf,
-                i -> new ByteDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i)),
+                i -> new ByteDirectBuf(new FileBlock(fileBlock.getPath(), String.valueOf(i)),
                         1 << (connector.getBlockOffset() - offset.getOffset()), FileMode.WRITE));
     }
 }

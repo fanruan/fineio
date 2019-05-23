@@ -2,10 +2,10 @@ package com.fineio.v3.utils;
 
 
 import com.fineio.accessor.Block;
+import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
-import com.fineio.v3.connector.Connector;
+import com.fineio.storage.Connector;
 import com.fineio.v3.file.DirectoryBlock;
-import com.fineio.v3.file.FileKey;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class ZipUtils {
         try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(inputStream))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null && !entry.isDirectory()) {
-                connector.write(new FileKey(parent, entry.getName()), inputStream);
+                connector.write(new FileBlock(parent, entry.getName()), inputStream);
             }
             long end = System.currentTimeMillis();
             FineIOLoggers.getLogger().info(String.format("Unzip %s finished. Cost %d ms", parent, (end - start)));
@@ -52,11 +52,11 @@ public class ZipUtils {
     }
 
     private static void compress(Block sourceFile, Connector connector, ZipOutputStream zos, String name) throws IOException {
-        if (sourceFile instanceof FileKey) {
+        if (sourceFile instanceof FileBlock) {
             // 向zip输出流中添加一个zip实体，构造器中name为zip实体的文件的名字
             zos.putNextEntry(new ZipEntry(name));
             // copy文件到zip输出流中
-            try (InputStream in = connector.read((FileKey) sourceFile)) {
+            try (InputStream in = connector.read((FileBlock) sourceFile)) {
                 IOUtils.copyBinaryTo(in, zos);
                 // Complete the entry
                 zos.closeEntry();

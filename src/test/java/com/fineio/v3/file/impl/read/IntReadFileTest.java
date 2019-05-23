@@ -1,9 +1,9 @@
 package com.fineio.v3.file.impl.read;
 
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.IntDirectBuffer;
 import com.fineio.v3.buffer.impl.IntDirectBuf;
-import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.type.FileMode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +24,7 @@ public class IntReadFileTest {
 
     @Test
     public void getInt() throws Exception {
-        IntReadFile rf = spy(new IntReadFile(mock(FileKey.class), mock(Connector.class)));
+        IntReadFile rf = spy(new IntReadFile(mock(FileBlock.class), mock(Connector.class)));
 
         IntDirectBuffer buf = mock(IntDirectBuffer.class);
         doReturn(buf).when(rf).getBuffer(0);
@@ -38,12 +38,12 @@ public class IntReadFileTest {
 
     @Test
     public void newDirectBuf() throws Exception {
-        IntReadFile rf = new IntReadFile(mock(FileKey.class), mock(Connector.class));
+        IntReadFile rf = new IntReadFile(mock(FileBlock.class), mock(Connector.class));
 
-        FileKey fileKey = mock(FileKey.class);
+        FileBlock FileBlock = mock(FileBlock.class);
         IntDirectBuf buf = mock(IntDirectBuf.class);
-        whenNew(IntDirectBuf.class).withArguments(1L, 16, fileKey, 16, FileMode.READ).thenReturn(buf);
+        whenNew(IntDirectBuf.class).withArguments(1L, 16, FileBlock, 16, FileMode.READ).thenReturn(buf);
 
-        assertEquals(buf, rf.newDirectBuf(1L, 16, fileKey));
+        assertEquals(buf, rf.newDirectBuf(1L, 16, FileBlock));
     }
 }

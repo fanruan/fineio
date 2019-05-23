@@ -2,10 +2,10 @@ package com.fineio.v3.file.impl.read;
 
 
 import com.fineio.accessor.file.IReadFile;
+import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.DirectBuffer;
-import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.file.impl.File;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.MemoryUtils;
@@ -20,8 +20,8 @@ import java.io.InputStream;
  * @date 2019/4/16
  */
 abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IReadFile<B> {
-    ReadFile(FileKey fileKey, Offset offset, Connector connector) {
-        super(fileKey, offset, connector);
+    ReadFile(FileBlock FileBlock, Offset offset, Connector connector) {
+        super(FileBlock, offset, connector);
     }
 
     @Override
@@ -31,10 +31,10 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
 
     private B loadBuffer(int nthBuf) {
         // TODO: 2019/4/16 anchore 先拿cache，拿不到就生成buffer，put进cache
-        FileKey nthFileKey = new FileKey(fileKey.getPath(), String.valueOf(nthBuf));
+        FileBlock nthFileBlock = new FileBlock(fileBlock.getPath(), String.valueOf(nthBuf));
         Long address = null;
         int avail = 0;
-        try (InputStream input = new BufferedInputStream(connector.read(nthFileKey))) {
+        try (InputStream input = new BufferedInputStream(connector.read(nthFileBlock))) {
             avail = input.available();
             address = MemoryManager.INSTANCE.allocate(avail, FileMode.READ);
             long ptr = address;
@@ -42,7 +42,7 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
             for (int read; (read = input.read(bytes)) != -1; ptr += read) {
                 MemoryUtils.copyMemory(bytes, ptr, read);
             }
-            return newDirectBuf(address, (int) ((ptr - address) >> offset.getOffset()), nthFileKey);
+            return newDirectBuf(address, (int) ((ptr - address) >> offset.getOffset()), nthFileBlock);
         } catch (Throwable e) {
             if (address != null) {
                 MemoryManager.INSTANCE.release(address, avail, FileMode.READ);
@@ -52,7 +52,7 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
         }
     }
 
-    abstract B newDirectBuf(long address, int size, FileKey fileKey);
+    abstract B newDirectBuf(long address, int size, FileBlock FileBlock);
 
     @Override
     public void close() {

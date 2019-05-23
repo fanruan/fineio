@@ -6,44 +6,47 @@ import com.fineio.accessor.Block;
 import java.net.URI;
 
 /**
- * Created by daniel on 2017/2/9.
+ *
+ * @author daniel
+ * @date 2017/2/9
  */
-public final class FileBlock implements Block {
+public class FileBlock implements Block {
     private final static String EMPTY = "";
 
-    private URI uri;
+    private String dir;
 
     private String fileName;
 
     /**
      * 空就代表文件夹把
-     * @param uri
+     * @param dir
      * @param fileName
      */
-    public FileBlock(URI uri, String fileName){
-        this.uri = uri;
+    public FileBlock(String dir, String fileName) {
+        this.dir = dir;
         this.fileName = fileName;
     }
 
     /**
      * 空就代表文件夹把
-     * @param uri
+     * @param dir
      */
-    public FileBlock(URI uri){
-        this.uri = uri;
+    public FileBlock(String dir) {
+        this.dir = dir;
         this.fileName = EMPTY;
     }
 
+    @Override
     public String toString() {
-        return (uri == null ? "":uri.toString())+ (fileName == null ? "": fileName);
+        return (dir == null ? "" : dir) + (fileName == null ? "" : fileName);
     }
 
     /**
      * parent的URI
      * @return
      */
-    public URI getParentUri() {
-        return  uri;
+    public String getDir() {
+        return dir;
     }
 
     @Override
@@ -51,39 +54,41 @@ public final class FileBlock implements Block {
         return fileName;
     }
 
-    /**
-     * 实际URI
-     * @return
-     */
-    public URI getBlockURI(){
-        if (EMPTY.equals(fileName)) {
-            return uri;
-        }
-        return uri.resolve(fileName);
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-        FileBlock block = (FileBlock) o;
+        FileBlock fileBlock = (FileBlock) o;
 
-        if (uri != null ? !uri.equals(block.uri) : block.uri != null) return false;
-        return fileName != null ? fileName.equals(block.fileName) : block.fileName == null;
+        if (dir != null ? !dir.equals(fileBlock.dir) : fileBlock.dir != null) {
+            return false;
+        }
+        return fileName != null ? fileName.equals(fileBlock.fileName) : fileBlock.fileName == null;
 
     }
 
     @Override
     public int hashCode() {
-        int result = uri != null ? uri.hashCode() : 0;
+        int result = dir != null ? dir.hashCode() : 0;
         result = 31 * result + (fileName != null ? fileName.hashCode() : 0);
         return result;
     }
 
     @Override
     public String getPath() {
-        return getBlockURI().getPath();
+        return dir + "/" + fileName;
     }
 
+    public URI getParentUri() {
+        return URI.create(dir);
+    }
+
+    public URI getBlockUri() {
+        return URI.create(getPath());
+    }
 }

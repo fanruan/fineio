@@ -1,10 +1,10 @@
 package com.fineio.v3.file.impl.write;
 
 import com.fineio.accessor.file.IWriteFile;
+import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.DirectBuffer;
-import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.file.impl.File;
 import com.fineio.v3.file.sync.FileSync;
 import com.fineio.v3.file.sync.FileSyncJob;
@@ -20,13 +20,13 @@ public abstract class WriteFile<B extends DirectBuffer> extends File<B> implemen
 
     private final boolean asyncWrite;
 
-    WriteFile(FileKey fileKey, Offset offset, Connector connector, boolean asyncWrite) {
-        super(fileKey, offset, connector);
+    WriteFile(FileBlock FileBlock, Offset offset, Connector connector, boolean asyncWrite) {
+        super(FileBlock, offset, connector);
         this.asyncWrite = asyncWrite;
     }
 
     void delete() {
-        connector.delete(fileKey);
+        connector.delete(fileBlock);
     }
 
     void syncBufIfNeed(int nthBuf) {

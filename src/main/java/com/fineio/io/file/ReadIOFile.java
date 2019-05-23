@@ -69,9 +69,9 @@ public final class ReadIOFile<B extends Buf> extends BaseReadIOFile<B> implement
                             }
                         }
                     }
-                    connector.delete(new FileBlock(uri));
+                    connector.delete(new FileBlock(uri.getPath()));
                     URI parentURI = uri;
-                    while (null != (parentURI = connector.deleteParent(new FileBlock(parentURI)))) {
+                    while (null != (parentURI = connector.deleteParent(new FileBlock(parentURI.getPath())))) {
                     }
                     released = true;
                 }

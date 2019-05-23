@@ -1,8 +1,8 @@
 package com.fineio.v3.file.impl.write;
 
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.DirectBuffer;
-import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.FileKey;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -42,12 +42,12 @@ public class WriteFileTest {
 
         Connector connector = mock(Connector.class);
         setInternalState(wf, "connector", connector);
-        FileKey fileKey = mock(FileKey.class);
-        setInternalState(wf, "fileKey", fileKey);
+        FileBlock FileBlock = mock(FileBlock.class);
+        setInternalState(wf, "fileBlock", FileBlock);
 
         wf.delete();
 
-        verify(connector).delete(fileKey);
+        verify(connector).delete(FileBlock);
     }
 
     @Test

@@ -1,10 +1,10 @@
 package com.fineio.v3.file.impl.write;
 
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.LongDirectBuffer;
 import com.fineio.v3.buffer.impl.LongDirectBuf;
-import com.fineio.v3.connector.Connector;
 import com.fineio.v3.file.FileClosedException;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.Offset;
 import com.fineio.v3.type.FileMode;
 
@@ -13,16 +13,16 @@ import com.fineio.v3.type.FileMode;
  * @date 2019/4/3
  */
 public class LongWriteFile extends WriteFile<LongDirectBuffer> {
-    public LongWriteFile(FileKey fileKey, Connector connector, boolean asyncWrite) {
-        super(fileKey, Offset.LONG, connector, asyncWrite);
+    public LongWriteFile(FileBlock FileBlock, Connector connector, boolean asyncWrite) {
+        super(FileBlock, Offset.LONG, connector, asyncWrite);
     }
 
-    public static LongWriteFile ofAsync(FileKey fileKey, Connector connector) {
-        return new LongWriteFile(fileKey, connector, true);
+    public static LongWriteFile ofAsync(FileBlock FileBlock, Connector connector) {
+        return new LongWriteFile(FileBlock, connector, true);
     }
 
-    public static LongWriteFile ofSync(FileKey fileKey, Connector connector) {
-        return new LongWriteFile(fileKey, connector, false);
+    public static LongWriteFile ofSync(FileBlock FileBlock, Connector connector) {
+        return new LongWriteFile(FileBlock, connector, false);
     }
 
     public void putLong(long pos, long value) throws FileClosedException, IllegalArgumentException {
@@ -36,7 +36,7 @@ public class LongWriteFile extends WriteFile<LongDirectBuffer> {
     @Override
     protected LongDirectBuffer getBuffer(int nthBuf) {
         return buffers.computeIfAbsent(nthBuf,
-                i -> new LongDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i)),
+                i -> new LongDirectBuf(new FileBlock(fileBlock.getPath(), String.valueOf(i)),
                         1 << (connector.getBlockOffset() - offset.getOffset()), FileMode.WRITE));
     }
 }
