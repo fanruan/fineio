@@ -1,10 +1,10 @@
 package com.fineio.v3.file.impl;
 
+import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.v3.buffer.DoubleDirectBuffer;
 import com.fineio.v3.buffer.impl.DoubleDirectBuf;
 import com.fineio.v3.file.impl.write.DoubleWriteFile;
-import com.fineio.v3.type.FileMode;
 
 /**
  * @author anchore

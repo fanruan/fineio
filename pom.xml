@@ -6,7 +6,7 @@
 
     <groupId>com.fineio</groupId>
     <artifactId>fineio</artifactId>
-    <version>2.0-RELEASE-SNAPSHOT</version>
+    <version>3.0-RELEASE-SNAPSHOT</version>
     <properties>
         <mockito.version>2.8.9</mockito.version>
         <powermock.version>1.7.4</powermock.version>

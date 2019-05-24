@@ -1,5 +1,6 @@
 package com.fineio.v3.buffer.impl;
 
+import com.fineio.accessor.FileMode;
 import com.fineio.io.Buffer.Listener;
 import com.fineio.io.ByteBuffer;
 import com.fineio.io.ByteBuffer.ByteReadBuffer;
@@ -9,7 +10,6 @@ import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.ByteDirectBuffer;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
-import com.fineio.v3.type.FileMode;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Level;

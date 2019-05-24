@@ -1,12 +1,12 @@
 package com.fineio.v3.file.impl.read;
 
+import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.IntDirectBuffer;
 import com.fineio.v3.buffer.impl.IntDirectBuf;
 import com.fineio.v3.file.FileClosedException;
 import com.fineio.v3.memory.Offset;
-import com.fineio.v3.type.FileMode;
 
 /**
  * @author anchore

@@ -1,9 +1,10 @@
-package com.fineio.v3.type;
+package com.fineio.accessor;
 
 /**
  *
  */
 public enum DataType {
+    //
     BYTE,
     INT,
     LONG,

@@ -1,5 +1,6 @@
 package com.fineio.v3.file.impl;
 
+import com.fineio.accessor.FileMode;
 import com.fineio.accessor.file.IAppendFile;
 import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
@@ -8,7 +9,6 @@ import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.file.impl.write.WriteFile;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.MemoryUtils;
-import com.fineio.v3.type.FileMode;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

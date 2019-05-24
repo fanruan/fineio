@@ -1,13 +1,13 @@
 package com.fineio.accessor.impl;
 
+import com.fineio.accessor.DataType;
+import com.fineio.accessor.FileMode;
 import com.fineio.accessor.Model;
 import com.fineio.accessor.buffer.ByteBuf;
 import com.fineio.accessor.buffer.DoubleBuf;
 import com.fineio.accessor.buffer.IntBuf;
 import com.fineio.accessor.buffer.LongBuf;
 import com.fineio.accessor.file.IFile;
-import com.fineio.v3.type.DataType;
-import com.fineio.v3.type.FileMode;
 
 /**
  * @author yee

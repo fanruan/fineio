@@ -37,7 +37,7 @@ public abstract class BaseZipPackageManager implements PackageManager {
      * @param dir
      * @return
      */
-    protected abstract OutputStream output(String dir);
+    protected abstract OutputStream output(String dir) throws IOException;
 
     /**
      * 获取输入流
@@ -45,5 +45,5 @@ public abstract class BaseZipPackageManager implements PackageManager {
      * @param dir
      * @return
      */
-    protected abstract InputStream input(String dir);
+    protected abstract InputStream input(String dir) throws IOException;
 }

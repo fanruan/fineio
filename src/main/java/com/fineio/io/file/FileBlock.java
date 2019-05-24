@@ -6,7 +6,6 @@ import com.fineio.accessor.Block;
 import java.net.URI;
 
 /**
- *
  * @author daniel
  * @date 2017/2/9
  */
@@ -19,6 +18,7 @@ public class FileBlock implements Block {
 
     /**
      * 空就代表文件夹把
+     *
      * @param dir
      * @param fileName
      */
@@ -29,6 +29,7 @@ public class FileBlock implements Block {
 
     /**
      * 空就代表文件夹把
+     *
      * @param dir
      */
     public FileBlock(String dir) {
@@ -38,11 +39,12 @@ public class FileBlock implements Block {
 
     @Override
     public String toString() {
-        return (dir == null ? "" : dir) + (fileName == null ? "" : fileName);
+        return (dir == null ? "" : dir) + "/" + (fileName == null ? "" : fileName);
     }
 
     /**
      * parent的URI
+     *
      * @return
      */
     public String getDir() {
@@ -81,7 +83,7 @@ public class FileBlock implements Block {
 
     @Override
     public String getPath() {
-        return dir + "/" + fileName;
+        return toString();
     }
 
     public URI getParentUri() {

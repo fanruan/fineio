@@ -1,5 +1,6 @@
 package com.fineio.accessor.impl.v2;
 
+import com.fineio.accessor.FileMode;
 import com.fineio.accessor.IOAccessor;
 import com.fineio.accessor.Model;
 import com.fineio.accessor.buffer.ByteBuf;
@@ -20,7 +21,6 @@ import com.fineio.io.file.IOFile;
 import com.fineio.io.file.ReadIOFile;
 import com.fineio.io.file.WriteIOFile;
 import com.fineio.storage.Connector;
-import com.fineio.v3.type.FileMode;
 
 import java.net.URI;
 

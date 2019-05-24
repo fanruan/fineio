@@ -23,7 +23,7 @@ public interface Connector {
 
     /**
      * 写整快的方法，可以保证通一个块不被同时写
-     *
+     * inputStream不需要释放，内部已经处理
      * @param file
      * @param inputStream
      */

@@ -1,12 +1,12 @@
 package com.fineio.v3.memory;
 
 import com.fineio.FineIO;
+import com.fineio.accessor.FileMode;
 import com.fineio.logger.FineIOLogger;
 import com.fineio.memory.MemoryHelper;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.allocator.BaseMemoryAllocator;
 import com.fineio.v3.memory.allocator.WriteMemoryAllocator;
-import com.fineio.v3.type.FileMode;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

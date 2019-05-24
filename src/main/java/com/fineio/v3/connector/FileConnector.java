@@ -30,13 +30,12 @@ public class FileConnector extends BaseConnector {
 
     @Override
     public void write(FileBlock file, InputStream is) throws IOException {
-        File f = new File(file.getDir());
-        if (!f.exists()) {
-            f.mkdirs();
+        File parent = new File(file.getPath()).getParentFile();
+        if (!parent.exists()) {
+            parent.mkdirs();
         }
-        try (InputStream input = is;
-             OutputStream output = new BufferedOutputStream(new FileOutputStream(file.getPath()))) {
-            for (int b; (b = input.read()) != -1; ) {
+        try (OutputStream output = new BufferedOutputStream(new FileOutputStream(file.getPath()))) {
+            for (int b; (b = is.read()) != -1; ) {
                 output.write(b);
             }
         }
@@ -72,10 +71,10 @@ public class FileConnector extends BaseConnector {
         File f = new File(file);
         if (f.isDirectory()) {
             List<Block> blocks = new ArrayList<>();
-            String[] list = f.list((dir, name) -> !(".".equals(name) || "..".equals(name)));
+            File[] list = f.listFiles((dir, name) -> !(".".equals(name) || "..".equals(name)));
             if (null != list) {
-                for (String s : list) {
-                    blocks.add(list(s));
+                for (File s : list) {
+                    blocks.add(list(s.getAbsolutePath()));
                 }
             }
             return new DirectoryBlock(file, blocks);
