@@ -1,5 +1,6 @@
 package com.fineio.accessor.impl.v3;
 
+import com.fineio.accessor.FileMode;
 import com.fineio.accessor.IOAccessor;
 import com.fineio.accessor.Model;
 import com.fineio.accessor.buffer.ByteBuf;
@@ -24,7 +25,6 @@ import com.fineio.v3.file.impl.write.ByteWriteFile;
 import com.fineio.v3.file.impl.write.DoubleWriteFile;
 import com.fineio.v3.file.impl.write.IntWriteFile;
 import com.fineio.v3.file.impl.write.LongWriteFile;
-import com.fineio.v3.type.FileMode;
 
 import java.net.URI;
 

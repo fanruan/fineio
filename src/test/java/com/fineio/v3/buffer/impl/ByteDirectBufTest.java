@@ -1,9 +1,9 @@
 package com.fineio.v3.buffer.impl;
 
+import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
-import com.fineio.v3.type.FileMode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;

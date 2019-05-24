@@ -1,10 +1,10 @@
 package com.fineio.v3.file.impl;
 
+import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.v3.buffer.LongDirectBuffer;
 import com.fineio.v3.buffer.impl.LongDirectBuf;
 import com.fineio.v3.file.impl.write.LongWriteFile;
-import com.fineio.v3.type.FileMode;
 
 /**
  * @author anchore
