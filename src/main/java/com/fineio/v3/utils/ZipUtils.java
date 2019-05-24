@@ -44,7 +44,7 @@ public class ZipUtils {
         try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(inputStream))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null && !entry.isDirectory()) {
-                connector.write(new FileBlock(parent, entry.getName()), inputStream);
+                connector.write(new FileBlock(parent, entry.getName()), zis);
             }
             long end = System.currentTimeMillis();
             FineIOLoggers.getLogger().info(String.format("Unzip %s finished. Cost %d ms", parent, (end - start)));

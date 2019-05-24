@@ -22,6 +22,7 @@ import com.fineio.memory.manager.manager.MemoryManager;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.memory.manager.obj.impl.AllocateObject;
 import com.fineio.storage.Connector;
+import com.fineio.v3.utils.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -565,11 +566,14 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         private void write0() {
             synchronized (this) {
                 changed = false;
+                InputStream inputStream = getInputStream();
                 try {
-                    bufferKey.getConnector().write(bufferKey.getBlock(), getInputStream());
+                    bufferKey.getConnector().write(bufferKey.getBlock(), inputStream);
                     flushed = true;
                 } catch (IOException e) {
                     FineIOLoggers.getLogger().error(e);
+                } finally {
+                    IOUtils.close(inputStream);
                 }
             }
         }
