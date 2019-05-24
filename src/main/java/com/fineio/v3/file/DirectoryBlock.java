@@ -1,5 +1,7 @@
 package com.fineio.v3.file;
 
+import com.fineio.accessor.Block;
+
 import java.io.File;
 import java.util.List;
 

@@ -19,6 +19,7 @@ public abstract class AbstractConnector implements Connector {
      * @param file
      * @param bytes
      */
+    @Override
     public void write(FileBlock file, byte[] bytes) throws IOException {
         write(file, new ByteArrayInputStream(bytes));
     }
@@ -28,6 +29,7 @@ public abstract class AbstractConnector implements Connector {
      * 默认值22;
      * @return
      */
+    @Override
     public byte getBlockOffset() {
         return DEFAULT_OFFSET;
     }

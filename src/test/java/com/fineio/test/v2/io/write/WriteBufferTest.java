@@ -91,7 +91,7 @@ public class WriteBufferTest extends TestCase {
     public void testByteWrite() throws Exception {
         int len = 20;
         byte[] bytes = createRandomByte(len);
-        ByteBuffer.ByteWriteBuffer bb = CacheManager.DataType.BYTE.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
+        ByteBuffer.ByteWriteBuffer bb = CacheManager.DataType.BYTE.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI("").getPath(), ""), len).asWrite();
         for (int i = 0; i < bytes.length; i++) {
             bb.put(i, bytes[i]);
         }
@@ -120,7 +120,7 @@ public class WriteBufferTest extends TestCase {
     public void testCharWrite() throws Exception {
         int len = 20;
         char[] bytes = createRandomChar(len);
-        CharBuffer.CharWriteBuffer bb = CacheManager.DataType.CHAR.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
+        CharBuffer.CharWriteBuffer bb = CacheManager.DataType.CHAR.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI("").getPath(), ""), len).asWrite();
         for (int i = 0; i < bytes.length; i++) {
             bb.put(i, bytes[i]);
         }
@@ -148,7 +148,7 @@ public class WriteBufferTest extends TestCase {
     public void testCharWriteDESC() throws Exception {
         int len = 20;
         char[] bytes = createRandomChar(len);
-        CharBuffer.CharWriteBuffer bb = CacheManager.DataType.CHAR.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
+        CharBuffer.CharWriteBuffer bb = CacheManager.DataType.CHAR.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI("").getPath(), ""), len).asWrite();
         for (int i = bytes.length; i > 0; i--) {
             bb.put(i - 1, bytes[i - 1]);
         }
@@ -178,7 +178,7 @@ public class WriteBufferTest extends TestCase {
     public void testDoubleWriteDESC() throws Exception {
         int len = 20;
         double[] bytes = createRandomDouble(len);
-        DoubleBuffer.DoubleWriteBuffer bb = CacheManager.DataType.DOUBLE.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
+        DoubleBuffer.DoubleWriteBuffer bb = CacheManager.DataType.DOUBLE.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI("").getPath(), ""), len).asWrite();
         for (int i = bytes.length; i > 0; i--) {
             bb.put(i - 1, bytes[i - 1]);
         }
@@ -208,7 +208,7 @@ public class WriteBufferTest extends TestCase {
     public void testDoubleWrite() throws Exception {
         int len = 20;
         double[] bytes = createRandomDouble(len);
-        DoubleBuffer.DoubleWriteBuffer bb = CacheManager.DataType.DOUBLE.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
+        DoubleBuffer.DoubleWriteBuffer bb = CacheManager.DataType.DOUBLE.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI("").getPath(), ""), len).asWrite();
         for (int i = 0; i < bytes.length; i++) {
             bb.put(i, bytes[i]);
         }
@@ -244,7 +244,7 @@ public class WriteBufferTest extends TestCase {
     public void testFloatWrite() throws Exception {
         int len = 20;
         float[] bytes = createRandomFloat(len);
-        FloatBuffer.FloatWriteBuffer bb = CacheManager.DataType.FLOAT.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
+        FloatBuffer.FloatWriteBuffer bb = CacheManager.DataType.FLOAT.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI("").getPath(), ""), len).asWrite();
         for (int i = 0; i < bytes.length; i++) {
             bb.put(i, bytes[i]);
         }
@@ -272,7 +272,7 @@ public class WriteBufferTest extends TestCase {
     public void testFloatWriteDESC() throws Exception {
         int len = 20;
         float[] bytes = createRandomFloat(len);
-        FloatBuffer.FloatWriteBuffer bb = CacheManager.DataType.FLOAT.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
+        FloatBuffer.FloatWriteBuffer bb = CacheManager.DataType.FLOAT.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI("").getPath(), ""), len).asWrite();
         for (int i = bytes.length; i > 0; i--) {
             bb.put(i - 1, bytes[i - 1]);
         }
@@ -301,7 +301,7 @@ public class WriteBufferTest extends TestCase {
     public void testIntWrite() throws Exception {
         int len = 20;
         int[] bytes = createRandomInt(len);
-        IntBuffer.IntWriteBuffer bb = CacheManager.DataType.INT.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
+        IntBuffer.IntWriteBuffer bb = CacheManager.DataType.INT.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI("").getPath(), ""), len).asWrite();
         for (int i = 0; i < bytes.length; i++) {
             bb.put(i, bytes[i]);
         }
@@ -329,7 +329,7 @@ public class WriteBufferTest extends TestCase {
     public void testIntWriteDESC() throws Exception {
         int len = 20;
         int[] bytes = createRandomInt(len);
-        IntBuffer.IntWriteBuffer bb = CacheManager.DataType.INT.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
+        IntBuffer.IntWriteBuffer bb = CacheManager.DataType.INT.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI("").getPath(), ""), len).asWrite();
         for (int i = bytes.length; i > 0; i--) {
             bb.put(i - 1, bytes[i - 1]);
         }
@@ -358,7 +358,7 @@ public class WriteBufferTest extends TestCase {
     public void testLongWrite() throws Exception {
         int len = 20;
         long[] bytes = createRandomLong(len);
-        LongBuffer.LongWriteBuffer bb = CacheManager.DataType.LONG.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
+        LongBuffer.LongWriteBuffer bb = CacheManager.DataType.LONG.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI("").getPath(), ""), len).asWrite();
         for (int i = 0; i < bytes.length; i++) {
             bb.put(i, bytes[i]);
         }
@@ -386,7 +386,7 @@ public class WriteBufferTest extends TestCase {
     public void testLongWriteDESC() throws Exception {
         int len = 20;
         long[] bytes = createRandomLong(len);
-        LongBuffer.LongWriteBuffer bb = CacheManager.DataType.LONG.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
+        LongBuffer.LongWriteBuffer bb = CacheManager.DataType.LONG.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI("").getPath(), ""), len).asWrite();
         for (int i = bytes.length; i > 0; i--) {
             bb.put(i - 1, bytes[i - 1]);
         }
@@ -414,7 +414,7 @@ public class WriteBufferTest extends TestCase {
     public void testShortWrite() throws Exception {
         int len = 20;
         short[] bytes = createRandomShort(len);
-        ShortBuffer.ShortWriteBuffer bb = CacheManager.DataType.SHORT.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
+        ShortBuffer.ShortWriteBuffer bb = CacheManager.DataType.SHORT.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI("").getPath(), ""), len).asWrite();
         for (int i = 0; i < bytes.length; i++) {
             bb.put(i, bytes[i]);
         }
@@ -442,7 +442,7 @@ public class WriteBufferTest extends TestCase {
     public void testShortWriteDESC() throws Exception {
         int len = 20;
         short[] bytes = createRandomShort(len);
-        ShortBuffer.ShortWriteBuffer bb = CacheManager.DataType.SHORT.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI(""), ""), len).asWrite();
+        ShortBuffer.ShortWriteBuffer bb = CacheManager.DataType.SHORT.createBuffer(new WriteIOFileTest.MemoryConnector(), new FileBlock(new URI("").getPath(), ""), len).asWrite();
         for (int i = bytes.length; i > 0; i--) {
             bb.put(i - 1, bytes[i - 1]);
         }

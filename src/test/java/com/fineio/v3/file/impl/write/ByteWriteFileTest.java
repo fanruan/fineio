@@ -1,9 +1,9 @@
 package com.fineio.v3.file.impl.write;
 
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.ByteDirectBuffer;
 import com.fineio.v3.buffer.impl.ByteDirectBuf;
-import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.type.FileMode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +35,7 @@ public class ByteWriteFileTest {
 
     @Test
     public void putByte() throws Exception {
-        ByteWriteFile wf = spy(ByteWriteFile.ofSync(mock(FileKey.class), mock(Connector.class)));
+        ByteWriteFile wf = spy(ByteWriteFile.ofSync(mock(FileBlock.class), mock(Connector.class)));
         ByteDirectBuffer buf = mock(ByteDirectBuffer.class);
         doReturn(buf).when(wf).getBuffer(0);
         doNothing().when(wf).syncBufIfNeed(anyInt());
@@ -53,12 +53,12 @@ public class ByteWriteFileTest {
         ConcurrentHashMap<Object, Object> buffers = spy(new ConcurrentHashMap<>());
         whenNew(ConcurrentHashMap.class).withNoArguments().thenReturn(buffers);
         ByteDirectBuf buf = mock(ByteDirectBuf.class);
-        FileKey fileKey = mock(FileKey.class);
-        FileKey childFileKey = mock(FileKey.class);
-        whenNew(FileKey.class).withArguments(fileKey.getPath(), "0").thenReturn(childFileKey);
-        whenNew(ByteDirectBuf.class).withArguments(childFileKey, 1, FileMode.WRITE).thenReturn(buf);
+        FileBlock fileBlock = mock(FileBlock.class);
+        FileBlock childFileBlock = mock(FileBlock.class);
+        whenNew(FileBlock.class).withArguments(fileBlock.getPath(), "0").thenReturn(childFileBlock);
+        whenNew(ByteDirectBuf.class).withArguments(childFileBlock, 1, FileMode.WRITE).thenReturn(buf);
 
-        ByteWriteFile wf = ByteWriteFile.ofSync(fileKey, mock(Connector.class));
+        ByteWriteFile wf = ByteWriteFile.ofSync(fileBlock, mock(Connector.class));
 
         assertEquals(buf, wf.getBuffer(0));
 

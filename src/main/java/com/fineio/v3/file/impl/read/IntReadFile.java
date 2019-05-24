@@ -1,10 +1,10 @@
 package com.fineio.v3.file.impl.read;
 
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.IntDirectBuffer;
 import com.fineio.v3.buffer.impl.IntDirectBuf;
-import com.fineio.v3.connector.Connector;
 import com.fineio.v3.file.FileClosedException;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.Offset;
 import com.fineio.v3.type.FileMode;
 
@@ -13,8 +13,8 @@ import com.fineio.v3.type.FileMode;
  * @date 2019/4/12
  */
 public class IntReadFile extends ReadFile<IntDirectBuffer> {
-    public IntReadFile(FileKey fileKey, Connector connector) {
-        super(fileKey, Offset.INT, connector);
+    public IntReadFile(FileBlock fileBlock, Connector connector) {
+        super(fileBlock, Offset.INT, connector);
     }
 
     public int getInt(long pos) throws FileClosedException, IllegalArgumentException {
@@ -24,7 +24,7 @@ public class IntReadFile extends ReadFile<IntDirectBuffer> {
     }
 
     @Override
-    IntDirectBuffer newDirectBuf(long address, int size, FileKey fileKey) {
-        return new IntDirectBuf(address, size, fileKey, size, FileMode.READ);
+    IntDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
+        return new IntDirectBuf(address, size, fileBlock, size, FileMode.READ);
     }
 }

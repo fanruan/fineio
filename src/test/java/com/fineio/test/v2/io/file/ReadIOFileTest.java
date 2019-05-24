@@ -43,9 +43,9 @@ public class ReadIOFileTest {
         URI u = new URI("");
         Field head = FileConstants.class.getDeclaredField("HEAD");
         head.setAccessible(true);
-        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(String.class, String.class);
         constructor.setAccessible(true);
-        FileBlock block = constructor.newInstance(u, head.get(null));
+        FileBlock block = constructor.newInstance(u.getPath(), head.get(null));
         EasyMock.expect(connector.read(EasyMock.eq(block))).andReturn(null).anyTimes();
         EasyMock.expect(connector.getBlockOffset()).andReturn((byte) 22).anyTimes();
         control.replay();
@@ -68,9 +68,9 @@ public class ReadIOFileTest {
         URI u = new URI("/");
         Field head = FileConstants.class.getDeclaredField("HEAD");
         head.setAccessible(true);
-        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(String.class, String.class);
         constructor.setAccessible(true);
-        FileBlock block = constructor.newInstance(u, head.get(null));
+        FileBlock block = constructor.newInstance(u.getPath(), head.get(null));
         EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
             public InputStream answer() {
                 return new ByteArrayInputStream(res);

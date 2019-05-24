@@ -1,9 +1,9 @@
 package com.fineio.v3.file.impl.write;
 
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.DoubleDirectBuffer;
 import com.fineio.v3.buffer.impl.DoubleDirectBuf;
-import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.type.FileMode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +35,7 @@ public class DoubleWriteFileTest {
 
     @Test
     public void putDouble() throws Exception {
-        DoubleWriteFile wf = spy(DoubleWriteFile.ofSync(mock(FileKey.class), mock(Connector.class)));
+        DoubleWriteFile wf = spy(DoubleWriteFile.ofSync(mock(FileBlock.class), mock(Connector.class)));
         DoubleDirectBuffer buf = mock(DoubleDirectBuffer.class);
         doReturn(buf).when(wf).getBuffer(0);
         doNothing().when(wf).syncBufIfNeed(anyInt());
@@ -53,12 +53,12 @@ public class DoubleWriteFileTest {
         ConcurrentHashMap<Object, Object> buffers = spy(new ConcurrentHashMap<>());
         whenNew(ConcurrentHashMap.class).withNoArguments().thenReturn(buffers);
         DoubleDirectBuf buf = mock(DoubleDirectBuf.class);
-        FileKey fileKey = mock(FileKey.class);
-        FileKey childFileKey = mock(FileKey.class);
-        whenNew(FileKey.class).withArguments(fileKey.getPath(), "0").thenReturn(childFileKey);
-        whenNew(DoubleDirectBuf.class).withArguments(childFileKey, 1 << -3, FileMode.WRITE).thenReturn(buf);
+        FileBlock fileBlock = mock(FileBlock.class);
+        FileBlock childFileBlock = mock(FileBlock.class);
+        whenNew(FileBlock.class).withArguments(fileBlock.getPath(), "0").thenReturn(childFileBlock);
+        whenNew(DoubleDirectBuf.class).withArguments(childFileBlock, 1 << -3, FileMode.WRITE).thenReturn(buf);
 
-        DoubleWriteFile wf = DoubleWriteFile.ofSync(fileKey, mock(Connector.class));
+        DoubleWriteFile wf = DoubleWriteFile.ofSync(fileBlock, mock(Connector.class));
 
         assertEquals(buf, wf.getBuffer(0));
 

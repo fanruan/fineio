@@ -1,5 +1,6 @@
 package com.fineio.io;
 
+import com.fineio.accessor.buffer.CharBuf;
 import com.fineio.io.file.FileBlock;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
@@ -11,7 +12,8 @@ import java.net.URI;
  * @author yee
  * @date 2018/9/19
  */
-public class CharBuffer extends BaseBuffer<CharBuffer.CharReadBuffer, CharBuffer.CharWriteBuffer> {
+@Deprecated
+public class CharBuffer extends BaseBuffer<CharBuffer.CharReadBuffer, CharBuffer.CharWriteBuffer> implements CharBuf {
     public CharBuffer(Connector connector, URI uri, boolean syncWrite, Listener listener) {
         super(connector, uri, syncWrite, listener);
     }
@@ -45,6 +47,7 @@ public class CharBuffer extends BaseBuffer<CharBuffer.CharReadBuffer, CharBuffer
         void put(int pos, char value);
     }
 
+    @Deprecated
     private class CharBufferR extends ReadBuffer implements CharReadBuffer {
         @Override
         public char get(int pos) {
@@ -53,6 +56,7 @@ public class CharBuffer extends BaseBuffer<CharBuffer.CharReadBuffer, CharBuffer
         }
     }
 
+    @Deprecated
     private class CharBufferW extends WriteBuffer implements CharWriteBuffer {
         @Override
         public void put(char value) {

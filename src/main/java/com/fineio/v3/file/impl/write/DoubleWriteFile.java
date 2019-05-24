@@ -1,10 +1,10 @@
 package com.fineio.v3.file.impl.write;
 
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.DoubleDirectBuffer;
 import com.fineio.v3.buffer.impl.DoubleDirectBuf;
-import com.fineio.v3.connector.Connector;
 import com.fineio.v3.file.FileClosedException;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.Offset;
 import com.fineio.v3.type.FileMode;
 
@@ -13,16 +13,16 @@ import com.fineio.v3.type.FileMode;
  * @date 2019/4/3
  */
 public class DoubleWriteFile extends WriteFile<DoubleDirectBuffer> {
-    public DoubleWriteFile(FileKey fileKey, Connector connector, boolean asyncWrite) {
-        super(fileKey, Offset.DOUBLE, connector, asyncWrite);
+    public DoubleWriteFile(FileBlock fileBlock, Connector connector, boolean asyncWrite) {
+        super(fileBlock, Offset.DOUBLE, connector, asyncWrite);
     }
 
-    public static DoubleWriteFile ofAsync(FileKey fileKey, Connector connector) {
-        return new DoubleWriteFile(fileKey, connector, true);
+    public static DoubleWriteFile ofAsync(FileBlock fileBlock, Connector connector) {
+        return new DoubleWriteFile(fileBlock, connector, true);
     }
 
-    public static DoubleWriteFile ofSync(FileKey fileKey, Connector connector) {
-        return new DoubleWriteFile(fileKey, connector, false);
+    public static DoubleWriteFile ofSync(FileBlock fileBlock, Connector connector) {
+        return new DoubleWriteFile(fileBlock, connector, false);
     }
 
     public void putDouble(long pos, double value) throws FileClosedException, IllegalArgumentException {
@@ -36,7 +36,7 @@ public class DoubleWriteFile extends WriteFile<DoubleDirectBuffer> {
     @Override
     protected DoubleDirectBuffer getBuffer(int nthBuf) {
         return buffers.computeIfAbsent(nthBuf,
-                i -> new DoubleDirectBuf(new FileKey(fileKey.getPath(), String.valueOf(i)),
+                i -> new DoubleDirectBuf(new FileBlock(fileBlock.getPath(), String.valueOf(i)),
                         1 << (connector.getBlockOffset() - offset.getOffset()), FileMode.WRITE));
     }
 }

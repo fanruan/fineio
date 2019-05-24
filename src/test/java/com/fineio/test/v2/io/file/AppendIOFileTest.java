@@ -1,6 +1,7 @@
 package com.fineio.test.v2.io.file;
 
 import com.fineio.FineIO;
+import com.fineio.accessor.Block;
 import com.fineio.io.ByteBuffer;
 import com.fineio.io.CharBuffer;
 import com.fineio.io.FloatBuffer;
@@ -412,7 +413,7 @@ public class AppendIOFileTest extends TestCase {
 
         private Map<FileBlock, byte[]> map = new ConcurrentHashMap<FileBlock, byte[]>();
 
-
+        @Override
         public InputStream read(FileBlock file) {
             byte[] b = map.get(file);
             if (b != null) {
@@ -421,7 +422,7 @@ public class AppendIOFileTest extends TestCase {
             return null;
         }
 
-
+        @Override
         public void write(FileBlock file, InputStream inputStream) {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             byte[] temp = new byte[1024];
@@ -436,7 +437,7 @@ public class AppendIOFileTest extends TestCase {
             map.put(file, byteArrayOutputStream.toByteArray());
         }
 
-
+        @Override
         public boolean delete(FileBlock block) {
             map.remove(block);
             return true;
@@ -445,6 +446,21 @@ public class AppendIOFileTest extends TestCase {
         @Override
         public boolean exists(FileBlock block) {
             return false;
+        }
+
+        @Override
+        public boolean delete(Block block) {
+            return false;
+        }
+
+        @Override
+        public boolean exists(Block block) {
+            return false;
+        }
+
+        @Override
+        public Block list(String dir) {
+            return null;
         }
 
         @Override

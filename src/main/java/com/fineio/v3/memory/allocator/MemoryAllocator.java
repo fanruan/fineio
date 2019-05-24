@@ -30,4 +30,5 @@ public interface MemoryAllocator {
      */
     long getMemory();
 
+    void clear();
 }

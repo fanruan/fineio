@@ -1,9 +1,10 @@
 package com.fineio.v3.file.impl;
 
+import com.fineio.accessor.file.IFile;
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.DirectBuffer;
-import com.fineio.v3.connector.Connector;
 import com.fineio.v3.file.FileClosedException;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.Offset;
 
 import java.io.Closeable;
@@ -15,8 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author anchore
  * @date 2019/4/16
  */
-public abstract class File<B extends DirectBuffer> implements Closeable {
-    protected final FileKey fileKey;
+public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B> {
+    protected final FileBlock fileBlock;
 
     protected final Connector connector;
 
@@ -26,8 +27,8 @@ public abstract class File<B extends DirectBuffer> implements Closeable {
 
     protected final Offset offset;
 
-    protected File(FileKey fileKey, Offset offset, Connector connector) {
-        this.fileKey = fileKey;
+    protected File(FileBlock fileBlock, Offset offset, Connector connector) {
+        this.fileBlock = fileBlock;
         this.offset = offset;
         this.connector = connector;
     }
@@ -44,7 +45,7 @@ public abstract class File<B extends DirectBuffer> implements Closeable {
 
     protected void ensureOpen() {
         if (closed.get()) {
-            throw new FileClosedException(fileKey);
+            throw new FileClosedException(fileBlock);
         }
     }
 

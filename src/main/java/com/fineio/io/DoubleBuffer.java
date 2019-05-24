@@ -1,5 +1,6 @@
 package com.fineio.io;
 
+import com.fineio.accessor.buffer.DoubleBuf;
 import com.fineio.io.file.FileBlock;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
@@ -11,7 +12,7 @@ import java.net.URI;
  * @author yee
  * @date 2018/9/19
  */
-public class DoubleBuffer extends BaseBuffer<DoubleBuffer.DoubleReadBuffer, DoubleBuffer.DoubleWriteBuffer> {
+public class DoubleBuffer extends BaseBuffer<DoubleBuffer.DoubleReadBuffer, DoubleBuffer.DoubleWriteBuffer> implements DoubleBuf {
     public DoubleBuffer(Connector connector, URI uri, boolean syncWrite, Listener listener) {
         super(connector, uri, syncWrite, listener);
     }

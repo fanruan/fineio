@@ -1,9 +1,9 @@
 package com.fineio.v3.file.impl.read;
 
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.DoubleDirectBuffer;
 import com.fineio.v3.buffer.impl.DoubleDirectBuf;
-import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.type.FileMode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +24,7 @@ public class DoubleReadFileTest {
 
     @Test
     public void getDouble() throws Exception {
-        DoubleReadFile rf = spy(new DoubleReadFile(mock(FileKey.class), mock(Connector.class)));
+        DoubleReadFile rf = spy(new DoubleReadFile(mock(FileBlock.class), mock(Connector.class)));
 
         DoubleDirectBuffer buf = mock(DoubleDirectBuffer.class);
         doReturn(buf).when(rf).getBuffer(0);
@@ -38,12 +38,12 @@ public class DoubleReadFileTest {
 
     @Test
     public void newDirectBuf() throws Exception {
-        DoubleReadFile rf = new DoubleReadFile(mock(FileKey.class), mock(Connector.class));
+        DoubleReadFile rf = new DoubleReadFile(mock(FileBlock.class), mock(Connector.class));
 
-        FileKey fileKey = mock(FileKey.class);
+        FileBlock fileBlock = mock(FileBlock.class);
         DoubleDirectBuf buf = mock(DoubleDirectBuf.class);
-        whenNew(DoubleDirectBuf.class).withArguments(1L, 16, fileKey, 16, FileMode.READ).thenReturn(buf);
+        whenNew(DoubleDirectBuf.class).withArguments(1L, 16, fileBlock, 16, FileMode.READ).thenReturn(buf);
 
-        assertEquals(buf, rf.newDirectBuf(1L, 16, fileKey));
+        assertEquals(buf, rf.newDirectBuf(1L, 16, fileBlock));
     }
 }

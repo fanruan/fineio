@@ -1,6 +1,7 @@
 package com.fineio.io;
 
 
+import com.fineio.accessor.buffer.Buf;
 import com.fineio.cache.SyncStatus;
 import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
@@ -11,7 +12,7 @@ import java.net.URI;
  * @author yee
  * @date 2018/9/19
  */
-public interface Buffer {
+public interface Buffer extends Buf {
     Level getLevel();
 
     SyncStatus getSyncStatus();

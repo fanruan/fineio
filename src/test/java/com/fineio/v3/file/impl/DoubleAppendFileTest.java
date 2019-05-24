@@ -1,8 +1,8 @@
 package com.fineio.v3.file.impl;
 
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.impl.DoubleDirectBuf;
-import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.file.impl.write.DoubleWriteFile;
 import com.fineio.v3.memory.Offset;
 import com.fineio.v3.type.FileMode;
@@ -47,15 +47,15 @@ public class DoubleAppendFileTest {
         DoubleAppendFile af = mock(DoubleAppendFile.class);
         DoubleWriteFile wf = mock(DoubleWriteFile.class);
         setInternalState(af, "writeFile", wf);
-        doCallRealMethod().when(af, "newDirectBuf", anyLong(), anyInt(), any(FileKey.class));
+        doCallRealMethod().when(af, "newDirectBuf", anyLong(), anyInt(), any(FileBlock.class));
 
         setInternalState(wf, "connector", mock(Connector.class));
         setInternalState(wf, "offset", Offset.DOUBLE);
 
-        FileKey fileKey = mock(FileKey.class);
+        FileBlock fileBlock = mock(FileBlock.class);
         DoubleDirectBuf buf = mock(DoubleDirectBuf.class);
-        whenNew(DoubleDirectBuf.class).withArguments(1L, 1, fileKey, 1 << -3, FileMode.WRITE).thenReturn(buf);
+        whenNew(DoubleDirectBuf.class).withArguments(1L, 1, fileBlock, 1 << -3, FileMode.WRITE).thenReturn(buf);
 
-        assertEquals(buf, af.newDirectBuf(1, 1, fileKey));
+        assertEquals(buf, af.newDirectBuf(1, 1, fileBlock));
     }
 }

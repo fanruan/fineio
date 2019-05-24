@@ -1,5 +1,6 @@
 package com.fineio.io;
 
+import com.fineio.accessor.buffer.LongBuf;
 import com.fineio.io.file.FileBlock;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
@@ -11,7 +12,7 @@ import java.net.URI;
  * @author yee
  * @date 2018/9/19
  */
-public class LongBuffer extends BaseBuffer<LongBuffer.LongReadBuffer, LongBuffer.LongWriteBuffer> {
+public class LongBuffer extends BaseBuffer<LongBuffer.LongReadBuffer, LongBuffer.LongWriteBuffer> implements LongBuf {
     public LongBuffer(Connector connector, URI uri, boolean syncWrite, Listener listener) {
         super(connector, uri, syncWrite, listener);
     }

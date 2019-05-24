@@ -1,8 +1,7 @@
 package com.fineio.test.file.writer;
 
-import com.fineio.io.file.FileBlock;
-import com.fineio.io.base.Job;
 import com.fineio.io.base.JobAssist;
+import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.writer.JobContainer;
 import com.fineio.storage.Connector;
 import junit.framework.TestCase;
@@ -21,52 +20,38 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class JobContainerTest extends TestCase {
 
     public void testContainer() throws Exception {
-        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(String.class, String.class);
         constructor.setAccessible(true);
         JobContainer container = new JobContainer();
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
         control.replay();
-        URI uri = new URI("");
-        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
-            public void doJob() {
+        String uri = "";
+        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), () -> {
 
-            }
         })));
 
-        assertFalse(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
-            public void doJob() {
+        assertFalse(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), () -> {
 
-            }
         })));
         container.get();
         assertTrue(container.isEmpty());
-        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
-            public void doJob() {
+        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), () -> {
 
-            }
         })));
-        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "2"), new Job() {
-            public void doJob() {
+        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "2"), () -> {
 
-            }
         })));
-        assertTrue(container.put(new JobAssist(null, constructor.newInstance(uri, "1"), new Job() {
-            public void doJob() {
+        assertTrue(container.put(new JobAssist(null, constructor.newInstance(uri, "1"), () -> {
 
-            }
         })));
         container.get();
-        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
-            public void doJob() {
+        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), () -> {
 
-            }
         })));
         container.get();
-        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "2"), new Job() {
-            public void doJob() {
+        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "2"), () -> {
 
-            }
         })));
         assertFalse(container.isEmpty());
         container.get();
@@ -79,33 +64,26 @@ public class JobContainerTest extends TestCase {
 
     public void testWait() throws Exception {
 
-        final Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        final Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(String.class, String.class);
         constructor.setAccessible(true);
         final JobContainer container = new JobContainer();
         IMocksControl control = EasyMock.createControl();
         final Connector connector = control.createMock(Connector.class);
         control.replay();
         final URI uri = new URI("");
-        JobAssist jobAssist = new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
-            public void doJob() {
+        JobAssist jobAssist = new JobAssist(connector, constructor.newInstance(uri.getPath(), "1"), () -> {
 
-            }
         });
-        final JobAssist jobAssist3 = new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
-            public void doJob() {
+        final JobAssist jobAssist3 = new JobAssist(connector, constructor.newInstance(uri.getPath(), "1"), () -> {
 
-            }
         });
         assertTrue(container.put(jobAssist));
         final AtomicInteger atomicInteger = new AtomicInteger(0);
-        new Thread(){
-
-            public void run() {
-                atomicInteger.addAndGet(1);
-                container.waitJob(jobAssist3);
-                atomicInteger.addAndGet(1);
-            }
-        }.start();
+        new Thread(() -> {
+            atomicInteger.addAndGet(1);
+            container.waitJob(jobAssist3);
+            atomicInteger.addAndGet(1);
+        }).start();
         Thread.sleep(200);
         assertEquals(atomicInteger.get(), 1);
         synchronized (jobAssist3){
@@ -120,10 +98,8 @@ public class JobContainerTest extends TestCase {
         Thread.sleep(200);
         assertEquals(atomicInteger.get(), 2);
 
-        final JobAssist jobAssist2 = new JobAssist(connector, constructor.newInstance(uri, "2"), new Job() {
-            public void doJob() {
+        final JobAssist jobAssist2 = new JobAssist(connector, constructor.newInstance(uri.getPath(), "2"), () -> {
 
-            }
         });
         new Thread(){
             public void run() {
@@ -145,7 +121,7 @@ public class JobContainerTest extends TestCase {
 
 
     public void testMultiThread() throws Exception {
-        final Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        final Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(String.class, String.class);
         constructor.setAccessible(true);
         final JobContainer container = new JobContainer();
         IMocksControl control = EasyMock.createControl();
@@ -163,11 +139,7 @@ public class JobContainerTest extends TestCase {
                         for (int q = 0; q < len; q++) {
                             try {
                                 final int k = q;
-                                container.put(new JobAssist(connector, constructor.newInstance(uri, String.valueOf(q)), new Job() {
-                                    public void doJob() {
-                                        sign[k] = true;
-                                    }
-                                }));
+                                container.put(new JobAssist(connector, constructor.newInstance(uri.getPath(), String.valueOf(q)), () -> sign[k] = true));
                             } catch (InstantiationException e) {
                                 e.printStackTrace();
                             } catch (IllegalAccessException e) {
@@ -200,7 +172,7 @@ public class JobContainerTest extends TestCase {
             jobAssist.doJob();
         }
         for(int i = 0; i < len; i ++) {
-            assertEquals(sign[i], true);
+            assertTrue(sign[i]);
         }
     }
 

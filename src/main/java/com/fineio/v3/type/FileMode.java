@@ -9,7 +9,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public enum FileMode {
     //
     READ,
-    WRITE;
+    WRITE,
+    APPEND;
     private ReentrantLock lock = new ReentrantLock();
     private Condition condition = lock.newCondition();
 

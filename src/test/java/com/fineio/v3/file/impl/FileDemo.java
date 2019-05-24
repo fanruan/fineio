@@ -1,7 +1,7 @@
 package com.fineio.v3.file.impl;
 
+import com.fineio.io.file.FileBlock;
 import com.fineio.v3.connector.FileConnector;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.file.impl.read.ByteReadFile;
 import com.fineio.v3.file.impl.read.DoubleReadFile;
 import com.fineio.v3.file.impl.read.IntReadFile;
@@ -22,8 +22,8 @@ import static org.junit.Assert.assertEquals;
  * @date 2019/4/16
  */
 public class FileDemo {
-    private FileKey key = new FileKey(System.getProperty("user.dir"), "overwrite");
-    private FileConnector connector = new FileConnector(10);
+    private FileBlock key = new FileBlock(System.getProperty("user.dir"), "overwrite");
+    private FileConnector connector = new FileConnector((byte) 10);
     private int n = 1 << 10;
 
     @Test

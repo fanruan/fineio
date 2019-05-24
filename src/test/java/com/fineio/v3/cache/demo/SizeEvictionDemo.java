@@ -31,9 +31,7 @@ public class SizeEvictionDemo {
 
         LoadingCache<Integer, Integer> cache2 = Caffeine.newBuilder()
                 .maximumWeight(1000)
-                .weigher((Integer key, Integer value) -> {
-                    return value;
-                })
+                .weigher((Integer key, Integer value) -> value)
                 .build(key -> createExpensiveGraph(key));
         Thread.sleep(1000L);
 

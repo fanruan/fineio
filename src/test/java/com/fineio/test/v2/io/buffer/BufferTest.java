@@ -55,9 +55,9 @@ public class BufferTest {
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
         URI u = new URI("");
-        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(String.class, String.class);
         constructor.setAccessible(true);
-        FileBlock block = constructor.newInstance(u, "0");
+        FileBlock block = constructor.newInstance(u.getPath(), "0");
         EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
             public InputStream answer() {
                 return new ByteArrayInputStream(value);
@@ -295,9 +295,9 @@ public class BufferTest {
         IMocksControl control = EasyMock.createControl();
         Connector connector = control.createMock(Connector.class);
         URI u = new URI("");
-        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(URI.class, String.class);
+        Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(String.class, String.class);
         constructor.setAccessible(true);
-        FileBlock block = constructor.newInstance(u, "0");
+        FileBlock block = constructor.newInstance(u.getPath(), "0");
         EasyMock.expect(connector.read(EasyMock.eq(block))).andAnswer(new IAnswer<InputStream>() {
 
             public InputStream answer() {

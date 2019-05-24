@@ -1,5 +1,6 @@
 package com.fineio.storage;
 
+import com.fineio.accessor.Block;
 import com.fineio.io.file.FileBlock;
 
 import java.io.IOException;
@@ -14,6 +15,7 @@ public interface Connector {
 
     /**
      * 读整块的方法
+     *
      * @param file
      * @return
      */
@@ -21,22 +23,27 @@ public interface Connector {
 
     /**
      * 写整快的方法，可以保证通一个块不被同时写
+     *
      * @param file
      * @param inputStream
      */
-    void write(FileBlock file, InputStream inputStream)  throws IOException;
+    void write(FileBlock file, InputStream inputStream) throws IOException;
 
     /*
     输出byte[]
      */
-    void write(FileBlock file, byte[] bytes)  throws IOException;
+    void write(FileBlock file, byte[] bytes) throws IOException;
 
     /**
      * 删除块
+     *
      * @param block
      * @return
      */
-    boolean delete(FileBlock block);
+    @Deprecated
+    default boolean delete(FileBlock block) {
+        return delete((Block) block);
+    }
 
     /**
      * 写文件时单个块的最大size偏移量
@@ -44,16 +51,41 @@ public interface Connector {
      * 可以根据磁盘的读写能力控制这个值的大小介于12-31之间
      * 不支持小于12 4K
      * 不支持大于31 2G
+     *
      * @return
      */
     byte getBlockOffset();
 
     /**
      * 文件是否存在
+     *
      * @param block
      * @return
      */
-    boolean exists(FileBlock block);
+    @Deprecated
+    default boolean exists(FileBlock block) {
+        return exists((Block) block);
+    }
+
+    /**
+     * @param block
+     * @return
+     */
+    boolean delete(Block block);
+
+    /**
+     * @param block
+     * @return
+     */
+    boolean exists(Block block);
+
+    /**
+     * @param dir
+     * @return
+     * @since 3.0
+     */
+    Block list(String dir);
+
 
     /**
      * 复制文件
@@ -61,6 +93,7 @@ public interface Connector {
      * @param destBlock
      * @return
      */
+    @Deprecated
     boolean copy(FileBlock srcBlock, FileBlock destBlock) throws IOException;
 
     /**
@@ -68,5 +101,6 @@ public interface Connector {
      * @param block
      * @return
      */
+    @Deprecated
     URI deleteParent(FileBlock block);
 }

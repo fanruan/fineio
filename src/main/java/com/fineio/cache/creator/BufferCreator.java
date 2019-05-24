@@ -195,11 +195,12 @@ public abstract class BufferCreator<B extends Buffer> {
 
     public B createBuffer(Connector connector, FileBlock block, int maxOffset, boolean async) {
         synchronized (this) {
-            B buffer = keyMap.get(block.getBlockURI());
+            URI key = URI.create(block.getPath());
+            B buffer = keyMap.get(key);
             if (null == buffer) {
                 buffer = create(connector, block, maxOffset, async);
                 bufferMap.put(buffer);
-                keyMap.put(block.getBlockURI(), buffer);
+                keyMap.put(key, buffer);
             } else {
                 bufferMap.update(buffer);
             }

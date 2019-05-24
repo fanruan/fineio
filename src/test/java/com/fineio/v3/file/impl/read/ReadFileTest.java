@@ -1,8 +1,8 @@
 package com.fineio.v3.file.impl.read;
 
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.DirectBuffer;
-import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
@@ -53,12 +53,12 @@ public class ReadFileTest {
     public void loadBuffer() throws Exception {
         ReadFile<?> rf = mock(ReadFile.class, CALLS_REAL_METHODS);
 
-        setInternalState(rf, "fileKey", mock(FileKey.class));
+        setInternalState(rf, "fileBlock", mock(FileBlock.class));
         Connector connector = mock(Connector.class);
         setInternalState(rf, "connector", connector);
 
         InputStream input = mock(InputStream.class, CALLS_REAL_METHODS);
-        when(connector.read(any(FileKey.class))).thenReturn(input);
+        when(connector.read(any(FileBlock.class))).thenReturn(input);
 
         when(input.available()).thenReturn(1);
 
@@ -79,7 +79,7 @@ public class ReadFileTest {
         bytes[0] = 1;
         MemoryUtils.copyMemory(bytes, 1, 1);
 
-        verify(rf).newDirectBuf(eq(1L), eq(1), any(FileKey.class));
+        verify(rf).newDirectBuf(eq(1L), eq(1), any(FileBlock.class));
 
         when(input.read()).thenThrow(IOException.class);
 

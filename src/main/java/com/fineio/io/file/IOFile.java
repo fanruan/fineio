@@ -1,5 +1,7 @@
 package com.fineio.io.file;
 
+import com.fineio.accessor.buffer.Buf;
+import com.fineio.accessor.file.IFile;
 import com.fineio.base.Bits;
 import com.fineio.io.Buffer;
 import com.fineio.io.BufferW;
@@ -22,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author yee
  * @date 2018/9/20
  */
-public abstract class IOFile<B extends Buffer> {
+public abstract class IOFile<B extends Buf> implements IFile<B> {
     protected final static int STEP_LEN = MemoryConstants.STEP_LONG;
     private final static int HEAD_LEN = STEP_LEN + 1;
     /**
@@ -325,11 +327,11 @@ public abstract class IOFile<B extends Buffer> {
     protected abstract Buffer initBuffer(int index);
 
     protected FileBlock createIndexBlock(int index) {
-        return new FileBlock(uri, String.valueOf(index));
+        return new FileBlock(uri.getPath(), String.valueOf(index));
     }
 
     protected final FileBlock createHeadBlock() {
-        return new FileBlock(uri, FileConstants.HEAD);
+        return new FileBlock(uri.getPath(), FileConstants.HEAD);
     }
 
     /**
@@ -367,6 +369,7 @@ public abstract class IOFile<B extends Buffer> {
         }
     }
 
+    @Override
     public void close() {
         if (!close) {
             synchronized (this) {

@@ -1,8 +1,8 @@
 package com.fineio.v3.file.impl;
 
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.DirectBuffer;
-import com.fineio.v3.connector.Connector;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.file.impl.write.WriteFile;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.MemoryUtils;
@@ -12,6 +12,7 @@ import com.fineio.v3.type.FileMode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.stubbing.Answer;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
@@ -36,7 +37,6 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.verifyPrivate;
-import static org.powermock.api.mockito.PowerMockito.verifyZeroInteractions;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.reflect.Whitebox.getInternalState;
 import static org.powermock.reflect.Whitebox.invokeMethod;
@@ -54,17 +54,17 @@ public class AppendFileTest {
 
         Connector connector = mock(Connector.class);
         setInternalState(wf, "connector", connector);
-        setInternalState(wf, "fileKey", mock(FileKey.class));
+        setInternalState(wf, "fileBlock", mock(FileBlock.class));
 
-        when(connector.exists(any(FileKey.class))).thenReturn(false, true);
+        when(connector.exists(any(FileBlock.class))).thenReturn(false, true);
 
         invokeMethod(af, "initLastPos");
 
-        verify(connector, never()).read(any(FileKey.class));
+        verify(connector, never()).read(any(FileBlock.class));
         assertEquals(0, (int) getInternalState(af, "lastPos"));
 
         InputStream input = mock(InputStream.class);
-        when(connector.read(any(FileKey.class))).thenReturn(input);
+        when(connector.read(any(FileBlock.class))).thenReturn(input);
 
         when(input.read(any(byte[].class))).thenReturn(1).thenThrow(IOException.class)
                 .thenAnswer((Answer<Integer>) invocationOnMock -> {
@@ -95,15 +95,15 @@ public class AppendFileTest {
         setInternalState(af, "writeFile", wf);
         when(wf.nthVal(anyLong())).thenReturn(0, 1);
 
-        FileKey fileKey = mock(FileKey.class);
-        setInternalState(wf, "fileKey", fileKey);
+        FileBlock fileBlock = mock(FileBlock.class);
+        setInternalState(wf, "fileBlock", fileBlock);
 
         Connector connector = mock(Connector.class);
         setInternalState(wf, "connector", connector);
 
-        when(connector.exists(any(FileKey.class))).thenReturn(false, true);
+        when(connector.exists(any(FileBlock.class))).thenReturn(false, true);
         InputStream input = mock(InputStream.class, CALLS_REAL_METHODS);
-        when(connector.read(any(FileKey.class))).thenReturn(input);
+        when(connector.read(any(FileBlock.class))).thenReturn(input);
 
         when(input.available()).thenReturn(1);
         when(input.read()).thenReturn(1, -1);
@@ -118,15 +118,15 @@ public class AppendFileTest {
         setInternalState(wf, "buffers", buffers);
 
         DirectBuffer buf = mock(DirectBuffer.class);
-        doReturn(buf).when(af).newDirectBuf(anyLong(), eq(1), any(FileKey.class));
+        doReturn(buf).when(af).newDirectBuf(anyLong(), eq(1), any(FileBlock.class));
 
         invokeMethod(af, "initLastBuf");
         // nthVal == 0
-        verifyZeroInteractions(connector);
+        PowerMockito.verifyZeroInteractions(connector);
 
         invokeMethod(af, "initLastBuf");
         // not exists
-        verify(connector, never()).read(any(FileKey.class));
+        verify(connector, never()).read(any(FileBlock.class));
 
         invokeMethod(af, "initLastBuf");
 
@@ -161,13 +161,13 @@ public class AppendFileTest {
         setInternalState(af, "writeFile", wf);
         doCallRealMethod().when(af, "writeLastPos");
 
-        setInternalState(wf, "fileKey", mock(FileKey.class));
+        setInternalState(wf, "fileBlock", mock(FileBlock.class));
 
         Connector connector = mock(Connector.class);
         setInternalState(wf, "connector", connector);
 
         invokeMethod(af, "writeLastPos");
 
-        verify(connector).write(eq(new byte[4]), any(FileKey.class));
+        verify(connector).write(any(FileBlock.class), eq(new byte[4]));
     }
 }

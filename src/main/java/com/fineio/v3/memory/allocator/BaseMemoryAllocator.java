@@ -64,4 +64,8 @@ public class BaseMemoryAllocator implements MemoryAllocator {
         return memorySize.sum();
     }
 
+    @Override
+    public void clear() {
+        memorySize.reset();
+    }
 }

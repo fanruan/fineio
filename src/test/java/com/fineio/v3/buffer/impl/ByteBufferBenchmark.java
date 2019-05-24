@@ -7,7 +7,6 @@ import com.fineio.io.ByteBuffer.ByteWriteBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.ByteDirectBuffer;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
 import com.fineio.v3.type.FileMode;
@@ -110,7 +109,7 @@ public class ByteBufferBenchmark {
         @Setup
         public void setupOnTrial() throws IOException {
             int sizeInBytes = cap << Offset.BYTE.getOffset();
-            buf = new ByteDirectBuf(MemoryUtils.allocate(sizeInBytes), cap, mock(FileKey.class), cap, FileMode.READ);
+            buf = new ByteDirectBuf(MemoryUtils.allocate(sizeInBytes), cap, mock(FileBlock.class), cap, FileMode.READ);
 
             byte[] bytes = new byte[1024];
             for (int i = 0; i < cap; i++) {
@@ -149,7 +148,7 @@ public class ByteBufferBenchmark {
 
         @Setup(Level.Invocation)
         public void setupOnInvocation() {
-            buf = new ByteDirectBuf(mock(FileKey.class), cap, FileMode.WRITE);
+            buf = new ByteDirectBuf(mock(FileBlock.class), cap, FileMode.WRITE);
 
             oldBuf = new ByteBuffer(mock(Connector.class), new FileBlock(null), 10, false, mock(Listener.class)).asWrite();
         }

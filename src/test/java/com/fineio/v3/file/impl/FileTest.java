@@ -1,8 +1,8 @@
 package com.fineio.v3.file.impl;
 
-import com.fineio.v3.connector.Connector;
+import com.fineio.io.file.FileBlock;
+import com.fineio.storage.Connector;
 import com.fineio.v3.file.FileClosedException;
-import com.fineio.v3.file.FileKey;
 import com.fineio.v3.memory.Offset;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -27,7 +27,7 @@ public class FileTest {
         File<?> f = mock(File.class, Mockito.CALLS_REAL_METHODS);
 
         Connector connector = mock(Connector.class);
-        when(connector.getBlockOffset()).thenReturn(10);
+        when(connector.getBlockOffset()).thenReturn((byte) 10);
         setInternalState(f, "connector", connector);
 
         setInternalState(f, "offset", Offset.BYTE);
@@ -41,7 +41,7 @@ public class FileTest {
         File<?> f = mock(File.class, Mockito.CALLS_REAL_METHODS);
 
         Connector connector = mock(Connector.class);
-        when(connector.getBlockOffset()).thenReturn(10);
+        when(connector.getBlockOffset()).thenReturn((byte) 10);
         setInternalState(f, "connector", connector);
 
         setInternalState(f, "offset", Offset.INT);
@@ -60,7 +60,7 @@ public class FileTest {
         f.ensureOpen();
 
         Whitebox.<AtomicBoolean>getInternalState(f, "closed").set(true);
-        setInternalState(f, "fileKey", mock(FileKey.class));
+        setInternalState(f, "fileBlock", mock(FileBlock.class));
 
         try {
             // closed, ensure throws

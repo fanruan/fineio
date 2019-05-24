@@ -68,7 +68,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         this.syncWrite = syncWrite;
         level = Level.INITIAL;
         syncStatus = SyncStatus.UNSUPPORTED;
-        bufferKey = new BufferKey(connector, new FileBlock(uri));
+        bufferKey = new BufferKey(connector, new FileBlock(uri.getPath()));
         this.direct = true;
         this.listener = listener;
         this.uri = uri;
@@ -85,7 +85,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         this.maxOffset = maxOffset;
         this.maxLength = 1 << (this.maxOffset + getOffset());
         this.listener = listener;
-        this.uri = block.getBlockURI();
+        this.uri = URI.create(block.getPath());
 
     }
 

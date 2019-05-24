@@ -62,4 +62,9 @@ public enum MemoryManager {
             mode.getLock().unlock();
         }
     }
+
+    public void clear() {
+        allocator.clear();
+        reAllocator.clear();
+    }
 }

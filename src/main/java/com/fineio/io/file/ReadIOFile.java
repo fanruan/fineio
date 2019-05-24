@@ -1,5 +1,7 @@
 package com.fineio.io.file;
 
+import com.fineio.accessor.buffer.Buf;
+import com.fineio.accessor.file.IReadFile;
 import com.fineio.io.BaseBuffer;
 import com.fineio.io.Buffer;
 import com.fineio.io.file.writer.JobFinishedManager;
@@ -13,7 +15,7 @@ import java.net.URI;
  * @author yee
  * @date 2018/9/20
  */
-public final class ReadIOFile<B extends Buffer> extends BaseReadIOFile<B> {
+public final class ReadIOFile<B extends Buf> extends BaseReadIOFile<B> implements IReadFile<B> {
     ReadIOFile(Connector connector, URI uri, FileModel model) {
         super(connector, uri, model);
     }
@@ -23,7 +25,7 @@ public final class ReadIOFile<B extends Buffer> extends BaseReadIOFile<B> {
         return FileLevel.READ;
     }
 
-    public static final <E extends BaseBuffer> ReadIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
+    public static final <E extends Buf> ReadIOFile<E> createFineIO(Connector connector, URI uri, FileModel model) {
         return new ReadIOFile<E>(connector, uri, model);
     }
 
@@ -67,9 +69,9 @@ public final class ReadIOFile<B extends Buffer> extends BaseReadIOFile<B> {
                             }
                         }
                     }
-                    connector.delete(new FileBlock(uri));
+                    connector.delete(new FileBlock(uri.getPath()));
                     URI parentURI = uri;
-                    while (null != (parentURI = connector.deleteParent(new FileBlock(parentURI)))) {
+                    while (null != (parentURI = connector.deleteParent(new FileBlock(parentURI.getPath())))) {
                     }
                     released = true;
                 }

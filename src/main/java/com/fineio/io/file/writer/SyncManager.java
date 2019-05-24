@@ -149,7 +149,7 @@ public final class SyncManager {
                         executor.submit(new Runnable() {
                             @Override
                             public void run() {
-                                URI uri = jobAssist.getKey().getBlock().getBlockURI();
+                                URI uri = URI.create(jobAssist.getKey().getBlock().getPath());
                                 try {
                                     jobAssist.doJob();
                                 } catch (Throwable e) {

@@ -1,6 +1,7 @@
 package com.fineio.test.v2.io.file;
 
 import com.fineio.FineIO;
+import com.fineio.accessor.Block;
 import com.fineio.io.ByteBuffer;
 import com.fineio.io.CharBuffer;
 import com.fineio.io.FloatBuffer;
@@ -50,6 +51,7 @@ public class WriteIOFileTest extends TestCase {
     public void testConstruct() throws Exception {
         final byte size = 26;
         Connector connector = new MemoryConnector() {
+            @Override
             public byte getBlockOffset() {
                 return size;
             }
@@ -309,7 +311,7 @@ public class WriteIOFileTest extends TestCase {
 
         private Map<FileBlock, byte[]> map = new ConcurrentHashMap<FileBlock, byte[]>();
 
-
+        @Override
         public InputStream read(FileBlock file) {
             byte[] b = map.get(file);
             if (b != null) {
@@ -318,7 +320,7 @@ public class WriteIOFileTest extends TestCase {
             return null;
         }
 
-
+        @Override
         public void write(FileBlock file, InputStream inputStream) {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             byte[] temp = new byte[1024];
@@ -333,7 +335,7 @@ public class WriteIOFileTest extends TestCase {
             map.put(file, byteArrayOutputStream.toByteArray());
         }
 
-
+        @Override
         public boolean delete(FileBlock block) {
             map.remove(block);
             return true;
@@ -342,6 +344,21 @@ public class WriteIOFileTest extends TestCase {
         @Override
         public boolean exists(FileBlock block) {
             return false;
+        }
+
+        @Override
+        public boolean delete(Block block) {
+            return false;
+        }
+
+        @Override
+        public boolean exists(Block block) {
+            return false;
+        }
+
+        @Override
+        public Block list(String dir) {
+            return null;
         }
 
         @Override
