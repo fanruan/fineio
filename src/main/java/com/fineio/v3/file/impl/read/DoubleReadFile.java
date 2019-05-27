@@ -1,6 +1,5 @@
 package com.fineio.v3.file.impl.read;
 
-import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.DoubleDirectBuffer;
@@ -25,6 +24,6 @@ public class DoubleReadFile extends ReadFile<DoubleDirectBuffer> {
 
     @Override
     DoubleDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
-        return new DoubleDirectBuf(address, size, fileBlock, size, FileMode.READ);
+        return new DoubleDirectBuf(address, size, fileBlock, size);
     }
 }

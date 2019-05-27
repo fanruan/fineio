@@ -45,7 +45,7 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
             return newDirectBuf(address, (int) ((ptr - address) >> offset.getOffset()), nthFileBlock);
         } catch (Throwable e) {
             if (address != null) {
-                MemoryManager.INSTANCE.release(address, avail, FileMode.READ);
+                MemoryManager.INSTANCE.release(address, avail);
             }
             FineIOLoggers.getLogger().error(e);
             return null;

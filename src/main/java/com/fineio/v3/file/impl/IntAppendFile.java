@@ -1,6 +1,5 @@
 package com.fineio.v3.file.impl;
 
-import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.v3.buffer.IntDirectBuffer;
 import com.fineio.v3.buffer.impl.IntDirectBuf;
@@ -21,6 +20,6 @@ public class IntAppendFile extends AppendFile<IntWriteFile, IntDirectBuffer> {
 
     @Override
     protected IntDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
-        return new IntDirectBuf(address, size, fileBlock, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()), FileMode.WRITE);
+        return new IntDirectBuf(address, size, fileBlock, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()));
     }
 }

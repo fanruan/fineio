@@ -68,7 +68,7 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> imple
                 writeFile.buffers.put(nthBuf, newDirectBuf(address, (int) ((ptr - address) >> writeFile.offset.getOffset()), lastFileBlock));
             } catch (Throwable e) {
                 if (address != null) {
-                    MemoryManager.INSTANCE.release(address, avail, FileMode.WRITE);
+                    MemoryManager.INSTANCE.release(address, avail);
                 }
                 FineIOLoggers.getLogger().error(e);
             }

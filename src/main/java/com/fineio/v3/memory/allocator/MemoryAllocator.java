@@ -31,4 +31,6 @@ public interface MemoryAllocator {
     long getMemory();
 
     void clear();
+
+    void addMemory(long size, Condition condition) throws OutOfDirectMemoryException;
 }

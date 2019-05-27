@@ -46,7 +46,7 @@ public class IntDirectBufTest {
 
     @Test
     public void getInt() {
-        IntDirectBuf buf = spy(new IntDirectBuf(1, 16, mock(FileBlock.class), 1024, FileMode.READ));
+        IntDirectBuf buf = spy(new IntDirectBuf(1, 16, mock(FileBlock.class), 1024));
         mockStatic(MemoryUtils.class);
         when(MemoryUtils.getInt(1, 0)).thenReturn(1);
 

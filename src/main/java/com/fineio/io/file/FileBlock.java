@@ -90,7 +90,11 @@ public class FileBlock implements Block {
         return URI.create(dir);
     }
 
-    public URI getBlockUri() {
+    public URI getBlockURI() {
         return URI.create(getPath());
+    }
+
+    public String getFileName() {
+        return fileName;
     }
 }

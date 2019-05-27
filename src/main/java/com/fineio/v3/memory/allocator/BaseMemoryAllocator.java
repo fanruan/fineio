@@ -68,4 +68,25 @@ public class BaseMemoryAllocator implements MemoryAllocator {
     public void clear() {
         memorySize.reset();
     }
+
+    @Override
+    public void addMemory(long size, Condition condition) throws OutOfDirectMemoryException {
+        if (size < 0) {
+            this.memorySize.add(size);
+            condition.signalAll();
+        } else {
+            do {
+                if (memorySize.sum() + size < limitMemorySize) {
+                    memorySize.add(size);
+                }
+                try {
+                    if (!condition.await(10, TimeUnit.MINUTES)) {
+                        throw new OutOfDirectMemoryException("Cannot allocate memory size " + size + " for 10 min. Max memory is " + limitMemorySize);
+                    }
+                } catch (InterruptedException e) {
+                    throw new OutOfDirectMemoryException(e);
+                }
+            } while (true);
+        }
+    }
 }

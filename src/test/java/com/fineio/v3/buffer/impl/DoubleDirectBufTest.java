@@ -46,7 +46,7 @@ public class DoubleDirectBufTest {
 
     @Test
     public void getDouble() {
-        DoubleDirectBuf buf = spy(new DoubleDirectBuf(1, 16, mock(FileBlock.class), 1024, FileMode.READ));
+        DoubleDirectBuf buf = spy(new DoubleDirectBuf(1, 16, mock(FileBlock.class), 1024));
         mockStatic(MemoryUtils.class);
         when(MemoryUtils.getDouble(1, 0)).thenReturn(1D);
 

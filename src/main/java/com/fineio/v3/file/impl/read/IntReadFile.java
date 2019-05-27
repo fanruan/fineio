@@ -1,6 +1,5 @@
 package com.fineio.v3.file.impl.read;
 
-import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.IntDirectBuffer;
@@ -25,6 +24,6 @@ public class IntReadFile extends ReadFile<IntDirectBuffer> {
 
     @Override
     IntDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
-        return new IntDirectBuf(address, size, fileBlock, size, FileMode.READ);
+        return new IntDirectBuf(address, size, fileBlock, size);
     }
 }
