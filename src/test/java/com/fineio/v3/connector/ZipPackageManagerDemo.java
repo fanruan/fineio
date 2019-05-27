@@ -1,5 +1,6 @@
 package com.fineio.v3.connector;
 
+import com.fineio.accessor.Block;
 import com.fineio.v3.utils.IOUtils;
 
 import java.io.FileInputStream;
@@ -13,17 +14,43 @@ import java.io.InputStream;
  */
 public class ZipPackageManagerDemo {
     public static void main(String[] args) throws IOException {
-        ZipPackageManager zipPackageManager = new ZipPackageManager(new FileConnector(), new PackageConnector() {
+        FileConnector connector = new FileConnector();
+        ZipPackageManager zipPackageManager = new ZipPackageManager(connector, new PackageConnector() {
             @Override
             public void write(String path, InputStream is) throws IOException {
-                try (FileOutputStream fileOutputStream = new FileOutputStream(path + ".zip"); InputStream input = is) {
+                try (FileOutputStream fileOutputStream = new FileOutputStream(path + getSuffix()); InputStream input = is) {
                     IOUtils.copyBinaryTo(input, fileOutputStream);
                 }
             }
 
             @Override
             public InputStream read(String path) throws IOException {
-                return new FileInputStream(path + ".zip");
+                return new FileInputStream(path + getSuffix());
+            }
+
+            @Override
+            public Block list(String dir) {
+                return connector.list(dir);
+            }
+
+            @Override
+            public String getSuffix() {
+                return ".zip";
+            }
+
+            @Override
+            public boolean delete(String dir) {
+                return false;
+            }
+
+            @Override
+            public long size(String dir) {
+                return 0;
+            }
+
+            @Override
+            public boolean exist(String dir) {
+                return false;
             }
         });
         zipPackageManager.packageDir("/Users/yee/Downloads/oss");

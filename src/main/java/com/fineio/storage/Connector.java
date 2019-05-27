@@ -84,7 +84,7 @@ public interface Connector {
      * @return
      * @since 3.0
      */
-    Block list(String dir);
+    Block list(String dir) throws IOException;
 
 
     /**
@@ -103,4 +103,6 @@ public interface Connector {
      */
     @Deprecated
     URI deleteParent(FileBlock block);
+
+    long size(Block block);
 }

@@ -19,4 +19,5 @@ public interface PackageManager {
      */
     void unPackageDir(String unPackDir, String resourceName) throws IOException;
 
+    PackageConnector getPackageConnector();
 }

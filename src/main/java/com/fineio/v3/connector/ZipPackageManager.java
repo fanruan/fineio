@@ -31,4 +31,9 @@ public class ZipPackageManager implements PackageManager {
         ZipUtils.unZip(unPackDir, connector, packageConnector.read(resourceName));
     }
 
+    @Override
+    public PackageConnector getPackageConnector() {
+        return packageConnector;
+    }
+
 }

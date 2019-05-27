@@ -94,6 +94,19 @@ public class FileConnector extends BaseConnector {
     }
 
     @Override
+    public long size(Block block) {
+        long size = 0;
+        if (block instanceof FileBlock) {
+            size += new File(block.getPath()).length();
+        } else {
+            for (Block file : ((DirectoryBlock) block).getFiles()) {
+                size += size(file);
+            }
+        }
+        return size;
+    }
+
+    @Override
     public void write(FileBlock file, byte[] data) throws IOException {
         try (OutputStream output = new FileOutputStream(file.getPath())) {
             output.write(data);

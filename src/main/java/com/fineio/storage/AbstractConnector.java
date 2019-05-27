@@ -1,5 +1,6 @@
 package com.fineio.storage;
 
+import com.fineio.accessor.Block;
 import com.fineio.io.file.FileBlock;
 
 import java.io.ByteArrayInputStream;
@@ -37,5 +38,10 @@ public abstract class AbstractConnector implements Connector {
     @Override
     public URI deleteParent(FileBlock block) {
         return null;
+    }
+
+    @Override
+    public long size(Block block) {
+        return 0;
     }
 }
