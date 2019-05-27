@@ -11,4 +11,6 @@ import java.io.Closeable;
 public interface IFile<B extends Buf> extends Closeable {
     @Override
     void close();
+
+    boolean exists();
 }

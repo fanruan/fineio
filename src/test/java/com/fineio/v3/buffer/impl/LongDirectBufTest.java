@@ -46,7 +46,7 @@ public class LongDirectBufTest {
 
     @Test
     public void getLong() {
-        LongDirectBuf buf = spy(new LongDirectBuf(1, 16, mock(FileBlock.class), 1024, FileMode.READ));
+        LongDirectBuf buf = spy(new LongDirectBuf(1, 16, mock(FileBlock.class), 1024));
         mockStatic(MemoryUtils.class);
         when(MemoryUtils.getLong(1, 0)).thenReturn(1L);
 

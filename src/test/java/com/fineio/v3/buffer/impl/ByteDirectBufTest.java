@@ -46,7 +46,7 @@ public class ByteDirectBufTest {
 
     @Test
     public void getByte() {
-        ByteDirectBuf buf = spy(new ByteDirectBuf(1, 16, mock(FileBlock.class), 1024, FileMode.READ));
+        ByteDirectBuf buf = spy(new ByteDirectBuf(1, 16, mock(FileBlock.class), 1024));
         mockStatic(MemoryUtils.class);
         when(MemoryUtils.getByte(1, 0)).thenReturn((byte) 1);
 

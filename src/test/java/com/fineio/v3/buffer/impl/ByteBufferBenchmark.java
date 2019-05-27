@@ -109,7 +109,7 @@ public class ByteBufferBenchmark {
         @Setup
         public void setupOnTrial() throws IOException {
             int sizeInBytes = cap << Offset.BYTE.getOffset();
-            buf = new ByteDirectBuf(MemoryUtils.allocate(sizeInBytes), cap, mock(FileBlock.class), cap, FileMode.READ);
+            buf = new ByteDirectBuf(MemoryUtils.allocate(sizeInBytes), cap, mock(FileBlock.class), cap);
 
             byte[] bytes = new byte[1024];
             for (int i = 0; i < cap; i++) {

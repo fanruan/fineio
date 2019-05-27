@@ -43,7 +43,7 @@ public class BaseDirectBufferTest {
 
     @Test
     public void ensureOpen() {
-        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024, FileMode.READ);
+        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024);
         // to be closed
         buf.ensureOpen();
 
@@ -84,7 +84,7 @@ public class BaseDirectBufferTest {
 
     @Test
     public void checkPos() {
-        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024, FileMode.READ);
+        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024);
 
         buf.checkPos(1);
         try {
@@ -99,7 +99,7 @@ public class BaseDirectBufferTest {
 
     @Test
     public void updatePos() {
-        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024, FileMode.READ);
+        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024);
 
         buf.updateSize(16);
         assertEquals(17, (int) Whitebox.getInternalState(buf, "size"));
@@ -110,7 +110,7 @@ public class BaseDirectBufferTest {
 
     @Test
     public void getAddress() throws Exception {
-        assertEquals(1, new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024, FileMode.READ).getAddress());
+        assertEquals(1, new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024).getAddress());
 
         WriteMemoryAllocator reAllocator = mock(WriteMemoryAllocator.class);
         setInternalState(MemoryManager.INSTANCE, "reAllocator", reAllocator);
@@ -121,13 +121,13 @@ public class BaseDirectBufferTest {
 
     @Test
     public void getSizeInBytes() {
-        assertEquals(16, new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024, FileMode.READ).getSizeInBytes());
+        assertEquals(16, new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024).getSizeInBytes());
     }
 
     @Test
     public void getFileBlock() {
         FileBlock fileBlock = mock(FileBlock.class);
-        assertEquals(fileBlock, new DirectBuffer(1, 16, fileBlock, Offset.BYTE, 1024, FileMode.READ).getFileBlock());
+        assertEquals(fileBlock, new DirectBuffer(1, 16, fileBlock, Offset.BYTE, 1024).getFileBlock());
     }
 
     @Test
@@ -138,7 +138,7 @@ public class BaseDirectBufferTest {
         BaseMemoryAllocator allocator = mock(BaseMemoryAllocator.class);
         setInternalState(MemoryManager.INSTANCE, "allocator", allocator);
 
-        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024, FileMode.READ);
+        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024);
         buf.close();
         buf.close();
 
@@ -151,8 +151,8 @@ public class BaseDirectBufferTest {
             super(fileBlock, offset, maxCap, fileMode);
         }
 
-        DirectBuffer(long address, int cap, FileBlock fileBlock, Offset offset, int maxCap, FileMode fileMode) {
-            super(address, cap, fileBlock, offset, maxCap, fileMode);
+        DirectBuffer(long address, int cap, FileBlock fileBlock, Offset offset, int maxCap) {
+            super(address, cap, fileBlock, offset, maxCap);
         }
     }
 }

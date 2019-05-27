@@ -8,6 +8,8 @@ import com.fineio.v3.memory.allocator.MemoryAllocator;
 import com.fineio.v3.memory.allocator.MemoryReAllocator;
 import com.fineio.v3.memory.allocator.WriteMemoryAllocator;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Condition;
 
 /**
@@ -20,6 +22,7 @@ public enum MemoryManager {
 
     private MemoryAllocator allocator;
     private MemoryReAllocator reAllocator;
+    private ConcurrentMap<Long, FileMode> memoryMode = new ConcurrentHashMap<>();
 
     MemoryManager() {
         long total = MemoryHelper.getMaxMemory();
@@ -29,12 +32,17 @@ public enum MemoryManager {
 
     public long allocate(long size, FileMode mode) throws OutOfDirectMemoryException {
         mode.getLock().lock();
+
         try {
             Condition condition = mode.getCondition();
+            long address;
             if (mode == FileMode.READ) {
-                return allocator.allocate(size, condition);
+                address = allocator.allocate(size, condition);
+            } else {
+                address = reAllocator.allocate(size, condition);
             }
-            return reAllocator.allocate(size, condition);
+            memoryMode.putIfAbsent(address, mode);
+            return address;
         } finally {
             mode.getLock().unlock();
         }
@@ -43,13 +51,19 @@ public enum MemoryManager {
     public long allocate(long address, long oldSize, long newSize) throws OutOfDirectMemoryException {
         FileMode.WRITE.getLock().lock();
         try {
-            return reAllocator.reallocate(address, oldSize, newSize, FileMode.WRITE.getCondition());
+            long reallocate = reAllocator.reallocate(address, oldSize, newSize, FileMode.WRITE.getCondition());
+            if (address != reallocate) {
+                memoryMode.remove(address);
+                memoryMode.putIfAbsent(reallocate, FileMode.WRITE);
+            }
+            return reallocate;
         } finally {
             FileMode.WRITE.getLock().unlock();
         }
     }
 
-    public void release(long address, long size, FileMode mode) {
+    public void release(long address, long size) {
+        FileMode mode = memoryMode.get(address);
         mode.getLock().lock();
         try {
             Condition condition = mode.getCondition();
@@ -58,9 +72,16 @@ public enum MemoryManager {
             } else {
                 reAllocator.release(address, size, condition);
             }
+            memoryMode.remove(address);
         } finally {
             mode.getLock().unlock();
         }
+    }
+
+    public void transfer(long address, long size) throws OutOfDirectMemoryException {
+        allocator.addMemory(size, FileMode.READ.getCondition());
+        reAllocator.addMemory(0 - size, FileMode.WRITE.getCondition());
+        memoryMode.put(address, FileMode.READ);
     }
 
     public void clear() {
