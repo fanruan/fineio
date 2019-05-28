@@ -12,6 +12,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Condition;
 
+import static com.fineio.accessor.FileMode.READ;
+import static com.fineio.accessor.FileMode.WRITE;
+
 /**
  * @author yee
  * @date 2019-04-11
@@ -49,16 +52,16 @@ public enum MemoryManager {
     }
 
     public long allocate(long address, long oldSize, long newSize) throws OutOfDirectMemoryException {
-        FileMode.WRITE.getLock().lock();
+        WRITE.getLock().lock();
         try {
-            long reallocate = reAllocator.reallocate(address, oldSize, newSize, FileMode.WRITE.getCondition());
+            long reallocate = reAllocator.reallocate(address, oldSize, newSize, WRITE.getCondition());
             if (address != reallocate) {
                 memoryMode.remove(address);
-                memoryMode.putIfAbsent(reallocate, FileMode.WRITE);
+                memoryMode.putIfAbsent(reallocate, WRITE);
             }
             return reallocate;
         } finally {
-            FileMode.WRITE.getLock().unlock();
+            WRITE.getLock().unlock();
         }
     }
 
@@ -78,10 +81,26 @@ public enum MemoryManager {
         }
     }
 
-    public void transfer(long address, long size) throws OutOfDirectMemoryException {
-        allocator.addMemory(size, FileMode.READ.getCondition());
-        reAllocator.addMemory(0 - size, FileMode.WRITE.getCondition());
-        memoryMode.put(address, FileMode.READ);
+    public void transferWriteToRead(long address, long size) throws OutOfDirectMemoryException {
+        if (!memoryMode.containsKey(address) || memoryMode.get(address) != WRITE) {
+            throw new IllegalArgumentException("cannot transfer memory which doesn't exist or isn't write-memory");
+        }
+
+        FileMode.READ.getLock().lock();
+        try {
+            allocator.addMemory(size, FileMode.READ.getCondition());
+        } finally {
+            FileMode.READ.getLock().unlock();
+        }
+
+        WRITE.getLock().lock();
+        try {
+            reAllocator.addMemory(-size, WRITE.getCondition());
+        } finally {
+            WRITE.getLock().unlock();
+        }
+
+        memoryMode.replace(address, WRITE, READ);
     }
 
     public void clear() {

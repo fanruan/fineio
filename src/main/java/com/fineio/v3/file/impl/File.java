@@ -56,5 +56,10 @@ public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B
     }
 
     @Override
+    public boolean exists() {
+        return connector.exists(new FileBlock(fileBlock.getPath(), "0"));
+    }
+
+    @Override
     public abstract void close();
 }

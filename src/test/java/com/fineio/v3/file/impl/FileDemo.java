@@ -10,6 +10,7 @@ import com.fineio.v3.file.impl.write.ByteWriteFile;
 import com.fineio.v3.file.impl.write.DoubleWriteFile;
 import com.fineio.v3.file.impl.write.IntWriteFile;
 import com.fineio.v3.file.impl.write.LongWriteFile;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.stream.IntStream;
@@ -25,6 +26,11 @@ public class FileDemo {
     private FileBlock key = new FileBlock(System.getProperty("user.dir"), "overwrite");
     private FileConnector connector = new FileConnector((byte) 10);
     private int n = 1 << 10;
+
+    @Before
+    public void setUp() {
+        BufferCache.get().invalidateAll();
+    }
 
     @Test
     public void testByte() {

@@ -18,6 +18,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.assertEquals;
@@ -137,6 +139,7 @@ public class BaseDirectBufferTest {
 
         BaseMemoryAllocator allocator = mock(BaseMemoryAllocator.class);
         setInternalState(MemoryManager.INSTANCE, "allocator", allocator);
+        setInternalState(MemoryManager.INSTANCE, "memoryMode", new ConcurrentHashMap<>(Collections.singletonMap(1L, FileMode.READ)));
 
         DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024);
         buf.close();

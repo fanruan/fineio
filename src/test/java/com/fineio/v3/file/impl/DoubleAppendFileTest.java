@@ -1,6 +1,5 @@
 package com.fineio.v3.file.impl;
 
-import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.impl.DoubleDirectBuf;
@@ -54,7 +53,7 @@ public class DoubleAppendFileTest {
 
         FileBlock fileBlock = mock(FileBlock.class);
         DoubleDirectBuf buf = mock(DoubleDirectBuf.class);
-        whenNew(DoubleDirectBuf.class).withArguments(1L, 1, fileBlock, 1 << -3, FileMode.WRITE).thenReturn(buf);
+        whenNew(DoubleDirectBuf.class).withArguments(1L, 1, fileBlock, 1 << -3).thenReturn(buf);
 
         assertEquals(buf, af.newDirectBuf(1, 1, fileBlock));
     }

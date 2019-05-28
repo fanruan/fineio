@@ -7,6 +7,7 @@ import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.DirectBuffer;
+import com.fineio.v3.file.impl.BufferCache;
 import com.fineio.v3.file.impl.File;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.MemoryUtils;
@@ -32,24 +33,29 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
     private B loadBuffer(int nthBuf) {
         // TODO: 2019/4/16 anchore 先拿cache，拿不到就生成buffer，put进cache
         FileBlock nthFileBlock = new FileBlock(fileBlock.getPath(), String.valueOf(nthBuf));
-        Long address = null;
-        int avail = 0;
-        try (InputStream input = new BufferedInputStream(connector.read(nthFileBlock))) {
-            avail = input.available();
-            address = MemoryManager.INSTANCE.allocate(avail, FileMode.READ);
-            long ptr = address;
-            byte[] bytes = new byte[1024];
-            for (int read; (read = input.read(bytes)) != -1; ptr += read) {
-                MemoryUtils.copyMemory(bytes, ptr, read);
+
+        DirectBuffer buf = BufferCache.get().get(nthFileBlock, fb -> {
+            Long address = null;
+            int avail = 0;
+            try (InputStream input = new BufferedInputStream(connector.read(fb))) {
+                avail = input.available();
+                address = MemoryManager.INSTANCE.allocate(avail, FileMode.READ);
+                long ptr = address;
+                byte[] bytes = new byte[1024];
+                for (int read; (read = input.read(bytes)) != -1; ptr += read) {
+                    MemoryUtils.copyMemory(bytes, ptr, read);
+                }
+                return newDirectBuf(address, (int) ((ptr - address) >> offset.getOffset()), fb);
+            } catch (Throwable e) {
+                if (address != null) {
+                    MemoryManager.INSTANCE.release(address, avail);
+                }
+                FineIOLoggers.getLogger().error(e);
+                return null;
             }
-            return newDirectBuf(address, (int) ((ptr - address) >> offset.getOffset()), nthFileBlock);
-        } catch (Throwable e) {
-            if (address != null) {
-                MemoryManager.INSTANCE.release(address, avail);
-            }
-            FineIOLoggers.getLogger().error(e);
-            return null;
-        }
+        });
+
+        return (B) buf;
     }
 
     abstract B newDirectBuf(long address, int size, FileBlock fileBlock);

@@ -34,6 +34,8 @@ public class AppendFileDemo {
                 child.delete();
             }
         }
+
+        BufferCache.get().invalidateAll();
     }
 
     @Test

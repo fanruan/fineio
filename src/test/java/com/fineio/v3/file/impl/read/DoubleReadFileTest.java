@@ -1,6 +1,5 @@
 package com.fineio.v3.file.impl.read;
 
-import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.DoubleDirectBuffer;
@@ -42,7 +41,7 @@ public class DoubleReadFileTest {
 
         FileBlock fileBlock = mock(FileBlock.class);
         DoubleDirectBuf buf = mock(DoubleDirectBuf.class);
-        whenNew(DoubleDirectBuf.class).withArguments(1L, 16, fileBlock, 16, FileMode.READ).thenReturn(buf);
+        whenNew(DoubleDirectBuf.class).withArguments(1L, 16, fileBlock, 16).thenReturn(buf);
 
         assertEquals(buf, rf.newDirectBuf(1L, 16, fileBlock));
     }
