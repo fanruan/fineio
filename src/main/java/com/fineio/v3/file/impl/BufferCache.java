@@ -32,6 +32,10 @@ public class BufferCache {
         cache.invalidate(key);
     }
 
+    public void invalidateAll() {
+        cache.invalidateAll();
+    }
+
     private static final BufferCache INSTANCE = new BufferCache();
 
     private BufferCache() {
