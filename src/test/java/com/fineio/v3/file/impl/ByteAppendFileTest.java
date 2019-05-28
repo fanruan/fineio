@@ -1,6 +1,5 @@
 package com.fineio.v3.file.impl;
 
-import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.impl.ByteDirectBuf;
@@ -54,7 +53,7 @@ public class ByteAppendFileTest {
 
         FileBlock fileBlock = mock(FileBlock.class);
         ByteDirectBuf buf = mock(ByteDirectBuf.class);
-        whenNew(ByteDirectBuf.class).withArguments(1L, 1, fileBlock, 1, FileMode.WRITE).thenReturn(buf);
+        whenNew(ByteDirectBuf.class).withArguments(1L, 1, fileBlock, 1).thenReturn(buf);
 
         assertEquals(buf, af.newDirectBuf(1, 1, fileBlock));
     }

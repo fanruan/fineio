@@ -78,6 +78,7 @@ public class BaseMemoryAllocator implements MemoryAllocator {
             do {
                 if (memorySize.sum() + size < limitMemorySize) {
                     memorySize.add(size);
+                    return;
                 }
                 try {
                     if (!condition.await(10, TimeUnit.MINUTES)) {

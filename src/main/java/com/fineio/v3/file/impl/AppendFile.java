@@ -78,6 +78,11 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> imple
     abstract B newDirectBuf(long address, int size, FileBlock fileBlock);
 
     @Override
+    public boolean exists() {
+        return writeFile.exists() && writeFile.connector.exists(new FileBlock(writeFile.fileBlock.getPath(), LAST_POS));
+    }
+
+    @Override
     public void close() {
         try {
             writeFile.close();

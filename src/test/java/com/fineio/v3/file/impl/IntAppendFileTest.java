@@ -1,6 +1,5 @@
 package com.fineio.v3.file.impl;
 
-import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.impl.IntDirectBuf;
@@ -53,7 +52,7 @@ public class IntAppendFileTest {
 
         FileBlock fileBlock = mock(FileBlock.class);
         IntDirectBuf buf = mock(IntDirectBuf.class);
-        whenNew(IntDirectBuf.class).withArguments(1L, 1, fileBlock, 1 << -2, FileMode.WRITE).thenReturn(buf);
+        whenNew(IntDirectBuf.class).withArguments(1L, 1, fileBlock, 1 << -2).thenReturn(buf);
 
         assertEquals(buf, af.newDirectBuf(1, 1, fileBlock));
     }
