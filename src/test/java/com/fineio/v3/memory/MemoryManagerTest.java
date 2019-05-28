@@ -1,12 +1,12 @@
 package com.fineio.v3.memory;
 
 import com.fineio.FineIO;
+import com.fineio.accessor.FileMode;
 import com.fineio.logger.FineIOLogger;
 import com.fineio.memory.MemoryHelper;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.allocator.BaseMemoryAllocator;
 import com.fineio.v3.memory.allocator.WriteMemoryAllocator;
-import com.fineio.v3.type.FileMode;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -39,7 +39,7 @@ public class MemoryManagerTest {
         allocator.setAccessible(true);
         BaseMemoryAllocator o = (BaseMemoryAllocator) allocator.get(MemoryManager.INSTANCE);
         assertEquals(1024, o.getMemory());
-        MemoryManager.INSTANCE.release(allocate, 1024, FileMode.READ);
+        MemoryManager.INSTANCE.release(allocate, 1024);
         assertEquals(0, o.getMemory());
     }
 
@@ -52,7 +52,7 @@ public class MemoryManagerTest {
         assertEquals(1024, o.getMemory());
         allocate = MemoryManager.INSTANCE.allocate(allocate, 1024, 2048);
         assertEquals(2048, o.getMemory());
-        MemoryManager.INSTANCE.release(allocate, 2048, FileMode.WRITE);
+        MemoryManager.INSTANCE.release(allocate, 2048);
         assertEquals(0, o.getMemory());
     }
 
@@ -115,7 +115,7 @@ public class MemoryManagerTest {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            MemoryManager.INSTANCE.release(address, size, mode);
+            MemoryManager.INSTANCE.release(address, size);
         }
     }
 }

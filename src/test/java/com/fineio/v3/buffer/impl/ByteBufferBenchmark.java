@@ -1,5 +1,6 @@
 package com.fineio.v3.buffer.impl;
 
+import com.fineio.accessor.FileMode;
 import com.fineio.io.Buffer.Listener;
 import com.fineio.io.ByteBuffer;
 import com.fineio.io.ByteBuffer.ByteReadBuffer;
@@ -9,7 +10,6 @@ import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.ByteDirectBuffer;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
-import com.fineio.v3.type.FileMode;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
@@ -81,7 +81,7 @@ public class ByteBufferBenchmark {
         @Setup
         public void setupOnTrial() throws IOException {
             int sizeInBytes = cap << Offset.BYTE.getOffset();
-            buf = new ByteDirectBuf(MemoryUtils.allocate(sizeInBytes), cap, mock(FileBlock.class), cap, FileMode.READ);
+            buf = new ByteDirectBuf(MemoryUtils.allocate(sizeInBytes), cap, mock(FileBlock.class), cap);
 
             byte[] bytes = new byte[1024];
             for (int i = 0; i < cap; i++) {

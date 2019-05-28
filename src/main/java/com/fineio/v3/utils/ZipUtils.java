@@ -5,12 +5,14 @@ import com.fineio.accessor.Block;
 import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.storage.Connector;
+import com.fineio.v3.connector.PackageConnector;
 import com.fineio.v3.file.DirectoryBlock;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -25,17 +27,18 @@ public class ZipUtils {
      * 压缩成ZIP 方法1
      *
      * @param srcDir 压缩文件夹路径
-     * @param out    压缩文件输出流
      * @throws RuntimeException 压缩失败会抛出运行时异常
      */
-    public static void toZip(Block srcDir, Connector connector, OutputStream out)
+    public static void toZip(Block srcDir, Connector connector, PackageConnector packageConnector)
             throws IOException {
 
         long start = System.currentTimeMillis();
-        try (ZipOutputStream zos = new ZipOutputStream(out)) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (ZipOutputStream zos = new ZipOutputStream(bos)) {
             compress(srcDir, connector, zos, srcDir.getName());
             long end = System.currentTimeMillis();
             FineIOLoggers.getLogger().info(String.format("Zip %s finished. Cost %d ms", srcDir, (end - start)));
+            packageConnector.write(srcDir.getPath(), new ByteArrayInputStream(bos.toByteArray()));
         }
     }
 
@@ -44,7 +47,7 @@ public class ZipUtils {
         try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(inputStream))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null && !entry.isDirectory()) {
-                connector.write(new FileBlock(parent, entry.getName()), inputStream);
+                connector.write(new FileBlock(parent, entry.getName()), zis);
             }
             long end = System.currentTimeMillis();
             FineIOLoggers.getLogger().info(String.format("Unzip %s finished. Cost %d ms", parent, (end - start)));

@@ -1,5 +1,6 @@
 package com.fineio.v3.buffer.impl;
 
+import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.v3.buffer.BufferAllocateFailedException;
 import com.fineio.v3.buffer.BufferClosedException;
@@ -8,7 +9,6 @@ import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.Offset;
-import com.fineio.v3.type.FileMode;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -39,8 +39,6 @@ abstract class BaseDirectBuffer implements DirectBuffer {
 
     private final AtomicBoolean closed = new AtomicBoolean(false);
 
-    private final FileMode fileMode;
-
     /**
      * for write, may grow cap
      *
@@ -49,7 +47,7 @@ abstract class BaseDirectBuffer implements DirectBuffer {
      * @param maxCap  max cap
      */
     BaseDirectBuffer(FileBlock fileBlock, Offset offset, int maxCap, FileMode fileMode) throws BufferAllocateFailedException {
-        this(allocate(16, offset, fileMode), 16, fileBlock, offset, maxCap, fileMode);
+        this(allocate(16, offset, fileMode), 16, fileBlock, offset, maxCap);
         this.size = 0;
     }
 
@@ -72,14 +70,13 @@ abstract class BaseDirectBuffer implements DirectBuffer {
      * @param offset  offset
      * @param maxCap  maxCap
      */
-    BaseDirectBuffer(long address, int cap, FileBlock fileBlock, Offset offset, int maxCap, FileMode fileMode) {
+    BaseDirectBuffer(long address, int cap, FileBlock fileBlock, Offset offset, int maxCap) {
         this.fileBlock = fileBlock;
         this.offset = offset;
         this.address = address;
         this.cap = cap;
         this.maxCap = maxCap;
         this.size = cap;
-        this.fileMode = fileMode;
     }
 
     void ensureOpen() {
@@ -142,7 +139,7 @@ abstract class BaseDirectBuffer implements DirectBuffer {
     @Override
     public void close() {
         if (closed.compareAndSet(false, true)) {
-            MemoryManager.INSTANCE.release(address, cap, fileMode);
+            MemoryManager.INSTANCE.release(address, cap);
         }
     }
 }

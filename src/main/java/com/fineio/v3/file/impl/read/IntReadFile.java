@@ -6,7 +6,6 @@ import com.fineio.v3.buffer.IntDirectBuffer;
 import com.fineio.v3.buffer.impl.IntDirectBuf;
 import com.fineio.v3.file.FileClosedException;
 import com.fineio.v3.memory.Offset;
-import com.fineio.v3.type.FileMode;
 
 /**
  * @author anchore
@@ -25,6 +24,6 @@ public class IntReadFile extends ReadFile<IntDirectBuffer> {
 
     @Override
     IntDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
-        return new IntDirectBuf(address, size, fileBlock, size, FileMode.READ);
+        return new IntDirectBuf(address, size, fileBlock, size);
     }
 }

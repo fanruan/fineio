@@ -4,7 +4,6 @@ import com.fineio.io.file.FileBlock;
 import com.fineio.v3.buffer.DoubleDirectBuffer;
 import com.fineio.v3.buffer.impl.DoubleDirectBuf;
 import com.fineio.v3.file.impl.write.DoubleWriteFile;
-import com.fineio.v3.type.FileMode;
 
 /**
  * @author anchore
@@ -21,6 +20,6 @@ public class DoubleAppendFile extends AppendFile<DoubleWriteFile, DoubleDirectBu
 
     @Override
     protected DoubleDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
-        return new DoubleDirectBuf(address, size, fileBlock, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()), FileMode.WRITE);
+        return new DoubleDirectBuf(address, size, fileBlock, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()));
     }
 }

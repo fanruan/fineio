@@ -6,7 +6,6 @@ import com.fineio.v3.buffer.DoubleDirectBuffer;
 import com.fineio.v3.buffer.impl.DoubleDirectBuf;
 import com.fineio.v3.file.FileClosedException;
 import com.fineio.v3.memory.Offset;
-import com.fineio.v3.type.FileMode;
 
 /**
  * @author anchore
@@ -25,6 +24,6 @@ public class DoubleReadFile extends ReadFile<DoubleDirectBuffer> {
 
     @Override
     DoubleDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
-        return new DoubleDirectBuf(address, size, fileBlock, size, FileMode.READ);
+        return new DoubleDirectBuf(address, size, fileBlock, size);
     }
 }

@@ -23,7 +23,7 @@ public interface Connector {
 
     /**
      * 写整快的方法，可以保证通一个块不被同时写
-     *
+     * inputStream不需要释放，内部已经处理
      * @param file
      * @param inputStream
      */
@@ -84,7 +84,7 @@ public interface Connector {
      * @return
      * @since 3.0
      */
-    Block list(String dir);
+    Block list(String dir) throws IOException;
 
 
     /**
@@ -103,4 +103,6 @@ public interface Connector {
      */
     @Deprecated
     URI deleteParent(FileBlock block);
+
+    long size(Block block);
 }

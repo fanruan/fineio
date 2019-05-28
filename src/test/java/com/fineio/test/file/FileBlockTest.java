@@ -24,6 +24,6 @@ public class FileBlockTest extends TestCase {
     public void testToString() throws  Exception {
         Constructor<FileBlock> constructor = FileBlock.class.getDeclaredConstructor(String.class, String.class);
         constructor.setAccessible(true);
-        assertEquals(constructor.newInstance("a", "test").toString(), "a" + "test");
+        assertEquals(constructor.newInstance("a", "test").toString(), "a/test");
     }
 }

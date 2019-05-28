@@ -48,4 +48,10 @@ public class DirectoryBlock implements Block {
         return new File(dirPath).getName();
     }
 
+    @Override
+    public String toString() {
+        return "DirectoryBlock{" +
+                "dirPath='" + dirPath + '\'' +
+                '}';
+    }
 }

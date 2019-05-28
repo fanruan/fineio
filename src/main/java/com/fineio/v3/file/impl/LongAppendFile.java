@@ -4,7 +4,6 @@ import com.fineio.io.file.FileBlock;
 import com.fineio.v3.buffer.LongDirectBuffer;
 import com.fineio.v3.buffer.impl.LongDirectBuf;
 import com.fineio.v3.file.impl.write.LongWriteFile;
-import com.fineio.v3.type.FileMode;
 
 /**
  * @author anchore
@@ -21,6 +20,6 @@ public class LongAppendFile extends AppendFile<LongWriteFile, LongDirectBuffer> 
 
     @Override
     protected LongDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
-        return new LongDirectBuf(address, size, fileBlock, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()), FileMode.WRITE);
+        return new LongDirectBuf(address, size, fileBlock, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()));
     }
 }

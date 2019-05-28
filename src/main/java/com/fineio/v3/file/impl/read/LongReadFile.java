@@ -6,7 +6,6 @@ import com.fineio.v3.buffer.LongDirectBuffer;
 import com.fineio.v3.buffer.impl.LongDirectBuf;
 import com.fineio.v3.file.FileClosedException;
 import com.fineio.v3.memory.Offset;
-import com.fineio.v3.type.FileMode;
 
 /**
  * @author anchore
@@ -25,6 +24,6 @@ public class LongReadFile extends ReadFile<LongDirectBuffer> {
 
     @Override
     LongDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
-        return new LongDirectBuf(address, size, fileBlock, size, FileMode.READ);
+        return new LongDirectBuf(address, size, fileBlock, size);
     }
 }

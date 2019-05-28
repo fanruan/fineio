@@ -1,6 +1,7 @@
 package com.fineio.v3.file.impl.read;
 
 
+import com.fineio.accessor.FileMode;
 import com.fineio.accessor.file.IReadFile;
 import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
@@ -10,7 +11,6 @@ import com.fineio.v3.file.impl.File;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
-import com.fineio.v3.type.FileMode;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
@@ -45,7 +45,7 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
             return newDirectBuf(address, (int) ((ptr - address) >> offset.getOffset()), nthFileBlock);
         } catch (Throwable e) {
             if (address != null) {
-                MemoryManager.INSTANCE.release(address, avail, FileMode.READ);
+                MemoryManager.INSTANCE.release(address, avail);
             }
             FineIOLoggers.getLogger().error(e);
             return null;

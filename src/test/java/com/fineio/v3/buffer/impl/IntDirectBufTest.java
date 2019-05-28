@@ -1,9 +1,9 @@
 package com.fineio.v3.buffer.impl;
 
+import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
-import com.fineio.v3.type.FileMode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -46,7 +46,7 @@ public class IntDirectBufTest {
 
     @Test
     public void getInt() {
-        IntDirectBuf buf = spy(new IntDirectBuf(1, 16, mock(FileBlock.class), 1024, FileMode.READ));
+        IntDirectBuf buf = spy(new IntDirectBuf(1, 16, mock(FileBlock.class), 1024));
         mockStatic(MemoryUtils.class);
         when(MemoryUtils.getInt(1, 0)).thenReturn(1);
 

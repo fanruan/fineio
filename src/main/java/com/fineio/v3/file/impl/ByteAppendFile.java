@@ -4,7 +4,6 @@ import com.fineio.io.file.FileBlock;
 import com.fineio.v3.buffer.ByteDirectBuffer;
 import com.fineio.v3.buffer.impl.ByteDirectBuf;
 import com.fineio.v3.file.impl.write.ByteWriteFile;
-import com.fineio.v3.type.FileMode;
 
 /**
  * @author anchore
@@ -21,6 +20,6 @@ public class ByteAppendFile extends AppendFile<ByteWriteFile, ByteDirectBuffer> 
 
     @Override
     protected ByteDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
-        return new ByteDirectBuf(address, size, fileBlock, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()), FileMode.WRITE);
+        return new ByteDirectBuf(address, size, fileBlock, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()));
     }
 }
