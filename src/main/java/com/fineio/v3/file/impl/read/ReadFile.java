@@ -37,7 +37,7 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
         DirectBuffer buf = BufferCache.get().get(nthFileBlock, fb -> {
             Long address = null;
             int avail = 0;
-            try (InputStream input = new BufferedInputStream(connector.read(nthFileBlock))) {
+            try (InputStream input = new BufferedInputStream(connector.read(fb))) {
                 avail = input.available();
                 address = MemoryManager.INSTANCE.allocate(avail, FileMode.READ);
                 long ptr = address;
@@ -45,7 +45,7 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
                 for (int read; (read = input.read(bytes)) != -1; ptr += read) {
                     MemoryUtils.copyMemory(bytes, ptr, read);
                 }
-                return newDirectBuf(address, (int) ((ptr - address) >> offset.getOffset()), nthFileBlock);
+                return newDirectBuf(address, (int) ((ptr - address) >> offset.getOffset()), fb);
             } catch (Throwable e) {
                 if (address != null) {
                     MemoryManager.INSTANCE.release(address, avail);
