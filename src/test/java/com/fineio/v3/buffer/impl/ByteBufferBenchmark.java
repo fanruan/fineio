@@ -144,7 +144,7 @@ public class ByteBufferBenchmark {
         int[] randomWriteIndex = new int[cap];
 
         @Setup
-        public void setupOnTrial() throws IOException {
+        public void setupOnTrial() {
             AtomicInteger idx = new AtomicInteger(0);
             // 避免出现一开始容量就增加到最大，在每个grow区间内随机写入，既有随机又有grow
             for (int left = 0, right = 16; right <= cap; left = right, right <<= 1) {
@@ -158,8 +158,13 @@ public class ByteBufferBenchmark {
 
             oldBuf = new ByteBuffer(mock(Connector.class), new FileBlock(null), 10, false, mock(Listener.class)).asWrite();
         }
-    }
 
+        @TearDown(Level.Invocation)
+        public void tearDownOnInvocation() {
+            buf.close();
+            oldBuf.close();
+        }
+    }
 
     public static void main(String[] args) throws Exception {
         jmhBenchmark();
