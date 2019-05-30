@@ -26,11 +26,15 @@ public enum MemoryManager {
     private MemoryAllocator allocator;
     private MemoryReAllocator reAllocator;
     private ConcurrentMap<Long, FileMode> memoryMode = new ConcurrentHashMap<>();
+    private final long readMemorySize;
+    private final long writeMemorySize;
 
     MemoryManager() {
         long total = MemoryHelper.getMaxMemory();
-        this.allocator = new BaseMemoryAllocator((long) (total * 0.6));
-        this.reAllocator = new WriteMemoryAllocator((long) (total * 0.2));
+        readMemorySize = (long) (total * 0.6);
+        this.allocator = new BaseMemoryAllocator(readMemorySize);
+        writeMemorySize = (long) (total * 0.2);
+        this.reAllocator = new WriteMemoryAllocator(writeMemorySize);
     }
 
     public long allocate(long size, FileMode mode) throws OutOfDirectMemoryException {
@@ -106,5 +110,9 @@ public enum MemoryManager {
     public void clear() {
         allocator.clear();
         reAllocator.clear();
+    }
+
+    public long getCacheMemoryLimit() {
+        return readMemorySize;
     }
 }
