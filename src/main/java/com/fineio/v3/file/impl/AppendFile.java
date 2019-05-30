@@ -9,8 +9,10 @@ import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.file.impl.write.WriteFile;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.MemoryUtils;
+import com.fineio.v3.utils.IOUtils;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -56,19 +58,18 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> imple
         FileBlock lastFileBlock = new FileBlock(writeFile.fileBlock.getPath(), String.valueOf(nthBuf));
         if (writeFile.connector.exists(lastFileBlock)) {
             Long address = null;
-            int avail = 0;
-            try (InputStream input = new BufferedInputStream(writeFile.connector.read(lastFileBlock))) {
-                avail = input.available();
-                address = MemoryManager.INSTANCE.allocate(avail, FileMode.WRITE);
-                long ptr = address;
-                byte[] bytes = new byte[1024];
-                for (int read; (read = input.read(bytes)) != -1; ptr += read) {
-                    MemoryUtils.copyMemory(bytes, ptr, read);
-                }
-                writeFile.buffers.put(nthBuf, newDirectBuf(address, (int) ((ptr - address) >> writeFile.offset.getOffset()), lastFileBlock));
+            int size = 0;
+            try (InputStream input = new BufferedInputStream(writeFile.connector.read(lastFileBlock));
+                 ByteArrayOutputStream byteOutput = new ByteArrayOutputStream()) {
+                IOUtils.copyBinaryTo(input, byteOutput);
+                size = byteOutput.size();
+                address = MemoryManager.INSTANCE.allocate(size, FileMode.READ);
+                MemoryUtils.copyMemory(byteOutput.toByteArray(), address, size);
+
+                writeFile.putBuffer(nthBuf, newDirectBuf(address, size >> writeFile.offset.getOffset(), lastFileBlock));
             } catch (Throwable e) {
                 if (address != null) {
-                    MemoryManager.INSTANCE.release(address, avail);
+                    MemoryManager.INSTANCE.release(address, size);
                 }
                 FineIOLoggers.getLogger().error(e);
             }

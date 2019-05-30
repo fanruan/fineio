@@ -8,6 +8,7 @@ import com.fineio.v3.file.impl.write.WriteFile;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
+import com.fineio.v3.memory.allocator.BaseMemoryAllocator;
 import com.fineio.v3.memory.allocator.WriteMemoryAllocator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
@@ -128,17 +130,23 @@ public class AppendFileTest {
         // not exists
         verify(connector, never()).read(any(FileBlock.class));
 
+        doCallRealMethod().when(wf).putBuffer(anyInt(), any(DirectBuffer.class));
+
         invokeMethod(af, "initLastBuf");
 
-        verify(buffers).put(0, buf);
+        verify(buffers).putIfAbsent(0, buf);
 
-        doThrow(new IOException()).when(input).read();
-        WriteMemoryAllocator reAllocator = spy(Whitebox.<WriteMemoryAllocator>getInternalState(MemoryManager.INSTANCE, "reAllocator"));
-        setInternalState(MemoryManager.INSTANCE, "reAllocator", reAllocator);
+        when(input.read()).thenReturn(1, -1);
+
+        doThrow(new Error()).when(MemoryUtils.class);
+        MemoryUtils.copyMemory(any(byte[].class), anyLong(), anyLong());
+
+        BaseMemoryAllocator allocator = spy(Whitebox.<WriteMemoryAllocator>getInternalState(MemoryManager.INSTANCE, "allocator"));
+        setInternalState(MemoryManager.INSTANCE, "allocator", allocator);
 
         invokeMethod(af, "initLastBuf");
         // throwable
-        verify(reAllocator).release(anyLong(), eq(1L), eq(FileMode.WRITE.getCondition()));
+        verify(allocator).release(eq(0L), eq(1L), eq(FileMode.READ.getCondition()));
     }
 
     @Test

@@ -41,6 +41,7 @@ public class BufferCache {
 
     private BufferCache() {
         cache = Caffeine.newBuilder()
+                // 读内存上限-4M
                 .maximumWeight(MemoryManager.INSTANCE.getCacheMemoryLimit() - (1 << 22))
                 .<FileBlock, DirectBuffer>weigher((key, value) -> value.getSizeInBytes())
                 .expireAfterAccess(60, TimeUnit.MINUTES)

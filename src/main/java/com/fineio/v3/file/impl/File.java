@@ -8,8 +8,6 @@ import com.fineio.v3.file.FileClosedException;
 import com.fineio.v3.memory.Offset;
 
 import java.io.Closeable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -20,8 +18,6 @@ public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B
     protected final FileBlock fileBlock;
 
     protected final Connector connector;
-
-    protected final ConcurrentMap<Integer, B> buffers = new ConcurrentHashMap<>();
 
     protected final AtomicBoolean closed = new AtomicBoolean(false);
 
