@@ -63,7 +63,7 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> imple
                  ByteArrayOutputStream byteOutput = new ByteArrayOutputStream()) {
                 IOUtils.copyBinaryTo(input, byteOutput);
                 size = byteOutput.size();
-                address = MemoryManager.INSTANCE.allocate(size, FileMode.READ);
+                address = MemoryManager.INSTANCE.allocate(size, FileMode.WRITE);
                 MemoryUtils.copyMemory(byteOutput.toByteArray(), address, size);
 
                 writeFile.putBuffer(nthBuf, newDirectBuf(address, size >> writeFile.offset.getOffset(), lastFileBlock));

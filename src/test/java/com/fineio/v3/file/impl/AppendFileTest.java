@@ -8,7 +8,6 @@ import com.fineio.v3.file.impl.write.WriteFile;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
-import com.fineio.v3.memory.allocator.BaseMemoryAllocator;
 import com.fineio.v3.memory.allocator.WriteMemoryAllocator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -141,12 +140,12 @@ public class AppendFileTest {
         doThrow(new Error()).when(MemoryUtils.class);
         MemoryUtils.copyMemory(any(byte[].class), anyLong(), anyLong());
 
-        BaseMemoryAllocator allocator = spy(Whitebox.<WriteMemoryAllocator>getInternalState(MemoryManager.INSTANCE, "allocator"));
-        setInternalState(MemoryManager.INSTANCE, "allocator", allocator);
+        WriteMemoryAllocator reAllocator = spy(Whitebox.<WriteMemoryAllocator>getInternalState(MemoryManager.INSTANCE, "reAllocator"));
+        setInternalState(MemoryManager.INSTANCE, "reAllocator", reAllocator);
 
         invokeMethod(af, "initLastBuf");
         // throwable
-        verify(allocator).release(eq(0L), eq(1L), eq(FileMode.READ.getCondition()));
+        verify(reAllocator).release(eq(0L), eq(1L), eq(FileMode.WRITE.getCondition()));
     }
 
     @Test
