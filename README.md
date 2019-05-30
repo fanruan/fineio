@@ -95,72 +95,61 @@ Connector接口介绍
 同理 这个方法AbstractConnector默认值是22 也就是4M，如果需要调整这个大小，可以重写这个值
 可以看下Zip4JConnector的实现 实现了多磁盘目录的输出： Cube多目录多线程压缩输出原理
 实现了Connector下面就是怎么来使用FineIO了，缓存部分DM不需要考虑，这是被封装好的，只需要知道怎么使用VFS
-FineIO使用
-创建虚拟文件
-创建文件的时候需要传递三个参数 Connector 相对URI 和 MODEL类型 点击查看MODEL类型列表
+
+## FineIO使用
+### 创建虚拟文件
+创建文件的时候需要传递三个参数 Connector 相对URI 和 Model类型 点击查看MODEL类型列表
 示例：
 创建一个long类型的写操作文件：
 
-    IOFile<LongBuffer> file = FineIO.createIOFile(connector, dir, MODEL.WRITE_LONG);
+```java
+IFile<LongBuf> file = FineIOAccessor.INSTANCE.createFile(connector, dir, BaseModel.ofLong().asWrite());
+```
 
 创建一个byte类型的读操作文件：
 
-    IOFile<ByteBuffer> file = FineIO.createIOFile(connector, dir, MODEL.READ_BYTE);
+```java
+IFile<ByteBuf> file = FineIOAccessor.INSTANCE.createFile(connector, dir, BaseModel.ofByte().asRead());
+```
 
-写虚拟文件
-写操作文仅支持MODEL类型是WRITE或者EDIT开头的文件 READ类型的文件不支持写操作
+### 写虚拟文件
+写操作文仅支持Model类型是WRITE或者APPEND的文件 READ类型的文件不支持写操作
 连续写double值
 
-    IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, dir, MODEL.WRITE_DOUBLE);
+```java
+IFile<DoubleBuf> file = FineIOAccessor.INSTANCE.createFile(connector, dir, BaseModel.ofDouble().asWrite());
      
-    for(long i = 0;i < 1000000L;i++){
-        FineIO.put(file, (double)i);
-    }
-    file.close();
+for(long i = 0;i < 1000000L;i++){
+    FineIOAccessor.INSTANCE.put((IWriteFile<? extends DoubleBuf>)file, i, (double)i);
+}
+file.close();
+```
 
 或者
 
-    IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, dir, MODEL.WRITE_DOUBLE);
+```java
+IFile<DoubleBuf> file = FineIOAccessor.INSTANCE.createFile(connector, dir, BaseModel.ofDouble().asAppend());
      
-    for(long i = 0;i < 1000000L;i++){
-        FineIO.put(file, i, (double)i);
-    }
-    file.close();
+for(long i = 0;i < 1000000L;i++){
+    FineIOAccessor.INSTANCE.put((IAppendFile<? extends DoubleBuf>)file, (double)i);
+}
+file.close();
+```
 
 两个代码的效果是等同的，需要注意的是写文件操作仅支持连续写入，并且位置也是直接连续的
-读虚拟文件
+
+### 读虚拟文件
 读double方法示例：
 
-    IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, dir, MODEL.READ_DOUBLE);
-    double result = 0;
-    for(long i = 0; i < rowCount; i++){
-        result += FineIO.getDouble(file, i);
-    }
-    file.close();
+```java
+IFile<DoubleBuf> file = FineIOAccessor.INSTANCE.createFile(connector, dir, BaseModel.ofDouble());
+double result = 0;
+for(long i = 0; i < rowCount; i++){
+    result += FineIOAccessor.INSTANCE.getDouble((IReadFile<? extends DoubleBuf>) file, i);
+}
+file.close();
+```
 
-注意如果读越界，会抛出BufferIndexOutOfBoundsException的异常
-编辑虚拟文件
-按double方式编辑一个文件示例：
-
-    IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, dir, MODEL.EDIT_DOUBLE);
-    double result = 0;
-    for(long i = 0; i < rowCount; i++){
-        result += FineIO.getDouble(file, i);
-    }
-    for(long i = rowCount/2; i < rowCount; i++){
-        FineIO.put(file, i, FineIO.getDouble(file, i - rowCount/2)*2);
-    }
-    file.close();
-
-注意编辑文件的方法支持随机写入和随机读取，但是内存不足情况下容易导致IO频繁进出，Cube场景下不是特别需要
-删除文件
-删除文件示例：
-
-    IOFile<DoubleBuffer> file = FineIO.createIOFile(connector, dir, MODEL.READ_DOUBLE);
-    file.close();
-    file.delete();
-
-注意：删除文件需要创建一个读或者编辑的文件，写文件的方法不能正确删除
-OK FineIO 用法就是这么简单，还想咋地
 此外写文件写完需要close文件，读文件则在完全不需要读的情况下close，不需要每次创建，读文件方法支持多线程访问
 实现不同的Connector即可对接不同的存储，想怎么存都可以，实现HDFS就存到HDFS，实现redis就存到redis
+
