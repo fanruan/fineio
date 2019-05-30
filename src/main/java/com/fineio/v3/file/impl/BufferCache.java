@@ -41,8 +41,7 @@ public class BufferCache {
 
     private BufferCache() {
         cache = Caffeine.newBuilder()
-                // TODO: 2019/5/28 anchore weight定为读内存上限，需要memory manager资瓷下
-                .maximumWeight((MemoryManager.INSTANCE.getCacheMemoryLimit() >> 12) - 1)
+                .maximumWeight(MemoryManager.INSTANCE.getCacheMemoryLimit() - (1 << 22))
                 .<FileBlock, DirectBuffer>weigher((key, value) -> value.getSizeInBytes())
                 .expireAfterAccess(60, TimeUnit.MINUTES)
                 .recordStats()
