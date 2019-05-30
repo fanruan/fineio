@@ -9,13 +9,18 @@ import com.fineio.v3.file.impl.File;
 import com.fineio.v3.file.sync.FileSync;
 import com.fineio.v3.file.sync.FileSyncJob;
 import com.fineio.v3.memory.Offset;
+import sun.reflect.CallerSensitive;
 
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author yee
  */
 public abstract class WriteFile<B extends DirectBuffer> extends File<B> implements IWriteFile<B> {
+    final ConcurrentMap<Integer, B> buffers = new ConcurrentHashMap<>();
+
     private int curBuf = -1;
 
     private final boolean asyncWrite;
@@ -65,5 +70,17 @@ public abstract class WriteFile<B extends DirectBuffer> extends File<B> implemen
                 FineIOLoggers.getLogger().error(e);
             }
         }
+    }
+
+    /**
+     * 给append file调的
+     * 禁止给别的类用
+     *
+     * @param nthBuf 第n个buf
+     * @param buf    buf
+     */
+    @CallerSensitive
+    public void putBuffer(int nthBuf, B buf) {
+        buffers.putIfAbsent(nthBuf, buf);
     }
 }

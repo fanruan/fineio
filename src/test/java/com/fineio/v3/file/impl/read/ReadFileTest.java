@@ -3,7 +3,6 @@ package com.fineio.v3.file.impl.read;
 import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
-import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
@@ -13,18 +12,17 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.ConcurrentMap;
+import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.powermock.api.mockito.PowerMockito.doThrow;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.spy;
@@ -36,18 +34,6 @@ import static org.powermock.reflect.Whitebox.setInternalState;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({MemoryUtils.class})
 public class ReadFileTest {
-
-    @Test
-    public void getBuffer() {
-        ReadFile<?> rf = mock(ReadFile.class, CALLS_REAL_METHODS);
-
-        ConcurrentMap<Integer, DirectBuffer> buffers = mock(ConcurrentMap.class);
-        setInternalState(rf, "buffers", buffers);
-
-        rf.getBuffer(0);
-
-        verify(buffers).computeIfAbsent(eq(0), any(Function.class));
-    }
 
     @Test
     public void loadBuffer() throws Exception {
@@ -75,13 +61,15 @@ public class ReadFileTest {
         invokeMethod(rf, "loadBuffer", 0);
 
         verifyStatic(MemoryUtils.class);
-        byte[] bytes = new byte[1024];
-        bytes[0] = 1;
+        byte[] bytes = ByteBuffer.allocate(1).put((byte) 1).array();
         MemoryUtils.copyMemory(bytes, 1, 1);
 
         verify(rf).newDirectBuf(eq(1L), eq(1), any(FileBlock.class));
 
-        when(input.read()).thenThrow(IOException.class);
+        when(input.read()).thenReturn(1, -1);
+
+        doThrow(new Error()).when(MemoryUtils.class);
+        MemoryUtils.copyMemory(any(byte[].class), anyLong(), anyLong());
 
         invokeMethod(rf, "loadBuffer", 0);
 
@@ -94,14 +82,7 @@ public class ReadFileTest {
         AtomicBoolean closed = spy(new AtomicBoolean(false));
         setInternalState(rf, "closed", closed);
 
-        ConcurrentMap<Integer, DirectBuffer> buffers = mock(ConcurrentMap.class);
-        setInternalState(rf, "buffers", buffers);
-
         rf.close();
         assertTrue(closed.get());
-        verify(buffers).clear();
-
-        rf.close();
-        verifyNoMoreInteractions(buffers);
     }
 }
