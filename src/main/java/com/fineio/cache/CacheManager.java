@@ -84,8 +84,8 @@ public final class CacheManager {
                 if (null != buffer) {
                     MemoryObject obj = buffer.getFreeObject();
                     if (null != obj) {
-                        deAllocator.deAllocate(obj);
                         buffer.unLoad();
+                        deAllocator.deAllocate(obj);
                         return true;
                     }
                 }

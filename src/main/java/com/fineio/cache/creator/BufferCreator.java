@@ -65,11 +65,11 @@ public abstract class BufferCreator<B extends Buffer> {
                 }
                 if (null != object) {
                     B b = keyMap.remove(buffer.getUri());
+                    buffer.unLoad();
+                    builder.build().deAllocate(object);
                     if (null != b) {
                         bufferMap.remove(b, true);
                     }
-                    builder.build().deAllocate(object);
-                    buffer.unLoad();
                     Reference<? extends B> ref = null;
                     while (null != (ref = bufferReferenceQueue.poll())) {
                         synchronized (ref) {
@@ -114,11 +114,11 @@ public abstract class BufferCreator<B extends Buffer> {
         MemoryObject object = buffer.getFreeObject();
         if (null != object) {
             B b = keyMap.remove(buffer.getUri());
+            buffer.unLoad();
             if (null != b) {
                 bufferMap.remove(b, true);
             }
             DE_ALLOCATOR.deAllocate(object);
-            buffer.unLoad();
             return true;
         }
         return false;
