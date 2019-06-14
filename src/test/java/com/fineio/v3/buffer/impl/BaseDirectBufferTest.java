@@ -69,19 +69,17 @@ public class BaseDirectBufferTest {
         buf.ensureCap(256);
 
         assertEquals(512, (int) Whitebox.getInternalState(buf, "cap"));
-        // max cap exceeds, won't grow
-        buf.ensureCap(1024);
-
-        assertEquals(512, (int) Whitebox.getInternalState(buf, "cap"));
 
         when(reAllocator.reallocate(0, 512, 1024, FileMode.WRITE.getCondition())).thenThrow(new OutOfDirectMemoryException(""));
-
         try {
+            // max cap exceeds, grow up to max cap
+            buf.ensureCap(1024);
             // allocation will fail
-            buf.ensureCap(512);
             fail();
         } catch (BufferAllocateFailedException ignore) {
         }
+
+        assertEquals(512, (int) Whitebox.getInternalState(buf, "cap"));
     }
 
     @Test

@@ -21,7 +21,7 @@ public class IntDirectBuf extends BaseDirectBuffer implements IntDirectBuffer {
     }
 
     /**
-     * for read
+     * for read or append
      *
      * @param address 地址
      * @param cap     容量

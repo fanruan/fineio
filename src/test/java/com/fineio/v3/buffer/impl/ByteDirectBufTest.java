@@ -28,10 +28,11 @@ public class ByteDirectBufTest {
 
     @Test
     public void putByte() throws Exception {
+        FileBlock fileBlock = mock(FileBlock.class);
         spy(BaseDirectBuffer.class);
-        doReturn(1L).when(BaseDirectBuffer.class, "allocate", 16, Offset.BYTE, FileMode.WRITE);
+        doReturn(1L).when(BaseDirectBuffer.class, "allocate", 16, Offset.BYTE, FileMode.WRITE, fileBlock);
 
-        ByteDirectBuf buf = spy(new ByteDirectBuf(mock(FileBlock.class), 1024, FileMode.WRITE));
+        ByteDirectBuf buf = spy(new ByteDirectBuf(fileBlock, 1024, FileMode.WRITE));
         mockStatic(MemoryUtils.class);
 
         buf.putByte(0, (byte) 0);

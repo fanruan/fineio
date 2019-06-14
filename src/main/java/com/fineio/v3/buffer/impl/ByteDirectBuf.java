@@ -21,7 +21,7 @@ public class ByteDirectBuf extends BaseDirectBuffer implements ByteDirectBuffer 
     }
 
     /**
-     * for read
+     * for read or append
      *
      * @param address 地址
      * @param cap     容量

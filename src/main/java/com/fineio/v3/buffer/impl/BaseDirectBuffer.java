@@ -43,19 +43,19 @@ abstract class BaseDirectBuffer implements DirectBuffer {
      * for write, may grow cap
      *
      * @param fileBlock file key
-     * @param offset  offset
-     * @param maxCap  max cap
+     * @param offset    offset
+     * @param maxCap    max cap
      */
     BaseDirectBuffer(FileBlock fileBlock, Offset offset, int maxCap, FileMode fileMode) throws BufferAllocateFailedException {
-        this(allocate(16, offset, fileMode), 16, fileBlock, offset, maxCap);
+        this(allocate(16, offset, fileMode, fileBlock), 16, fileBlock, offset, maxCap);
         this.size = 0;
     }
 
-    private static long allocate(int cap, Offset offset, FileMode fileMode) {
+    private static long allocate(int cap, Offset offset, FileMode fileMode, FileBlock fileBlock) {
         try {
             return MemoryManager.INSTANCE.allocate(cap << offset.getOffset(), fileMode);
         } catch (OutOfDirectMemoryException e) {
-            throw BufferAllocateFailedException.ofAllocate(cap << offset.getOffset(), e);
+            throw BufferAllocateFailedException.ofAllocate(cap << offset.getOffset(), e, fileBlock);
         }
     }
 
@@ -64,11 +64,11 @@ abstract class BaseDirectBuffer implements DirectBuffer {
      * <p>
      * for append, write after read
      *
-     * @param address address
-     * @param cap     cap
+     * @param address   address
+     * @param cap       cap
      * @param fileBlock file key
-     * @param offset  offset
-     * @param maxCap  maxCap
+     * @param offset    offset
+     * @param maxCap    maxCap
      */
     BaseDirectBuffer(long address, int cap, FileBlock fileBlock, Offset offset, int maxCap) {
         this.fileBlock = fileBlock;
@@ -81,19 +81,22 @@ abstract class BaseDirectBuffer implements DirectBuffer {
 
     void ensureOpen() {
         if (closed.get()) {
-            throw new BufferClosedException(address);
+            throw new BufferClosedException(address, fileBlock);
         }
     }
 
     void ensureCap(int pos) {
-        if (pos < cap) {
+        if (pos < cap || cap == maxCap) {
             return;
         }
         int newCap = cap << 1;
         for (; newCap <= pos && newCap > 0; ) {
             newCap <<= 1;
         }
-        if (newCap > cap && newCap <= maxCap) {
+        if (newCap > cap) {
+            if (newCap > maxCap) {
+                newCap = maxCap;
+            }
             reallocate(newCap);
             cap = newCap;
         }
@@ -105,13 +108,13 @@ abstract class BaseDirectBuffer implements DirectBuffer {
         try {
             address = MemoryManager.INSTANCE.allocate(address, oldSize, newSize);
         } catch (OutOfDirectMemoryException e) {
-            throw BufferAllocateFailedException.ofReallocate(address, oldSize, newSize, e);
+            throw BufferAllocateFailedException.ofReallocate(address, oldSize, newSize, e, fileBlock);
         }
     }
 
     void checkPos(int pos) {
         if (pos < 0 || pos >= cap) {
-            throw new BufferOutOfBoundException(pos, cap);
+            throw new BufferOutOfBoundException(pos, cap, fileBlock);
         }
     }
 

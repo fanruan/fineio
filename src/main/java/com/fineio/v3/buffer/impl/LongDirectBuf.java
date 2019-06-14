@@ -21,7 +21,7 @@ public class LongDirectBuf extends BaseDirectBuffer implements LongDirectBuffer 
     }
 
     /**
-     * for read
+     * for read or append
      *
      * @param address 地址
      * @param cap     容量

@@ -28,10 +28,11 @@ public class LongDirectBufTest {
 
     @Test
     public void putLong() throws Exception {
+        FileBlock fileBlock = mock(FileBlock.class);
         spy(BaseDirectBuffer.class);
-        doReturn(1L).when(BaseDirectBuffer.class, "allocate", 16, Offset.LONG, FileMode.WRITE);
+        doReturn(1L).when(BaseDirectBuffer.class, "allocate", 16, Offset.LONG, FileMode.WRITE, fileBlock);
 
-        LongDirectBuf buf = spy(new LongDirectBuf(mock(FileBlock.class), 1024, FileMode.WRITE));
+        LongDirectBuf buf = spy(new LongDirectBuf(fileBlock, 1024, FileMode.WRITE));
         mockStatic(MemoryUtils.class);
 
         buf.putLong(0, 0);

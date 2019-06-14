@@ -3,6 +3,9 @@ package com.fineio.v3.file.impl.read;
 import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
+import com.fineio.v3.buffer.BufferAcquireFailedException;
+import com.fineio.v3.buffer.DirectBuffer;
+import com.fineio.v3.file.impl.BufferCache;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
@@ -16,7 +19,9 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,7 +42,7 @@ public class ReadFileTest {
 
     @Test
     public void loadBuffer() throws Exception {
-        ReadFile<?> rf = mock(ReadFile.class, CALLS_REAL_METHODS);
+        ReadFile<DirectBuffer> rf = mock(ReadFile.class, CALLS_REAL_METHODS);
 
         setInternalState(rf, "fileBlock", mock(FileBlock.class));
         Connector connector = mock(Connector.class);
@@ -58,20 +63,26 @@ public class ReadFileTest {
 
         mockStatic(MemoryUtils.class);
 
-        invokeMethod(rf, "loadBuffer", 0);
+        DirectBuffer buf = mock(DirectBuffer.class);
+        when(rf.newDirectBuf(eq(1L), eq(1), any(FileBlock.class))).thenReturn(buf);
+        assertEquals(buf, invokeMethod(rf, "loadBuffer", 0));
 
         verifyStatic(MemoryUtils.class);
         byte[] bytes = ByteBuffer.allocate(1).put((byte) 1).array();
         MemoryUtils.copyMemory(bytes, 1, 1);
 
-        verify(rf).newDirectBuf(eq(1L), eq(1), any(FileBlock.class));
+        BufferCache.get().invalidateAll();
 
         when(input.read()).thenReturn(1, -1);
 
         doThrow(new Error()).when(MemoryUtils.class);
         MemoryUtils.copyMemory(any(byte[].class), anyLong(), anyLong());
 
-        invokeMethod(rf, "loadBuffer", 0);
+        try {
+            invokeMethod(rf, "loadBuffer", 0);
+            fail();
+        } catch (BufferAcquireFailedException ignore) {
+        }
 
         verify(allocator).release(1, 1, FileMode.READ.getCondition());
     }

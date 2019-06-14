@@ -6,6 +6,7 @@ import com.fineio.accessor.file.IReadFile;
 import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.storage.Connector;
+import com.fineio.v3.buffer.BufferAcquireFailedException;
 import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.file.impl.BufferCache;
 import com.fineio.v3.file.impl.File;
@@ -55,7 +56,9 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
                 return null;
             }
         });
-
+        if (buf == null) {
+            throw new BufferAcquireFailedException(fileBlock);
+        }
         return (B) buf;
     }
 
