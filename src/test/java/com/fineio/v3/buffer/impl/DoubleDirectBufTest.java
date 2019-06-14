@@ -28,10 +28,11 @@ public class DoubleDirectBufTest {
 
     @Test
     public void putDouble() throws Exception {
+        FileBlock fileBlock = mock(FileBlock.class);
         spy(BaseDirectBuffer.class);
-        doReturn(1L).when(BaseDirectBuffer.class, "allocate", 16, Offset.DOUBLE, FileMode.WRITE);
+        doReturn(1L).when(BaseDirectBuffer.class, "allocate", 16, Offset.DOUBLE, FileMode.WRITE, fileBlock);
 
-        DoubleDirectBuf buf = spy(new DoubleDirectBuf(mock(FileBlock.class), 1024, FileMode.WRITE));
+        DoubleDirectBuf buf = spy(new DoubleDirectBuf(fileBlock, 1024, FileMode.WRITE));
         mockStatic(MemoryUtils.class);
 
         buf.putDouble(0, 0);

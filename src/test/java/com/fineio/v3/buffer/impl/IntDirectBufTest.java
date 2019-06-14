@@ -28,10 +28,11 @@ public class IntDirectBufTest {
 
     @Test
     public void putInt() throws Exception {
+        FileBlock fileBlock = mock(FileBlock.class);
         spy(BaseDirectBuffer.class);
-        doReturn(1L).when(BaseDirectBuffer.class, "allocate", 16, Offset.INT, FileMode.WRITE);
+        doReturn(1L).when(BaseDirectBuffer.class, "allocate", 16, Offset.INT, FileMode.WRITE, fileBlock);
 
-        IntDirectBuf buf = spy(new IntDirectBuf(mock(FileBlock.class), 1024, FileMode.WRITE));
+        IntDirectBuf buf = spy(new IntDirectBuf(fileBlock, 1024, FileMode.WRITE));
         mockStatic(MemoryUtils.class);
 
         buf.putInt(0, 0);
