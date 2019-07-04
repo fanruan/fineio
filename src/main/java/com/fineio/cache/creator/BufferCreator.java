@@ -217,7 +217,7 @@ public abstract class BufferCreator<B extends Buffer> {
     protected abstract B create(Connector connector, URI uri, boolean sync);
 
     synchronized
-    public B poll() {
+    public B poll() throws InterruptedException {
         B buffer = bufferMap.peek();
         if (null == buffer) {
             return null;
@@ -225,8 +225,14 @@ public abstract class BufferCreator<B extends Buffer> {
         switch (buffer.getLevel()) {
             case READ:
                 if (buffer.getSyncStatus() == SyncStatus.UNSUPPORTED) {
-                    keyMap.remove(buffer.getUri());
-                    return bufferMap.poll();
+                    buffer.resetAccess();
+                    Thread.sleep(1000);
+                    if (!buffer.resentAccess()) {
+                        keyMap.remove(buffer.getUri());
+                        return bufferMap.poll();
+                    } else {
+                        bufferMap.update(buffer);
+                    }
                 } else {
                     bufferMap.update(buffer);
                 }
