@@ -12,6 +12,7 @@ import com.fineio.io.Level;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.ShortBuffer;
 import com.fineio.io.file.FileBlock;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.manager.deallocator.DeAllocator;
 import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.manager.MemoryManager;
@@ -80,15 +81,21 @@ public final class CacheManager {
             }
 
             private boolean clean(BufferCreator creator) {
-                Buffer buffer = creator.poll();
-                if (null != buffer) {
-                    MemoryObject obj = buffer.getFreeObject();
-                    if (null != obj) {
-                        buffer.unLoad();
-                        deAllocator.deAllocate(obj);
-                        return true;
+
+                try {
+                    Buffer buffer = creator.poll();
+                    if (null != buffer) {
+                        MemoryObject obj = buffer.getFreeObject();
+                        if (null != obj) {
+                            buffer.unLoad();
+                            deAllocator.deAllocate(obj);
+                            return true;
+                        }
                     }
+                } catch (InterruptedException e) {
+                    FineIOLoggers.getLogger().error(e);
                 }
+
                 return false;
             }
         };
