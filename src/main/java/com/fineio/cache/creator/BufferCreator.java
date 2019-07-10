@@ -13,6 +13,7 @@ import com.fineio.io.Level;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.ShortBuffer;
 import com.fineio.io.file.FileBlock;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.manager.deallocator.DeAllocator;
 import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
@@ -96,8 +97,17 @@ public abstract class BufferCreator<B extends Buffer> {
                 switch (level) {
                     case READ:
                         if (buffer.getSyncStatus() == SyncStatus.UNSUPPORTED) {
-                            cleanBuffer(buffer);
-                            result = true;
+                            buffer.resetAccess();
+                            try {
+                                Thread.sleep(1000);
+                                if (!buffer.resentAccess()) {
+                                    cleanBuffer(buffer);
+                                    result = true;
+                                }
+                            } catch (InterruptedException e) {
+                                FineIOLoggers.getLogger().debug("ignore cleanBuffer time wait error");
+                            }
+
                         }
                         break;
                     case CLEAN:
