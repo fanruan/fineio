@@ -11,10 +11,35 @@ import java.io.InputStream;
 public final class DirectInputStream extends InputStream {
     private final static int EOF = -1;
 
-    private int p = 0;
-    private long address;
-    private int size;
     private Checker checker;
+
+    private final long address;
+    private final int size;
+    private int cursor = 0;
+
+    @Override
+    public int read() {
+        doCheck();
+        return available() > 0 ? MemoryUtils.getByte(address, cursor++) : EOF;
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) {
+        doCheck();
+        int avail = available();
+        if (avail <= 0) {
+            return EOF;
+        }
+        int size = avail > len ? len : avail;
+        MemoryUtils.readMemory(b, off, address + cursor, size);
+        cursor += size;
+        return size;
+    }
+
+    @Override
+    public int available() {
+        return size - cursor;
+    }
 
     public DirectInputStream(long address, int size, Checker checker) {
         this.address = address;
@@ -28,53 +53,6 @@ public final class DirectInputStream extends InputStream {
      */
     public long size(){
         return size;
-    }
-
-    public final int read(byte b[], int off, int len) {
-        if (doLenCheck(b, off, len)){
-            return 0;
-        }
-        return readMemory(b, off, len);
-    }
-
-    private  final int readMemory(byte[] b, int off, int len) {
-        return readInner(b, off, getLen(len,off));
-    }
-
-    private final int readInner(byte[] b, int off, int len) {
-        return len == 0 ? EOF : ri(b, off, len);
-    }
-
-    private final int ri(byte[] b, int off, int len) {
-        MemoryUtils.readMemory(b, off, address + p, len);
-        p+=len;
-        return len;
-    }
-
-    private final boolean doLenCheck(byte[] b, int off, int len) {
-        doCheck();
-        if (b == null) {
-            throw new NullPointerException();
-        } else if (off < 0 || len < 0 || len > b.length - off) {
-            throw new IndexOutOfBoundsException();
-        } else return len == 0;
-    }
-
-    private final int getLen(int len,int off) {
-        int left = size - p - off;
-        if(left < len) {
-            len = left;
-        }
-        if(len < 0){
-            len = 0;
-        }
-        return len;
-    }
-
-    @Override
-    public final int read() {
-        doCheck();
-        return p == size ? EOF : (MemoryUtils.getByte(address, p++)&0xff);
     }
 
     private final void doCheck() {

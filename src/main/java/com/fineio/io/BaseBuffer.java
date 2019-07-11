@@ -27,6 +27,7 @@ import com.fineio.v3.utils.IOUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -47,7 +48,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
     protected volatile long address;
     protected volatile long allocateSize;
     protected volatile URI uri;
-    protected volatile boolean close;
+    protected AtomicBoolean close = new AtomicBoolean(false);
     protected volatile boolean access;
     /**
      * read start
@@ -147,14 +148,14 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
     @Override
     public boolean isClose() {
-        return close;
+        return close.get();
     }
 
     protected abstract int getOffset();
 
     @Override
     public void close() {
-        close = true;
+        close.compareAndSet(false, true);
     }
 
     @Override
@@ -285,7 +286,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
         @Override
         public boolean isClose() {
-            return close;
+            return close.get();
         }
 
         @Override
@@ -366,9 +367,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                 if (load) {
                     return;
                 }
-                if (close) {
-                    close = false;
-                }
+                close.compareAndSet(true, false);
                 Allocator allocator;
                 try {
                     if (!direct) {
@@ -604,7 +603,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         }
 
         protected void ensureCapacity(int position) {
-            if (position < maxSize && !close) {
+            if (position < maxSize && !close.get()) {
                 addCapacity(position);
                 changed = true;
             } else {
@@ -686,7 +685,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
         @Override
         public boolean isClose() {
-            return close;
+            return close.get();
         }
 
         @Override

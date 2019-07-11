@@ -58,8 +58,8 @@ public final class ReadIOFile<B extends Buf> extends BaseReadIOFile<B> implement
                             if (!released && buffers[i] != null) {
                                 MemoryObject object = buffers[i].getFreeObject();
                                 if (null != object) {
-                                    BaseDeAllocator.Builder.READ.build().deAllocate(object);
                                     buffers[i].unLoad();
+                                    BaseDeAllocator.Builder.READ.build().deAllocate(object);
                                 }
                                 buffers[i] = null;
                             }
