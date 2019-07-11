@@ -1,4 +1,4 @@
-package com.fineio.v1.cache;
+package com.fineio.cache;
 
 
 import java.lang.ref.ReferenceQueue;
@@ -99,6 +99,7 @@ public class CacheLinkedMap<T> {
             } else {
                 co.updateTime();
             }
+            doChange(co);
         }
     }
 

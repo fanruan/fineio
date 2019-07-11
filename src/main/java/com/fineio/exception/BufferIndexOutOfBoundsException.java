@@ -8,10 +8,6 @@ import java.net.URI;
  */
 public class BufferIndexOutOfBoundsException extends IndexOutOfBoundsException {
 
-    public BufferIndexOutOfBoundsException(long index) {
-        super("Index out of range: " + index);
-    }
-
     public BufferIndexOutOfBoundsException(URI uri, long index, long maxSize) {
         super("Index out of range: " + uri + " index: " + index + " maxSize: " + maxSize);
     }

@@ -26,6 +26,7 @@ import com.fineio.storage.Connector;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -46,7 +47,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
     protected volatile long address;
     protected volatile long allocateSize;
     protected volatile URI uri;
-    protected volatile boolean close;
+    protected AtomicBoolean close = new AtomicBoolean(false);
     protected volatile boolean access;
     /**
      * read start
@@ -146,14 +147,14 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
     @Override
     public boolean isClose() {
-        return close;
+        return close.get();
     }
 
     protected abstract int getOffset();
 
     @Override
     public void close() {
-        close = true;
+        close.compareAndSet(false, true);
     }
 
     @Override
@@ -284,7 +285,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
         @Override
         public boolean isClose() {
-            return close;
+            return close.get();
         }
 
         @Override
@@ -365,9 +366,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                 if (load) {
                     return;
                 }
-                if (close) {
-                    close = false;
-                }
+                close.compareAndSet(true, false);
                 Allocator allocator;
                 try {
                     if (!direct) {
@@ -525,7 +524,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             });
         }
 
-        protected final boolean needFlush() {
+        final boolean needFlush() {
             return !flushed || changed;
         }
 
@@ -543,7 +542,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             }
         }
 
-        private final void forceWrite(boolean clear) {
+        private void forceWrite(boolean clear) {
             int i = 0;
             while (needFlush()) {
                 i++;
@@ -562,13 +561,14 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             }
         }
 
-        private final void write0() {
+        private void write0() {
             synchronized (this) {
                 changed = false;
                 try {
                     bufferKey.getConnector().write(bufferKey.getBlock(), getInputStream());
                     flushed = true;
                 } catch (IOException e) {
+                    FineIOLoggers.getLogger().error(e);
                 }
             }
         }
@@ -590,18 +590,16 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             if (getAddress() == 0) {
                 throw new StreamCloseException();
             }
-            DirectInputStream inputStream = new DirectInputStream(getAddress(), (writeCurrentPosition + 1) << getOffset(), new StreamCloseChecker(status.get()) {
+            return new DirectInputStream(getAddress(), (writeCurrentPosition + 1) << getOffset(), new StreamCloseChecker(status.get()) {
                 @Override
                 public boolean check() {
                     return WriteBuffer.this.status.get() == getStatus();
                 }
             });
-
-            return inputStream;
         }
 
         protected void ensureCapacity(int position) {
-            if (position < maxSize && !close) {
+            if (position < maxSize && !close.get()) {
                 addCapacity(position);
                 changed = true;
             } else {
@@ -683,7 +681,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
         @Override
         public boolean isClose() {
-            return close;
+            return close.get();
         }
 
         @Override

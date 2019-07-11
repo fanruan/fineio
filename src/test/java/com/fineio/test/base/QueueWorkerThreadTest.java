@@ -1,20 +1,24 @@
 package com.fineio.test.base;
 
-import com.fineio.base.SingleWaitThread;
+import com.fineio.base.QueueWorkerThread;
 import com.fineio.base.Worker;
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Created by daniel on 2017/3/6.
- */
-public class SingleWaitThreadTest  extends TestCase {
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
 
+/**
+ * @author yee
+ * @date 2019-01-17
+ */
+public class QueueWorkerThreadTest {
+    @Test
     public void testSingleWaitThread() {
         final AtomicInteger running = new AtomicInteger(0);
         final AtomicInteger trigger = new AtomicInteger(0);
-        final SingleWaitThread thread = new SingleWaitThread(new Worker() {
+        final QueueWorkerThread thread = new QueueWorkerThread(new Worker() {
             public void work() {
                 try {
                     Thread.sleep(100);
@@ -25,10 +29,10 @@ public class SingleWaitThreadTest  extends TestCase {
         });
         final int threadLen = 100;
         Thread[] t = new Thread[threadLen];
-        for(int i = 0; i < threadLen; i++) {
-            t[i] = new Thread(){
-                public void run(){
-                    for(int k = 0; k < threadLen; k++) {
+        for (int i = 0; i < threadLen; i++) {
+            t[i] = new Thread() {
+                public void run() {
+                    for (int k = 0; k < threadLen; k++) {
                         try {
                             Thread.sleep(10);
                         } catch (InterruptedException e) {
@@ -39,10 +43,10 @@ public class SingleWaitThreadTest  extends TestCase {
                 }
             };
         }
-        for(int i = 0; i < threadLen; i++) {
+        for (int i = 0; i < threadLen; i++) {
             t[i].start();
         }
-        for(int i = 0; i < threadLen; i++) {
+        for (int i = 0; i < threadLen; i++) {
             try {
                 t[i].join();
             } catch (InterruptedException e) {
@@ -50,7 +54,7 @@ public class SingleWaitThreadTest  extends TestCase {
             }
         }
         Thread ttt = new Thread() {
-            public void run(){
+            public void run() {
                 try {
                     Thread.sleep(2010);
                 } catch (InterruptedException e) {
@@ -69,5 +73,4 @@ public class SingleWaitThreadTest  extends TestCase {
         assertTrue(trigger.get() > running.get());
         assertTrue(running.get() > 1);
     }
-
 }
