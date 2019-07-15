@@ -27,14 +27,14 @@ public abstract class BaseDeAllocator extends SyncObject implements DeAllocator 
             return;
         }
         FineIOLoggers.getLogger().debug(String.format("auto release address: %d, release size: %d, currentSize: %d", memoryObject.getAddress(), memoryObject.getAllocateSize(), MemoryManager.INSTANCE.getCurrentMemorySize()));
-//        synchronized (this) {
-//            try {
-//                wait(100);
-//            } catch (InterruptedException e) {
-//                FineIOLoggers.getLogger().debug("release time wait interrupted");
-        beforeStatusChange();
-//            }
-//        }
+        synchronized (this) {
+            try {
+                wait(100);
+            } catch (InterruptedException e) {
+                FineIOLoggers.getLogger().debug("release time wait interrupted");
+                beforeStatusChange();
+            }
+        }
         long address = memoryObject.getAddress();
         MemoryUtils.free(address);
         returnMemory(memoryObject.getAllocateSize());

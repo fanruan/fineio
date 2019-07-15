@@ -14,7 +14,6 @@ import com.fineio.io.LongBuffer;
 import com.fineio.io.ShortBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
-import com.fineio.memory.manager.deallocator.DeAllocator;
 import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.memory.manager.obj.impl.AllocateObject;
@@ -36,7 +35,6 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class BufferCreator<B extends Buffer> {
     private static final long TIMEOUT = 10 * 60 * 1000L;
-    private static final DeAllocator DE_ALLOCATOR = BaseDeAllocator.Builder.READ.build();
     protected final ScheduledExecutorService activeService;
     protected final ScheduledExecutorService timeoutService;
     protected Buffer.Listener listener;
@@ -128,7 +126,7 @@ public abstract class BufferCreator<B extends Buffer> {
             if (null != b) {
                 bufferMap.remove(b, true);
             }
-            DE_ALLOCATOR.deAllocate(object);
+            BaseDeAllocator.Builder.READ.build().deAllocate(object);
             return true;
         }
         return false;

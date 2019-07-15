@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -49,6 +50,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
     protected volatile URI uri;
     protected AtomicBoolean close = new AtomicBoolean(false);
     protected volatile boolean access;
+    private AtomicLong version = new AtomicLong(0);
     /**
      * read start
      */
@@ -211,6 +213,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
     public void unLoad() {
         lock.lock();
         try {
+            version.incrementAndGet();
             level = Level.INITIAL;
             load = false;
             allocateSize = 0;
@@ -228,10 +231,12 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
     protected abstract class ReadBuffer implements Buffer {
         protected volatile long readAddress;
+        private long readVersion;
 
         public ReadBuffer() {
             level = Level.READ;
-            if (address == 0) {
+            readVersion = version.get();
+            if (address == 0 && version.compareAndSet(readVersion, readVersion)) {
                 checkRead0();
             } else {
                 readAddress = address;
@@ -315,14 +320,8 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         public final void checkRead0() {
             try {
                 switch (level) {
-                    case CLEAN:
-                        level = Level.READ;
-                        if (0 < maxSize && address != 0) {
-                            load = true;
-                            readAddress = address;
-                        }
-                        break;
                     case READ:
+                        load = false;
                         loadContent();
                         break;
                     case WRITE:
@@ -346,7 +345,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         }
 
         private void checkReadWithException(int p) {
-            if (!load || maxSize == 0 || address == 0) {
+            while (!version.compareAndSet(readVersion, readVersion)) {
                 load = false;
                 loadContent();
                 listener.update(this);
@@ -387,6 +386,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     allocateSize = memoryObject.getAllocateSize();
                     load = true;
                     maxSize = (int) (allocateSize >> getOffset());
+                    readVersion = version.get();
                 } finally {
                     lock.unlock();
                 }
