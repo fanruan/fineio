@@ -16,6 +16,7 @@ import com.fineio.storage.Connector;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.easymock.IMocksControl;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -41,7 +42,7 @@ public class BufferTest {
         return arrays;
     }
 
-    @Test
+    @Ignore
     public void testBuffer100() throws Exception {
         for (int i = 0; i < 100; i++) {
             testBuffer();
