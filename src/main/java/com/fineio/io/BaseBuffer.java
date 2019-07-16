@@ -50,7 +50,8 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
     protected volatile URI uri;
     protected AtomicBoolean close = new AtomicBoolean(false);
     protected volatile boolean access;
-    private AtomicLong version = new AtomicLong(0);
+    protected AtomicLong version = new AtomicLong(0);
+    protected AtomicBoolean loading = new AtomicBoolean(false);
     /**
      * read start
      */
@@ -185,6 +186,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     return null;
                 case CLEAN:
                     MemoryObject object = new AllocateObject(address, allocateSize);
+                    version.incrementAndGet();
                     load = false;
                     allocateSize = 0;
                     maxSize = 0;
@@ -194,6 +196,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     synchronized (this) {
                         if (syncStatus != SyncStatus.SYNC) {
                             MemoryObject obj = new AllocateObject(address, allocateSize);
+                            version.incrementAndGet();
                             load = false;
                             allocateSize = 0;
                             maxSize = 0;
@@ -213,7 +216,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
     public void unLoad() {
         lock.lock();
         try {
-            version.incrementAndGet();
             level = Level.INITIAL;
             load = false;
             allocateSize = 0;
@@ -270,7 +272,10 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
         @Override
         public void clearAfterClose() {
-            listener.remove(BaseBuffer.this, BaseDeAllocator.Builder.READ);
+            if (!loading.get()) {
+                close.compareAndSet(false, true);
+                listener.remove(BaseBuffer.this, BaseDeAllocator.Builder.READ);
+            }
         }
 
         @Override
@@ -295,6 +300,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
         @Override
         public void close() {
+            close.compareAndSet(false, true);
         }
 
         @Override
@@ -309,7 +315,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
         @Override
         public void unLoad() {
-            BaseBuffer.this.unLoad();
+//            BaseBuffer.this.unLoad();
         }
 
         @Override
@@ -360,7 +366,8 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         }
 
         private void loadContent() {
-            synchronized (this) {
+            if (loading.compareAndSet(false, true)) {
+//                synchronized (this) {
                 level = Level.READ;
                 if (load) {
                     return;
@@ -390,6 +397,14 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                 } finally {
                     lock.unlock();
                 }
+//                }
+                loading.compareAndSet(true, false);
+            } else {
+                while (!loading.compareAndSet(false, false)) {
+                    // wait
+                }
+                readAddress = address;
+                readVersion = version.get();
             }
         }
 
