@@ -6,6 +6,7 @@ import com.fineio.io.IntBuffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.test.v2.io.file.WriteIOFileTest;
 import junit.framework.TestCase;
+import org.junit.Ignore;
 
 import java.io.IOException;
 import java.net.URI;
@@ -14,6 +15,7 @@ import java.util.Arrays;
 /**
  * Created by daniel on 2017/4/25.
  */
+@Ignore
 public class DirectAccessTest extends TestCase {
 
 
