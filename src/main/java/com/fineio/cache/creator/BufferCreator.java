@@ -13,7 +13,7 @@ import com.fineio.io.Level;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.ShortBuffer;
 import com.fineio.io.file.FileBlock;
-import com.fineio.memory.manager.deallocator.DeAllocator;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.memory.manager.obj.impl.AllocateObject;
@@ -35,7 +35,6 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class BufferCreator<B extends Buffer> {
     private static final long TIMEOUT = 10 * 60 * 1000L;
-    private static final DeAllocator DE_ALLOCATOR = BaseDeAllocator.Builder.READ.build();
     protected final ScheduledExecutorService activeService;
     protected final ScheduledExecutorService timeoutService;
     protected Buffer.Listener listener;
@@ -65,11 +64,11 @@ public abstract class BufferCreator<B extends Buffer> {
                 }
                 if (null != object) {
                     B b = keyMap.remove(buffer.getUri());
+                    buffer.unLoad();
+                    builder.build().deAllocate(object);
                     if (null != b) {
                         bufferMap.remove(b, true);
                     }
-                    builder.build().deAllocate(object);
-                    buffer.unLoad();
                     Reference<? extends B> ref = null;
                     while (null != (ref = bufferReferenceQueue.poll())) {
                         synchronized (ref) {
@@ -96,8 +95,17 @@ public abstract class BufferCreator<B extends Buffer> {
                 switch (level) {
                     case READ:
                         if (buffer.getSyncStatus() == SyncStatus.UNSUPPORTED) {
-                            cleanBuffer(buffer);
-                            result = true;
+                            buffer.resetAccess();
+                            try {
+                                Thread.sleep(1000);
+                                if (!buffer.resentAccess()) {
+                                    cleanBuffer(buffer);
+                                    result = true;
+                                }
+                            } catch (InterruptedException e) {
+                                FineIOLoggers.getLogger().debug("ignore cleanBuffer time wait error");
+                            }
+
                         }
                         break;
                     case CLEAN:
@@ -114,11 +122,11 @@ public abstract class BufferCreator<B extends Buffer> {
         MemoryObject object = buffer.getFreeObject();
         if (null != object) {
             B b = keyMap.remove(buffer.getUri());
+            buffer.unLoad();
             if (null != b) {
                 bufferMap.remove(b, true);
             }
-            DE_ALLOCATOR.deAllocate(object);
-            buffer.unLoad();
+            BaseDeAllocator.Builder.READ.build().deAllocate(object);
             return true;
         }
         return false;
@@ -218,7 +226,7 @@ public abstract class BufferCreator<B extends Buffer> {
     protected abstract B create(Connector connector, URI uri, boolean sync);
 
     synchronized
-    public B poll() {
+    public B poll() throws InterruptedException {
         B buffer = bufferMap.peek();
         if (null == buffer) {
             return null;
@@ -226,8 +234,14 @@ public abstract class BufferCreator<B extends Buffer> {
         switch (buffer.getLevel()) {
             case READ:
                 if (buffer.getSyncStatus() == SyncStatus.UNSUPPORTED) {
-                    keyMap.remove(buffer.getUri());
-                    return bufferMap.poll();
+                    buffer.resetAccess();
+                    Thread.sleep(1000);
+                    if (!buffer.resentAccess()) {
+                        keyMap.remove(buffer.getUri());
+                        return bufferMap.poll();
+                    } else {
+                        bufferMap.update(buffer);
+                    }
                 } else {
                     bufferMap.update(buffer);
                 }

@@ -99,6 +99,7 @@ public class CacheLinkedMap<T> {
             } else {
                 co.updateTime();
             }
+            doChange(co);
         }
     }
 

@@ -123,7 +123,7 @@ public abstract class IOFile<B extends Buf> implements IFile<B> {
             result = 0;
         } else {
             int len = buffers.length;
-            if (((BufferW) buffers[len - 1]).full()) {
+            if (null != buffers[len - 1] && ((BufferW) buffers[len - 1]).full()) {
                 result = triggerWrite(len);
             } else {
                 result = len - 1;
