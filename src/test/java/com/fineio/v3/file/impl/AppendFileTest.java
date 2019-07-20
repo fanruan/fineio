@@ -11,18 +11,14 @@ import com.fineio.v3.memory.Offset;
 import com.fineio.v3.memory.allocator.WriteMemoryAllocator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.util.concurrent.ConcurrentMap;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -37,55 +33,13 @@ import static org.powermock.api.mockito.PowerMockito.doThrow;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.spy;
-import static org.powermock.api.mockito.PowerMockito.verifyPrivate;
 import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.reflect.Whitebox.getInternalState;
 import static org.powermock.reflect.Whitebox.invokeMethod;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({AppendFile.class, MemoryUtils.class})
 public class AppendFileTest {
-    @Test
-    public void initLastPos() throws Exception {
-        AppendFile af = mock(AppendFile.class);
-        WriteFile wf = mock(WriteFile.class);
-        setInternalState(af, "writeFile", wf);
-        doCallRealMethod().when(af, "initLastPos");
-
-        Connector connector = mock(Connector.class);
-        setInternalState(wf, "connector", connector);
-        setInternalState(wf, "fileBlock", mock(FileBlock.class));
-
-        when(connector.exists(any(FileBlock.class))).thenReturn(false, true);
-
-        invokeMethod(af, "initLastPos");
-
-        verify(connector, never()).read(any(FileBlock.class));
-        assertEquals(0, (int) getInternalState(af, "lastPos"));
-
-        InputStream input = mock(InputStream.class);
-        when(connector.read(any(FileBlock.class))).thenReturn(input);
-
-        when(input.read(any(byte[].class))).thenReturn(1).thenThrow(IOException.class)
-                .thenAnswer((Answer<Integer>) invocationOnMock -> {
-                    byte[] bytes = invocationOnMock.getArgument(0);
-                    ByteBuffer.wrap(bytes).putInt(1);
-                    return 4;
-                });
-
-        invokeMethod(af, "initLastPos");
-
-        assertEquals(0, (int) getInternalState(af, "lastPos"));
-
-        invokeMethod(af, "initLastPos");
-
-        assertEquals(0, (int) getInternalState(af, "lastPos"));
-
-        invokeMethod(af, "initLastPos");
-
-        assertEquals(1, (int) getInternalState(af, "lastPos"));
-    }
 
     @Test
     public void initLastBuf() throws Exception {
@@ -94,7 +48,7 @@ public class AppendFileTest {
 
         WriteFile wf = mock(WriteFile.class);
         setInternalState(af, "writeFile", wf);
-        when(wf.nthVal(anyLong())).thenReturn(0, 1);
+        when(wf.nthVal(anyInt())).thenReturn(0, 1);
 
         FileBlock fileBlock = mock(FileBlock.class);
         setInternalState(wf, "fileBlock", fileBlock);
@@ -115,7 +69,7 @@ public class AppendFileTest {
 
         setInternalState(wf, "offset", Offset.BYTE);
 
-        ConcurrentMap<Integer, DirectBuffer> buffers = mock(ConcurrentMap.class);
+        DirectBuffer[] buffers = new DirectBuffer[1];
         setInternalState(wf, "buffers", buffers);
 
         DirectBuffer buf = mock(DirectBuffer.class);
@@ -129,11 +83,9 @@ public class AppendFileTest {
         // not exists
         verify(connector, never()).read(any(FileBlock.class));
 
-        doCallRealMethod().when(wf).putBuffer(anyInt(), any(DirectBuffer.class));
-
         invokeMethod(af, "initLastBuf");
 
-        verify(buffers).putIfAbsent(0, buf);
+        assertThat(buffers[0]).isEqualTo(buf);
 
         when(input.read()).thenReturn(1, -1);
 
@@ -146,35 +98,5 @@ public class AppendFileTest {
         invokeMethod(af, "initLastBuf");
         // throwable
         verify(reAllocator).release(eq(0L), eq(1L), eq(FileMode.WRITE.getCondition()));
-    }
-
-    @Test
-    public void close() throws Exception {
-        AppendFile af = mock(AppendFile.class);
-        WriteFile wf = mock(WriteFile.class);
-        setInternalState(af, "writeFile", wf);
-        doCallRealMethod().when(af).close();
-
-        af.close();
-
-        verify(wf).close();
-        verifyPrivate(af).invoke("writeLastPos");
-    }
-
-    @Test
-    public void writeLastPos() throws Exception {
-        AppendFile af = mock(AppendFile.class);
-        WriteFile wf = mock(WriteFile.class);
-        setInternalState(af, "writeFile", wf);
-        doCallRealMethod().when(af, "writeLastPos");
-
-        setInternalState(wf, "fileBlock", mock(FileBlock.class));
-
-        Connector connector = mock(Connector.class);
-        setInternalState(wf, "connector", connector);
-
-        invokeMethod(af, "writeLastPos");
-
-        verify(connector).write(any(FileBlock.class), eq(new byte[4]));
     }
 }

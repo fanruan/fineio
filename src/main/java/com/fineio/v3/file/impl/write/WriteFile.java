@@ -9,37 +9,42 @@ import com.fineio.v3.file.impl.File;
 import com.fineio.v3.file.sync.FileSync;
 import com.fineio.v3.file.sync.FileSyncJob;
 import com.fineio.v3.memory.Offset;
-import sun.reflect.CallerSensitive;
 
-import java.util.Iterator;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Arrays;
 
 /**
  * @author yee
  */
 public abstract class WriteFile<B extends DirectBuffer> extends File<B> implements IWriteFile<B> {
-    final ConcurrentMap<Integer, B> buffers = new ConcurrentHashMap<>();
-
     private int curBuf = -1;
 
     private final boolean asyncWrite;
+
+    private int lastPos;
 
     WriteFile(FileBlock fileBlock, Offset offset, Connector connector, boolean asyncWrite) {
         super(fileBlock, offset, connector);
         this.asyncWrite = asyncWrite;
     }
 
-    void delete() {
-        connector.delete(fileBlock);
+    void growBufferCache(int nthBuf) {
+        if (nthBuf >= buffers.length) {
+            buffers = Arrays.copyOf(buffers, nthBuf + 16);
+        }
+    }
+
+    void updateLastPos(int pos) {
+        if (pos >= lastPos) {
+            lastPos = pos + 1;
+        }
     }
 
     void syncBufIfNeed(int nthBuf) {
         if (curBuf == -1) {
             curBuf = nthBuf;
-        } else if (curBuf != nthBuf) {
-            syncBuf(getBuffer(curBuf));
-            buffers.remove(curBuf);
+        } else if (curBuf != nthBuf && nthBuf >= 0) {
+            syncBuf(buffers[curBuf]);
+            buffers[curBuf] = null;
 
             curBuf = nthBuf;
         }
@@ -48,10 +53,17 @@ public abstract class WriteFile<B extends DirectBuffer> extends File<B> implemen
     @Override
     public void close() {
         if (closed.compareAndSet(false, true)) {
-            for (Iterator<B> itr = buffers.values().iterator(); itr.hasNext(); ) {
+            syncBufs();
+            writeLastPos(this, lastPos);
+        }
+    }
+
+    private void syncBufs() {
+        for (int i = 0; i < buffers.length; i++) {
+            if (buffers[i] != null) {
                 try {
-                    syncBuf(itr.next());
-                    itr.remove();
+                    syncBuf(buffers[i]);
+                    buffers[i] = null;
                 } catch (Exception e) {
                     FineIOLoggers.getLogger().error(e);
                 }
@@ -72,15 +84,7 @@ public abstract class WriteFile<B extends DirectBuffer> extends File<B> implemen
         }
     }
 
-    /**
-     * 给append file调的
-     * 禁止给别的类用
-     *
-     * @param nthBuf 第n个buf
-     * @param buf    buf
-     */
-    @CallerSensitive
-    public void putBuffer(int nthBuf, B buf) {
-        buffers.putIfAbsent(nthBuf, buf);
+    void delete() {
+        connector.delete(fileBlock);
     }
 }

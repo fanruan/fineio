@@ -14,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 
 import static org.junit.Assert.assertEquals;
 
@@ -59,7 +58,7 @@ public class FileDemo {
     @Test
     public void testLong() {
         LongWriteFile longWriteFile = LongWriteFile.ofSync(key, connector);
-        LongStream.range(0, n).forEachOrdered(i -> longWriteFile.putLong(i, i));
+        IntStream.range(0, n).forEachOrdered(i -> longWriteFile.putLong(i, i));
         longWriteFile.close();
 
         LongReadFile longReadFile = new LongReadFile(key, connector);
@@ -71,7 +70,7 @@ public class FileDemo {
     @Test
     public void testDouble() {
         DoubleWriteFile doubleWriteFile = DoubleWriteFile.ofSync(key, connector);
-        LongStream.range(0, n).forEachOrdered(i -> doubleWriteFile.putDouble(i, i));
+        IntStream.range(0, n).forEachOrdered(i -> doubleWriteFile.putDouble(i, i));
         doubleWriteFile.close();
 
         DoubleReadFile doubleReadFile = new DoubleReadFile(key, connector);

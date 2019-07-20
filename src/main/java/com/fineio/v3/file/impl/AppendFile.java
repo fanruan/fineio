@@ -4,7 +4,6 @@ import com.fineio.accessor.FileMode;
 import com.fineio.accessor.file.IAppendFile;
 import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
-import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.file.impl.write.WriteFile;
 import com.fineio.v3.memory.MemoryManager;
@@ -13,39 +12,20 @@ import com.fineio.v3.utils.IOUtils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 
 /**
  * @author yee
  */
 abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> implements IAppendFile<B> {
-    private static final String LAST_POS = "last_pos";
+    final WF writeFile;
 
     int lastPos;
 
-    final WF writeFile;
-
     AppendFile(WF writeFile) {
         this.writeFile = writeFile;
-        initLastPos();
+        lastPos = File.getLastPos(writeFile);
         initLastBuf();
-    }
-
-    private void initLastPos() {
-        Connector connector = writeFile.connector;
-        FileBlock fileBlock = new FileBlock(writeFile.fileBlock.getPath(), LAST_POS);
-        if (connector.exists(fileBlock)) {
-            try (InputStream input = connector.read(fileBlock)) {
-                byte[] bytes = new byte[4];
-                if (input.read(bytes) == bytes.length) {
-                    lastPos = ByteBuffer.wrap(bytes).getInt();
-                }
-            } catch (IOException e) {
-                FineIOLoggers.getLogger().error(e);
-            }
-        }
     }
 
     private void initLastBuf() {
@@ -66,7 +46,7 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> imple
                 address = MemoryManager.INSTANCE.allocate(size, FileMode.WRITE);
                 MemoryUtils.copyMemory(byteOutput.toByteArray(), address, size);
 
-                writeFile.putBuffer(nthBuf, newDirectBuf(address, size >> writeFile.offset.getOffset(), lastFileBlock));
+                writeFile.buffers[nthBuf] = newDirectBuf(address, size >> writeFile.offset.getOffset(), lastFileBlock);
             } catch (Throwable e) {
                 if (address != null) {
                     MemoryManager.INSTANCE.release(address, size);
@@ -80,24 +60,11 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> imple
 
     @Override
     public boolean exists() {
-        return writeFile.exists() && writeFile.connector.exists(new FileBlock(writeFile.fileBlock.getPath(), LAST_POS));
+        return writeFile.exists();
     }
 
     @Override
     public void close() {
-        try {
-            writeFile.close();
-        } finally {
-            writeLastPos();
-        }
-    }
-
-    private void writeLastPos() {
-        byte[] bytes = ByteBuffer.allocate(4).putInt(lastPos).array();
-        try {
-            writeFile.connector.write(new FileBlock(writeFile.fileBlock.getPath(), LAST_POS), bytes);
-        } catch (IOException e) {
-            FineIOLoggers.getLogger().error(e);
-        }
+        writeFile.close();
     }
 }

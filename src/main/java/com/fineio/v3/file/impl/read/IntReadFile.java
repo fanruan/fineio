@@ -2,9 +2,9 @@ package com.fineio.v3.file.impl.read;
 
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
+import com.fineio.v3.buffer.BufferAcquireFailedException;
 import com.fineio.v3.buffer.IntDirectBuffer;
 import com.fineio.v3.buffer.impl.IntDirectBuf;
-import com.fineio.v3.file.FileClosedException;
 import com.fineio.v3.memory.Offset;
 
 /**
@@ -14,12 +14,27 @@ import com.fineio.v3.memory.Offset;
 public class IntReadFile extends ReadFile<IntDirectBuffer> {
     public IntReadFile(FileBlock fileBlock, Connector connector) {
         super(fileBlock, Offset.INT, connector);
+        init();
     }
 
-    public int getInt(long pos) throws FileClosedException, IllegalArgumentException {
+    private void init() {
+        int lastPos = getLastPos(this);
+        buffers = new IntDirectBuffer[nthBuf(lastPos) + 1];
+    }
+
+    public int getInt(int pos) {
         ensureOpen();
-        checkPos(pos);
-        return getBuffer(nthBuf(pos)).getInt(nthVal(pos));
+        int nthBuf = nthBuf(pos);
+        int nthVal = nthVal(pos);
+        try {
+            return buffers[nthBuf].getInt(nthVal);
+        } catch (NullPointerException e) {
+            // buffers[nthBuf]为null，对应未初始化，从cache拿
+            return (buffers[nthBuf] = loadBuffer(nthBuf)).getInt(nthVal);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // buffers数组越界，只可能是读到不存在的数据
+            throw new BufferAcquireFailedException(fileBlock, e);
+        }
     }
 
     @Override

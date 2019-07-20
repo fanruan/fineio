@@ -9,8 +9,8 @@ import com.fineio.accessor.buffer.ByteBuf;
 public interface ByteDirectBuffer extends DirectBuffer, ByteBuf {
     void putByte(int pos, byte val)
             throws BufferClosedException, BufferAllocateFailedException,
-            BufferOutOfBoundException;
+            BufferOutOfBoundsException;
 
     byte getByte(int pos)
-            throws BufferClosedException, BufferOutOfBoundException;
+            throws BufferClosedException, BufferOutOfBoundsException;
 }

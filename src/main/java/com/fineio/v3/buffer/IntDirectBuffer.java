@@ -9,8 +9,8 @@ import com.fineio.accessor.buffer.IntBuf;
 public interface IntDirectBuffer extends DirectBuffer, IntBuf {
     void putInt(int pos, int val)
             throws BufferClosedException, BufferAllocateFailedException,
-            BufferOutOfBoundException;
+            BufferOutOfBoundsException;
 
     int getInt(int pos)
-            throws BufferClosedException, BufferOutOfBoundException;
+            throws BufferClosedException, BufferOutOfBoundsException;
 }

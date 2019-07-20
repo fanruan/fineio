@@ -5,7 +5,7 @@ import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.v3.buffer.BufferAllocateFailedException;
 import com.fineio.v3.buffer.BufferClosedException;
-import com.fineio.v3.buffer.BufferOutOfBoundException;
+import com.fineio.v3.buffer.BufferOutOfBoundsException;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.Offset;
@@ -89,11 +89,11 @@ public class BaseDirectBufferTest {
         buf.checkPos(1);
         try {
             buf.checkPos(-1);
-        } catch (BufferOutOfBoundException ignore) {
+        } catch (BufferOutOfBoundsException ignore) {
         }
         try {
             buf.checkPos(16);
-        } catch (BufferOutOfBoundException ignore) {
+        } catch (BufferOutOfBoundsException ignore) {
         }
     }
 
