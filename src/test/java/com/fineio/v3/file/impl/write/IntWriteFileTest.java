@@ -1,29 +1,24 @@
 package com.fineio.v3.file.impl.write;
 
-import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.IntDirectBuffer;
-import com.fineio.v3.buffer.impl.IntDirectBuf;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.doAnswer;
 import static org.powermock.api.mockito.PowerMockito.doNothing;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.verifyPrivate;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
+import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.reflect.Whitebox.getInternalState;
 
 /**
  * @author anchore
@@ -35,33 +30,35 @@ public class IntWriteFileTest {
 
     @Test
     public void putInt() throws Exception {
-        IntWriteFile wf = spy(IntWriteFile.ofSync(mock(FileBlock.class), mock(Connector.class)));
-        IntDirectBuffer buf = mock(IntDirectBuffer.class);
-        doReturn(buf).when(wf).getBuffer(0);
+        Connector connector = mock(Connector.class);
+        when(connector.getBlockOffset()).thenReturn((byte) 3);
+        IntWriteFile wf = spy(IntWriteFile.ofSync(mock(FileBlock.class), connector));
         doNothing().when(wf).syncBufIfNeed(anyInt());
+        doAnswer(invocation -> {
+            IntDirectBuffer[] buffers = getInternalState(wf, "buffers");
+            int nthBuf = invocation.getArgument(0);
+            buffers[nthBuf] = mock(IntDirectBuffer.class);
+            buffers[nthBuf].putInt(invocation.getArgument(1), invocation.getArgument(2));
+            return null;
+        }).when(wf, "newAndPut", anyInt(), anyInt(), anyInt());
 
+        IntDirectBuffer[] buffers = getInternalState(wf, "buffers");
         wf.putInt(0, 0);
+        verify(buffers[0]).putInt(0, 0);
 
-        verifyPrivate(wf).invoke("ensureOpen");
-        verifyPrivate(wf).invoke("checkPos", 0L);
+        wf.putInt(2, 0);
+        IntDirectBuffer[] grownBuffers = getInternalState(wf, "buffers");
+        verify(grownBuffers[1]).putInt(0, 0);
+
+        try {
+            wf.putInt(-1, 0);
+            fail();
+        } catch (ArrayIndexOutOfBoundsException ignore) {
+        }
+
+        verifyPrivate(wf, times(3)).invoke("ensureOpen");
         verify(wf).syncBufIfNeed(0);
-        verify(buf).putInt(0, 0);
-    }
-
-    @Test
-    public void getBuffer() throws Exception {
-        ConcurrentHashMap<Object, Object> buffers = spy(new ConcurrentHashMap<>());
-        whenNew(ConcurrentHashMap.class).withNoArguments().thenReturn(buffers);
-        IntDirectBuf buf = mock(IntDirectBuf.class);
-        FileBlock fileBlock = mock(FileBlock.class);
-        FileBlock childFileBlock = mock(FileBlock.class);
-        whenNew(FileBlock.class).withArguments(fileBlock.getPath(), "0").thenReturn(childFileBlock);
-        whenNew(IntDirectBuf.class).withArguments(childFileBlock, 1 << -2, FileMode.WRITE).thenReturn(buf);
-
-        IntWriteFile wf = IntWriteFile.ofSync(fileBlock, mock(Connector.class));
-
-        assertEquals(buf, wf.getBuffer(0));
-
-        verify(buffers).computeIfAbsent(eq(0), any(Function.class));
+        verify(wf).syncBufIfNeed(1);
+        verify(wf).syncBufIfNeed(-1 >> 1);
     }
 }

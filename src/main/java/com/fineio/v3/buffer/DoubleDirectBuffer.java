@@ -9,8 +9,8 @@ import com.fineio.accessor.buffer.DoubleBuf;
 public interface DoubleDirectBuffer extends DirectBuffer, DoubleBuf {
     void putDouble(int pos, double val)
             throws BufferClosedException, BufferAllocateFailedException,
-            BufferOutOfBoundException;
+            BufferOutOfBoundsException;
 
     double getDouble(int pos)
-            throws BufferClosedException, BufferOutOfBoundException;
+            throws BufferClosedException, BufferOutOfBoundsException;
 }

@@ -23,8 +23,8 @@ public class ByteDirectBuf extends BaseDirectBuffer implements ByteDirectBuffer 
     /**
      * for read or append
      *
-     * @param address 地址
-     * @param cap     容量
+     * @param address   地址
+     * @param cap       容量
      * @param fileBlock file key
      */
     public ByteDirectBuf(long address, int cap, FileBlock fileBlock, int maxCap) {

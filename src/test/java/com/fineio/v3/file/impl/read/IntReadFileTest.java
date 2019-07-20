@@ -2,6 +2,7 @@ package com.fineio.v3.file.impl.read;
 
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
+import com.fineio.v3.buffer.BufferAcquireFailedException;
 import com.fineio.v3.buffer.IntDirectBuffer;
 import com.fineio.v3.buffer.impl.IntDirectBuf;
 import org.junit.Test;
@@ -10,12 +11,16 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.doReturn;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.verifyPrivate;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
+import static org.powermock.reflect.Whitebox.setInternalState;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({IntReadFile.class})
@@ -23,16 +28,24 @@ public class IntReadFileTest {
 
     @Test
     public void getInt() throws Exception {
-        IntReadFile rf = spy(new IntReadFile(mock(FileBlock.class), mock(Connector.class)));
+        Connector connector = mock(Connector.class);
+        when(connector.getBlockOffset()).thenReturn((byte) 2);
+        IntReadFile rf = spy(new IntReadFile(mock(FileBlock.class), connector));
+        setInternalState(rf, "buffers", new IntDirectBuffer[1]);
 
         IntDirectBuffer buf = mock(IntDirectBuffer.class);
-        doReturn(buf).when(rf).getBuffer(0);
-
         when(buf.getInt(0)).thenReturn(1);
+        doReturn(buf).when(rf).loadBuffer(anyInt());
 
         assertEquals(1, rf.getInt(0));
-        verifyPrivate(rf).invoke("ensureOpen");
-        verifyPrivate(rf).invoke("checkPos", 0L);
+
+        try {
+            rf.getInt(1);
+            fail();
+        } catch (BufferAcquireFailedException ignore) {
+        }
+
+        verifyPrivate(rf, times(2)).invoke("ensureOpen");
     }
 
     @Test

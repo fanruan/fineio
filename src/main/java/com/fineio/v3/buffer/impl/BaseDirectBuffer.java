@@ -4,7 +4,7 @@ import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
 import com.fineio.v3.buffer.BufferAllocateFailedException;
 import com.fineio.v3.buffer.BufferClosedException;
-import com.fineio.v3.buffer.BufferOutOfBoundException;
+import com.fineio.v3.buffer.BufferOutOfBoundsException;
 import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.MemoryManager;
@@ -114,7 +114,7 @@ abstract class BaseDirectBuffer implements DirectBuffer {
 
     void checkPos(int pos) {
         if (pos < 0 || pos >= cap) {
-            throw new BufferOutOfBoundException(pos, cap, fileBlock);
+            throw new BufferOutOfBoundsException(pos, cap, fileBlock);
         }
     }
 

@@ -9,8 +9,8 @@ import com.fineio.accessor.buffer.LongBuf;
 public interface LongDirectBuffer extends DirectBuffer, LongBuf {
     void putLong(int pos, long val)
             throws BufferClosedException, BufferAllocateFailedException,
-            BufferOutOfBoundException;
+            BufferOutOfBoundsException;
 
     long getLong(int pos)
-            throws BufferClosedException, BufferOutOfBoundException;
+            throws BufferClosedException, BufferOutOfBoundsException;
 }

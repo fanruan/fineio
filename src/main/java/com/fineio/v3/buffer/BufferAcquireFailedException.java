@@ -10,4 +10,8 @@ public class BufferAcquireFailedException extends RuntimeException {
     public BufferAcquireFailedException(FileBlock fileBlock) {
         super(fileBlock.getPath());
     }
+
+    public BufferAcquireFailedException(FileBlock fileBlock, Throwable e) {
+        super(fileBlock.getPath(), e);
+    }
 }

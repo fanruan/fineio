@@ -18,6 +18,7 @@ import com.fineio.v3.utils.IOUtils;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * @author anchore
@@ -28,13 +29,7 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
         super(fileBlock, offset, connector);
     }
 
-    @Override
-    protected B getBuffer(int nthBuf) {
-        return loadBuffer(nthBuf);
-    }
-
-    private B loadBuffer(int nthBuf) {
-        // TODO: 2019/4/16 anchore 先拿cache，拿不到就生成buffer，put进cache
+    B loadBuffer(int nthBuf) {
         FileBlock nthFileBlock = new FileBlock(fileBlock.getPath(), String.valueOf(nthBuf));
 
         DirectBuffer buf = BufferCache.get().get(nthFileBlock, fb -> {
@@ -66,6 +61,8 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
 
     @Override
     public void close() {
-        closed.compareAndSet(false, true);
+        if (closed.compareAndSet(false, true)) {
+            Arrays.fill(buffers, null);
+        }
     }
 }
