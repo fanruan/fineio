@@ -357,7 +357,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                 loadContent();
                 listener.update(this);
             }
-            if (p < maxSize && p > -1 && address > 0) {
+            if (p < maxSize && p > -1 && readAddress > 0) {
                 if (!access) {
                     access = true;
                 }
