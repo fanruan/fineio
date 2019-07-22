@@ -370,6 +370,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 //                synchronized (this) {
                 level = Level.READ;
                 if (load) {
+                    loading.compareAndSet(true, false);
                     return;
                 }
                 close.compareAndSet(true, false);
@@ -383,12 +384,13 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                                 bufferKey.getConnector().read(bufferKey.getBlock()));
                     }
                 } catch (Exception e) {
+                    loading.compareAndSet(true, false);
                     throw new BufferConstructException(e);
                 }
-                memoryObject = MemoryManager.INSTANCE.allocate(allocator);
-                readAddress = memoryObject.getAddress();
                 lock.lock();
                 try {
+                    memoryObject = MemoryManager.INSTANCE.allocate(allocator);
+                    readAddress = memoryObject.getAddress();
                     address = readAddress;
                     allocateSize = memoryObject.getAllocateSize();
                     load = true;
