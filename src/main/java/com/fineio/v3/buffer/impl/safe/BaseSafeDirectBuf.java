@@ -1,4 +1,4 @@
-package com.fineio.v3.buffer.impl.guard;
+package com.fineio.v3.buffer.impl.safe;
 
 import com.fineio.io.file.FileBlock;
 import com.fineio.v3.buffer.BufferClosedException;
@@ -31,7 +31,7 @@ abstract class BaseSafeDirectBuf<B extends DirectBuffer> implements DirectBuffer
     }
 
     static class BaseVoidDirectBuf implements DirectBuffer {
-        private DirectBuffer realBuf;
+        DirectBuffer realBuf;
 
         BaseVoidDirectBuf(DirectBuffer realBuf) {
             this.realBuf = realBuf;
@@ -44,7 +44,7 @@ abstract class BaseSafeDirectBuf<B extends DirectBuffer> implements DirectBuffer
 
         @Override
         public long getAddress() {
-            throw new BufferClosedException(getAddress(), getFileBlock());
+            throw new BufferClosedException(realBuf.getAddress(), getFileBlock());
         }
 
         @Override

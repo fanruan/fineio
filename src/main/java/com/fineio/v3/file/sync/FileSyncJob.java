@@ -7,10 +7,10 @@ import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.buffer.DoubleDirectBuffer;
 import com.fineio.v3.buffer.IntDirectBuffer;
 import com.fineio.v3.buffer.LongDirectBuffer;
-import com.fineio.v3.buffer.impl.guard.SafeByteDirectBuf;
-import com.fineio.v3.buffer.impl.guard.SafeDoubleDirectBuf;
-import com.fineio.v3.buffer.impl.guard.SafeIntDirectBuf;
-import com.fineio.v3.buffer.impl.guard.SafeLongDirectBuf;
+import com.fineio.v3.buffer.impl.safe.SafeByteDirectBuf;
+import com.fineio.v3.buffer.impl.safe.SafeDoubleDirectBuf;
+import com.fineio.v3.buffer.impl.safe.SafeIntDirectBuf;
+import com.fineio.v3.buffer.impl.safe.SafeLongDirectBuf;
 import com.fineio.v3.file.impl.BufferCache;
 import com.fineio.v3.memory.MemoryManager;
 
@@ -71,7 +71,7 @@ public class FileSyncJob implements Runnable {
         if (buf instanceof DoubleDirectBuffer) {
             return new SafeDoubleDirectBuf((DoubleDirectBuffer) buf);
         }
-        throw new IllegalArgumentException(String.format("cannot make safe buffer of type %s", buf.getClass()));
+        throw new IllegalArgumentException(String.format("cannot make safe buffer of %s", buf));
     }
 
     @Override

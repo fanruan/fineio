@@ -1,4 +1,4 @@
-package com.fineio.v3.buffer.impl.guard;
+package com.fineio.v3.buffer.impl.safe;
 
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.v3.buffer.BufferAllocateFailedException;
@@ -31,6 +31,7 @@ public class SafeDoubleDirectBuf extends BaseSafeDirectBuf<DoubleDirectBuffer> i
         DirectBuffer realBuf = buf;
         buf = new VoidDoubleDirectBuf(realBuf);
         try {
+            // 等待最后一次读完就释放
             Thread.sleep(100);
         } catch (InterruptedException e) {
             FineIOLoggers.getLogger().error(e);
@@ -46,12 +47,12 @@ public class SafeDoubleDirectBuf extends BaseSafeDirectBuf<DoubleDirectBuffer> i
 
         @Override
         public void putDouble(int pos, double val) throws BufferClosedException, BufferAllocateFailedException, BufferOutOfBoundsException {
-            throw new BufferClosedException(getAddress(), getFileBlock());
+            throw new BufferClosedException(realBuf.getAddress(), getFileBlock());
         }
 
         @Override
         public double getDouble(int pos) throws BufferClosedException, BufferOutOfBoundsException {
-            throw new BufferClosedException(getAddress(), getFileBlock());
+            throw new BufferClosedException(realBuf.getAddress(), getFileBlock());
         }
     }
 }
