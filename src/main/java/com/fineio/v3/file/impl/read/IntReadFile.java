@@ -5,6 +5,7 @@ import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.BufferAcquireFailedException;
 import com.fineio.v3.buffer.IntDirectBuffer;
 import com.fineio.v3.buffer.impl.IntDirectBuf;
+import com.fineio.v3.buffer.impl.guard.SafeIntDirectBuf;
 import com.fineio.v3.memory.Offset;
 
 /**
@@ -39,6 +40,6 @@ public class IntReadFile extends ReadFile<IntDirectBuffer> {
 
     @Override
     IntDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
-        return new IntDirectBuf(address, size, fileBlock, size);
+        return new SafeIntDirectBuf(new IntDirectBuf(address, size, fileBlock, size));
     }
 }

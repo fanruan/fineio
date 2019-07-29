@@ -5,6 +5,7 @@ import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.BufferAcquireFailedException;
 import com.fineio.v3.buffer.LongDirectBuffer;
 import com.fineio.v3.buffer.impl.LongDirectBuf;
+import com.fineio.v3.buffer.impl.guard.SafeLongDirectBuf;
 import com.fineio.v3.memory.Offset;
 
 /**
@@ -39,6 +40,6 @@ public class LongReadFile extends ReadFile<LongDirectBuffer> {
 
     @Override
     LongDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
-        return new LongDirectBuf(address, size, fileBlock, size);
+        return new SafeLongDirectBuf(new LongDirectBuf(address, size, fileBlock, size));
     }
 }
