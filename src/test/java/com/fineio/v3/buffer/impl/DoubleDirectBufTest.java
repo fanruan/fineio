@@ -53,7 +53,6 @@ public class DoubleDirectBufTest {
 
         assertEquals(1, buf.getDouble(0), 0);
 
-        verify(buf).ensureOpen();
         verify(buf).checkPos(0);
     }
 }

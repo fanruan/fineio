@@ -53,7 +53,6 @@ public class IntDirectBufTest {
 
         assertEquals(1, buf.getInt(0), 0);
 
-        verify(buf).ensureOpen();
         verify(buf).checkPos(0);
     }
 }

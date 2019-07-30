@@ -51,6 +51,7 @@ public class FileSyncJob implements Runnable {
             MemoryManager.INSTANCE.transferWriteToRead(buffer.getAddress(), buffer.getSizeInBytes());
             BufferCache.get().put(buffer.getFileBlock(), makeSafe(buffer));
         } catch (Throwable e) {
+            buffer.close();
             // TODO: 2019/4/15 anchore 写完要通知cache该块已过期，重新load
             BufferCache.get().invalidate(buffer.getFileBlock());
 
