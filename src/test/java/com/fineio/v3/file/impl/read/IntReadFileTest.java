@@ -5,6 +5,7 @@ import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.BufferAcquireFailedException;
 import com.fineio.v3.buffer.IntDirectBuffer;
 import com.fineio.v3.buffer.impl.IntDirectBuf;
+import com.fineio.v3.buffer.impl.safe.SafeIntDirectBuf;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -55,7 +56,9 @@ public class IntReadFileTest {
         FileBlock fileBlock = mock(FileBlock.class);
         IntDirectBuf buf = mock(IntDirectBuf.class);
         whenNew(IntDirectBuf.class).withArguments(1L, 16, fileBlock, 16).thenReturn(buf);
+        SafeIntDirectBuf safeBuf = mock(SafeIntDirectBuf.class);
+        whenNew(SafeIntDirectBuf.class).withArguments(buf).thenReturn(safeBuf);
 
-        assertEquals(buf, rf.newDirectBuf(1L, 16, fileBlock));
+        assertEquals(safeBuf, rf.newDirectBuf(1L, 16, fileBlock));
     }
 }

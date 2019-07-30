@@ -48,7 +48,7 @@ public class BufferCache {
                 .recordStats()
                 .removalListener((key, value, cause) -> {
                     value.close();
-                    FineIOLoggers.getLogger().info(MessageFormat.format("removed {0}, cause {1}", key, cause));
+                    FineIOLoggers.getLogger().debug(MessageFormat.format("removed {0}, cause {1}", key, cause));
                 })
                 .build();
     }

@@ -5,6 +5,7 @@ import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.BufferAcquireFailedException;
 import com.fineio.v3.buffer.DoubleDirectBuffer;
 import com.fineio.v3.buffer.impl.DoubleDirectBuf;
+import com.fineio.v3.buffer.impl.safe.SafeDoubleDirectBuf;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -55,7 +56,9 @@ public class DoubleReadFileTest {
         FileBlock fileBlock = mock(FileBlock.class);
         DoubleDirectBuf buf = mock(DoubleDirectBuf.class);
         whenNew(DoubleDirectBuf.class).withArguments(1L, 16, fileBlock, 16).thenReturn(buf);
+        SafeDoubleDirectBuf safeBuf = mock(SafeDoubleDirectBuf.class);
+        whenNew(SafeDoubleDirectBuf.class).withArguments(buf).thenReturn(safeBuf);
 
-        assertEquals(buf, rf.newDirectBuf(1L, 16, fileBlock));
+        assertEquals(safeBuf, rf.newDirectBuf(1L, 16, fileBlock));
     }
 }

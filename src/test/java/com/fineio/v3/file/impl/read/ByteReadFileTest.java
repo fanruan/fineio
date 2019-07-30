@@ -5,6 +5,7 @@ import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.BufferAcquireFailedException;
 import com.fineio.v3.buffer.ByteDirectBuffer;
 import com.fineio.v3.buffer.impl.ByteDirectBuf;
+import com.fineio.v3.buffer.impl.safe.SafeByteDirectBuf;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -55,7 +56,9 @@ public class ByteReadFileTest {
         FileBlock fileBlock = mock(FileBlock.class);
         ByteDirectBuf buf = mock(ByteDirectBuf.class);
         whenNew(ByteDirectBuf.class).withArguments(1L, 16, fileBlock, 16).thenReturn(buf);
+        SafeByteDirectBuf safeBuf = mock(SafeByteDirectBuf.class);
+        whenNew(SafeByteDirectBuf.class).withArguments(buf).thenReturn(safeBuf);
 
-        assertEquals(buf, rf.newDirectBuf(1L, 16, fileBlock));
+        assertEquals(safeBuf, rf.newDirectBuf(1L, 16, fileBlock));
     }
 }

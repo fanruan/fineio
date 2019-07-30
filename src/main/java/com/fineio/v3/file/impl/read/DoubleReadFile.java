@@ -5,6 +5,7 @@ import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.BufferAcquireFailedException;
 import com.fineio.v3.buffer.DoubleDirectBuffer;
 import com.fineio.v3.buffer.impl.DoubleDirectBuf;
+import com.fineio.v3.buffer.impl.safe.SafeDoubleDirectBuf;
 import com.fineio.v3.memory.Offset;
 
 /**
@@ -39,6 +40,6 @@ public class DoubleReadFile extends ReadFile<DoubleDirectBuffer> {
 
     @Override
     DoubleDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
-        return new DoubleDirectBuf(address, size, fileBlock, size);
+        return new SafeDoubleDirectBuf(new DoubleDirectBuf(address, size, fileBlock, size));
     }
 }
