@@ -53,7 +53,6 @@ public class ByteDirectBufTest {
 
         assertEquals(1, buf.getByte(0));
 
-        verify(buf).ensureOpen();
         verify(buf).checkPos(0);
     }
 }

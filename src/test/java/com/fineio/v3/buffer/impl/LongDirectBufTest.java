@@ -53,7 +53,6 @@ public class LongDirectBufTest {
 
         assertEquals(1, buf.getLong(0), 0);
 
-        verify(buf).ensureOpen();
         verify(buf).checkPos(0);
     }
 }
