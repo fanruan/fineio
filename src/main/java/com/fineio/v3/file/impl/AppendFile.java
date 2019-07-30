@@ -13,6 +13,7 @@ import com.fineio.v3.utils.IOUtils;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * @author yee
@@ -46,6 +47,7 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> imple
                 address = MemoryManager.INSTANCE.allocate(size, FileMode.WRITE);
                 MemoryUtils.copyMemory(byteOutput.toByteArray(), address, size);
 
+                writeFile.buffers = Arrays.copyOf(writeFile.buffers, nthBuf + 16);
                 writeFile.buffers[nthBuf] = newDirectBuf(address, size >> writeFile.offset.getOffset(), lastFileBlock);
             } catch (Throwable e) {
                 if (address != null) {

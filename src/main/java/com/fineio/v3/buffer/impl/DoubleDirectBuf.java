@@ -42,7 +42,7 @@ public class DoubleDirectBuf extends BaseDirectBuffer implements DoubleDirectBuf
 
     @Override
     public double getDouble(int pos) {
-        ensureOpen();
+        // 不用ensureOpen是因为有safe buffer资瓷
         checkPos(pos);
         return MemoryUtils.getDouble(address, pos);
     }
