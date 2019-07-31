@@ -5,6 +5,7 @@ import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.BufferAcquireFailedException;
 import com.fineio.v3.buffer.LongDirectBuffer;
 import com.fineio.v3.buffer.impl.LongDirectBuf;
+import com.fineio.v3.buffer.impl.safe.SafeLongDirectBuf;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -55,7 +56,9 @@ public class LongReadFileTest {
         FileBlock fileBlock = mock(FileBlock.class);
         LongDirectBuf buf = mock(LongDirectBuf.class);
         whenNew(LongDirectBuf.class).withArguments(1L, 16, fileBlock, 16).thenReturn(buf);
+        SafeLongDirectBuf safeBuf = mock(SafeLongDirectBuf.class);
+        whenNew(SafeLongDirectBuf.class).withArguments(buf).thenReturn(safeBuf);
 
-        assertEquals(buf, rf.newDirectBuf(1L, 16, fileBlock));
+        assertEquals(safeBuf, rf.newDirectBuf(1L, 16, fileBlock));
     }
 }

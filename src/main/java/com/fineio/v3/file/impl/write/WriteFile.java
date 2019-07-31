@@ -27,7 +27,12 @@ public abstract class WriteFile<B extends DirectBuffer> extends File<B> implemen
         this.asyncWrite = asyncWrite;
     }
 
-    void growBufferCache(int nthBuf) {
+    /**
+     * 给append file的后门
+     *
+     * @param nthBuf 第n个buf
+     */
+    public void growBuffers(int nthBuf) {
         if (nthBuf >= buffers.length) {
             buffers = Arrays.copyOf(buffers, nthBuf + 16);
         }

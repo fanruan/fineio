@@ -46,6 +46,7 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> imple
                 address = MemoryManager.INSTANCE.allocate(size, FileMode.WRITE);
                 MemoryUtils.copyMemory(byteOutput.toByteArray(), address, size);
 
+                writeFile.growBuffers(nthBuf);
                 writeFile.buffers[nthBuf] = newDirectBuf(address, size >> writeFile.offset.getOffset(), lastFileBlock);
             } catch (Throwable e) {
                 if (address != null) {

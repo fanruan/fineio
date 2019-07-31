@@ -38,7 +38,7 @@ public class ByteWriteFile extends WriteFile<ByteDirectBuffer> {
             newAndPut(nthBuf, nthVal, value);
         } catch (ArrayIndexOutOfBoundsException e) {
             // buffers数组越界，对应当前buffers全写完的情况，也考虑了负下标越界
-            growBufferCache(nthBuf);
+            growBuffers(nthBuf);
             newAndPut(nthBuf, nthVal, value);
         }
         updateLastPos(pos);

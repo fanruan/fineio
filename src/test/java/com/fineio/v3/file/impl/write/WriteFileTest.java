@@ -44,13 +44,13 @@ public class WriteFileTest {
 
     @Test
     public void growBufferCache() {
-        wf.growBufferCache(-1);
+        wf.growBuffers(-1);
         assertThat(getInternalState(wf, DirectBuffer[].class)).isSameAs(buffers);
 
-        wf.growBufferCache(0);
+        wf.growBuffers(0);
         assertThat(getInternalState(wf, DirectBuffer[].class)).isSameAs(buffers);
 
-        wf.growBufferCache(3);
+        wf.growBuffers(3);
         assertThat(getInternalState(wf, DirectBuffer[].class)).isNotSameAs(buffers).hasSize(19);
     }
 

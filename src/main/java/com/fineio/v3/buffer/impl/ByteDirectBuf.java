@@ -42,7 +42,7 @@ public class ByteDirectBuf extends BaseDirectBuffer implements ByteDirectBuffer 
 
     @Override
     public byte getByte(int pos) {
-        ensureOpen();
+        // 不用ensureOpen是因为有safe buffer资瓷
         checkPos(pos);
         return MemoryUtils.getByte(address, pos);
     }
