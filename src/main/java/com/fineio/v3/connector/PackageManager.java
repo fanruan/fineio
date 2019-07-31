@@ -8,9 +8,9 @@ import java.io.IOException;
 public interface PackageManager {
 
     /**
-     * @param dir
+     * @param resourcePath
      */
-    void packageDir(String dir) throws IOException;
+    void packageDir(String targetPath, String resourcePath) throws IOException;
 
     /**
      *

@@ -29,7 +29,7 @@ public class ZipUtils {
      * @param srcDir 压缩文件夹路径
      * @throws RuntimeException 压缩失败会抛出运行时异常
      */
-    public static void toZip(Block srcDir, Connector connector, PackageConnector packageConnector)
+    public static void toZip(Block srcDir, String targetPath, Connector connector, PackageConnector packageConnector)
             throws IOException {
 
         long start = System.currentTimeMillis();
@@ -38,7 +38,7 @@ public class ZipUtils {
             compress(srcDir, connector, zos, srcDir.getName());
             long end = System.currentTimeMillis();
             FineIOLoggers.getLogger().info(String.format("Zip %s finished. Cost %d ms", srcDir, (end - start)));
-            packageConnector.write(srcDir.getPath(), new ByteArrayInputStream(bos.toByteArray()));
+            packageConnector.write(targetPath, new ByteArrayInputStream(bos.toByteArray()));
         }
     }
 
