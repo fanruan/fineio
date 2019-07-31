@@ -53,7 +53,7 @@ public class ZipPackageManagerDemo {
                 return false;
             }
         });
-        zipPackageManager.packageDir("/Users/yee/Downloads/oss");
+        zipPackageManager.packageDir("/Users/yee/test1", "/Users/yee/Downloads/2019");
         zipPackageManager.unPackageDir("/Users/yee/Downloads/oss1", "/Users/yee/Downloads/oss");
     }
 }

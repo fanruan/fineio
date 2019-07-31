@@ -21,9 +21,9 @@ public class ZipPackageManager implements PackageManager {
     }
 
     @Override
-    public void packageDir(String dir) throws IOException {
-        Block block = connector.list(dir);
-        ZipUtils.toZip(block, connector, packageConnector);
+    public void packageDir(String targetPath, String resourcePath) throws IOException {
+        Block block = connector.list(resourcePath);
+        ZipUtils.toZip(block, targetPath, connector, packageConnector);
     }
 
     @Override
