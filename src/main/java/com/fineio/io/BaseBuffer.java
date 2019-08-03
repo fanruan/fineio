@@ -51,7 +51,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
     protected AtomicBoolean close = new AtomicBoolean(false);
     protected volatile boolean access;
     protected AtomicLong version = new AtomicLong(0);
-    protected AtomicBoolean loading = new AtomicBoolean(false);
+    protected Lock loading = new ReentrantLock();
     /**
      * read start
      */
@@ -64,9 +64,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
     private volatile boolean direct;
     private final boolean syncWrite;
-
-
-    private Lock lock = new ReentrantLock();
 
     public BaseBuffer(Connector connector, URI uri, boolean syncWrite, Listener listener) {
         this.syncWrite = syncWrite;
@@ -120,21 +117,21 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
     @Override
     public long getAddress() {
-        lock.lock();
+        loading.lock();
         try {
             return address;
         } finally {
-            lock.unlock();
+            loading.unlock();
         }
     }
 
     @Override
     public long getAllocateSize() {
-        lock.lock();
+        loading.lock();
         try {
             return allocateSize;
         } finally {
-            lock.unlock();
+            loading.unlock();
         }
     }
 
@@ -178,7 +175,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
     @Override
     public MemoryObject getFreeObject() {
-        lock.lock();
+        loading.lock();
         try {
             switch (level) {
                 case WRITE:
@@ -208,13 +205,13 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     return null;
             }
         } finally {
-            lock.unlock();
+            loading.unlock();
         }
     }
 
     @Override
     public void unLoad() {
-        lock.lock();
+        loading.lock();
         try {
             level = Level.INITIAL;
             load = false;
@@ -222,7 +219,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             maxSize = 0;
             address = 0;
         } finally {
-            lock.unlock();
+            loading.unlock();
         }
     }
 
@@ -272,9 +269,12 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
 
         @Override
         public void clearAfterClose() {
-            if (!loading.get()) {
+            loading.lock();
+            try {
                 close.compareAndSet(false, true);
                 listener.remove(BaseBuffer.this, BaseDeAllocator.Builder.READ);
+            } finally {
+                loading.unlock();
             }
         }
 
@@ -366,11 +366,13 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         }
 
         private void loadContent() {
-            if (loading.compareAndSet(false, true)) {
+            loading.lock();
+            try {
 //                synchronized (this) {
                 level = Level.READ;
                 if (load) {
-                    loading.compareAndSet(true, false);
+                    readAddress = address;
+                    readAddress = version.get();
                     return;
                 }
                 close.compareAndSet(true, false);
@@ -384,29 +386,17 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                                 bufferKey.getConnector().read(bufferKey.getBlock()));
                     }
                 } catch (Exception e) {
-                    loading.compareAndSet(true, false);
                     throw new BufferConstructException(e);
                 }
-                lock.lock();
-                try {
-                    memoryObject = MemoryManager.INSTANCE.allocate(allocator);
-                    readAddress = memoryObject.getAddress();
-                    address = readAddress;
-                    allocateSize = memoryObject.getAllocateSize();
-                    load = true;
-                    maxSize = (int) (allocateSize >> getOffset());
-                    readVersion = version.get();
-                } finally {
-                    lock.unlock();
-                }
-//                }
-                loading.compareAndSet(true, false);
-            } else {
-                while (!loading.compareAndSet(false, false)) {
-                    // wait
-                }
-                readAddress = address;
+                memoryObject = MemoryManager.INSTANCE.allocate(allocator);
+                readAddress = memoryObject.getAddress();
+                address = readAddress;
+                allocateSize = memoryObject.getAllocateSize();
+                load = true;
+                maxSize = (int) (allocateSize >> getOffset());
                 readVersion = version.get();
+            } finally {
+                loading.unlock();
             }
         }
 
