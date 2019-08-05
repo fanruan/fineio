@@ -1,6 +1,5 @@
 package com.fineio.storage;
 
-import com.fineio.accessor.Block;
 import com.fineio.io.file.FileBlock;
 
 import java.io.IOException;
@@ -41,9 +40,7 @@ public interface Connector {
      * @return
      */
     @Deprecated
-    default boolean delete(FileBlock block) {
-        return delete((Block) block);
-    }
+    boolean delete(FileBlock block);
 
     /**
      * 写文件时单个块的最大size偏移量
@@ -63,29 +60,7 @@ public interface Connector {
      * @return
      */
     @Deprecated
-    default boolean exists(FileBlock block) {
-        return exists((Block) block);
-    }
-
-    /**
-     * @param block
-     * @return
-     */
-    boolean delete(Block block);
-
-    /**
-     * @param block
-     * @return
-     */
-    boolean exists(Block block);
-
-    /**
-     * @param dir
-     * @return
-     * @since 3.0
-     */
-    Block list(String dir) throws IOException;
-
+    boolean exists(FileBlock block);
 
     /**
      * 复制文件
@@ -104,5 +79,4 @@ public interface Connector {
     @Deprecated
     URI deleteParent(FileBlock block);
 
-    long size(Block block);
 }
