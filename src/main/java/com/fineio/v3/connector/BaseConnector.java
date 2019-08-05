@@ -1,6 +1,6 @@
 package com.fineio.v3.connector;
 
-import com.fineio.storage.Connector;
+import com.fineio.storage.v3.Connector;
 
 /**
  * @author yee

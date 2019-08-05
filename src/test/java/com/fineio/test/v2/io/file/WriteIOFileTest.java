@@ -1,7 +1,6 @@
 package com.fineio.test.v2.io.file;
 
 import com.fineio.FineIO;
-import com.fineio.accessor.Block;
 import com.fineio.io.ByteBuffer;
 import com.fineio.io.CharBuffer;
 import com.fineio.io.FloatBuffer;
@@ -344,21 +343,6 @@ public class WriteIOFileTest extends TestCase {
         @Override
         public boolean exists(FileBlock block) {
             return false;
-        }
-
-        @Override
-        public boolean delete(Block block) {
-            return false;
-        }
-
-        @Override
-        public boolean exists(Block block) {
-            return false;
-        }
-
-        @Override
-        public Block list(String dir) {
-            return null;
         }
 
         @Override
