@@ -372,7 +372,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                 level = Level.READ;
                 if (load) {
                     readAddress = address;
-                    readAddress = version.get();
+                    readVersion = version.get();
                     return;
                 }
                 close.compareAndSet(true, false);
