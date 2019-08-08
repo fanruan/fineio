@@ -59,7 +59,7 @@ public abstract class WriteFile<B extends DirectBuffer> extends File<B> implemen
     public void close() {
         if (closed.compareAndSet(false, true)) {
             syncBufs();
-            writeLastPos(this, lastPos);
+            writeMeta(this, lastPos);
         }
     }
 

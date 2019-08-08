@@ -45,7 +45,7 @@ public class IntWriteFile extends WriteFile<IntDirectBuffer> {
 
     private void newAndPut(int nthBuf, int nthVal, int value) {
         buffers[nthBuf] = new IntDirectBuf(new FileBlock(fileBlock.getPath(), String.valueOf(nthBuf)),
-                1 << (connector.getBlockOffset() - offset.getOffset()), FileMode.WRITE);
+                1 << (blockOffset - offset.getOffset()), FileMode.WRITE);
         buffers[nthBuf].putInt(nthVal, value);
     }
 

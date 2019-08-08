@@ -45,7 +45,7 @@ public class DoubleWriteFile extends WriteFile<DoubleDirectBuffer> {
 
     private void newAndPut(int nthBuf, int nthVal, double value) {
         buffers[nthBuf] = new DoubleDirectBuf(new FileBlock(fileBlock.getPath(), String.valueOf(nthBuf)),
-                1 << (connector.getBlockOffset() - offset.getOffset()), FileMode.WRITE);
+                1 << (blockOffset - offset.getOffset()), FileMode.WRITE);
         buffers[nthBuf].putDouble(nthVal, value);
     }
 

@@ -24,7 +24,7 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> imple
 
     AppendFile(WF writeFile) {
         this.writeFile = writeFile;
-        lastPos = File.getLastPos(writeFile);
+        lastPos = File.initMetaAndGetLastPos(writeFile);
         initLastBuf();
     }
 

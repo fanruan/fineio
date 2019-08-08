@@ -19,11 +19,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @date 2019/4/16
  */
 public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B> {
-    private static final String LAST_POS = "last_pos";
+    /**
+     * 1 byte: block offset
+     * 1 int: last byte pos 单个file最大支持约21.4亿行byte，5.3亿行int，2.6亿行long/double
+     */
+    static final String META = "meta";
 
     protected final FileBlock fileBlock;
 
     protected final Connector connector;
+
+    protected byte blockOffset;
 
     protected final AtomicBoolean closed = new AtomicBoolean(false);
 
@@ -35,14 +41,15 @@ public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B
         this.fileBlock = fileBlock;
         this.offset = offset;
         this.connector = connector;
+        blockOffset = connector.getBlockOffset();
     }
 
     protected int nthBuf(int pos) {
-        return pos >> (connector.getBlockOffset() - offset.getOffset());
+        return pos >> (blockOffset - offset.getOffset());
     }
 
     protected int nthVal(int pos) {
-        return (int) (pos & ((1L << connector.getBlockOffset() - offset.getOffset()) - 1));
+        return (int) (pos & ((1L << blockOffset - offset.getOffset()) - 1));
     }
 
     protected void ensureOpen() {
@@ -53,28 +60,32 @@ public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B
 
     @Override
     public boolean exists() {
-        return connector.exists(new FileBlock(fileBlock.getPath(), LAST_POS));
+        return connector.exists(new FileBlock(fileBlock.getPath(), META));
     }
 
     @Override
     public abstract void close();
 
-    protected static void writeLastPos(File<?> file, int lastPos) {
-        byte[] bytes = ByteBuffer.allocate(4).putInt(lastPos).array();
+    protected static void writeMeta(File<?> file, int lastPos) {
+        byte[] bytes = ByteBuffer.allocate(5)
+                .put(file.blockOffset)
+                .putInt(lastPos << file.offset.getOffset()).array();
         try {
-            file.connector.write(new FileBlock(file.fileBlock.getPath(), LAST_POS), bytes);
+            file.connector.write(new FileBlock(file.fileBlock.getPath(), META), bytes);
         } catch (IOException e) {
             FineIOLoggers.getLogger().error(e);
         }
     }
 
-    protected static int getLastPos(File<?> file) {
-        FileBlock lastPosFileKey = new FileBlock(file.fileBlock.getPath(), LAST_POS);
-        if (file.connector.exists(lastPosFileKey)) {
-            try (InputStream input = file.connector.read(lastPosFileKey)) {
-                byte[] bytes = new byte[4];
+    protected static int initMetaAndGetLastPos(File<?> file) {
+        FileBlock metaFileKey = new FileBlock(file.fileBlock.getPath(), META);
+        if (file.connector.exists(metaFileKey)) {
+            try (InputStream input = file.connector.read(metaFileKey)) {
+                byte[] bytes = new byte[5];
                 if (input.read(bytes) == bytes.length) {
-                    return ByteBuffer.wrap(bytes).getInt();
+                    ByteBuffer buf = ByteBuffer.wrap(bytes);
+                    file.blockOffset = buf.get();
+                    return buf.getInt() >> file.offset.getOffset();
                 }
             } catch (IOException e) {
                 FineIOLoggers.getLogger().error(e);

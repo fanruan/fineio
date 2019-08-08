@@ -24,6 +24,7 @@ import static org.junit.Assert.assertEquals;
 public class AppendFileDemo {
     private FileBlock key = new FileBlock(System.getProperty("user.dir"), "append");
     private FileConnector connector = new FileConnector((byte) 10);
+    private FileConnector newConnector = new FileConnector((byte) 5);
     private int n = 1 << 10;
 
     @Before
@@ -46,7 +47,7 @@ public class AppendFileDemo {
         }
         byteFile.close();
 
-        byteFile = new ByteAppendFile(ByteWriteFile.ofSync(key, connector));
+        byteFile = new ByteAppendFile(ByteWriteFile.ofSync(key, newConnector));
         for (int i = 0; i < 128; i++) {
             byteFile.putByte((byte) i);
         }
@@ -66,7 +67,7 @@ public class AppendFileDemo {
         }
         intFile.close();
 
-        intFile = new IntAppendFile(IntWriteFile.ofSync(key, connector));
+        intFile = new IntAppendFile(IntWriteFile.ofSync(key, newConnector));
         for (int i = n >> 1; i < n; i++) {
             intFile.putInt(i);
         }
@@ -86,7 +87,7 @@ public class AppendFileDemo {
         }
         longAppendFile.close();
 
-        longAppendFile = new LongAppendFile(LongWriteFile.ofSync(key, connector));
+        longAppendFile = new LongAppendFile(LongWriteFile.ofSync(key, newConnector));
         for (int i = n >> 1; i < n; i++) {
             longAppendFile.putLong(i);
         }
@@ -106,7 +107,7 @@ public class AppendFileDemo {
         }
         doubleAppendFile.close();
 
-        doubleAppendFile = new DoubleAppendFile(DoubleWriteFile.ofSync(key, connector));
+        doubleAppendFile = new DoubleAppendFile(DoubleWriteFile.ofSync(key, newConnector));
         for (int i = n >> 1; i < n; i++) {
             doubleAppendFile.putDouble(i);
         }
