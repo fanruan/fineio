@@ -45,7 +45,7 @@ public class LongWriteFile extends WriteFile<LongDirectBuffer> {
 
     private void newAndPut(int nthBuf, int nthVal, long value) {
         buffers[nthBuf] = new LongDirectBuf(new FileBlock(fileBlock.getPath(), String.valueOf(nthBuf)),
-                1 << (connector.getBlockOffset() - offset.getOffset()), FileMode.WRITE);
+                1 << (blockOffset - offset.getOffset()), FileMode.WRITE);
         buffers[nthBuf].putLong(nthVal, value);
     }
 }

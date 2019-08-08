@@ -19,7 +19,7 @@ public class DoubleReadFile extends ReadFile<DoubleDirectBuffer> {
     }
 
     private void init() {
-        int lastPos = getLastPos(this);
+        int lastPos = initMetaAndGetLastPos(this);
         buffers = new DoubleDirectBuffer[nthBuf(lastPos) + 1];
     }
 

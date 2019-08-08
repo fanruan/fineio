@@ -42,7 +42,7 @@ public class FileTest {
     public void setUp() {
         setInternalState(f, "fileBlock", mock(FileBlock.class));
         setInternalState(f, "connector", connector);
-        when(connector.getBlockOffset()).thenReturn((byte) 10);
+        setInternalState(f, "blockOffset", (byte) 10);
     }
 
     @Test
@@ -82,32 +82,35 @@ public class FileTest {
 
     @Test
     public void exists() {
-        when(connector.exists(argThat(arg -> arg.getName().equals("last_pos")))).thenReturn(true, false);
+        when(connector.exists(argThat(arg -> arg.getName().equals(File.META)))).thenReturn(true, false);
 
         assertThat(f.exists()).isTrue();
         assertThat(f.exists()).isFalse();
     }
 
     @Test
-    public void writeLastPos() throws IOException {
-        File.writeLastPos(f, 1);
+    public void writeMeta() throws IOException {
+        setInternalState(f, "offset", Offset.BYTE);
+        File.writeMeta(f, 1);
 
-        verify(connector).write(argThat(arg -> arg.getName().equals("last_pos")), eq(new byte[]{0, 0, 0, 1}));
+        verify(connector).write(argThat(arg -> arg.getName().equals(File.META)), eq(new byte[]{0xA, 0, 0, 0, 1}));
     }
 
     @Test
-    public void getLastPos() throws IOException {
+    public void initMetaAndGetLastPos() throws IOException {
+        setInternalState(f, "offset", Offset.BYTE);
         when(connector.exists(any(FileBlock.class))).thenReturn(false, true);
 
-        assertThat(File.getLastPos(f)).isZero();
+        assertThat(File.initMetaAndGetLastPos(f)).isZero();
 
-        when(connector.read(argThat(arg -> arg.getName().equals("last_pos"))))
-                .thenReturn(new ByteArrayInputStream(new byte[]{0, 0, 0, 1}))
+        when(connector.read(argThat(arg -> arg.getName().equals(File.META))))
+                .thenReturn(new ByteArrayInputStream(new byte[]{0xA, 0, 0, 0, 1}))
                 .thenThrow(new IOException())
                 .thenReturn(new ByteArrayInputStream(new byte[1]));
 
-        assertThat(File.getLastPos(f)).isEqualTo(1);
-        assertThat(File.getLastPos(f)).isZero();
-        assertThat(File.getLastPos(f)).isZero();
+        assertThat(File.initMetaAndGetLastPos(f)).isEqualTo(1);
+        assertThat(f.blockOffset).isEqualTo((byte) 0xA);
+        assertThat(File.initMetaAndGetLastPos(f)).isZero();
+        assertThat(File.initMetaAndGetLastPos(f)).isZero();
     }
 }

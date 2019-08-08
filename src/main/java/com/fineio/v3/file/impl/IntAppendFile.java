@@ -20,6 +20,6 @@ public class IntAppendFile extends AppendFile<IntWriteFile, IntDirectBuffer> {
 
     @Override
     protected IntDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock) {
-        return new IntDirectBuf(address, size, fileBlock, 1 << (writeFile.connector.getBlockOffset() - writeFile.offset.getOffset()));
+        return new IntDirectBuf(address, size, fileBlock, 1 << (writeFile.blockOffset - writeFile.offset.getOffset()));
     }
 }

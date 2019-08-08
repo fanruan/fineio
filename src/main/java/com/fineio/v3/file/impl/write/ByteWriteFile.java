@@ -46,7 +46,7 @@ public class ByteWriteFile extends WriteFile<ByteDirectBuffer> {
 
     private void newAndPut(int nthBuf, int nthVal, byte value) {
         buffers[nthBuf] = new ByteDirectBuf(new FileBlock(fileBlock.getPath(), String.valueOf(nthBuf)),
-                1 << (connector.getBlockOffset() - offset.getOffset()), FileMode.WRITE);
+                1 << (blockOffset - offset.getOffset()), FileMode.WRITE);
         buffers[nthBuf].putByte(nthVal, value);
     }
 
