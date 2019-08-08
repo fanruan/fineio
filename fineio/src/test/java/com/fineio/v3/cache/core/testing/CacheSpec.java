@@ -1,0 +1,860 @@
+/*
+ * Copyright 2014 Ben Manes. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.fineio.v3.cache.core.testing;
+
+import com.fineio.v3.cache.core.AsyncCacheLoader;
+import com.fineio.v3.cache.core.CacheLoader;
+import com.fineio.v3.cache.core.CacheWriter;
+import com.fineio.v3.cache.core.Expiry;
+import com.fineio.v3.cache.core.LoadingCache;
+import com.fineio.v3.cache.core.RemovalListener;
+import com.fineio.v3.cache.core.Weigher;
+import com.fineio.v3.cache.core.testing.RemovalListeners.ConsumingRemovalListener;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Interner;
+import com.google.common.collect.Interners;
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.mockito.Mockito;
+
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.util.Objects.requireNonNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
+
+/**
+ * The cache test specification so that a {@link org.testng.annotations.DataProvider} can construct
+ * the maximum number of cache combinations to test against.
+ *
+ * @author ben.manes@gmail.com (Ben Manes)
+ */
+@SuppressWarnings("ImmutableEnumChecker")
+@Target(METHOD)
+@Retention(RUNTIME)
+public @interface CacheSpec {
+
+    /* --------------- Compute --------------- */
+
+    // FIXME: A hack to allow the NEGATIVE loader's return value to be retained on refresh
+    ThreadLocal<Interner<Integer>> interner =
+            ThreadLocal.withInitial(Interners::newStrongInterner);
+    ExecutorService cachedExecutorService = Executors.newCachedThreadPool(
+            new ThreadFactoryBuilder().setDaemon(true).build());
+
+    /* --------------- Implementation --------------- */
+
+    /**
+     * Indicates whether the test supports a cache allowing for asynchronous computations. This is
+     * for implementation specific tests that may inspect the internal state of a down casted cache.
+     */
+    Compute[] compute() default {
+            Compute.ASYNC,
+            Compute.SYNC
+    };
+
+    /**
+     * The implementation, each resulting in a new combination.
+     */
+    Implementation[] implementation() default {
+            Implementation.Caffeine,
+            Implementation.Guava,
+    };
+
+    /* --------------- Initial capacity --------------- */
+
+    InitialCapacity[] initialCapacity() default {
+            InitialCapacity.DEFAULT
+    };
+
+    Stats[] stats() default {
+            Stats.ENABLED,
+            Stats.DISABLED
+    };
+
+    /* --------------- Statistics --------------- */
+
+    /**
+     * The maximum size, each resulting in a new combination.
+     */
+    Maximum[] maximumSize() default {
+            Maximum.DISABLED,
+            Maximum.UNREACHABLE
+    };
+
+    /**
+     * The weigher, each resulting in a new combination.
+     */
+    CacheWeigher[] weigher() default {
+            CacheWeigher.DEFAULT,
+            CacheWeigher.ZERO,
+            CacheWeigher.TEN
+    };
+
+    /* --------------- Maximum size --------------- */
+
+    /**
+     * Indicates that the combination must have any of the expiration settings.
+     */
+    Expiration[] mustExpireWithAnyOf() default {};
+
+    /**
+     * The expiration time-to-idle setting, each resulting in a new combination.
+     */
+    Expire[] expireAfterAccess() default {
+            Expire.DISABLED,
+            Expire.FOREVER
+    };
+
+    /* --------------- Weigher --------------- */
+
+    /**
+     * The expiration time-to-live setting, each resulting in a new combination.
+     */
+    Expire[] expireAfterWrite() default {
+            Expire.DISABLED,
+            Expire.FOREVER
+    };
+
+    /**
+     * The refresh setting, each resulting in a new combination.
+     */
+    Expire[] refreshAfterWrite() default {
+            Expire.DISABLED,
+            Expire.FOREVER
+    };
+
+    /* --------------- Expiration --------------- */
+
+    /**
+     * The variable expiration setting, each resulting in a new combination.
+     */
+    CacheExpiry[] expiry() default {
+            CacheExpiry.DISABLED,
+            CacheExpiry.ACCESS
+    };
+
+    /**
+     * The fixed duration for the expiry.
+     */
+    Expire expiryTime() default Expire.FOREVER;
+
+    /**
+     * Indicates if the amount of time that should be auto-advance for each entry when populating.
+     */
+    Advance[] advanceOnPopulation() default {
+            Advance.ZERO
+    };
+
+    /**
+     * Indicates that the combination must have a weak or soft reference collection setting.
+     */
+    boolean requiresWeakOrSoft() default false;
+
+    /**
+     * The reference type of that the cache holds a key with (strong or weak only).
+     */
+    ReferenceType[] keys() default {
+            ReferenceType.STRONG,
+            ReferenceType.WEAK
+    };
+
+    /**
+     * The reference type of that the cache holds a value with (strong, soft, or weak).
+     */
+    ReferenceType[] values() default {
+            ReferenceType.STRONG,
+            ReferenceType.WEAK,
+            ReferenceType.SOFT
+    };
+
+    /**
+     * The removal listeners, each resulting in a new combination.
+     */
+    Listener[] removalListener() default {
+            Listener.CONSUMING,
+            Listener.DEFAULT,
+    };
+
+    Loader[] loader() default {
+            Loader.NEGATIVE,
+    };
+
+    /**
+     * Ignored if weak keys are configured.
+     */
+    Writer[] writer() default {
+            Writer.MOCKITO,
+    };
+
+    /**
+     * The executors retrieved from a supplier, each resulting in a new combination.
+     */
+    CacheExecutor[] executor() default {
+            CacheExecutor.DIRECT,
+    };
+
+    /**
+     * If the executor is allowed to have failures.
+     */
+    ExecutorFailure executorFailure() default ExecutorFailure.DISALLOWED;
+
+    /* --------------- Reference-based --------------- */
+
+    /**
+     * The number of entries to populate the cache with. The keys and values are integers starting
+     * from above the integer cache limit, with the value being the negated key. The cache will never
+     * be populated to exceed the maximum size, if defined, thereby ensuring that no evictions occur
+     * prior to the test. Each configuration results in a new combination.
+     */
+    Population[] population() default {
+            Population.EMPTY,
+            Population.SINGLETON,
+            Population.PARTIAL,
+            Population.FULL
+    };
+
+    enum Compute {
+        ASYNC,
+        SYNC,
+    }
+
+    enum Implementation {
+        Caffeine,
+        Guava
+    }
+
+    /**
+     * The initial capacities, each resulting in a new combination.
+     */
+    enum InitialCapacity {
+        /**
+         * A flag indicating that the initial capacity is not configured.
+         */
+        DEFAULT(16),
+        /**
+         * A configuration where the table grows on the first addition.
+         */
+        ZERO(0),
+        /**
+         * A configuration where the table grows on the second addition.
+         */
+        ONE(1),
+        /**
+         * A configuration where the table grows after the {@link Population#FULL} count.
+         */
+        FULL(50),
+        /**
+         * A configuration where the table grows after the 10 x {@link Population#FULL} count.
+         */
+        EXCESSIVE(100);
+
+        private final int size;
+
+        InitialCapacity(int size) {
+            this.size = size;
+        }
+
+        public int size() {
+            return size;
+        }
+    }
+
+    /* --------------- Removal --------------- */
+
+    enum Stats {
+        ENABLED,
+        DISABLED
+    }
+
+    enum Maximum {
+        /**
+         * A flag indicating that entries are not evicted due to a maximum threshold.
+         */
+        DISABLED(Long.MAX_VALUE),
+        /**
+         * A configuration where entries are evicted immediately.
+         */
+        ZERO(0L),
+        /**
+         * A configuration that holds a single unit.
+         */
+        ONE(1L),
+        /**
+         * A configuration that holds 10 units.
+         */
+        TEN(10L),
+        /**
+         * A configuration that holds 150 units.
+         */
+        ONE_FIFTY(150L),
+        /**
+         * A configuration that holds the {@link Population#FULL} unit count.
+         */
+        FULL(InitialCapacity.FULL.size()),
+        /**
+         * A configuration where the threshold is too high for eviction to occur.
+         */
+        UNREACHABLE(Long.MAX_VALUE);
+
+        private final long max;
+
+        Maximum(long max) {
+            this.max = max;
+        }
+
+        public long max() {
+            return max;
+        }
+    }
+
+    /* --------------- CacheLoader --------------- */
+
+    enum CacheWeigher implements Weigher<Object, Object> {
+        /**
+         * A flag indicating that no weigher is set when building the cache.
+         */
+        DEFAULT(1),
+        /**
+         * A flag indicating that every entry is valued at 10 units.
+         */
+        TEN(10),
+        /**
+         * A flag indicating that every entry is valued at 0 unit.
+         */
+        ZERO(0),
+        /**
+         * A flag indicating that every entry is valued at -1 unit.
+         */
+        NEGATIVE(-1),
+        /**
+         * A flag indicating that every entry is valued at Integer.MAX_VALUE units.
+         */
+        MAX_VALUE(Integer.MAX_VALUE),
+        /**
+         * A flag indicating that the entry is weighted by the integer value.
+         */
+        VALUE(1) {
+            @Override
+            public int weigh(Object key, Object value) {
+                requireNonNull(key);
+                return ((Integer) value).intValue();
+            }
+        },
+        /**
+         * A flag indicating that the entry is weighted by the value's collection size.
+         */
+        COLLECTION(1) {
+            @Override
+            public int weigh(Object key, Object value) {
+                requireNonNull(key);
+                return ((Collection<?>) value).size();
+            }
+        },
+        /**
+         * A flag indicating that the entry's weight is randomly changing.
+         */
+        RANDOM(1) {
+            @Override
+            public int weigh(Object key, Object value) {
+                requireNonNull(key);
+                requireNonNull(value);
+                return ThreadLocalRandom.current().nextInt(1, 10);
+            }
+        };
+
+        private final int units;
+
+        CacheWeigher(int multiplier) {
+            this.units = multiplier;
+        }
+
+        @Override
+        public int weigh(Object key, Object value) {
+            requireNonNull(key);
+            requireNonNull(value);
+            return units;
+        }
+
+        public int unitsPerEntry() {
+            return units;
+        }
+    }
+
+    enum Expiration {
+        AFTER_WRITE, AFTER_ACCESS, VARIABLE
+    }
+
+    enum CacheExpiry {
+        DISABLED {
+            @Override
+            public <K, V> Expiry<K, V> createExpiry(Expire expiryTime) {
+                return null;
+            }
+        },
+        MOCKITO {
+            @Override
+            public <K, V> Expiry<K, V> createExpiry(Expire expiryTime) {
+                @SuppressWarnings("unchecked")
+                Expiry<K, V> mock = Mockito.mock(Expiry.class);
+                when(mock.expireAfterCreate(any(), any(), anyLong()))
+                        .thenReturn(expiryTime.timeNanos());
+                when(mock.expireAfterUpdate(any(), any(), anyLong(), anyLong()))
+                        .thenReturn(expiryTime.timeNanos());
+                when(mock.expireAfterRead(any(), any(), anyLong(), anyLong()))
+                        .thenReturn(expiryTime.timeNanos());
+                return mock;
+            }
+        },
+        CREATE {
+            @Override
+            public <K, V> Expiry<K, V> createExpiry(Expire expiryTime) {
+                return ExpiryBuilder
+                        .expiringAfterCreate(expiryTime.timeNanos())
+                        .build();
+            }
+        },
+        WRITE {
+            @Override
+            public <K, V> Expiry<K, V> createExpiry(Expire expiryTime) {
+                return ExpiryBuilder
+                        .expiringAfterCreate(expiryTime.timeNanos())
+                        .expiringAfterUpdate(expiryTime.timeNanos())
+                        .build();
+            }
+        },
+        ACCESS {
+            @Override
+            public <K, V> Expiry<K, V> createExpiry(Expire expiryTime) {
+                return ExpiryBuilder
+                        .expiringAfterCreate(expiryTime.timeNanos())
+                        .expiringAfterUpdate(expiryTime.timeNanos())
+                        .expiringAfterRead(expiryTime.timeNanos())
+                        .build();
+            }
+        };
+
+        public abstract <K, V> Expiry<K, V> createExpiry(Expire expiryTime);
+    }
+
+    /* --------------- CacheWriter --------------- */
+
+    enum Expire {
+        /**
+         * A flag indicating that entries are not evicted due to expiration.
+         */
+        DISABLED(Long.MIN_VALUE),
+        /**
+         * A configuration where entries are evicted immediately.
+         */
+        IMMEDIATELY(0L),
+        /**
+         * A configuration where entries are evicted almost immediately.
+         */
+        ONE_MILLISECOND(TimeUnit.MILLISECONDS.toNanos(1L)),
+        /**
+         * A configuration that holds a single entry.
+         */
+        ONE_MINUTE(TimeUnit.MINUTES.toNanos(1L)),
+        /**
+         * A configuration that holds the {@link Population#FULL} count.
+         */
+        FOREVER(Long.MAX_VALUE);
+
+        private final long timeNanos;
+
+        Expire(long timeNanos) {
+            this.timeNanos = timeNanos;
+        }
+
+        public long timeNanos() {
+            return timeNanos;
+        }
+    }
+
+    /**
+     * The time increment to advance by after each entry is added when populating the cache.
+     */
+    enum Advance {
+        ZERO(0),
+        ONE_MINUTE(TimeUnit.MINUTES.toNanos(1L));
+
+        private final long timeNanos;
+
+        Advance(long timeNanos) {
+            this.timeNanos = timeNanos;
+        }
+
+        public long timeNanos() {
+            return timeNanos;
+        }
+    }
+
+    /* --------------- Executor --------------- */
+
+    /**
+     * The reference type of cache keys and/or values.
+     */
+    enum ReferenceType {
+        /**
+         * Prevents referent from being reclaimed by the garbage collector.
+         */
+        STRONG,
+
+        /**
+         * Referent reclaimed when no strong or soft references exist.
+         */
+        WEAK,
+
+        /**
+         * Referent reclaimed in an LRU fashion when the VM runs low on memory and no strong
+         * references exist.
+         */
+        SOFT
+    }
+
+    enum Listener {
+        /**
+         * A flag indicating that no removal listener is configured.
+         */
+        DEFAULT {
+            @Override
+            public <K, V> RemovalListener<K, V> create() {
+                return null;
+            }
+        },
+        /**
+         * A removal listener that rejects all notifications.
+         */
+        REJECTING {
+            @Override
+            public <K, V> RemovalListener<K, V> create() {
+                return RemovalListeners.rejecting();
+            }
+        },
+        /**
+         * A {@link ConsumingRemovalListener} retains all notifications for evaluation by the test.
+         */
+        CONSUMING {
+            @Override
+            public <K, V> RemovalListener<K, V> create() {
+                return RemovalListeners.consuming();
+            }
+        };
+
+        public abstract <K, V> RemovalListener<K, V> create();
+    }
+
+    /**
+     * The {@link CacheLoader} for constructing the {@link LoadingCache}.
+     */
+    enum Loader implements CacheLoader<Integer, Integer> {
+        /**
+         * A loader that always returns null (no mapping).
+         */
+        NULL {
+            @Override
+            public Integer load(Integer key) {
+                return null;
+            }
+        },
+        /**
+         * A loader that returns the key.
+         */
+        IDENTITY {
+            @Override
+            public Integer load(Integer key) {
+                requireNonNull(key);
+                return key;
+            }
+        },
+        /**
+         * A loader that returns the key's negation.
+         */
+        NEGATIVE {
+            @Override
+            public Integer load(Integer key) {
+                return interner.get().intern(-key);
+            }
+        },
+        /**
+         * A loader that always throws an exception.
+         */
+        EXCEPTIONAL {
+            @Override
+            public Integer load(Integer key) {
+                throw new IllegalStateException();
+            }
+        },
+
+        /**
+         * A loader that always returns null (no mapping).
+         */
+        BULK_NULL {
+            @Override
+            public Integer load(Integer key) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Map<Integer, Integer> loadAll(Iterable<? extends Integer> keys) {
+                return null;
+            }
+        },
+        BULK_IDENTITY {
+            @Override
+            public Integer load(Integer key) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Map<Integer, Integer> loadAll(Iterable<? extends Integer> keys) {
+                Map<Integer, Integer> result = new HashMap<>();
+                keys.forEach(key -> result.put(key, key));
+                return result;
+            }
+        },
+        BULK_NEGATIVE {
+            @Override
+            public Integer load(Integer key) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Map<Integer, Integer> loadAll(Iterable<? extends Integer> keys) {
+                Map<Integer, Integer> result = new HashMap<>();
+                keys.forEach(key -> result.put(key, interner.get().intern(-key)));
+                return result;
+            }
+        },
+        /**
+         * A bulk-only loader that loads more than requested.
+         */
+        BULK_NEGATIVE_EXCEEDS {
+            @Override
+            public Integer load(Integer key) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Map<Integer, Integer> loadAll(Iterable<? extends Integer> keys)
+                    throws Exception {
+                List<Integer> moreKeys = new ArrayList<>(ImmutableList.copyOf(keys));
+                for (int i = 0; i < 10; i++) {
+                    moreKeys.add(ThreadLocalRandom.current().nextInt());
+                }
+                return BULK_NEGATIVE.loadAll(moreKeys);
+            }
+        },
+        /**
+         * A bulk-only loader that always throws an exception.
+         */
+        BULK_EXCEPTIONAL {
+            @Override
+            public Integer load(Integer key) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Map<Integer, Integer> loadAll(Iterable<? extends Integer> keys) {
+                throw new IllegalStateException();
+            }
+        };
+
+        private final boolean bulk;
+        private final AsyncCacheLoader<Integer, Integer> asyncLoader;
+
+        Loader() {
+            bulk = name().startsWith("BULK");
+            asyncLoader = bulk
+                    ? new BulkSeriazableAsyncCacheLoader(this)
+                    : new SeriazableAsyncCacheLoader(this);
+        }
+
+        public boolean isBulk() {
+            return bulk;
+        }
+
+        /**
+         * Returns a serializable view restricted to the {@link AsyncCacheLoader} interface.
+         */
+        public AsyncCacheLoader<Integer, Integer> async() {
+            return asyncLoader;
+        }
+
+        private static class SeriazableAsyncCacheLoader
+                implements AsyncCacheLoader<Integer, Integer>, Serializable {
+            private static final long serialVersionUID = 1L;
+
+            final Loader loader;
+
+            SeriazableAsyncCacheLoader(Loader loader) {
+                this.loader = loader;
+            }
+
+            @Override
+            public CompletableFuture<Integer> asyncLoad(Integer key, Executor executor) {
+                return loader.asyncLoad(key, executor);
+            }
+
+            private Object readResolve() throws ObjectStreamException {
+                return loader.asyncLoader;
+            }
+        }
+
+        private static final class BulkSeriazableAsyncCacheLoader extends SeriazableAsyncCacheLoader {
+            private static final long serialVersionUID = 1L;
+
+            BulkSeriazableAsyncCacheLoader(Loader loader) {
+                super(loader);
+            }
+
+            @Override
+            public CompletableFuture<Integer> asyncLoad(Integer key, Executor executor) {
+                throw new IllegalStateException();
+            }
+
+            @Override
+            public CompletableFuture<Map<Integer, Integer>> asyncLoadAll(
+                    Iterable<? extends Integer> keys, Executor executor) {
+                return loader.asyncLoadAll(keys, executor);
+            }
+        }
+    }
+
+    /**
+     * The {@link CacheWriter} for the external resource.
+     */
+    enum Writer {
+        /**
+         * A writer that does nothing.
+         */
+        DISABLED {
+            @Override
+            public <K, V> CacheWriter<K, V> create() {
+                return CacheWriter.disabledWriter();
+            }
+        },
+        /**
+         * A writer that records interactions.
+         */
+        MOCKITO {
+            @Override
+            public <K, V> CacheWriter<K, V> create() {
+                @SuppressWarnings("unchecked")
+                CacheWriter<K, V> mock = Mockito.mock(CacheWriter.class);
+                return mock;
+            }
+        },
+        /**
+         * A writer that always throws an exception.
+         */
+        EXCEPTIONAL {
+            @Override
+            public <K, V> CacheWriter<K, V> create() {
+                return new RejectingCacheWriter<K, V>();
+            }
+        };
+
+        public abstract <K, V> CacheWriter<K, V> create();
+    }
+
+    enum ExecutorFailure {
+        EXPECTED, DISALLOWED, IGNORED
+    }
+
+    /* --------------- Populated --------------- */
+
+    /**
+     * The executors that the cache can be configured with.
+     */
+    enum CacheExecutor {
+        DEFAULT { // fork-join common pool
+
+            @Override
+            public Executor create() {
+                // Use with caution as may be unpredictable during tests if awaiting completion
+                return null;
+            }
+        },
+        DIRECT {
+            @Override
+            public Executor create() {
+                // Cache implementations must avoid deadlocks by incorrectly assuming async execution
+                return new TrackingExecutor(MoreExecutors.newDirectExecutorService());
+            }
+        },
+        THREADED {
+            @Override
+            public Executor create() {
+                return new TrackingExecutor(cachedExecutorService);
+            }
+        },
+        REJECTING {
+            @Override
+            public Executor create() {
+                // Cache implementations must avoid corrupting internal state due to rejections
+                return new ForkJoinPool() {
+                    @Override
+                    public void execute(Runnable task) {
+                        throw new RejectedExecutionException();
+                    }
+                };
+            }
+        };
+
+        public abstract Executor create();
+    }
+
+    /**
+     * The population scenarios.
+     */
+    enum Population {
+        EMPTY(0),
+        SINGLETON(1),
+        PARTIAL(InitialCapacity.FULL.size() / 2),
+        FULL(InitialCapacity.FULL.size());
+
+        private final long size;
+
+        Population(long size) {
+            this.size = size;
+        }
+
+        public long size() {
+            return size;
+        }
+    }
+}
