@@ -10,8 +10,6 @@ import java.lang.reflect.Field;
 public final class MemoryUtils {
 
     private static Unsafe unsafe;
-    private static final long arrayBaseOffset = unsafe.arrayBaseOffset(byte[].class);
-
     static {
         try {
             Field f = Unsafe.class.getDeclaredField("theUnsafe");
@@ -20,6 +18,8 @@ public final class MemoryUtils {
         } catch (Exception e) {
         }
     }
+
+    private static final long arrayBaseOffset = unsafe.arrayBaseOffset(byte[].class);
 
     /**
      * 复制数组对象的值到堆外内存葱address开始的地址

@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class Transfer {
     public static void upgrade(Connector from, TransferProgressListener listener) throws IOException {
-        transfer(from, null, listener);
+        upgrade(from, null, listener);
     }
 
     public static void upgrade(Connector from, Connector to, TransferProgressListener listener) throws IOException {
