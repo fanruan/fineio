@@ -50,7 +50,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
     protected volatile URI uri;
     protected AtomicBoolean close = new AtomicBoolean(false);
     protected volatile boolean access;
-    protected AtomicLong version = new AtomicLong(0);
     protected Lock loading = new ReentrantLock();
     /**
      * read start
@@ -183,7 +182,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     return null;
                 case CLEAN:
                     MemoryObject object = new AllocateObject(address, allocateSize);
-                    version.incrementAndGet();
                     load = false;
                     allocateSize = 0;
                     maxSize = 0;
@@ -193,7 +191,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     synchronized (this) {
                         if (syncStatus != SyncStatus.SYNC) {
                             MemoryObject obj = new AllocateObject(address, allocateSize);
-                            version.incrementAndGet();
                             load = false;
                             allocateSize = 0;
                             maxSize = 0;
@@ -229,16 +226,10 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
     }
 
     protected abstract class ReadBuffer implements Buffer {
-        protected volatile long readAddress;
-        private long readVersion;
-
         public ReadBuffer() {
             level = Level.READ;
-            readVersion = version.get();
-            if (address == 0 && version.compareAndSet(readVersion, readVersion)) {
+            if (address == 0) {
                 checkRead0();
-            } else {
-                readAddress = address;
             }
         }
 
@@ -339,40 +330,56 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         }
 
         final void checkRead(int p) {
-            try {
-                checkReadWithException(p);
-            } catch (BufferIndexOutOfBoundsException e) {
-                synchronized (this) {
-                    clearAfterClose();
-                    load = false;
-                    checkReadWithException(p);
+            //若果是因为内存不足被释放了,等200ms再去load
+            if (!checkLoaded(p)){
+                waitAndCheck(p, 200, 0);
+            }
+        }
+
+
+        private void waitAndCheck(int p, long time, int times) {
+            synchronized (this) {
+                try {
+                    wait(time);
+                } catch (InterruptedException e) {
+                    FineIOLoggers.getLogger().debug("loading time wait interrupted");
+                }
+            }
+            synchronized (this) {
+                clearAfterClose();
+                load = false;
+                if (!checkLoaded(p)){
+                    //3次失败就不等了
+                    if (times > 3){
+                        FineIOLoggers.getLogger().error("not enough memory, stop this reading, or you may waiting years");
+                        throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
+                    }
+                    //每次多等一倍时间
+                    waitAndCheck(p, time << 1, times++);
                 }
             }
         }
 
-        private void checkReadWithException(int p) {
-            while (!version.compareAndSet(readVersion, readVersion)) {
+        private boolean checkLoaded(int p) {
+            if (address == 0){
                 load = false;
                 loadContent();
                 listener.update(this);
             }
-            if (p < maxSize && p > -1 && readAddress > 0) {
+            if (p < maxSize && p > -1 && address > 0) {
                 if (!access) {
                     access = true;
                 }
-                return;
+                return true;
             }
-            throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
+            return false;
         }
 
         private void loadContent() {
             loading.lock();
             try {
-//                synchronized (this) {
                 level = Level.READ;
                 if (load) {
-                    readAddress = address;
-                    readVersion = version.get();
                     return;
                 }
                 close.compareAndSet(true, false);
@@ -389,12 +396,10 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     throw new BufferConstructException(e);
                 }
                 memoryObject = MemoryManager.INSTANCE.allocate(allocator);
-                readAddress = memoryObject.getAddress();
-                address = readAddress;
+                address = memoryObject.getAddress();
                 allocateSize = memoryObject.getAllocateSize();
                 load = true;
                 maxSize = (int) (allocateSize >> getOffset());
-                readVersion = version.get();
             } finally {
                 loading.unlock();
             }
