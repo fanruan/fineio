@@ -50,7 +50,7 @@ public class IntBuffer extends BaseBuffer<IntBuffer.IntReadBuffer, IntBuffer.Int
         @Override
         public int get(int pos) {
             checkRead(pos);
-            return MemoryUtils.getInt(readAddress, pos);
+            return MemoryUtils.getInt(getAddress(), pos);
         }
     }
 

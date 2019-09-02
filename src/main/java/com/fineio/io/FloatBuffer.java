@@ -49,7 +49,7 @@ public class FloatBuffer extends BaseBuffer<FloatBuffer.FloatReadBuffer, FloatBu
         @Override
         public float get(int pos) {
             checkRead(pos);
-            return MemoryUtils.getFloat(readAddress, pos);
+            return MemoryUtils.getFloat(getAddress(), pos);
         }
     }
 

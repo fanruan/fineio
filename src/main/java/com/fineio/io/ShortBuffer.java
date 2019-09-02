@@ -49,7 +49,7 @@ public class ShortBuffer extends BaseBuffer<ShortBuffer.ShortReadBuffer, ShortBu
         @Override
         public short get(int pos) {
             checkRead(pos);
-            return MemoryUtils.getShort(readAddress, pos);
+            return MemoryUtils.getShort(getAddress(), pos);
         }
     }
 
