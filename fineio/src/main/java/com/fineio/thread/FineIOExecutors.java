@@ -17,6 +17,10 @@ public class FineIOExecutors {
         return Executors.newScheduledThreadPool(threadCount, new FineIOThreadFactory(prefix));
     }
 
+    public static ScheduledExecutorService newSingleThreadScheduledExecutor(Class<?> klass) {
+        return Executors.newSingleThreadScheduledExecutor(new FineIOThreadFactory(klass));
+    }
+
     public static ExecutorService newCachedExecutorService(String prefix) {
         return Executors.newCachedThreadPool(new FineIOThreadFactory(prefix));
     }
