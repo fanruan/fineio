@@ -34,17 +34,21 @@ public class FileSyncJob implements Runnable {
 
     @Override
     public void run() {
-        try (InputStream input = new BufferedInputStream(new DirectMemoryInputStream(buffer.getAddress(), buffer.getSizeInBytes()))) {
-            connector.write(buffer.getFileBlock(), input);
-
-            transferOrInvalidate();
+        try (DirectBuffer buf = buffer;
+             InputStream input = new BufferedInputStream(new DirectMemoryInputStream(buf.getAddress(), buf.getSizeInBytes()))) {
+            connector.write(buf.getFileBlock(), input);
         } catch (Throwable e) {
             FineIOLoggers.getLogger().error(e);
-            // TODO: 2019/4/15 anchore 失败了尝试多写几次？
-            buffer.close();
+        } finally {
+            // 通知cache该块已过期，重新load
+            BufferCache.get().invalidate(buffer.getFileBlock());
         }
     }
 
+    /**
+     * @deprecated 实际效果不理想，disable了
+     */
+    @Deprecated
     private void transferOrInvalidate() {
         try {
             // TODO: 2019/4/17 anchore 或者直接把buffer加到cache，写后读的场景会更快吧

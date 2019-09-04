@@ -139,7 +139,7 @@ abstract class BaseDirectBuffer implements DirectBuffer {
     @Override
     public void close() {
         if (closed.compareAndSet(false, true)) {
-            MemoryManager.INSTANCE.release(address, cap);
+            MemoryManager.INSTANCE.release(address, cap << offset.getOffset());
         }
     }
 }
