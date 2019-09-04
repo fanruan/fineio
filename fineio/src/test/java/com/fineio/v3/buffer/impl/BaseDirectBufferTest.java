@@ -139,11 +139,11 @@ public class BaseDirectBufferTest {
         setInternalState(MemoryManager.INSTANCE, "allocator", allocator);
         setInternalState(MemoryManager.INSTANCE, "memoryMode", new ConcurrentHashMap<>(Collections.singletonMap(1L, FileMode.READ)));
 
-        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.BYTE, 1024);
+        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.INT, 1024);
         buf.close();
         buf.close();
 
-        verify(allocator).release(1, 16, FileMode.READ.getCondition());
+        verify(allocator).release(1, 16 * Integer.BYTES, FileMode.READ.getCondition());
         verify(closed, atLeast(2)).compareAndSet(false, true);
     }
 
