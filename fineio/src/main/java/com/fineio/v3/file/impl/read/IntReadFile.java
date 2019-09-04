@@ -3,6 +3,7 @@ package com.fineio.v3.file.impl.read;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.BufferAcquireFailedException;
+import com.fineio.v3.buffer.BufferClosedException;
 import com.fineio.v3.buffer.IntDirectBuffer;
 import com.fineio.v3.buffer.impl.IntDirectBuf;
 import com.fineio.v3.buffer.impl.safe.SafeIntDirectBuf;
@@ -29,8 +30,9 @@ public class IntReadFile extends ReadFile<IntDirectBuffer> {
         int nthVal = nthVal(pos);
         try {
             return buffers[nthBuf].getInt(nthVal);
-        } catch (NullPointerException e) {
+        } catch (NullPointerException | BufferClosedException e) {
             // buffers[nthBuf]为null，对应未初始化，从cache拿
+            // 被缓存close掉，重新load
             return (buffers[nthBuf] = loadBuffer(nthBuf)).getInt(nthVal);
         } catch (ArrayIndexOutOfBoundsException e) {
             // buffers数组越界，只可能是读到不存在的数据
