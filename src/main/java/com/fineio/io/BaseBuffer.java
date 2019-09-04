@@ -355,7 +355,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                         throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
                     }
                     //每次多等一倍时间
-                    waitAndCheck(p, time << 1, times++);
+                    waitAndCheck(p, time << 1, ++times);
                 }
             }
         }
