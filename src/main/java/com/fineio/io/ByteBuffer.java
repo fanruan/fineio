@@ -48,8 +48,7 @@ public class ByteBuffer extends BaseBuffer<ByteBuffer.ByteReadBuffer, ByteBuffer
     private class ByteBufferR extends ReadBuffer implements ByteReadBuffer {
         @Override
         public byte get(int pos) {
-            checkRead(pos);
-            return MemoryUtils.getByte(getAddress(), pos);
+            return MemoryUtils.getByte(getReadAddress(pos), pos);
         }
     }
 
