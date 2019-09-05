@@ -55,7 +55,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
      * read start
      */
     protected volatile int maxLength;
-    protected volatile boolean load;
     protected volatile int maxSize;
     protected volatile int maxOffset;
     protected volatile Listener listener;
@@ -182,7 +181,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     return null;
                 case CLEAN:
                     MemoryObject object = new AllocateObject(address, allocateSize);
-                    load = false;
                     allocateSize = 0;
                     maxSize = 0;
                     address = 0;
@@ -191,7 +189,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     synchronized (this) {
                         if (syncStatus != SyncStatus.SYNC) {
                             MemoryObject obj = new AllocateObject(address, allocateSize);
-                            load = false;
                             allocateSize = 0;
                             maxSize = 0;
                             address = 0;
@@ -211,7 +208,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         loading.lock();
         try {
             level = Level.INITIAL;
-            load = false;
             allocateSize = 0;
             maxSize = 0;
             address = 0;
@@ -318,7 +314,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             try {
                 switch (level) {
                     case READ:
-                        load = false;
                         loadContent();
                         break;
                     case WRITE:
@@ -329,15 +324,18 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             }
         }
 
-        final void checkRead(int p) {
-            //若果是因为内存不足被释放了,等200ms再去load
-            if (!checkLoaded(p)){
-                waitAndCheck(p, 200, 0);
+        final long getReadAddress(int p) {
+            long readAddress = address;
+            if (checkReadable(p, readAddress)){
+                return readAddress;
             }
+            //若果是因为内存不足被释放了,等200ms再去load
+            return waitAndGetReadAddress(p, 200, 0);
         }
 
 
-        private void waitAndCheck(int p, long time, int times) {
+
+        private long waitAndGetReadAddress(int p, long time, int times) {
             synchronized (this) {
                 try {
                     wait(time);
@@ -345,28 +343,34 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     FineIOLoggers.getLogger().debug("loading time wait interrupted");
                 }
             }
-            synchronized (this) {
-                clearAfterClose();
-                load = false;
-                if (!checkLoaded(p)){
-                    //3次失败就不等了
-                    if (times > 3){
-                        FineIOLoggers.getLogger().error("not enough memory, stop this reading, or you may waiting years");
-                        throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
-                    }
-                    //每次多等一倍时间
-                    waitAndCheck(p, time << 1, ++times);
+            clearAfterClose();
+            long readAddress = getLoadedReadAddress();
+            if (!checkReadable(p, readAddress)){
+                //3次失败就不等了
+                if (times > 3){
+                    FineIOLoggers.getLogger().error("not enough memory, stop this reading, or you may waiting years");
+                    throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
                 }
+                //每次多等一倍时间
+                return waitAndGetReadAddress(p, time << 1, ++times);
+            } else {
+                return readAddress;
             }
         }
 
-        private boolean checkLoaded(int p) {
-            if (address == 0){
-                load = false;
+        private long getLoadedReadAddress() {
+            long readAddress = address;
+            if (readAddress == 0){
                 loadContent();
+                readAddress = address;
                 listener.update(this);
             }
-            if (p < maxSize && p > -1 && address > 0) {
+            return readAddress;
+
+        }
+
+        private boolean checkReadable(int p, long readAddress){
+            if (p < maxSize && p > -1 && readAddress > 0) {
                 if (!access) {
                     access = true;
                 }
@@ -379,7 +383,7 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             loading.lock();
             try {
                 level = Level.READ;
-                if (load) {
+                if (address != 0) {
                     return;
                 }
                 close.compareAndSet(true, false);
@@ -398,7 +402,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                 memoryObject = MemoryManager.INSTANCE.allocate(allocator);
                 address = memoryObject.getAddress();
                 allocateSize = memoryObject.getAllocateSize();
-                load = true;
                 maxSize = (int) (allocateSize >> getOffset());
             } finally {
                 loading.unlock();
@@ -593,7 +596,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             }
             if (writeCurrentPosition >= 0) {
                 maxSize = writeCurrentPosition + 1;
-                load = true;
                 memoryObject = new AllocateObject(address, allocateSize);
             }
         }
