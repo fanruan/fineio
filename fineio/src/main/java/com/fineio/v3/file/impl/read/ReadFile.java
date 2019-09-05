@@ -52,7 +52,7 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
             }
         });
         if (buf == null) {
-            throw new BufferAcquireFailedException(fileBlock);
+            throw new BufferAcquireFailedException(nthFileBlock);
         }
         return (B) buf;
     }
