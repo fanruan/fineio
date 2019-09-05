@@ -3,6 +3,7 @@ package com.fineio.v3.file.impl.read;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.BufferAcquireFailedException;
+import com.fineio.v3.buffer.BufferClosedException;
 import com.fineio.v3.buffer.ByteDirectBuffer;
 import com.fineio.v3.buffer.impl.ByteDirectBuf;
 import com.fineio.v3.buffer.impl.safe.SafeByteDirectBuf;
@@ -29,8 +30,9 @@ public class ByteReadFile extends ReadFile<ByteDirectBuffer> {
         int nthVal = nthVal(pos);
         try {
             return buffers[nthBuf].getByte(nthVal);
-        } catch (NullPointerException e) {
+        } catch (NullPointerException | BufferClosedException e) {
             // buffers[nthBuf]为null，对应未初始化，从cache拿
+            // 被缓存close掉，重新load
             return (buffers[nthBuf] = loadBuffer(nthBuf)).getByte(nthVal);
         } catch (ArrayIndexOutOfBoundsException e) {
             // buffers数组越界，只可能是读到不存在的数据

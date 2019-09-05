@@ -1,6 +1,7 @@
 package com.fineio.v3.memory;
 
 import com.fineio.accessor.FileMode;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.MemoryHelper;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.allocator.BaseMemoryAllocator;
@@ -33,8 +34,11 @@ public enum MemoryManager {
         long total = MemoryHelper.getMaxMemory();
         readMemorySize = (long) (total * 0.6);
         this.allocator = new BaseMemoryAllocator(readMemorySize);
+        FineIOLoggers.getLogger().info(String.format("fineio read memory size %d", readMemorySize));
+
         writeMemorySize = (long) (total * 0.2);
         this.reAllocator = new WriteMemoryAllocator(writeMemorySize);
+        FineIOLoggers.getLogger().info(String.format("fienio write memory size %d", writeMemorySize));
     }
 
     public long allocate(long size, FileMode mode) throws OutOfDirectMemoryException {

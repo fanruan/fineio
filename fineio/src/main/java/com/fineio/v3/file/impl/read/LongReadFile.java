@@ -3,6 +3,7 @@ package com.fineio.v3.file.impl.read;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.BufferAcquireFailedException;
+import com.fineio.v3.buffer.BufferClosedException;
 import com.fineio.v3.buffer.LongDirectBuffer;
 import com.fineio.v3.buffer.impl.LongDirectBuf;
 import com.fineio.v3.buffer.impl.safe.SafeLongDirectBuf;
@@ -29,8 +30,9 @@ public class LongReadFile extends ReadFile<LongDirectBuffer> {
         int nthVal = nthVal(pos);
         try {
             return buffers[nthBuf].getLong(nthVal);
-        } catch (NullPointerException e) {
+        } catch (NullPointerException | BufferClosedException e) {
             // buffers[nthBuf]为null，对应未初始化，从cache拿
+            // 被缓存close掉，重新load
             return (buffers[nthBuf] = loadBuffer(nthBuf)).getLong(nthVal);
         } catch (ArrayIndexOutOfBoundsException e) {
             // buffers数组越界，只可能是读到不存在的数据
