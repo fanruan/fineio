@@ -31,21 +31,24 @@ public class BufferCache {
 
     private void initRefresher() {
         FineIOExecutors.newSingleThreadScheduledExecutor(BufferCacheRefresher.class)
-                .scheduleWithFixedDelay(new BufferCacheRefresher(), 30, 30, TimeUnit.MINUTES);
+                .scheduleWithFixedDelay(new BufferCacheRefresher(), TimeUnit.MINUTES.toSeconds(10), 10, TimeUnit.SECONDS);
     }
 
     private void initCache() {
+        final long maximumWeight = MemoryManager.INSTANCE.getCacheMemoryLimit() / 2;
         cache = Caffeine.newBuilder()
                 // 读内存上限的一半
-                .maximumWeight(MemoryManager.INSTANCE.getCacheMemoryLimit() / 2)
+                .maximumWeight(maximumWeight)
                 .<FileBlock, DirectBuffer>weigher((key, value) -> value.getSizeInBytes())
-                .expireAfterAccess(Duration.ofMinutes(30))
+                .expireAfterAccess(Duration.ofMinutes(10))
                 .recordStats()
                 .removalListener((key, value, cause) -> {
                     value.close();
                     FineIOLoggers.getLogger().debug(MessageFormat.format("removed {0}, cause {1}", key, cause));
                 })
                 .build();
+
+        FineIOLoggers.getLogger().info(String.format("fineio buffer cache maximumWeight %d", maximumWeight));
     }
 
     public static BufferCache get() {
