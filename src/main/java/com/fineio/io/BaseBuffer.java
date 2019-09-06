@@ -329,20 +329,13 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             if (checkReadable(p, readAddress)){
                 return readAddress;
             }
-            //若果是因为内存不足被释放了,等200ms再去load
-            return waitAndGetReadAddress(p, 200);
+            //再给一次机会，不行就gg了
+            return getReadAddressAgain(p);
         }
 
 
 
-        private long waitAndGetReadAddress(int p, long time) {
-            synchronized (this) {
-                try {
-                    wait(time);
-                } catch (InterruptedException e) {
-                    FineIOLoggers.getLogger().debug("loading time wait interrupted");
-                }
-            }
+        private long getReadAddressAgain(int p) {
             long readAddress = getLoadedReadAddress();
             if (!checkReadable(p, readAddress)){
                 FineIOLoggers.getLogger().error("not enough memory, stop this reading, or you may waiting years");
