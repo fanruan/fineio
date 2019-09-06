@@ -330,12 +330,12 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                 return readAddress;
             }
             //若果是因为内存不足被释放了,等200ms再去load
-            return waitAndGetReadAddress(p, 200, 0);
+            return waitAndGetReadAddress(p, 200);
         }
 
 
 
-        private long waitAndGetReadAddress(int p, long time, int times) {
+        private long waitAndGetReadAddress(int p, long time) {
             synchronized (this) {
                 try {
                     wait(time);
@@ -343,16 +343,10 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     FineIOLoggers.getLogger().debug("loading time wait interrupted");
                 }
             }
-            clearAfterClose();
             long readAddress = getLoadedReadAddress();
             if (!checkReadable(p, readAddress)){
-                //3次失败就不等了
-                if (times > 3){
-                    FineIOLoggers.getLogger().error("not enough memory, stop this reading, or you may waiting years");
-                    throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
-                }
-                //每次多等一倍时间
-                return waitAndGetReadAddress(p, time << 1, ++times);
+                FineIOLoggers.getLogger().error("not enough memory, stop this reading, or you may waiting years");
+                throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
             } else {
                 return readAddress;
             }
