@@ -330,7 +330,10 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                 return readAddress;
             }
             //再给一次机会，不行就gg了
-            return getReadAddressAgain(p);
+            synchronized (this){
+                clearAfterClose();
+                return getReadAddressAgain(p);
+            }
         }
 
 
