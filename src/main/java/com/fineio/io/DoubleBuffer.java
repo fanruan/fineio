@@ -48,8 +48,7 @@ public class DoubleBuffer extends BaseBuffer<DoubleBuffer.DoubleReadBuffer, Doub
     private class DoubleBufferR extends ReadBuffer implements DoubleReadBuffer {
         @Override
         public double get(int pos) {
-            checkRead(pos);
-            return MemoryUtils.getDouble(readAddress, pos);
+            return MemoryUtils.getDouble(getReadAddress(pos), pos);
         }
     }
 

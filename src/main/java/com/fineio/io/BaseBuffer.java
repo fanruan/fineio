@@ -50,13 +50,11 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
     protected volatile URI uri;
     protected AtomicBoolean close = new AtomicBoolean(false);
     protected volatile boolean access;
-    protected AtomicLong version = new AtomicLong(0);
     protected Lock loading = new ReentrantLock();
     /**
      * read start
      */
     protected volatile int maxLength;
-    protected volatile boolean load;
     protected volatile int maxSize;
     protected volatile int maxOffset;
     protected volatile Listener listener;
@@ -183,8 +181,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     return null;
                 case CLEAN:
                     MemoryObject object = new AllocateObject(address, allocateSize);
-                    version.incrementAndGet();
-                    load = false;
                     allocateSize = 0;
                     maxSize = 0;
                     address = 0;
@@ -193,8 +189,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     synchronized (this) {
                         if (syncStatus != SyncStatus.SYNC) {
                             MemoryObject obj = new AllocateObject(address, allocateSize);
-                            version.incrementAndGet();
-                            load = false;
                             allocateSize = 0;
                             maxSize = 0;
                             address = 0;
@@ -214,7 +208,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
         loading.lock();
         try {
             level = Level.INITIAL;
-            load = false;
             allocateSize = 0;
             maxSize = 0;
             address = 0;
@@ -229,16 +222,10 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
     }
 
     protected abstract class ReadBuffer implements Buffer {
-        protected volatile long readAddress;
-        private long readVersion;
-
         public ReadBuffer() {
             level = Level.READ;
-            readVersion = version.get();
-            if (address == 0 && version.compareAndSet(readVersion, readVersion)) {
+            if (address == 0) {
                 checkRead0();
-            } else {
-                readAddress = address;
             }
         }
 
@@ -327,7 +314,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             try {
                 switch (level) {
                     case READ:
-                        load = false;
                         loadContent();
                         break;
                     case WRITE:
@@ -338,41 +324,56 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             }
         }
 
-        final void checkRead(int p) {
-            try {
-                checkReadWithException(p);
-            } catch (BufferIndexOutOfBoundsException e) {
-                synchronized (this) {
-                    clearAfterClose();
-                    load = false;
-                    checkReadWithException(p);
-                }
+        final long getReadAddress(int p) {
+            long readAddress = address;
+            if (checkReadable(p, readAddress)){
+                return readAddress;
+            }
+            //再给一次机会，不行就gg了
+            synchronized (this){
+                clearAfterClose();
+                return getReadAddressAgain(p);
             }
         }
 
-        private void checkReadWithException(int p) {
-            while (!version.compareAndSet(readVersion, readVersion)) {
-                load = false;
+
+
+        private long getReadAddressAgain(int p) {
+            long readAddress = getLoadedReadAddress();
+            if (!checkReadable(p, readAddress)){
+                FineIOLoggers.getLogger().error("not enough memory, stop this reading, or you may waiting years");
+                throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
+            } else {
+                return readAddress;
+            }
+        }
+
+        private long getLoadedReadAddress() {
+            long readAddress = address;
+            if (readAddress == 0){
                 loadContent();
+                readAddress = address;
                 listener.update(this);
             }
+            return readAddress;
+
+        }
+
+        private boolean checkReadable(int p, long readAddress){
             if (p < maxSize && p > -1 && readAddress > 0) {
                 if (!access) {
                     access = true;
                 }
-                return;
+                return true;
             }
-            throw new BufferIndexOutOfBoundsException(uri, p, maxSize);
+            return false;
         }
 
         private void loadContent() {
             loading.lock();
             try {
-//                synchronized (this) {
                 level = Level.READ;
-                if (load) {
-                    readAddress = address;
-                    readVersion = version.get();
+                if (address != 0) {
                     return;
                 }
                 close.compareAndSet(true, false);
@@ -389,12 +390,9 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
                     throw new BufferConstructException(e);
                 }
                 memoryObject = MemoryManager.INSTANCE.allocate(allocator);
-                readAddress = memoryObject.getAddress();
-                address = readAddress;
+                address = memoryObject.getAddress();
                 allocateSize = memoryObject.getAllocateSize();
-                load = true;
                 maxSize = (int) (allocateSize >> getOffset());
-                readVersion = version.get();
             } finally {
                 loading.unlock();
             }
@@ -588,7 +586,6 @@ public abstract class BaseBuffer<R extends BufferR, W extends BufferW> implement
             }
             if (writeCurrentPosition >= 0) {
                 maxSize = writeCurrentPosition + 1;
-                load = true;
                 memoryObject = new AllocateObject(address, allocateSize);
             }
         }

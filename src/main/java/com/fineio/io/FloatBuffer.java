@@ -48,8 +48,7 @@ public class FloatBuffer extends BaseBuffer<FloatBuffer.FloatReadBuffer, FloatBu
     private class FloatBufferR extends ReadBuffer implements FloatReadBuffer {
         @Override
         public float get(int pos) {
-            checkRead(pos);
-            return MemoryUtils.getFloat(readAddress, pos);
+            return MemoryUtils.getFloat(getReadAddress(pos), pos);
         }
     }
 
