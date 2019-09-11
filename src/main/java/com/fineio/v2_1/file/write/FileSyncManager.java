@@ -5,6 +5,7 @@ import com.fineio.storage.Connector;
 import com.fineio.thread.FineIOExecutors;
 import com.fineio.v2_1.unsafe.UnsafeBuf;
 
+import java.io.InputStream;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -31,7 +32,6 @@ public class FileSyncManager {
 
     private static class SingletonHolder {
         private static FileSyncManager INSTANCE = new FileSyncManager();
-
     }
 
     private static class SyncTask extends FutureTask {
@@ -42,7 +42,12 @@ public class FileSyncManager {
                 public Object call() throws Exception {
                     final Connector connector = buf.getBufferKey().getConnector();
                     final FileBlock block = buf.getBufferKey().getBlock();
-                    connector.write(block, buf.asInputStream());
+                    final InputStream inputStream = buf.asInputStream();
+                    if (inputStream.available() > 0) {
+                        connector.write(block, inputStream);
+                        buf.close();
+                        // TODO 这边将Buf加入Cache
+                    }
                     return null;
                 }
             });
