@@ -1,19 +1,22 @@
-package com.fineio.io.unsafe.impl;
+package com.fineio.v2_1.unsafe.impl;
 
 import com.fineio.exception.BufferConstructException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.io.Level;
 import com.fineio.io.base.BufferKey;
-import com.fineio.io.unsafe.ByteUnsafeBuf;
-import com.fineio.io.unsafe.UnsafeBuf;
+import com.fineio.io.base.Checker;
+import com.fineio.io.base.DirectInputStream;
 import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.impl.BaseMemoryAllocator;
 import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.manager.MemoryManager;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.memory.manager.obj.impl.AllocateObject;
+import com.fineio.v2_1.unsafe.ByteUnsafeBuf;
+import com.fineio.v2_1.unsafe.UnsafeBuf;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -32,6 +35,7 @@ public class BaseUnsafeBuf implements UnsafeBuf {
     private int maxOffset;
     private int currentOffset;
     private int currentMaxSize = 10;
+    private int writePos;
     private Level level;
     private ReentrantLock lock = new ReentrantLock();
 
@@ -119,7 +123,11 @@ public class BaseUnsafeBuf implements UnsafeBuf {
         while (position >= currentMaxSize) {
             addCapacity();
         }
+        if (position > writePos) {
+            writePos = position;
+        }
     }
+
 
     private void setCurrentCapacity(int offset) {
         this.currentOffset = offset;
@@ -140,4 +148,18 @@ public class BaseUnsafeBuf implements UnsafeBuf {
         return address;
     }
 
+    @Override
+    public InputStream asInputStream() {
+        return new DirectInputStream(address, writePos << offset, new Checker() {
+            @Override
+            public boolean check() {
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public BufferKey getBufferKey() {
+        return bufferKey;
+    }
 }

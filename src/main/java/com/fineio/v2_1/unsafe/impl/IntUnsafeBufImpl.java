@@ -1,7 +1,7 @@
-package com.fineio.io.unsafe.impl;
+package com.fineio.v2_1.unsafe.impl;
 
-import com.fineio.io.unsafe.IntUnsafeBuf;
 import com.fineio.memory.MemoryUtils;
+import com.fineio.v2_1.unsafe.IntUnsafeBuf;
 
 /**
  * @author yee
@@ -11,7 +11,7 @@ import com.fineio.memory.MemoryUtils;
 public class IntUnsafeBufImpl extends UnsafeBufWrapper implements IntUnsafeBuf {
     private BaseUnsafeBuf unsafeBuf;
 
-    public IntUnsafeBufImpl(BaseUnsafeBuf unsafeBuf) {
+    IntUnsafeBufImpl(BaseUnsafeBuf unsafeBuf) {
         super(unsafeBuf);
     }
 

@@ -1,7 +1,7 @@
-package com.fineio.io.unsafe.impl;
+package com.fineio.v2_1.unsafe.impl;
 
-import com.fineio.io.unsafe.LongUnsafeBuf;
 import com.fineio.memory.MemoryUtils;
+import com.fineio.v2_1.unsafe.LongUnsafeBuf;
 
 /**
  * @author yee
@@ -10,7 +10,7 @@ import com.fineio.memory.MemoryUtils;
  */
 public class LongUnsafeBufImpl extends UnsafeBufWrapper implements LongUnsafeBuf {
 
-    public LongUnsafeBufImpl(BaseUnsafeBuf unsafeBuf) {
+    LongUnsafeBufImpl(BaseUnsafeBuf unsafeBuf) {
         super(unsafeBuf);
     }
 

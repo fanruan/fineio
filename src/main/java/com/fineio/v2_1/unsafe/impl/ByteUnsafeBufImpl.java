@@ -1,11 +1,11 @@
-package com.fineio.io.unsafe.impl;
+package com.fineio.v2_1.unsafe.impl;
 
-import com.fineio.io.unsafe.ByteUnsafeBuf;
-import com.fineio.io.unsafe.DoubleUnsafeBuf;
-import com.fineio.io.unsafe.IntUnsafeBuf;
-import com.fineio.io.unsafe.LongUnsafeBuf;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.MemoryUtils;
+import com.fineio.v2_1.unsafe.ByteUnsafeBuf;
+import com.fineio.v2_1.unsafe.DoubleUnsafeBuf;
+import com.fineio.v2_1.unsafe.IntUnsafeBuf;
+import com.fineio.v2_1.unsafe.LongUnsafeBuf;
 
 /**
  * @author yee
@@ -14,7 +14,7 @@ import com.fineio.memory.MemoryUtils;
  */
 public class ByteUnsafeBufImpl extends UnsafeBufWrapper implements ByteUnsafeBuf {
 
-    public ByteUnsafeBufImpl(BaseUnsafeBuf unsafeBuf) {
+    ByteUnsafeBufImpl(BaseUnsafeBuf unsafeBuf) {
         super(unsafeBuf);
     }
 
