@@ -27,7 +27,7 @@ import java.util.concurrent.Future;
 public class WriteIOFile<B extends UnsafeBuf> extends IOFile<B> {
     private int offset;
 
-    protected WriteIOFile(Connector connector, URI uri, int offset) {
+    public WriteIOFile(Connector connector, URI uri, int offset) {
         super(connector, uri);
         this.offset = offset;
         this.buffers = new UnsafeBuf[16];

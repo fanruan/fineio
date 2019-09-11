@@ -162,4 +162,9 @@ public class BaseUnsafeBuf implements UnsafeBuf {
     public BufferKey getBufferKey() {
         return bufferKey;
     }
+
+    @Override
+    public long getMemorySize() {
+        return memorySize;
+    }
 }

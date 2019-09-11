@@ -32,4 +32,9 @@ public class UnsafeBufWrapper implements UnsafeBuf {
     public BufferKey getBufferKey() {
         return this.unsafeBuf.getBufferKey();
     }
+
+    @Override
+    public long getMemorySize() {
+        return this.unsafeBuf.getMemorySize();
+    }
 }

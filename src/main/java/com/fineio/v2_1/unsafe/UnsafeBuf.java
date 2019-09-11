@@ -14,4 +14,6 @@ public interface UnsafeBuf extends Closeable {
     InputStream asInputStream();
 
     BufferKey getBufferKey();
+
+    long getMemorySize();
 }
