@@ -32,13 +32,15 @@ public enum MemoryManager {
 
     MemoryManager() {
         long total = MemoryHelper.getMaxMemory();
-        readMemorySize = (long) (total * 0.6);
+        // 60% free or 2G
+        readMemorySize = Math.min((long) (total * 0.6), 2L << 30);
         this.allocator = new BaseMemoryAllocator(readMemorySize);
         FineIOLoggers.getLogger().info(String.format("fineio read memory size %d", readMemorySize));
 
-        writeMemorySize = (long) (total * 0.2);
+        // 20% free or 1G
+        writeMemorySize = Math.min((long) (total * 0.2), 1L << 30);
         this.reAllocator = new WriteMemoryAllocator(writeMemorySize);
-        FineIOLoggers.getLogger().info(String.format("fienio write memory size %d", writeMemorySize));
+        FineIOLoggers.getLogger().info(String.format("fineio write memory size %d", writeMemorySize));
     }
 
     public long allocate(long size, FileMode mode) throws OutOfDirectMemoryException {
@@ -118,5 +120,13 @@ public enum MemoryManager {
 
     public long getCacheMemoryLimit() {
         return readMemorySize;
+    }
+
+    public long getReadMemory() {
+        return allocator.getMemory();
+    }
+
+    public long getWriteMemory() {
+        return reAllocator.getMemory();
     }
 }
