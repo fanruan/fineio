@@ -3,6 +3,7 @@ package com.fineio.v3.memory;
 import com.fineio.accessor.FileMode;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.MemoryHelper;
+import com.fineio.v3.FineIoProperty;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.allocator.BaseMemoryAllocator;
 import com.fineio.v3.memory.allocator.MemoryAllocator;
@@ -32,13 +33,13 @@ public enum MemoryManager {
 
     MemoryManager() {
         long total = MemoryHelper.getMaxMemory();
-        // 60% free or 2G
-        readMemorySize = Math.min((long) (total * 0.6), 2L << 30);
+        // 60% free or read_mem_limit
+        readMemorySize = Math.min((long) (total * 0.6), FineIoProperty.READ_MEM_LIMIT.getValue() << 30);
         this.allocator = new BaseMemoryAllocator(readMemorySize);
         FineIOLoggers.getLogger().info(String.format("fineio read memory size %d", readMemorySize));
 
-        // 20% free or 1G
-        writeMemorySize = Math.min((long) (total * 0.2), 1L << 30);
+        // 20% free or write_mem_limit
+        writeMemorySize = Math.min((long) (total * 0.2), FineIoProperty.WRITE_MEM_LIMIT.getValue() << 30);
         this.reAllocator = new WriteMemoryAllocator(writeMemorySize);
         FineIOLoggers.getLogger().info(String.format("fineio write memory size %d", writeMemorySize));
     }
@@ -118,7 +119,7 @@ public enum MemoryManager {
         reAllocator.clear();
     }
 
-    public long getCacheMemoryLimit() {
+    public long getReadMemoryLimit() {
         return readMemorySize;
     }
 

@@ -3,6 +3,7 @@ package com.fineio.v3.file.impl;
 import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.thread.FineIOExecutors;
+import com.fineio.v3.FineIoProperty;
 import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.cache.core.Cache;
 import com.fineio.v3.cache.core.Caffeine;
@@ -35,9 +36,9 @@ public class BufferCache {
     }
 
     private void initCache() {
-        final long halfReadMem = MemoryManager.INSTANCE.getCacheMemoryLimit() / 2;
+        final long halfReadMem = MemoryManager.INSTANCE.getReadMemoryLimit() / 2;
         // 50% or 1G
-        long maximumWeight = Math.min(halfReadMem, 1L << 30);
+        long maximumWeight = Math.min(halfReadMem, FineIoProperty.CACHE_MEM_LIMIT.getValue() << 30);
         cache = Caffeine.newBuilder()
                 // 读内存上限的一半
                 .maximumWeight(maximumWeight)
