@@ -1,12 +1,12 @@
 package com.fineio.memory.manager.allocator;
 
-import com.fineio.FineIO;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.memory.manager.allocator.impl.BaseMemoryAllocator;
 import com.fineio.memory.manager.deallocator.DeAllocator;
 import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.memory.manager.obj.ReAllocateMemoryObject;
+import com.fineio.v2.FineIO;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;

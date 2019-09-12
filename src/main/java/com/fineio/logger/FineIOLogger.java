@@ -1,6 +1,6 @@
 package com.fineio.logger;
 
-import com.fineio.FineIO;
+import com.fineio.v2.FineIO;
 
 /**
  * @author yee
