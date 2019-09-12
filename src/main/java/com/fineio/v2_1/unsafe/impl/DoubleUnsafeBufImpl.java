@@ -16,12 +16,14 @@ public class DoubleUnsafeBufImpl extends UnsafeBufWrapper implements DoubleUnsaf
 
     @Override
     public double getDouble(int pos) {
-        return MemoryUtils.getDouble(unsafeBuf.getAddress(), unsafeBuf.ensurePos(pos));
+        final int offset = unsafeBuf.ensurePos(pos);
+        return MemoryUtils.getDouble(unsafeBuf.getAddress(), offset);
     }
 
     @Override
     public void putDouble(int pos, double v) {
-        MemoryUtils.put(unsafeBuf.getAddress(), unsafeBuf.ensureCap(pos), v);
+        final int offset = unsafeBuf.ensureCap(pos);
+        MemoryUtils.put(unsafeBuf.getAddress(), offset, v);
     }
 
 }

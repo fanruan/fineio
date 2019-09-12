@@ -37,4 +37,15 @@ public class UnsafeBufWrapper implements UnsafeBuf {
     public long getMemorySize() {
         return this.unsafeBuf.getMemorySize();
     }
+
+    @Override
+    public UnsafeBuf flip() {
+        unsafeBuf.flip();
+        return this;
+    }
+
+    @Override
+    public void loadContent() {
+        unsafeBuf.loadContent();
+    }
 }

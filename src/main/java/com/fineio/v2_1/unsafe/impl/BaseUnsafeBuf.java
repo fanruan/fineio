@@ -1,5 +1,6 @@
 package com.fineio.v2_1.unsafe.impl;
 
+import com.fineio.base.Maths;
 import com.fineio.exception.BufferConstructException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.io.Level;
@@ -27,14 +28,14 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class BaseUnsafeBuf implements UnsafeBuf {
     private BufferKey bufferKey;
-    private long address;
+    private volatile long address;
     private long memorySize;
     private AtomicBoolean close = new AtomicBoolean(false);
     private int maxSize;
     private int offset;
     private int maxOffset;
-    private int currentOffset;
-    private int currentMaxSize = 10;
+    private int currentOffset = 10;
+    private int currentMaxSize;
     private int writePos;
     private Level level;
     private ReentrantLock lock = new ReentrantLock();
@@ -50,7 +51,7 @@ public class BaseUnsafeBuf implements UnsafeBuf {
     private BaseUnsafeBuf(BufferKey bufferKey) {
         this.bufferKey = bufferKey;
         this.level = Level.READ;
-        loadContent();
+//        loadContent();
     }
 
     private BaseUnsafeBuf(BufferKey bufferKey, int maxOffset) {
@@ -65,21 +66,29 @@ public class BaseUnsafeBuf implements UnsafeBuf {
     public void close() throws IOException {
         if (close.compareAndSet(false, true)) {
             AllocateObject memoryObject = new AllocateObject(address, memorySize);
+            address = 0L;
+            memorySize = 0L;
             if (level == Level.WRITE) {
                 BaseDeAllocator.Builder.WRITE.build().deAllocate(memoryObject);
             } else {
                 BaseDeAllocator.Builder.READ.build().deAllocate(memoryObject);
             }
+
         }
     }
 
-    private void loadContent() {
+    @Override
+    public void loadContent() {
         try {
-            MemoryObject allocate = MemoryManager.INSTANCE.allocate(BaseMemoryAllocator.Builder.BLOCK.build(bufferKey.getConnector().read(bufferKey.getBlock())));
-            address = allocate.getAddress();
-            this.memorySize = allocate.getAllocateSize();
-            this.maxSize = (int) (this.memorySize >> offset);
-            this.close.compareAndSet(true, false);
+            synchronized (this) {
+                if (address == 0) {
+                    MemoryObject allocate = MemoryManager.INSTANCE.allocate(BaseMemoryAllocator.Builder.BLOCK.build(bufferKey.getConnector().read(bufferKey.getBlock())));
+                    address = allocate.getAddress();
+                    this.memorySize = allocate.getAllocateSize();
+                    this.maxSize = (int) (this.memorySize >> offset) + 1;
+                    this.close.compareAndSet(true, false);
+                }
+            }
         } catch (IOException e) {
             throw new BufferConstructException(e);
         }
@@ -87,27 +96,28 @@ public class BaseUnsafeBuf implements UnsafeBuf {
 
     BaseUnsafeBuf setOffset(int offset) {
         this.offset = offset;
-        this.maxSize = (int) (memorySize >> offset);
+        this.maxSize = (int) (memorySize >> offset) + 1;
         if (maxOffset != 0) {
             int maxMemory = 1 << (maxOffset + offset);
-            this.maxSize = maxMemory >> offset;
+            this.maxSize = (maxMemory >> offset);
         }
         return this;
     }
 
     int ensurePos(int pos) {
-        if (0 != address && pos > -1 && pos < maxSize) {
+        if (0 == address) {
+            lock.lock();
+            try {
+                loadContent();
+                return ensurePos(pos);
+            } finally {
+                lock.unlock();
+            }
+        }
+        if (pos > -1 && pos < maxSize) {
             return pos;
         }
-        lock.lock();
-        try {
-            if (0 != address) {
-                loadContent();
-            }
-            return ensurePos(pos);
-        } finally {
-            lock.unlock();
-        }
+        throw new BufferIndexOutOfBoundsException(bufferKey.getBlock().getBlockURI(), pos, maxSize);
     }
 
     int ensureCap(int pos) {
@@ -150,7 +160,7 @@ public class BaseUnsafeBuf implements UnsafeBuf {
 
     @Override
     public InputStream asInputStream() {
-        return new DirectInputStream(address, writePos << offset, new Checker() {
+        return new DirectInputStream(address, (writePos + 1) << offset, new Checker() {
             @Override
             public boolean check() {
                 return true;
@@ -167,4 +177,25 @@ public class BaseUnsafeBuf implements UnsafeBuf {
     public long getMemorySize() {
         return memorySize;
     }
+
+    @Override
+    public UnsafeBuf flip() {
+        if (level == Level.READ) {
+            level = Level.WRITE;
+            final byte blockOffset = bufferKey.getConnector().getBlockOffset();
+            maxOffset = blockOffset - this.offset;
+            final int offset = Maths.log2(maxSize);
+            setCurrentCapacity(offset);
+            currentMaxSize = maxSize;
+            writePos = maxSize - 1;
+            int maxMemory = 1 << blockOffset;
+            this.maxSize = (maxMemory >> this.offset);
+            MemoryManager.INSTANCE.flip(memorySize, true);
+        } else {
+            level = Level.READ;
+            MemoryManager.INSTANCE.flip(memorySize, false);
+        }
+        return this;
+    }
+
 }

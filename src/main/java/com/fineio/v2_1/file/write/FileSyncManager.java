@@ -3,6 +3,7 @@ package com.fineio.v2_1.file.write;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.thread.FineIOExecutors;
+import com.fineio.v2_1.cache.CacheManager;
 import com.fineio.v2_1.unsafe.UnsafeBuf;
 
 import java.io.InputStream;
@@ -45,8 +46,8 @@ public class FileSyncManager {
                     final InputStream inputStream = buf.asInputStream();
                     if (inputStream.available() > 0) {
                         connector.write(block, inputStream);
-                        buf.close();
-                        // TODO 这边将Buf加入Cache
+                        buf.flip();
+                        CacheManager.getInstance().put(buf);
                     }
                     return null;
                 }

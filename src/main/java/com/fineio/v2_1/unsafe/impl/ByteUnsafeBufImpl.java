@@ -20,12 +20,14 @@ public class ByteUnsafeBufImpl extends UnsafeBufWrapper implements ByteUnsafeBuf
 
     @Override
     public byte getByte(int pos) {
-        return MemoryUtils.getByte(unsafeBuf.getAddress(), unsafeBuf.ensurePos(pos));
+        final int offset = unsafeBuf.ensurePos(pos);
+        return MemoryUtils.getByte(unsafeBuf.getAddress(), offset);
     }
 
     @Override
     public void putByte(int pos, byte v) {
-        MemoryUtils.put(unsafeBuf.getAddress(), unsafeBuf.ensureCap(pos), v);
+        final int offset = unsafeBuf.ensureCap(pos);
+        MemoryUtils.put(unsafeBuf.getAddress(), offset, v);
     }
 
     @Override

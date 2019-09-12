@@ -1,11 +1,10 @@
 package com.fineio.v2_1.file.read;
 
-import com.fineio.base.Bits;
 import com.fineio.exception.BlockNotFoundException;
 import com.fineio.io.base.BufferKey;
 import com.fineio.io.file.FileBlock;
-import com.fineio.io.file.FileConstants;
 import com.fineio.storage.Connector;
+import com.fineio.v2_1.cache.CacheManager;
 import com.fineio.v2_1.file.IOFile;
 import com.fineio.v2_1.unsafe.ByteUnsafeBuf;
 import com.fineio.v2_1.unsafe.DoubleUnsafeBuf;
@@ -15,7 +14,6 @@ import com.fineio.v2_1.unsafe.UnsafeBuf;
 import com.fineio.v2_1.unsafe.impl.BaseUnsafeBuf;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 
 /**
@@ -24,41 +22,13 @@ import java.net.URI;
  */
 public class ReadIOFile<B extends UnsafeBuf> extends IOFile<B> {
 
-    protected ReadIOFile(Connector connector, URI uri, byte offset) {
+    protected ReadIOFile(Connector connector, URI uri, int offset) {
         super(connector, uri);
         readHeader(offset);
     }
 
-    private void readHeader(byte offset) {
-        InputStream is = null;
-        FileBlock head = new FileBlock(uri, FileConstants.HEAD);
-        try {
-            is = this.connector.read(head);
-            if (is == null) {
-                throw new BlockNotFoundException("block:" + uri.toString() + " not found!");
-            }
-            byte[] header = new byte[9];
-            is.read(header);
-            initBufferArray(offset, header);
-        } catch (Throwable e) {
-            throw new BlockNotFoundException("block:" + uri.toString() + " not found!");
-        } finally {
-            if (null != is) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                }
-            }
-            singleBlockLen = (1L << blockSizeOffset) - 1;
-        }
-    }
-
-    private void initBufferArray(byte offset, byte[] header) {
-        int p = 0;
-        createBufferArray(Bits.getInt(header, p));
-        //先空个long的位置
-        p += IOFile.STEP_LEN;
-        blockSizeOffset = (byte) (header[p] - offset);
+    public static <B extends UnsafeBuf> ReadIOFile<B> createFile(Connector connector, URI uri, int offset) {
+        return new ReadIOFile<B>(connector, uri, offset);
     }
 
     public int getInt(int pos) {
@@ -66,9 +36,15 @@ public class ReadIOFile<B extends UnsafeBuf> extends IOFile<B> {
             return ((IntUnsafeBuf) getBuffer(pos)).getInt((int) (pos & singleBlockLen));
         } catch (NullPointerException e) {
             final int i = pos >> blockSizeOffset;
-            final IntUnsafeBuf byteUnsafeBuf = BaseUnsafeBuf.newBuffer(new BufferKey(connector, new FileBlock(uri, String.valueOf(i)))).asInt();
-            buffers[i] = byteUnsafeBuf;
-            return byteUnsafeBuf.getInt((int) (pos & singleBlockLen));
+            final FileBlock block = new FileBlock(uri, String.valueOf(i));
+            final BufferKey bufferKey = new BufferKey(connector, block);
+            buffers[i] = CacheManager.getInstance().get(bufferKey.getBlock().getBlockURI(), new CacheManager.BufferCreator() {
+                @Override
+                public UnsafeBuf createBuffer() {
+                    return BaseUnsafeBuf.newBuffer(bufferKey).asInt();
+                }
+            });
+            return ((IntUnsafeBuf) buffers[i]).getInt((int) (pos & singleBlockLen));
         }
     }
 
@@ -78,6 +54,8 @@ public class ReadIOFile<B extends UnsafeBuf> extends IOFile<B> {
         } catch (NullPointerException e) {
             final int i = pos >> blockSizeOffset;
             final ByteUnsafeBuf byteUnsafeBuf = BaseUnsafeBuf.newBuffer(new BufferKey(connector, new FileBlock(uri, String.valueOf(i))));
+            CacheManager.getInstance().put(byteUnsafeBuf);
+            byteUnsafeBuf.loadContent();
             buffers[i] = byteUnsafeBuf;
             return byteUnsafeBuf.getByte((int) (pos & singleBlockLen));
         }
@@ -88,9 +66,16 @@ public class ReadIOFile<B extends UnsafeBuf> extends IOFile<B> {
             return ((LongUnsafeBuf) getBuffer(pos)).getLong((int) (pos & singleBlockLen));
         } catch (NullPointerException e) {
             final int i = pos >> blockSizeOffset;
-            final LongUnsafeBuf byteUnsafeBuf = BaseUnsafeBuf.newBuffer(new BufferKey(connector, new FileBlock(uri, String.valueOf(i)))).asLong();
-            buffers[i] = byteUnsafeBuf;
-            return byteUnsafeBuf.getLong((int) (pos & singleBlockLen));
+            final FileBlock block = new FileBlock(uri, String.valueOf(i));
+            final BufferKey bufferKey = new BufferKey(connector, block);
+
+            buffers[i] = CacheManager.getInstance().get(bufferKey.getBlock().getBlockURI(), new CacheManager.BufferCreator() {
+                @Override
+                public UnsafeBuf createBuffer() {
+                    return BaseUnsafeBuf.newBuffer(bufferKey).asLong();
+                }
+            });
+            return ((LongUnsafeBuf) buffers[i]).getLong((int) (pos & singleBlockLen));
         }
     }
 
@@ -100,6 +85,7 @@ public class ReadIOFile<B extends UnsafeBuf> extends IOFile<B> {
         } catch (NullPointerException e) {
             final int i = pos >> blockSizeOffset;
             final DoubleUnsafeBuf byteUnsafeBuf = BaseUnsafeBuf.newBuffer(new BufferKey(connector, new FileBlock(uri, String.valueOf(i)))).asDouble();
+            CacheManager.getInstance().put(byteUnsafeBuf);
             buffers[i] = byteUnsafeBuf;
             return byteUnsafeBuf.getDouble((int) (pos & singleBlockLen));
         }

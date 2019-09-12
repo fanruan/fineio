@@ -1,10 +1,16 @@
 package com.fineio.v2_1.file;
 
+import com.fineio.base.Bits;
+import com.fineio.exception.BlockNotFoundException;
+import com.fineio.io.file.FileBlock;
+import com.fineio.io.file.FileConstants;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 import com.fineio.v2_1.unsafe.UnsafeBuf;
 
 import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -40,5 +46,37 @@ public abstract class IOFile<B extends UnsafeBuf> implements Closeable {
     protected final void createBufferArray(int size) {
         this.blocks = size;
         this.buffers = new UnsafeBuf[size];
+    }
+
+    protected void readHeader(int offset) {
+        InputStream is = null;
+        FileBlock head = new FileBlock(uri, FileConstants.HEAD);
+        try {
+            is = this.connector.read(head);
+            if (is == null) {
+                throw new BlockNotFoundException("block:" + uri.toString() + " not found!");
+            }
+            byte[] header = new byte[9];
+            is.read(header);
+            initBufferArray(offset, header);
+        } catch (Throwable e) {
+            throw new BlockNotFoundException("block:" + uri.toString() + " not found!");
+        } finally {
+            if (null != is) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                }
+            }
+            singleBlockLen = (1L << blockSizeOffset) - 1;
+        }
+    }
+
+    private void initBufferArray(int offset, byte[] header) {
+        int p = 0;
+        createBufferArray(Bits.getInt(header, p));
+        //先空个long的位置
+        p += IOFile.STEP_LEN;
+        blockSizeOffset = (byte) (header[p] - offset);
     }
 }

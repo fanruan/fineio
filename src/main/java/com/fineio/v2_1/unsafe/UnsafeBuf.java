@@ -16,4 +16,8 @@ public interface UnsafeBuf extends Closeable {
     BufferKey getBufferKey();
 
     long getMemorySize();
+
+    UnsafeBuf flip();
+
+    void loadContent();
 }

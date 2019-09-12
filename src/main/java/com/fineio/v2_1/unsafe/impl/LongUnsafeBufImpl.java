@@ -16,12 +16,14 @@ public class LongUnsafeBufImpl extends UnsafeBufWrapper implements LongUnsafeBuf
 
     @Override
     public long getLong(int pos) {
-        return MemoryUtils.getLong(unsafeBuf.getAddress(), unsafeBuf.ensurePos(pos));
+        final int offset = unsafeBuf.ensurePos(pos);
+        return MemoryUtils.getLong(unsafeBuf.getAddress(), offset);
     }
 
     @Override
     public void putLong(int pos, long v) {
-        MemoryUtils.put(unsafeBuf.getAddress(), unsafeBuf.ensureCap(pos), v);
+        final int offset = unsafeBuf.ensureCap(pos);
+        MemoryUtils.put(unsafeBuf.getAddress(), offset, v);
     }
 
 }

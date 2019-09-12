@@ -30,7 +30,13 @@ public class WriteIOFile<B extends UnsafeBuf> extends IOFile<B> {
     public WriteIOFile(Connector connector, URI uri, int offset) {
         super(connector, uri);
         this.offset = offset;
-        this.buffers = new UnsafeBuf[16];
+        this.blockSizeOffset = (byte) (connector.getBlockOffset() - offset);
+        this.singleBlockLen = (1L << this.blockSizeOffset) - 1;
+        createBufferArray(0);
+    }
+
+    public static <B extends UnsafeBuf> WriteIOFile<B> createFile(Connector connector, URI uri, int offset) {
+        return new WriteIOFile<B>(connector, uri, offset);
     }
 
     @Override
@@ -57,7 +63,7 @@ public class WriteIOFile<B extends UnsafeBuf> extends IOFile<B> {
     private void writeHead() {
         FileBlock block = new FileBlock(uri, FileConstants.HEAD);
         byte[] bytes = new byte[HEAD_LEN];
-        Bits.putInt(bytes, 0, buffers == null ? 0 : buffers.length);
+        Bits.putInt(bytes, 0, buffers.length);
         bytes[STEP_LEN] = (byte) (blockSizeOffset + offset);
         try {
             connector.write(block, bytes);
@@ -116,7 +122,7 @@ public class WriteIOFile<B extends UnsafeBuf> extends IOFile<B> {
 
     private int getIndex(int pos) {
         final int idx = pos >> blockSizeOffset;
-        if (idx > buffers.length) {
+        if (idx >= buffers.length) {
             UnsafeBuf[] bufs = buffers;
             buffers = new UnsafeBuf[idx + 1];
             System.arraycopy(bufs, 0, buffers, 0, bufs.length);
@@ -132,7 +138,7 @@ public class WriteIOFile<B extends UnsafeBuf> extends IOFile<B> {
     }
 
     private void writeIdx(int idx) {
-        if (idx > 0) {
+        if (idx >= 0) {
             writeBuffer(buffers[idx]);
         }
     }
