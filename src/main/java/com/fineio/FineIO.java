@@ -1,6 +1,10 @@
 package com.fineio;
 
 import com.fineio.exception.MemorySetException;
+import com.fineio.io.ByteBuffer;
+import com.fineio.io.DoubleBuffer;
+import com.fineio.io.IntBuffer;
+import com.fineio.io.LongBuffer;
 import com.fineio.io.file.AppendIOFile;
 import com.fineio.io.file.IOFile;
 import com.fineio.io.file.ReadIOFile;
@@ -288,33 +292,33 @@ public final class FineIO {
     }
 
     public interface MODEL<F> {
-        FineIO.MODEL<ReadIOFile> READ_LONG = new FineIO.MODEL<ReadIOFile>() {
+        FineIO.MODEL<ReadIOFile<LongBuffer>> READ_LONG = new FineIO.MODEL<ReadIOFile<LongBuffer>>() {
 
             @Override
-            public ReadIOFile createIOFile(Connector connector, URI uri, boolean sync) {
+            public ReadIOFile<LongBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return ReadIOFile.createFile(connector, uri, MemoryConstants.OFFSET_LONG);
             }
         };
-        FineIO.MODEL<ReadIOFile> READ_DOUBLE = new FineIO.MODEL<ReadIOFile>() {
+        FineIO.MODEL<ReadIOFile<DoubleBuffer>> READ_DOUBLE = new FineIO.MODEL<ReadIOFile<DoubleBuffer>>() {
 
             @Override
-            public ReadIOFile createIOFile(Connector connector, URI uri, boolean sync) {
+            public ReadIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return ReadIOFile.createFile(connector, uri, MemoryConstants.OFFSET_DOUBLE);
             }
         };
 
 
-        FineIO.MODEL<ReadIOFile> READ_INT = new FineIO.MODEL<ReadIOFile>() {
+        FineIO.MODEL<ReadIOFile<IntBuffer>> READ_INT = new FineIO.MODEL<ReadIOFile<IntBuffer>>() {
 
             @Override
-            public ReadIOFile createIOFile(Connector connector, URI uri, boolean sync) {
+            public ReadIOFile<IntBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return ReadIOFile.createFile(connector, uri, MemoryConstants.OFFSET_INT);
             }
         };
-        FineIO.MODEL<ReadIOFile> READ_BYTE = new FineIO.MODEL<ReadIOFile>() {
+        FineIO.MODEL<ReadIOFile<ByteBuffer>> READ_BYTE = new FineIO.MODEL<ReadIOFile<ByteBuffer>>() {
 
             @Override
-            public ReadIOFile createIOFile(Connector connector, URI uri, boolean sync) {
+            public ReadIOFile<ByteBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return ReadIOFile.createFile(connector, uri, MemoryConstants.OFFSET_BYTE);
             }
         };

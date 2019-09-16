@@ -72,11 +72,14 @@ public class CacheManager {
     public <B extends Buffer> ReadIOFile<B> get(URI uri, FileCreator<B> creator) {
         synchronized (getURILock(uri)) {
             CacheObject<ReadIOFile> cache = files.get(uri);
-            if (null == cache) {
-                final ReadIOFile<B> file = creator.createFile();
-                cache = new CacheObject<ReadIOFile>(file);
-                files.put(uri, cache);
+            if (null != cache && null != cache.get()) {
+                cache.updateTime();
+                return cache.get();
+
             }
+            final ReadIOFile<B> file = creator.createFile();
+            cache = new CacheObject<ReadIOFile>(file);
+            files.put(uri, cache);
             return cache.get();
         }
     }

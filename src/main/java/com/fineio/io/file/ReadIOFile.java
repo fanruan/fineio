@@ -23,7 +23,11 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
 
     protected ReadIOFile(Connector connector, URI uri, int offset) {
         super(connector, uri);
-        readHeader(offset);
+        try {
+            readHeader(offset);
+        } catch (BlockNotFoundException e) {
+            this.blockSizeOffset = (byte) (connector.getBlockOffset() - offset);
+        }
     }
 
     public static <B extends Buffer> ReadIOFile<B> createFile(final Connector connector, final URI uri, final int offset) {
