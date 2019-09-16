@@ -1,55 +1,24 @@
 package com.fineio.io;
 
+import com.fineio.io.base.BufferKey;
 
-import com.fineio.cache.SyncStatus;
-import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
-import com.fineio.memory.manager.obj.MemoryObject;
-
+import java.io.Closeable;
+import java.io.InputStream;
 import java.net.URI;
 
 /**
  * @author yee
- * @date 2018/9/19
+ * @version 1.0
+ * Created by yee on 2019/9/10
  */
-public interface Buffer {
-    Level getLevel();
+public interface Buffer extends Closeable {
+    InputStream asInputStream();
 
-    SyncStatus getSyncStatus();
+    BufferKey getBufferKey();
 
-    long getAddress();
+    long getMemorySize();
 
-    long getAllocateSize();
+    Buffer flip();
 
     URI getUri();
-
-    boolean isDirect();
-
-    boolean isClose();
-
-    void close();
-
-    void clearAfterClose();
-
-    boolean resentAccess();
-
-    void resetAccess();
-
-    void unLoad();
-
-    int getLength();
-
-    MemoryObject getFreeObject();
-
-    <B extends Buffer> B asRead();
-
-    <B extends Buffer> B asWrite();
-
-    <B extends Buffer> B asAppend();
-
-    interface Listener {
-        void remove(Buffer buffer, BaseDeAllocator.Builder builder);
-
-        void update(Buffer buffer);
-    }
 }
-

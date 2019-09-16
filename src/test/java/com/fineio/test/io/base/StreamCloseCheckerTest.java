@@ -1,6 +1,6 @@
 package com.fineio.test.io.base;
 
-import com.fineio.io.base.StreamCloseChecker;
+import com.fineio.v2.io.base.StreamCloseChecker;
 import junit.framework.TestCase;
 
 import java.util.concurrent.atomic.AtomicInteger;

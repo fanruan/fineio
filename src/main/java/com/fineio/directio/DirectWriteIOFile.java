@@ -1,8 +1,8 @@
 package com.fineio.directio;
 
-import com.fineio.io.Buffer;
-import com.fineio.io.file.FileModel;
 import com.fineio.storage.Connector;
+import com.fineio.v2.io.Buffer;
+import com.fineio.v2.io.file.FileModel;
 
 import java.net.URI;
 
@@ -10,6 +10,7 @@ import java.net.URI;
  * @author yee
  * @date 2018/10/2
  */
+@Deprecated
 public final class DirectWriteIOFile<T extends Buffer> extends DirectIOFile<T> {
     private final boolean sync;
 

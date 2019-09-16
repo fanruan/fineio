@@ -1,10 +1,10 @@
 package com.fineio.directio;
 
-import com.fineio.io.Buffer;
 import com.fineio.io.file.FileBlock;
-import com.fineio.io.file.FileModel;
-import com.fineio.io.file.writer.JobFinishedManager;
 import com.fineio.storage.Connector;
+import com.fineio.v2.io.Buffer;
+import com.fineio.v2.io.file.FileModel;
+import com.fineio.v2.io.file.writer.JobFinishedManager;
 
 import java.net.URI;
 
@@ -12,6 +12,7 @@ import java.net.URI;
  * @author yee
  * @date 2018/10/2
  */
+@Deprecated
 public final class DirectReadIOFile<B extends Buffer> extends DirectIOFile<B> {
 
     DirectReadIOFile(Connector connector, URI uri, FileModel model) {

@@ -1,10 +1,10 @@
 package com.fineio.test.file.writer;
 
 import com.fineio.io.file.FileBlock;
-import com.fineio.io.base.Job;
-import com.fineio.io.base.JobAssist;
-import com.fineio.io.file.writer.JobContainer;
 import com.fineio.storage.Connector;
+import com.fineio.v2.io.base.Job;
+import com.fineio.v2.io.base.JobAssist;
+import com.fineio.v2.io.file.writer.JobContainer;
 import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
