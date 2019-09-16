@@ -15,8 +15,11 @@ import com.fineio.memory.MemoryConf;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.manager.manager.MemoryManager;
 import com.fineio.storage.Connector;
+import com.fineio.v2.io.file.writer.JobFinishedManager;
 
 import java.net.URI;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 /**
  * @author yee
@@ -61,6 +64,23 @@ public final class FineIO {
         setLogger(logger, false);
     }
 
+    /**
+     * 前面的任务都结束了调用
+     *
+     * @param runnable
+     */
+    public static Future<Void> doWhenFinished(Runnable runnable) {
+        return JobFinishedManager.getInstance().finish(runnable);
+    }
+
+    /**
+     * 前面的任务都结束了调用
+     *
+     * @param callable
+     */
+    public static <T> Future<T> doWhenFinished(Callable<T> callable) {
+        return JobFinishedManager.getInstance().finish(callable);
+    }
 
     /**
      * @return
