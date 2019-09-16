@@ -126,4 +126,18 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
     public boolean isAccess() {
         return access;
     }
+
+    /**
+     * 删除操作
+     *
+     * @return
+     */
+    public void delete() {
+
+        synchronized (this) {
+            close();
+            boolean delete = connector.delete(new FileBlock(uri, FileConstants.HEAD));
+            connector.delete(new FileBlock(uri));
+        }
+    }
 }
