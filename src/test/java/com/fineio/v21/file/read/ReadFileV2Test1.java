@@ -4,6 +4,7 @@ import com.fineio.v2.FineIO;
 import com.fineio.v2.io.IntBuffer;
 import com.fineio.v2.io.file.ReadIOFileV2;
 import com.fineio.v21.connector.FileConnector;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -24,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 public class ReadFileV2Test1 {
 
     @Test
+    @Ignore
     public void getInt() throws IOException, ExecutionException, InterruptedException {
         final FileConnector connector = new FileConnector();
 //        final WriteIOFile<IntUnsafeBuf> file = WriteIOFile.createFile(connector, URI.create("/Users/yee/testLongHead/"), MemoryConstants.OFFSET_INT);
