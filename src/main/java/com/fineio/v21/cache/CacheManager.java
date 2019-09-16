@@ -72,11 +72,14 @@ public class CacheManager {
     public <B extends Buffer> ReadIOFile<B> get(URI uri, FileCreator<B> creator) {
         synchronized (getURILock(uri)) {
             CacheObject<ReadIOFile> cache = files.get(uri);
-            if (null == cache) {
-                final ReadIOFile<B> file = creator.createFile();
-                cache = new CacheObject<ReadIOFile>(file);
-                files.put(uri, cache);
+            if (null != cache && null != cache.get()) {
+                cache.updateTime();
+                return cache.get();
+
             }
+            final ReadIOFile<B> file = creator.createFile();
+            cache = new CacheObject<ReadIOFile>(file);
+            files.put(uri, cache);
             return cache.get();
         }
     }
@@ -118,17 +121,19 @@ public class CacheManager {
             final CacheObject<ReadIOFile> cache = next.getValue();
             if (cache.getIdle() > TimeUnit.MINUTES.toSeconds(5)) {
                 final ReadIOFile readIOFile = cache.get();
-                readIOFile.resetAccess();
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                    if (readIOFile.isAccess()) {
-                        cache.updateTime();
-                    } else {
-                        readIOFile.close();
-                        return true;
+                if (null != readIOFile) {
+                    readIOFile.resetAccess();
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                        if (readIOFile.isAccess()) {
+                            cache.updateTime();
+                        } else {
+                            readIOFile.close();
+                            return true;
+                        }
+                    } catch (Exception e) {
+                        FineIOLoggers.getLogger().error("ignore");
                     }
-                } catch (Exception e) {
-                    FineIOLoggers.getLogger().error("ignore");
                 }
             }
         }

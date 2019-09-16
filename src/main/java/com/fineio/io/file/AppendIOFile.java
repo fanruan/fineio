@@ -1,5 +1,6 @@
 package com.fineio.io.file;
 
+import com.fineio.exception.BlockNotFoundException;
 import com.fineio.exception.BufferConstructException;
 import com.fineio.io.Buffer;
 import com.fineio.io.file.append.ByteAppendIOFile;
@@ -20,7 +21,11 @@ public abstract class AppendIOFile<B extends Buffer> extends WriteIOFile<B> {
 
     protected AppendIOFile(Connector connector, URI uri, byte offset) {
         super(connector, uri, offset);
-        readHeader(offset);
+        try {
+            readHeader(offset);
+        } catch (BlockNotFoundException e) {
+            this.blockSizeOffset = (byte) (connector.getBlockOffset() - offset);
+        }
         initLastBuffer(offset);
     }
 

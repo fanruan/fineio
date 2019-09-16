@@ -85,7 +85,8 @@ public class BaseBuffer implements Buffer {
         try {
             synchronized (this) {
                 if (address == 0) {
-                    MemoryObject allocate = MemoryManager.INSTANCE.allocate(BaseMemoryAllocator.Builder.BLOCK.build(bufferKey.getConnector().read(bufferKey.getBlock())));
+                    MemoryObject allocate = MemoryManager.INSTANCE.allocate(BaseMemoryAllocator.Builder.BLOCK.build(
+                            bufferKey.getConnector().read(bufferKey.getBlock()), 1 << bufferKey.getConnector().getBlockOffset()));
                     address = allocate.getAddress();
                     this.memorySize = allocate.getAllocateSize();
                     this.maxSize = (int) (this.memorySize >> offset) + 1;

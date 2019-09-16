@@ -91,4 +91,9 @@ public abstract class IOFile<B extends Buffer> implements Closeable {
 
     @Override
     public abstract void close();
+
+    @Override
+    public String toString() {
+        return uri.getPath();
+    }
 }
