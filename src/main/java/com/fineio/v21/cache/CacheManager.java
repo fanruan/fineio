@@ -118,17 +118,19 @@ public class CacheManager {
             final CacheObject<ReadIOFile> cache = next.getValue();
             if (cache.getIdle() > TimeUnit.MINUTES.toSeconds(5)) {
                 final ReadIOFile readIOFile = cache.get();
-                readIOFile.resetAccess();
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                    if (readIOFile.isAccess()) {
-                        cache.updateTime();
-                    } else {
-                        readIOFile.close();
-                        return true;
+                if (null != readIOFile) {
+                    readIOFile.resetAccess();
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                        if (readIOFile.isAccess()) {
+                            cache.updateTime();
+                        } else {
+                            readIOFile.close();
+                            return true;
+                        }
+                    } catch (Exception e) {
+                        FineIOLoggers.getLogger().error("ignore");
                     }
-                } catch (Exception e) {
-                    FineIOLoggers.getLogger().error("ignore");
                 }
             }
         }
