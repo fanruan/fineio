@@ -56,7 +56,8 @@ public final class FileBlock {
         if (EMPTY.equals(fileName)) {
             return uri;
         }
-        return uri.resolve(fileName);
+        final String path = uri.getPath();
+        return path.endsWith("/") ? URI.create(path + fileName) : URI.create(path + "/" + fileName);
     }
 
     @Override
