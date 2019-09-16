@@ -77,4 +77,18 @@ public abstract class IOFile<B extends Buffer> implements Closeable {
         p += IOFile.STEP_LEN;
         blockSizeOffset = (byte) (header[p] - offset);
     }
+
+    public final boolean exists() {
+        synchronized (this) {
+            boolean exists = connector.exists(new FileBlock(uri, FileConstants.HEAD));
+            boolean v = connector.exists(new FileBlock(uri, "0"));
+            if (exists) {
+                exists = v;
+            }
+            return exists;
+        }
+    }
+
+    @Override
+    public abstract void close();
 }
