@@ -3,7 +3,6 @@ package com.fineio.v21.file.read;
 import com.fineio.v2.FineIO;
 import com.fineio.v2.io.IntBuffer;
 import com.fineio.v2.io.file.ReadIOFileV2;
-import com.fineio.v21.connector.FileConnector;
 import org.junit.Ignore;
 import org.junit.Test;
 
