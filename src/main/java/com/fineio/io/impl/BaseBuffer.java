@@ -207,8 +207,7 @@ public class BaseBuffer implements Buffer {
             setCurrentCapacity(offset);
             currentMaxSize = maxSize;
             writePos = maxSize - 1;
-            int maxMemory = 1 << blockOffset;
-            this.maxSize = (maxMemory >> this.offset);
+            this.maxSize = 1 << maxOffset;
             MemoryManager.INSTANCE.flip(memorySize, true);
         } else {
             level = Level.READ;
