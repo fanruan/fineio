@@ -3,11 +3,11 @@ package com.fineio.io.impl;
 import com.fineio.base.Maths;
 import com.fineio.exception.BufferConstructException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
+import com.fineio.exception.StreamCloseException;
 import com.fineio.io.Buffer;
 import com.fineio.io.ByteBuffer;
 import com.fineio.io.Level;
 import com.fineio.io.base.BufferKey;
-import com.fineio.io.base.Checker;
 import com.fineio.io.base.DirectInputStream;
 import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.impl.BaseMemoryAllocator;
@@ -15,11 +15,13 @@ import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.manager.MemoryManager;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.memory.manager.obj.impl.AllocateObject;
+import com.fineio.v2.io.base.StreamCloseChecker;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -41,12 +43,18 @@ public class BaseBuffer implements Buffer {
     private Level level;
     private URI uri;
     private ReentrantLock lock = new ReentrantLock();
+    private volatile AtomicInteger status = new AtomicInteger(0);
 
     private BaseBuffer(BufferKey bufferKey) {
         this.bufferKey = bufferKey;
         this.level = Level.READ;
         this.uri = bufferKey.getBlock().getBlockURI();
-        loadContent();
+        lock.lock();
+        try {
+            loadContent();
+        } finally {
+            lock.unlock();
+        }
     }
 
     private BaseBuffer(BufferKey bufferKey, int maxOffset) {
@@ -68,30 +76,32 @@ public class BaseBuffer implements Buffer {
 
     @Override
     public void close() throws IOException {
-        if (close.compareAndSet(false, true)) {
-            AllocateObject memoryObject = new AllocateObject(address, memorySize);
-            address = 0L;
-            memorySize = 0L;
-            if (level == Level.WRITE) {
-                BaseDeAllocator.Builder.WRITE.build().deAllocate(memoryObject);
-            } else {
-                BaseDeAllocator.Builder.READ.build().deAllocate(memoryObject);
+        lock.lock();
+        try {
+            if (close.compareAndSet(false, true)) {
+                AllocateObject memoryObject = new AllocateObject(address, memorySize);
+                address = 0L;
+                memorySize = 0L;
+                if (level == Level.WRITE) {
+                    BaseDeAllocator.Builder.WRITE.build().deAllocate(memoryObject);
+                } else {
+                    BaseDeAllocator.Builder.READ.build().deAllocate(memoryObject);
+                }
             }
-
+        } finally {
+            lock.unlock();
         }
     }
 
     private void loadContent() {
         try {
-            synchronized (this) {
-                if (address == 0) {
-                    MemoryObject allocate = MemoryManager.INSTANCE.allocate(BaseMemoryAllocator.Builder.BLOCK.build(
-                            bufferKey.getConnector().read(bufferKey.getBlock()), 1 << bufferKey.getConnector().getBlockOffset()));
-                    address = allocate.getAddress();
-                    this.memorySize = allocate.getAllocateSize();
-                    this.maxSize = (int) (this.memorySize >> offset) + 1;
-                    this.close.compareAndSet(true, false);
-                }
+            if (address == 0) {
+                MemoryObject allocate = MemoryManager.INSTANCE.allocate(BaseMemoryAllocator.Builder.BLOCK.build(
+                        bufferKey.getConnector().read(bufferKey.getBlock()), 1 << bufferKey.getConnector().getBlockOffset()));
+                address = allocate.getAddress();
+                this.memorySize = allocate.getAllocateSize();
+                this.maxSize = (int) (this.memorySize >> offset) + 1;
+                this.close.compareAndSet(true, false);
             }
         } catch (IOException e) {
             throw new BufferConstructException(e);
@@ -153,9 +163,11 @@ public class BaseBuffer implements Buffer {
         setCurrentCapacity(this.currentOffset + 1);
         int newLen = this.currentMaxSize << offset;
         Allocator allocator = BaseMemoryAllocator.Builder.BLOCK.build(address, len, newLen);
+        status.incrementAndGet();
         MemoryObject object = MemoryManager.INSTANCE.allocate(allocator);
         address = object.getAddress();
         memorySize = newLen;
+        status.decrementAndGet();
     }
 
     long getAddress() {
@@ -164,10 +176,13 @@ public class BaseBuffer implements Buffer {
 
     @Override
     public InputStream asInputStream() {
-        return new DirectInputStream(address, (writePos + 1) << offset, new Checker() {
+        if (address == 0) {
+            throw new StreamCloseException();
+        }
+        return new DirectInputStream(address, (writePos + 1) << offset, new StreamCloseChecker(status.get()) {
             @Override
             public boolean check() {
-                return true;
+                return getStatus() == status.get();
             }
         });
     }
@@ -197,6 +212,7 @@ public class BaseBuffer implements Buffer {
             MemoryManager.INSTANCE.flip(memorySize, true);
         } else {
             level = Level.READ;
+            maxSize = writePos + 1;
             MemoryManager.INSTANCE.flip(memorySize, false);
         }
         return this;
