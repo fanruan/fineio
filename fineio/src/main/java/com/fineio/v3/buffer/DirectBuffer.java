@@ -16,6 +16,8 @@ public interface DirectBuffer extends Closeable, Buf {
 
     int getSizeInBytes();
 
+    int getCapInBytes();
+
     @Override
     void close();
 }
