@@ -3,11 +3,11 @@ package com.fineio.io.impl;
 import com.fineio.base.Maths;
 import com.fineio.exception.BufferConstructException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
+import com.fineio.exception.StreamCloseException;
 import com.fineio.io.Buffer;
 import com.fineio.io.ByteBuffer;
 import com.fineio.io.Level;
 import com.fineio.io.base.BufferKey;
-import com.fineio.io.base.Checker;
 import com.fineio.io.base.DirectInputStream;
 import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.impl.BaseMemoryAllocator;
@@ -15,11 +15,13 @@ import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.manager.MemoryManager;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.memory.manager.obj.impl.AllocateObject;
+import com.fineio.v2.io.base.StreamCloseChecker;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -41,6 +43,7 @@ public class BaseBuffer implements Buffer {
     private Level level;
     private URI uri;
     private ReentrantLock lock = new ReentrantLock();
+    private volatile AtomicInteger status = new AtomicInteger(0);
 
     private BaseBuffer(BufferKey bufferKey) {
         this.bufferKey = bufferKey;
@@ -160,9 +163,11 @@ public class BaseBuffer implements Buffer {
         setCurrentCapacity(this.currentOffset + 1);
         int newLen = this.currentMaxSize << offset;
         Allocator allocator = BaseMemoryAllocator.Builder.BLOCK.build(address, len, newLen);
+        status.incrementAndGet();
         MemoryObject object = MemoryManager.INSTANCE.allocate(allocator);
         address = object.getAddress();
         memorySize = newLen;
+        status.decrementAndGet();
     }
 
     long getAddress() {
@@ -171,10 +176,13 @@ public class BaseBuffer implements Buffer {
 
     @Override
     public InputStream asInputStream() {
-        return new DirectInputStream(address, (writePos + 1) << offset, new Checker() {
+        if (address == 0) {
+            throw new StreamCloseException();
+        }
+        return new DirectInputStream(address, (writePos + 1) << offset, new StreamCloseChecker(status.get()) {
             @Override
             public boolean check() {
-                return true;
+                return getStatus() == status.get();
             }
         });
     }

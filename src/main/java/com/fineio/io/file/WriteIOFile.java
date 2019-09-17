@@ -41,10 +41,12 @@ public class WriteIOFile<B extends Buffer> extends IOFile<B> {
         if (close.compareAndSet(false, true)) {
             writeHead();
             List<Future> futures = new ArrayList<Future>(buffers.length);
-            for (Buffer buffer : buffers) {
+            for (int i = 0; i < buffers.length; i++) {
                 Future future = null;
-                if (null != buffer && null != (future = writeBuffer(buffer))) {
+                Buffer buffer = buffers[i];
+                if (null != (future = writeBuffer(buffer))) {
                     futures.add(future);
+                    buffers[i] = null;
                 }
             }
             for (Future future : futures) {
