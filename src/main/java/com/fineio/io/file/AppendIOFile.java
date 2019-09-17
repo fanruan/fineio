@@ -23,10 +23,10 @@ public abstract class AppendIOFile<B extends Buffer> extends WriteIOFile<B> {
         super(connector, uri, offset);
         try {
             readHeader(offset);
+            initLastBuffer(offset);
         } catch (BlockNotFoundException e) {
             this.blockSizeOffset = (byte) (connector.getBlockOffset() - offset);
         }
-        initLastBuffer(offset);
     }
 
     public static ByteAppendIOFile asByte(Connector connector, URI uri) {
