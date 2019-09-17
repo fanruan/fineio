@@ -21,7 +21,8 @@ public class DoubleAppendIOFile extends AppendIOFile<ByteBuffer> {
     }
 
     public void put(double value) {
-        super.put(lastPos++, value);
+        super.put(lastPos, value);
+        lastPos++;
     }
 
     @Override
@@ -41,7 +42,8 @@ public class DoubleAppendIOFile extends AppendIOFile<ByteBuffer> {
 
     @Override
     public void put(int pos, double v) {
-        super.put(lastPos++, v);
+        super.put(lastPos, v);
+        lastPos++;
     }
 
     @Override

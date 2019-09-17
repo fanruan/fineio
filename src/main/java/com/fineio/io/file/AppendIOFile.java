@@ -50,15 +50,16 @@ public abstract class AppendIOFile<B extends Buffer> extends WriteIOFile<B> {
         final int idx = buffers.length - 1;
         if (idx >= 0) {
             try {
-                URI blockURI = new FileBlock(uri, String.valueOf(idx)).getBlockURI();
-                Buffer byteBuffer = CacheManager.getInstance().get(blockURI, new CacheManager.BufferCreator() {
+                URI uri = new FileBlock(this.uri, String.valueOf(idx)).getBlockURI();
+                Buffer byteBuffer = CacheManager.getInstance().get(uri, new CacheManager.BufferCreator() {
                     @Override
                     public Buffer createBuffer() {
                         return createBuf(idx);
                     }
                 });
                 buffers[idx] = byteBuffer.flip();
-                lastPos = (int) (byteBuffer.getMemorySize() + (idx << connector.getBlockOffset())) >> offset;
+                int preSize = (idx << connector.getBlockOffset()) >> offset;
+                lastPos = preSize + byteBuffer.getLength();
             } catch (BufferConstructException e) {
                 FineIOLoggers.getLogger().error(String.format("load buffer %s%d failed " + uri.getPath(), idx));
             }

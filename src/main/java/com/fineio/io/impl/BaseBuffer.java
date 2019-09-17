@@ -75,7 +75,7 @@ public class BaseBuffer implements Buffer {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         lock.lock();
         try {
             if (close.compareAndSet(false, true)) {
@@ -221,6 +221,11 @@ public class BaseBuffer implements Buffer {
     @Override
     public URI getUri() {
         return uri;
+    }
+
+    @Override
+    public int getLength() {
+        return writePos;
     }
 
 }

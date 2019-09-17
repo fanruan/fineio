@@ -35,7 +35,18 @@ public class CacheManager {
 
             @Override
             public boolean cleanAllCleanable() {
-                return clean();
+                if (!clean()) {
+                    Iterator<Map.Entry<URI, Buffer>> iterator = buffers.entrySet().iterator();
+                    while (iterator.hasNext() && files.isEmpty()) {
+                        Map.Entry<URI, Buffer> next = iterator.next();
+                        synchronized (getURILock(next.getKey())) {
+                            next.getValue().close();
+                            iterator.remove();
+                        }
+                    }
+                    return true;
+                }
+                return false;
             }
 
             @Override
@@ -61,8 +72,7 @@ public class CacheManager {
     public Buffer get(URI uri, BufferCreator creator) {
         synchronized (getURILock(uri)) {
             Buffer buf = buffers.get(uri);
-            if (null == buf) {
-                buf = creator.createBuffer();
+            if (null == buf && null != (buf = creator.createBuffer())) {
                 buffers.put(uri, buf);
             }
             return buf;
@@ -98,7 +108,8 @@ public class CacheManager {
 
     public void removeBuffers(URI uri, int length) {
         for (int i = 0; i < length; i++) {
-            buffers.remove(URI.create(uri.getPath() + i));
+            String path = uri.getPath();
+            buffers.remove(URI.create(path.endsWith("/") ? path + i : path + "/" + i));
         }
     }
 
@@ -107,6 +118,7 @@ public class CacheManager {
             SingletonHolder.EXEC.submit(new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
+                    FineIOLoggers.getLogger().info(String.format("Buf %s close. Release %d", buf.getUri().getPath(), buf.getMemorySize()));
                     buf.close();
                     return null;
                 }
@@ -129,6 +141,7 @@ public class CacheManager {
                             cache.updateTime();
                         } else {
                             readIOFile.close();
+                            iterator.remove();
                             return true;
                         }
                     } catch (Exception e) {

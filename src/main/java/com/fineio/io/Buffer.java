@@ -21,4 +21,9 @@ public interface Buffer extends Closeable {
     Buffer flip();
 
     URI getUri();
+
+    @Override
+    void close();
+
+    int getLength();
 }
