@@ -30,6 +30,11 @@ abstract class BaseSafeDirectBuf<B extends DirectBuffer> implements DirectBuffer
         return buf.getSizeInBytes();
     }
 
+    @Override
+    public int getCapInBytes() {
+        return buf.getCapInBytes();
+    }
+
     static class BaseVoidDirectBuf implements DirectBuffer {
         DirectBuffer realBuf;
 
@@ -50,6 +55,11 @@ abstract class BaseSafeDirectBuf<B extends DirectBuffer> implements DirectBuffer
         @Override
         public int getSizeInBytes() {
             return realBuf.getSizeInBytes();
+        }
+
+        @Override
+        public int getCapInBytes() {
+            return realBuf.getCapInBytes();
         }
 
         @Override

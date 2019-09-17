@@ -42,7 +42,7 @@ public class BufferCache {
         cache = Caffeine.newBuilder()
                 // 读内存上限的一半
                 .maximumWeight(maximumWeight)
-                .<FileBlock, DirectBuffer>weigher((key, value) -> value.getSizeInBytes())
+                .<FileBlock, DirectBuffer>weigher((key, value) -> value.getCapInBytes())
                 .expireAfterAccess(Duration.ofMinutes(10))
                 .recordStats()
                 .removalListener((key, value, cause) -> {
@@ -82,7 +82,7 @@ public class BufferCache {
                   caffine惰性释放，不用就不释放，即使过期、超重
                   这里刷掉过期的，超重的
                  */
-                FineIOLoggers.getLogger().debug(String.format("fineio read mem %d, fineio write mem %d", MemoryManager.INSTANCE.getReadMemory(), MemoryManager.INSTANCE.getWriteMemory()));
+                FineIOLoggers.getLogger().info(String.format("fineio read mem %d, fineio write mem %d", MemoryManager.INSTANCE.getReadMemory(), MemoryManager.INSTANCE.getWriteMemory()));
 
                 cache.cleanUp();
             } catch (Throwable e) {

@@ -22,11 +22,10 @@ public class FineIoProperty<T> {
             final T apply = valueCalculator.compose(valueGetter).apply(name);
             if (apply != null) {
                 value = apply;
-                return;
             }
         } catch (Exception ignore) {
+            value = defaultValue;
         }
-        value = defaultValue;
     }
 
     private static FineIoProperty<Long> ofSystemLong(String name, Long defaultValue) {

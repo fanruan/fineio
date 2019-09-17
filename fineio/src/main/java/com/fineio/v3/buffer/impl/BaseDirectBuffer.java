@@ -132,6 +132,11 @@ abstract class BaseDirectBuffer implements DirectBuffer {
     }
 
     @Override
+    public int getCapInBytes() {
+        return cap << offset.getOffset();
+    }
+
+    @Override
     public FileBlock getFileBlock() {
         return fileBlock;
     }
@@ -139,7 +144,7 @@ abstract class BaseDirectBuffer implements DirectBuffer {
     @Override
     public void close() {
         if (closed.compareAndSet(false, true)) {
-            MemoryManager.INSTANCE.release(address, cap << offset.getOffset());
+            MemoryManager.INSTANCE.release(address, getCapInBytes());
         }
     }
 }
