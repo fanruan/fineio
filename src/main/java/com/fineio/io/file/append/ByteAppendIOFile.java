@@ -21,12 +21,14 @@ public class ByteAppendIOFile extends AppendIOFile<ByteBuffer> {
     }
 
     public void put(byte value) {
-        super.put(lastPos++, value);
+        super.put(lastPos, value);
+        lastPos++;
     }
 
     @Override
     public void put(int pos, byte v) {
-        super.put(lastPos++, v);
+        super.put(lastPos, v);
+        lastPos++;
     }
 
     @Override

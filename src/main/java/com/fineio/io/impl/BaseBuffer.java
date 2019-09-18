@@ -75,7 +75,7 @@ public class BaseBuffer implements Buffer {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         lock.lock();
         try {
             if (close.compareAndSet(false, true)) {
@@ -100,7 +100,7 @@ public class BaseBuffer implements Buffer {
                         bufferKey.getConnector().read(bufferKey.getBlock()), 1 << bufferKey.getConnector().getBlockOffset()));
                 address = allocate.getAddress();
                 this.memorySize = allocate.getAllocateSize();
-                this.maxSize = (int) (this.memorySize >> offset) + 1;
+                this.maxSize = (int) (this.memorySize >> offset);
                 this.close.compareAndSet(true, false);
             }
         } catch (IOException e) {
@@ -207,8 +207,7 @@ public class BaseBuffer implements Buffer {
             setCurrentCapacity(offset);
             currentMaxSize = maxSize;
             writePos = maxSize - 1;
-            int maxMemory = 1 << blockOffset;
-            this.maxSize = (maxMemory >> this.offset);
+            this.maxSize = 1 << maxOffset;
             MemoryManager.INSTANCE.flip(memorySize, true);
         } else {
             level = Level.READ;
@@ -221,6 +220,11 @@ public class BaseBuffer implements Buffer {
     @Override
     public URI getUri() {
         return uri;
+    }
+
+    @Override
+    public int getLength() {
+        return writePos + 1;
     }
 
 }

@@ -3,7 +3,6 @@ package com.fineio.io.impl;
 import com.fineio.io.Buffer;
 import com.fineio.io.base.BufferKey;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
@@ -20,7 +19,7 @@ public class BufferWrapper implements Buffer {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         this.unsafeBuf.close();
     }
 
@@ -48,6 +47,11 @@ public class BufferWrapper implements Buffer {
     @Override
     public URI getUri() {
         return this.unsafeBuf.getUri();
+    }
+
+    @Override
+    public int getLength() {
+        return this.unsafeBuf.getLength();
     }
 
 }
