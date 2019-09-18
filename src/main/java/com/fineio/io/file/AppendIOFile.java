@@ -18,7 +18,7 @@ import java.net.URI;
  * @date 2019/9/11
  */
 public abstract class AppendIOFile<B extends Buffer> extends WriteIOFile<B> {
-    protected int lastPos;
+    protected volatile int lastPos;
 
     protected AppendIOFile(Connector connector, URI uri, byte offset) {
         super(connector, uri, offset);

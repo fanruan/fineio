@@ -100,7 +100,7 @@ public class BaseBuffer implements Buffer {
                         bufferKey.getConnector().read(bufferKey.getBlock()), 1 << bufferKey.getConnector().getBlockOffset()));
                 address = allocate.getAddress();
                 this.memorySize = allocate.getAllocateSize();
-                this.maxSize = (int) (this.memorySize >> offset) + 1;
+                this.maxSize = (int) (this.memorySize >> offset);
                 this.close.compareAndSet(true, false);
             }
         } catch (IOException e) {
@@ -224,7 +224,7 @@ public class BaseBuffer implements Buffer {
 
     @Override
     public int getLength() {
-        return writePos;
+        return writePos + 1;
     }
 
 }

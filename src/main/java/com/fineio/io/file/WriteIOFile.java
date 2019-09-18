@@ -139,6 +139,7 @@ public class WriteIOFile<B extends Buffer> extends IOFile<B> {
     private void writeIdx(int idx) {
         if (idx >= 0) {
             writeBuffer(buffers[idx]);
+            buffers[idx] = null;
         }
     }
 }
