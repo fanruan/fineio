@@ -11,6 +11,7 @@ import com.fineio.io.file.write.FileSyncManager;
 import com.fineio.io.impl.BaseBuffer;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.storage.Connector;
+import com.fineio.v21.cache.CacheManager;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -64,6 +65,7 @@ public class WriteIOFile<B extends Buffer> extends IOFile<B> {
         byte[] bytes = new byte[HEAD_LEN];
         Bits.putInt(bytes, 0, buffers.length);
         bytes[STEP_LEN] = (byte) (blockSizeOffset + offset);
+        CacheManager.getInstance().putHead(uri, bytes);
         try {
             connector.write(block, bytes);
         } catch (Throwable e) {

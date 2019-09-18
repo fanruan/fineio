@@ -7,6 +7,7 @@ import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.manager.manager.MemoryManager;
 import com.fineio.v21.exec.FineIOThreadPoolExecutor;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class CacheManager {
     private ConcurrentMap<URI, Buffer> buffers = new ConcurrentHashMap<URI, Buffer>();
     private ConcurrentMap<URI, CacheObject<ReadIOFile>> files = new ConcurrentHashMap<URI, CacheObject<ReadIOFile>>();
     private ConcurrentMap<URI, Object> lockMap = new ConcurrentHashMap<URI, Object>();
+    private ConcurrentMap<URI, byte[]> heads = new ConcurrentHashMap<URI, byte[]>();
 
     private CacheManager() {
         MemoryManager.INSTANCE.registerCleaner(new MemoryManager.Cleaner() {
@@ -69,6 +71,10 @@ public class CacheManager {
         }
     }
 
+    public void putHead(URI uri, byte[] head) {
+        heads.put(uri, head);
+    }
+
     public Buffer get(URI uri, BufferCreator creator) {
         synchronized (getURILock(uri)) {
             Buffer buf = buffers.get(uri);
@@ -77,6 +83,15 @@ public class CacheManager {
             }
             return buf;
         }
+    }
+
+    public byte[] get(URI uri, HeadReader reader) throws IOException {
+        if (heads.containsKey(uri)) {
+            return heads.get(uri);
+        }
+        byte[] bytes = reader.readHead();
+        heads.put(uri, bytes);
+        return bytes;
     }
 
     public <B extends Buffer> ReadIOFile<B> get(URI uri, FileCreator<B> creator) {
@@ -141,6 +156,7 @@ public class CacheManager {
                             cache.updateTime();
                         } else {
                             readIOFile.close();
+                            heads.remove(next.getKey());
                             iterator.remove();
                             return true;
                         }
@@ -159,6 +175,10 @@ public class CacheManager {
 
     public interface FileCreator<B extends Buffer> {
         ReadIOFile<B> createFile();
+    }
+
+    public interface HeadReader {
+        byte[] readHead() throws IOException;
     }
 
     private static class SingletonHolder {

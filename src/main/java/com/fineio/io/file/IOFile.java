@@ -5,6 +5,7 @@ import com.fineio.exception.BlockNotFoundException;
 import com.fineio.io.Buffer;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
+import com.fineio.v21.cache.CacheManager;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -47,25 +48,35 @@ public abstract class IOFile<B extends Buffer> implements Closeable {
     }
 
     protected void readHeader(int offset) {
-        InputStream is = null;
-        FileBlock head = new FileBlock(uri, FileConstants.HEAD);
+
+        final FileBlock head = new FileBlock(uri, FileConstants.HEAD);
         try {
-            is = this.connector.read(head);
-            if (is == null) {
-                throw new BlockNotFoundException("block:" + uri.toString() + " not found!");
-            }
-            byte[] header = new byte[9];
-            is.read(header);
+            byte[] header = CacheManager.getInstance().get(uri, new CacheManager.HeadReader() {
+                @Override
+                public byte[] readHead() throws IOException {
+                    InputStream is = null;
+                    try {
+                        is = connector.read(head);
+                        if (is == null) {
+                            throw new BlockNotFoundException("block:" + uri.toString() + " not found!");
+                        }
+                        byte[] header = new byte[9];
+                        is.read(header);
+                        return header;
+                    } finally {
+                        if (null != is) {
+                            try {
+                                is.close();
+                            } catch (IOException ignore) {
+                            }
+                        }
+                    }
+                }
+            });
             initBufferArray(offset, header);
         } catch (Throwable e) {
             throw new BlockNotFoundException("block:" + uri.toString() + " not found!");
         } finally {
-            if (null != is) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                }
-            }
             singleBlockLen = (1L << blockSizeOffset) - 1;
         }
     }
