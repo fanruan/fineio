@@ -112,8 +112,9 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
     @Override
     public void close() {
         if (close.compareAndSet(false, true) && null != buffers) {
-            Buffer[] bufs = buffers;
-            CacheManager.getInstance().removeBuffers(uri, bufs.length);
+            Buffer[] bufs = new Buffer[buffers.length];
+            System.arraycopy(buffers, 0, bufs, 0, buffers.length);
+            CacheManager.getInstance().removeBuffers(uri, bufs.length, false);
             Arrays.fill(buffers, null);
             for (Buffer buf : bufs) {
                 CacheManager.getInstance().close(buf);
@@ -129,6 +130,10 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
 
     public boolean isAccess() {
         return access;
+    }
+
+    public boolean isValid() {
+        return null != buffers;
     }
 
     /**

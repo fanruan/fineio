@@ -1,5 +1,6 @@
 package com.fineio.v21.cache;
 
+import com.fineio.base.Bits;
 import com.fineio.cache.CacheObject;
 import com.fineio.io.Buffer;
 import com.fineio.io.file.ReadIOFile;
@@ -103,9 +104,11 @@ public class CacheManager {
 
             }
             final ReadIOFile<B> file = creator.createFile();
-            cache = new CacheObject<ReadIOFile>(file);
-            files.put(uri, cache);
-            return cache.get();
+            if (file.isValid()) {
+                cache = new CacheObject<ReadIOFile>(file);
+                files.put(uri, cache);
+            }
+            return file;
         }
     }
 
@@ -121,10 +124,15 @@ public class CacheManager {
         return lock;
     }
 
-    public void removeBuffers(URI uri, int length) {
+    public void removeBuffers(URI uri, int length, boolean release) {
         for (int i = 0; i < length; i++) {
             String path = uri.getPath();
-            buffers.remove(URI.create(path.endsWith("/") ? path + i : path + "/" + i));
+            Buffer remove = buffers.remove(URI.create(path.endsWith("/") ? path + i : path + "/" + i));
+            if (release && null != remove) {
+                synchronized (getURILock(remove.getUri())) {
+                    remove.close();
+                }
+            }
         }
     }
 
@@ -146,7 +154,7 @@ public class CacheManager {
         while (iterator.hasNext()) {
             final Map.Entry<URI, CacheObject<ReadIOFile>> next = iterator.next();
             final CacheObject<ReadIOFile> cache = next.getValue();
-            if (cache.getIdle() > TimeUnit.MINUTES.toSeconds(5)) {
+            if (cache.getIdle() > TimeUnit.MINUTES.toMillis(5)) {
                 final ReadIOFile readIOFile = cache.get();
                 if (null != readIOFile) {
                     readIOFile.resetAccess();
@@ -162,6 +170,13 @@ public class CacheManager {
                         }
                     } catch (Exception e) {
                         FineIOLoggers.getLogger().error("ignore");
+                    }
+                } else {
+                    iterator.remove();
+                    byte[] remove = heads.remove(next.getKey());
+                    if (null != remove) {
+                        int size = Bits.getInt(remove, 0);
+                        removeBuffers(next.getKey(), size, true);
                     }
                 }
             }
