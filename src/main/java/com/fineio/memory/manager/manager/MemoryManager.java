@@ -66,7 +66,7 @@ public enum MemoryManager {
     private volatile AtomicInteger writeWaitCount = new AtomicInteger(0);
     private Lock memoryLock = new ReentrantLock();
     private ExecutorService gcThread = FineIOExecutors.newSingleThreadExecutor("io-gc-thread");
-    private ScheduledExecutorService gcTrigger = FineIOExecutors.newScheduledExecutorService(1, "io-gc-trigger");
+    //    private ScheduledExecutorService gcTrigger = FineIOExecutors.newScheduledExecutorService(1, "io-gc-trigger");
     private ScheduledExecutorService releaseLimitThread = FineIOExecutors.newScheduledExecutorService(1, "io-limit-thread");
     private volatile AtomicInteger releaseLimitCount = new AtomicInteger(0);
     private volatile AtomicInteger triggerCount = new AtomicInteger(0);
@@ -100,7 +100,7 @@ public enum MemoryManager {
                 }
             }
         });
-        gcTrigger.scheduleAtFixedRate(new CleanOneTask(), 30, 30, TimeUnit.SECONDS);
+//        gcTrigger.scheduleAtFixedRate(new CleanOneTask(), 30, 30, TimeUnit.SECONDS);
         releaseLimitThread.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
