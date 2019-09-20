@@ -15,6 +15,7 @@ import com.fineio.v2.io.IntBuffer;
 import com.fineio.v2.io.LongBuffer;
 import com.fineio.v2.io.ShortBuffer;
 import junit.framework.TestCase;
+import org.junit.Ignore;
 
 import java.lang.reflect.Method;
 import java.net.URI;
@@ -22,6 +23,7 @@ import java.net.URI;
 /**
  * Created by daniel on 2017/2/20.
  */
+@Ignore
 public class WriteBufferTest extends TestCase {
 
     private byte[] createRandomByte(int off) {
