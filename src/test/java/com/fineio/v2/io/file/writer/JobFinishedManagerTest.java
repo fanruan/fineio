@@ -6,6 +6,7 @@ import com.fineio.logger.FineIOLoggers;
 import com.fineio.v2.io.base.Job;
 import com.fineio.v2.io.base.JobAssist;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -23,6 +24,7 @@ import static org.junit.Assert.assertTrue;
  * @author yee
  * @date 2018/7/13
  */
+@Ignore
 public class JobFinishedManagerTest {
 
     private static ExecutorService executorService = Executors.newFixedThreadPool(3);
