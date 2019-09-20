@@ -2,6 +2,7 @@ package com.fineio.memory.manager.manager;
 
 import com.fineio.cache.AtomicWatchLong;
 import com.fineio.cache.Watcher;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.ReadAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
@@ -36,6 +37,7 @@ public enum MemoryManager {
     private static final int MIN_WRITE_OFFSET = 3;
     private static final int TRY_CLEAN_TIME = 100;
     private static final double DEFAULT_INCREMENT_RATE = 1.1D;
+    private Lock cleanOneLock = new ReentrantLock();
     /**
      * 释放内存上限
      */
@@ -358,6 +360,7 @@ public enum MemoryManager {
         @Override
         public void run() {
             if (null != cleaner) {
+                cleanOneLock.lock();
                 try {
                     if (cleaner.clean() && triggerGcCount.incrementAndGet() >= 20) {
                         System.gc();
@@ -369,7 +372,9 @@ public enum MemoryManager {
                         triggerCount.set(0);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    FineIOLoggers.getLogger().error(e);
+                } finally {
+                    cleanOneLock.unlock();
                 }
             }
         }
