@@ -19,8 +19,6 @@ import java.util.Arrays;
  * @date 2019/9/11
  */
 public class ReadIOFile<B extends Buffer> extends IOFile<B> {
-    private boolean access;
-
     protected ReadIOFile(Connector connector, URI uri, int offset) {
         super(connector, uri);
         try {
@@ -41,9 +39,6 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
 
     public int getInt(int pos) {
         try {
-            if (!access) {
-                access = true;
-            }
             return ((IntBuffer) getBuffer(pos)).getInt((int) (pos & singleBlockLen));
         } catch (NullPointerException e) {
             final int i = pos >> blockSizeOffset;
@@ -64,10 +59,16 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
             return ((ByteBuffer) getBuffer(pos)).getByte((int) (pos & singleBlockLen));
         } catch (NullPointerException e) {
             final int i = pos >> blockSizeOffset;
-            final ByteBuffer byteUnsafeBuf = BaseBuffer.newBuffer(new BufferKey(connector, new FileBlock(uri, String.valueOf(i))));
-            CacheManager.getInstance().put(byteUnsafeBuf);
-            buffers[i] = byteUnsafeBuf;
-            return byteUnsafeBuf.getByte((int) (pos & singleBlockLen));
+            final FileBlock block = new FileBlock(uri, String.valueOf(i));
+            final BufferKey bufferKey = new BufferKey(connector, block);
+
+            buffers[i] = CacheManager.getInstance().get(bufferKey.getBlock().getBlockURI(), new CacheManager.BufferCreator() {
+                @Override
+                public Buffer createBuffer() {
+                    return BaseBuffer.newBuffer(bufferKey);
+                }
+            });
+            return ((ByteBuffer) buffers[i]).getByte((int) (pos & singleBlockLen));
         }
     }
 
@@ -94,10 +95,16 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
             return ((DoubleBuffer) getBuffer(pos)).getDouble((int) (pos & singleBlockLen));
         } catch (NullPointerException e) {
             final int i = pos >> blockSizeOffset;
-            final DoubleBuffer byteUnsafeBuf = BaseBuffer.newBuffer(new BufferKey(connector, new FileBlock(uri, String.valueOf(i)))).asDouble();
-            CacheManager.getInstance().put(byteUnsafeBuf);
-            buffers[i] = byteUnsafeBuf;
-            return byteUnsafeBuf.getDouble((int) (pos & singleBlockLen));
+            final FileBlock block = new FileBlock(uri, String.valueOf(i));
+            final BufferKey bufferKey = new BufferKey(connector, block);
+
+            buffers[i] = CacheManager.getInstance().get(bufferKey.getBlock().getBlockURI(), new CacheManager.BufferCreator() {
+                @Override
+                public Buffer createBuffer() {
+                    return BaseBuffer.newBuffer(bufferKey).asDouble();
+                }
+            });
+            return ((DoubleBuffer) buffers[i]).getDouble((int) (pos & singleBlockLen));
         }
     }
 
@@ -120,16 +127,6 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
                 CacheManager.getInstance().close(buf);
             }
         }
-    }
-
-    public void resetAccess() {
-        if (access) {
-            access = false;
-        }
-    }
-
-    public boolean isAccess() {
-        return access;
     }
 
     public boolean isValid() {
