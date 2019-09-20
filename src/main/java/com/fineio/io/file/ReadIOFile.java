@@ -61,18 +61,30 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
 
     public byte getByte(int pos) {
         try {
+            if (!access) {
+                access = true;
+            }
             return ((ByteBuffer) getBuffer(pos)).getByte((int) (pos & singleBlockLen));
         } catch (NullPointerException e) {
             final int i = pos >> blockSizeOffset;
-            final ByteBuffer byteUnsafeBuf = BaseBuffer.newBuffer(new BufferKey(connector, new FileBlock(uri, String.valueOf(i))));
-            CacheManager.getInstance().put(byteUnsafeBuf);
-            buffers[i] = byteUnsafeBuf;
-            return byteUnsafeBuf.getByte((int) (pos & singleBlockLen));
+            final FileBlock block = new FileBlock(uri, String.valueOf(i));
+            final BufferKey bufferKey = new BufferKey(connector, block);
+
+            buffers[i] = CacheManager.getInstance().get(bufferKey.getBlock().getBlockURI(), new CacheManager.BufferCreator() {
+                @Override
+                public Buffer createBuffer() {
+                    return BaseBuffer.newBuffer(bufferKey);
+                }
+            });
+            return ((ByteBuffer) buffers[i]).getByte((int) (pos & singleBlockLen));
         }
     }
 
     public long getLong(int pos) {
         try {
+            if (!access) {
+                access = true;
+            }
             return ((LongBuffer) getBuffer(pos)).getLong((int) (pos & singleBlockLen));
         } catch (NullPointerException e) {
             final int i = pos >> blockSizeOffset;
@@ -91,13 +103,22 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
 
     public double getDouble(int pos) {
         try {
+            if (!access) {
+                access = true;
+            }
             return ((DoubleBuffer) getBuffer(pos)).getDouble((int) (pos & singleBlockLen));
         } catch (NullPointerException e) {
             final int i = pos >> blockSizeOffset;
-            final DoubleBuffer byteUnsafeBuf = BaseBuffer.newBuffer(new BufferKey(connector, new FileBlock(uri, String.valueOf(i)))).asDouble();
-            CacheManager.getInstance().put(byteUnsafeBuf);
-            buffers[i] = byteUnsafeBuf;
-            return byteUnsafeBuf.getDouble((int) (pos & singleBlockLen));
+            final FileBlock block = new FileBlock(uri, String.valueOf(i));
+            final BufferKey bufferKey = new BufferKey(connector, block);
+
+            buffers[i] = CacheManager.getInstance().get(bufferKey.getBlock().getBlockURI(), new CacheManager.BufferCreator() {
+                @Override
+                public Buffer createBuffer() {
+                    return BaseBuffer.newBuffer(bufferKey).asDouble();
+                }
+            });
+            return ((DoubleBuffer) buffers[i]).getDouble((int) (pos & singleBlockLen));
         }
     }
 
