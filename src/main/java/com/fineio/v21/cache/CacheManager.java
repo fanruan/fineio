@@ -77,6 +77,9 @@ public class CacheManager {
     }
 
     public Buffer get(URI uri, BufferCreator creator) {
+        if (buffers.containsKey(uri)) {
+            return buffers.get(uri);
+        }
         synchronized (getURILock(uri)) {
             Buffer buf = buffers.get(uri);
             if (null == buf && null != (buf = creator.createBuffer())) {
@@ -96,19 +99,23 @@ public class CacheManager {
     }
 
     public <B extends Buffer> ReadIOFile<B> get(URI uri, FileCreator<B> creator) {
+        CacheObject<ReadIOFile> cache = files.get(uri);
+        if (null != cache && null != cache.get()) {
+            cache.updateTime();
+            return cache.get();
+        }
         synchronized (getURILock(uri)) {
-            CacheObject<ReadIOFile> cache = files.get(uri);
-            if (null != cache && null != cache.get()) {
-                cache.updateTime();
-                return cache.get();
-
+            CacheObject<ReadIOFile> cacheObject = files.get(uri);
+            if (null == cacheObject || null == cacheObject.get()) {
+                final ReadIOFile<B> file = creator.createFile();
+                if (file.isValid()) {
+                    cacheObject = new CacheObject<ReadIOFile>(file);
+                    files.put(uri, cacheObject);
+                }
+                return file;
             }
-            final ReadIOFile<B> file = creator.createFile();
-            if (file.isValid()) {
-                cache = new CacheObject<ReadIOFile>(file);
-                files.put(uri, cache);
-            }
-            return file;
+            cacheObject.updateTime();
+            return cacheObject.get();
         }
     }
 
@@ -141,7 +148,7 @@ public class CacheManager {
             SingletonHolder.EXEC.submit(new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
-                    FineIOLoggers.getLogger().info(String.format("Buf %s close. Release %d", buf.getUri().getPath(), buf.getMemorySize()));
+                    FineIOLoggers.getLogger().debug(String.format("Buf %s close. Release %d", buf.getUri().getPath(), buf.getMemorySize()));
                     buf.close();
                     return null;
                 }
@@ -149,29 +156,14 @@ public class CacheManager {
         }
     }
 
-    public boolean closeTimeout() {
+    private boolean closeTimeout() {
         final Iterator<Map.Entry<URI, CacheObject<ReadIOFile>>> iterator = files.entrySet().iterator();
         while (iterator.hasNext()) {
             final Map.Entry<URI, CacheObject<ReadIOFile>> next = iterator.next();
             final CacheObject<ReadIOFile> cache = next.getValue();
             if (cache.getIdle() > TimeUnit.MINUTES.toMillis(5)) {
                 final ReadIOFile readIOFile = cache.get();
-                if (null != readIOFile) {
-                    readIOFile.resetAccess();
-                    try {
-                        TimeUnit.SECONDS.sleep(1);
-                        if (readIOFile.isAccess()) {
-                            cache.updateTime();
-                        } else {
-                            readIOFile.close();
-                            heads.remove(next.getKey());
-                            iterator.remove();
-                            return true;
-                        }
-                    } catch (Exception e) {
-                        FineIOLoggers.getLogger().error("ignore");
-                    }
-                } else {
+                if (null == readIOFile) {
                     iterator.remove();
                     byte[] remove = heads.remove(next.getKey());
                     if (null != remove) {

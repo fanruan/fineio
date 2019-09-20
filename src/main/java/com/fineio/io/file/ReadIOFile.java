@@ -19,8 +19,6 @@ import java.util.Arrays;
  * @date 2019/9/11
  */
 public class ReadIOFile<B extends Buffer> extends IOFile<B> {
-    private boolean access;
-
     protected ReadIOFile(Connector connector, URI uri, int offset) {
         super(connector, uri);
         try {
@@ -41,9 +39,6 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
 
     public int getInt(int pos) {
         try {
-            if (!access) {
-                access = true;
-            }
             return ((IntBuffer) getBuffer(pos)).getInt((int) (pos & singleBlockLen));
         } catch (NullPointerException e) {
             final int i = pos >> blockSizeOffset;
@@ -61,9 +56,6 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
 
     public byte getByte(int pos) {
         try {
-            if (!access) {
-                access = true;
-            }
             return ((ByteBuffer) getBuffer(pos)).getByte((int) (pos & singleBlockLen));
         } catch (NullPointerException e) {
             final int i = pos >> blockSizeOffset;
@@ -82,9 +74,6 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
 
     public long getLong(int pos) {
         try {
-            if (!access) {
-                access = true;
-            }
             return ((LongBuffer) getBuffer(pos)).getLong((int) (pos & singleBlockLen));
         } catch (NullPointerException e) {
             final int i = pos >> blockSizeOffset;
@@ -103,9 +92,6 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
 
     public double getDouble(int pos) {
         try {
-            if (!access) {
-                access = true;
-            }
             return ((DoubleBuffer) getBuffer(pos)).getDouble((int) (pos & singleBlockLen));
         } catch (NullPointerException e) {
             final int i = pos >> blockSizeOffset;
@@ -141,16 +127,6 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
                 CacheManager.getInstance().close(buf);
             }
         }
-    }
-
-    public void resetAccess() {
-        if (access) {
-            access = false;
-        }
-    }
-
-    public boolean isAccess() {
-        return access;
     }
 
     public boolean isValid() {
