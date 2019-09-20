@@ -49,12 +49,7 @@ public class BaseBuffer implements Buffer {
         this.bufferKey = bufferKey;
         this.level = Level.READ;
         this.uri = bufferKey.getBlock().getBlockURI();
-        lock.lock();
-        try {
-            loadContent();
-        } finally {
-            lock.unlock();
-        }
+        loadContent();
     }
 
     private BaseBuffer(BufferKey bufferKey, int maxOffset) {
@@ -94,6 +89,7 @@ public class BaseBuffer implements Buffer {
     }
 
     private void loadContent() {
+        lock.lock();
         try {
             if (address == 0) {
                 MemoryObject allocate = MemoryManager.INSTANCE.allocate(BaseMemoryAllocator.Builder.BLOCK.build(
@@ -105,6 +101,8 @@ public class BaseBuffer implements Buffer {
             }
         } catch (IOException e) {
             throw new BufferConstructException(e);
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -119,19 +117,14 @@ public class BaseBuffer implements Buffer {
     }
 
     int ensurePos(int pos) {
-        if (0 == address) {
-            lock.lock();
-            try {
-                loadContent();
-                return ensurePos(pos);
-            } finally {
-                lock.unlock();
-            }
-        }
-        if (pos > -1 && pos < maxSize) {
+        if (pos > -1 && pos < maxSize && address > 0) {
             return pos;
         }
-        throw new BufferIndexOutOfBoundsException(bufferKey.getBlock().getBlockURI(), pos, maxSize);
+        loadContent();
+        if (address == 0) {
+            throw new BufferIndexOutOfBoundsException(bufferKey.getBlock().getBlockURI(), pos, maxSize);
+        }
+        return pos;
     }
 
     int ensureCap(int pos) {
