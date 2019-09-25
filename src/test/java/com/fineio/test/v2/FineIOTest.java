@@ -1,5 +1,6 @@
 package com.fineio.test.v2;
 
+import com.fineio.FineIoTestBootstrap;
 import com.fineio.base.Bits;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.FileConstants;
@@ -29,6 +30,10 @@ import java.net.URI;
  * @date 2018/6/1
  */
 public class FineIOTest extends TestCase {
+    @Override
+    public void setUp() throws Exception {
+        FineIoTestBootstrap.boot();
+    }
 
     public void testCreateReadIOFilePlus() throws Exception {
 
