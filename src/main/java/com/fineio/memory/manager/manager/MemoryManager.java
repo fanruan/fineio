@@ -1,5 +1,6 @@
 package com.fineio.memory.manager.manager;
 
+import com.fineio.FineIoService;
 import com.fineio.cache.AtomicWatchLong;
 import com.fineio.cache.Watcher;
 import com.fineio.logger.FineIOLoggers;
@@ -24,7 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author yee
  * @date 2018/9/18
  */
-public enum MemoryManager {
+public enum MemoryManager implements FineIoService {
     /**
      * 单例
      */
@@ -45,7 +46,7 @@ public enum MemoryManager {
     /**
      * 扩容上限
      */
-    private final long memorySizeUpLimit;
+    private long memorySizeUpLimit;
     /**
      * 读内存空间
      */
@@ -67,9 +68,8 @@ public enum MemoryManager {
      */
     private volatile AtomicInteger writeWaitCount = new AtomicInteger(0);
     private Lock memoryLock = new ReentrantLock();
-    private ExecutorService gcThread = FineIOExecutors.newSingleThreadExecutor("io-gc-thread");
-    //    private ScheduledExecutorService gcTrigger = FineIOExecutors.newScheduledExecutorService(1, "io-gc-trigger");
-    private ScheduledExecutorService releaseLimitThread = FineIOExecutors.newScheduledExecutorService(1, "io-limit-thread");
+    private ExecutorService gcThread;
+    private ScheduledExecutorService releaseLimitThread;
     private volatile AtomicInteger releaseLimitCount = new AtomicInteger(0);
     private volatile AtomicInteger triggerCount = new AtomicInteger(0);
     private volatile AtomicInteger triggerGcCount = new AtomicInteger(0);
@@ -77,12 +77,14 @@ public enum MemoryManager {
 
     private Cleaner cleaner;
 
-    MemoryManager() {
+    @Override
+    public void start() {
         this.readSize = new AtomicWatchLong(createReadWatcher());
         this.writeSize = new AtomicWatchLong(createWriteWatcher());
         currentMaxSize = Math.min(VM.maxDirectMemory(), getMaxSize());
         releaseLimit = (long) (currentMaxSize * DEFAULT_RELEASE_RATE);
         memorySizeUpLimit = (long) (getMaxSize() * DEFAULT_RELEASE_RATE);
+        gcThread = FineIOExecutors.newSingleThreadExecutor("io-gc-thread");
         gcThread.execute(new Runnable() {
             @Override
             public void run() {
@@ -96,6 +98,8 @@ public enum MemoryManager {
                             }
                         }
                         LockSupport.parkNanos(1000);
+                    } catch (InterruptedException e) {
+                        return;
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -103,6 +107,7 @@ public enum MemoryManager {
             }
         });
 //        gcTrigger.scheduleAtFixedRate(new CleanOneTask(), 30, 30, TimeUnit.SECONDS);
+        releaseLimitThread = FineIOExecutors.newScheduledExecutorService(1, "io-limit-thread");
         releaseLimitThread.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -115,6 +120,19 @@ public enum MemoryManager {
                 releaseLimitCount.set(0);
             }
         }, 10, 10, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void stop() {
+        taskQueue.clear();
+        releaseLimitThread.shutdownNow();
+        gcThread.shutdownNow();
+
+        triggerGcCount.set(0);
+        triggerCount.set(0);
+        releaseLimitCount.set(0);
+        writeWaitCount.set(0);
+        readWaitCount.set(0);
     }
 
     public final void updateRead(long size) {

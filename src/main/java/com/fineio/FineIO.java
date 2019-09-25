@@ -13,6 +13,7 @@ import com.fineio.io.file.append.ByteAppendIOFile;
 import com.fineio.io.file.append.DoubleAppendIOFile;
 import com.fineio.io.file.append.IntAppendIOFile;
 import com.fineio.io.file.append.LongAppendIOFile;
+import com.fineio.io.file.write.FileSyncManager;
 import com.fineio.logger.FineIOLogger;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.MemoryConf;
@@ -20,6 +21,7 @@ import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.manager.manager.MemoryManager;
 import com.fineio.storage.Connector;
 import com.fineio.v2.io.file.writer.JobFinishedManager;
+import com.fineio.v21.cache.CacheManager;
 
 import java.net.URI;
 import java.util.concurrent.Callable;
@@ -32,6 +34,18 @@ import java.util.concurrent.Future;
 public final class FineIO {
 
     public static boolean DEBUG = false;
+
+    public static void start() {
+        MemoryManager.INSTANCE.start();
+        CacheManager.getInstance().start();
+        FileSyncManager.getInstance().start();
+    }
+
+    public static void stop() {
+        MemoryManager.INSTANCE.stop();
+        CacheManager.getInstance().stop();
+        FileSyncManager.getInstance().stop();
+    }
 
     /**
      * 创建IO文件

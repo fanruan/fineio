@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
  * @author yee
  * @date 2018/9/19
  */
+@Deprecated
 public abstract class BufferCreator<B extends Buffer> {
     private static final long TIMEOUT = 10 * 60 * 1000L;
     protected final ScheduledExecutorService activeService;
