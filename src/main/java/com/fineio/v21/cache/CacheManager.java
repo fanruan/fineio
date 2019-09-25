@@ -1,5 +1,6 @@
 package com.fineio.v21.cache;
 
+import com.fineio.FineIoService;
 import com.fineio.base.Bits;
 import com.fineio.cache.CacheObject;
 import com.fineio.io.Buffer;
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * @author yee
  * @date 2019/9/12
  */
-public class CacheManager {
+public class CacheManager implements FineIoService {
 
     private ConcurrentMap<URI, Buffer> buffers = new ConcurrentHashMap<URI, Buffer>();
     private ConcurrentMap<URI, CacheObject<ReadIOFile>> files = new ConcurrentHashMap<URI, CacheObject<ReadIOFile>>();
@@ -145,7 +146,7 @@ public class CacheManager {
 
     public void close(final Buffer buf) {
         if (null != buf) {
-            SingletonHolder.EXEC.submit(new Callable<Void>() {
+            exec.submit(new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
                     FineIOLoggers.getLogger().debug(String.format("Buf %s close. Release %d", buf.getUri().getPath(), buf.getMemorySize()));
@@ -190,7 +191,18 @@ public class CacheManager {
 
     private static class SingletonHolder {
         private static CacheManager INSTANCE = new CacheManager();
-        private final static ExecutorService EXEC = FineIOThreadPoolExecutor.newInstance(Runtime.getRuntime().availableProcessors(), "fineio-cache-event-dispatcher");
 
+    }
+
+    private ExecutorService exec;
+
+    @Override
+    public void start() {
+        exec = FineIOThreadPoolExecutor.newInstance(Runtime.getRuntime().availableProcessors(), "fineio-cache-event-dispatcher");
+    }
+
+    @Override
+    public void stop() {
+        exec.shutdownNow();
     }
 }
