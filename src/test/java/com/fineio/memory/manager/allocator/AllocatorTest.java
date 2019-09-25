@@ -1,5 +1,6 @@
 package com.fineio.memory.manager.allocator;
 
+import com.fineio.FineIoTestBootstrap;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.memory.manager.allocator.impl.BaseMemoryAllocator;
 import com.fineio.memory.manager.deallocator.DeAllocator;
@@ -7,6 +8,7 @@ import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.memory.manager.obj.ReAllocateMemoryObject;
 import com.fineio.v2.FineIO;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -22,6 +24,11 @@ public class AllocatorTest {
     private static final String TEMPLATE = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.PageMaker including versions of Lorem Ipsum.";
     private static final DeAllocator READ = BaseDeAllocator.Builder.READ.build();
     private static final DeAllocator WRITE = BaseDeAllocator.Builder.WRITE.build();
+
+    @Before
+    public void setUp() throws Exception {
+        FineIoTestBootstrap.boot();
+    }
 
     @Test
     public void allocateRead() {

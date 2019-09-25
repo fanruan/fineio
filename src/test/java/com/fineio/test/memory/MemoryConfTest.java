@@ -1,5 +1,6 @@
 package com.fineio.test.memory;
 
+import com.fineio.FineIoTestBootstrap;
 import com.fineio.exception.MemorySetException;
 import com.fineio.v2.FineIO;
 import junit.framework.TestCase;
@@ -8,6 +9,10 @@ import junit.framework.TestCase;
  * Created by daniel on 2017/2/13.
  */
 public class MemoryConfTest extends TestCase {
+    @Override
+    public void setUp() throws Exception {
+        FineIoTestBootstrap.boot();
+    }
 
     public void testGetAndSet(){
         assertEquals(FineIO.getMinMemSizeForSet(), 1L<<30);

@@ -1,5 +1,6 @@
 package com.fineio.test.v2.io.buffer;
 
+import com.fineio.FineIoTestBootstrap;
 import com.fineio.base.Bits;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.io.file.FileBlock;
@@ -16,6 +17,7 @@ import com.fineio.v2.io.ShortBuffer;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.easymock.IMocksControl;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -33,6 +35,11 @@ import static junit.framework.TestCase.assertTrue;
  * @date 2018/6/1
  */
 public class BufferTest {
+    @Before
+    public void setUp() throws Exception {
+        FineIoTestBootstrap.boot();
+    }
+
     private byte[] createRandomByte(int off) {
         int len = 1 << off;
         byte[] arrays = new byte[len];
