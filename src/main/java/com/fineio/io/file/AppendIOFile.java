@@ -61,7 +61,7 @@ public abstract class AppendIOFile<B extends Buffer> extends WriteIOFile<B> {
                 int preSize = (idx << connector.getBlockOffset()) >> offset;
                 lastPos = preSize + byteBuffer.getLength();
             } catch (BufferConstructException e) {
-                FineIOLoggers.getLogger().error(String.format("load buffer %s%d failed ", uri.getPath(), idx));
+                FineIOLoggers.getLogger().error(String.format("load buffer %s%d failed ", uri.getPath(), idx), e);
             }
         }
     }
