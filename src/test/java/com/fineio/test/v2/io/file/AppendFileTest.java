@@ -1,5 +1,6 @@
 package com.fineio.test.v2.io.file;
 
+import com.fineio.FineIoTestBootstrap;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.AbstractConnector;
 import com.fineio.storage.Connector;
@@ -30,6 +31,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class AppendFileTest extends TestCase {
     private static int ARRAY_LEN = 10000000;
+
+    @Override
+    public void setUp() throws Exception {
+        FineIoTestBootstrap.boot();
+    }
 
     public void testConstruct() throws Exception {
         final byte size = 26;
