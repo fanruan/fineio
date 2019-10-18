@@ -12,17 +12,12 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.powermock.reflect.Whitebox;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
@@ -88,29 +83,29 @@ public class FileTest {
         assertThat(f.exists()).isFalse();
     }
 
-    @Test
-    public void writeMeta() throws IOException {
-        setInternalState(f, "offset", Offset.BYTE);
-        File.writeMeta(f, 1);
-
-        verify(connector).write(argThat(arg -> arg.getName().equals(File.META)), eq(new byte[]{0xA, 0, 0, 0, 1}));
-    }
-
-    @Test
-    public void initMetaAndGetLastPos() throws IOException {
-        setInternalState(f, "offset", Offset.BYTE);
-        when(connector.exists(any(FileBlock.class))).thenReturn(false, true);
-
-        assertThat(File.initMetaAndGetLastPos(f)).isZero();
-
-        when(connector.read(argThat(arg -> arg.getName().equals(File.META))))
-                .thenReturn(new ByteArrayInputStream(new byte[]{0xA, 0, 0, 0, 1}))
-                .thenThrow(new IOException())
-                .thenReturn(new ByteArrayInputStream(new byte[1]));
-
-        assertThat(File.initMetaAndGetLastPos(f)).isEqualTo(1);
-        assertThat(f.blockOffset).isEqualTo((byte) 0xA);
-        assertThat(File.initMetaAndGetLastPos(f)).isZero();
-        assertThat(File.initMetaAndGetLastPos(f)).isZero();
-    }
+//    @Test
+//    public void writeMeta() throws IOException {
+//        setInternalState(f, "offset", Offset.BYTE);
+//        File.writeMeta(f, 1);
+//
+//        verify(connector).write(argThat(arg -> arg.getName().equals(File.META)), eq(new byte[]{0xA, 0, 0, 0, 1}));
+//    }
+//
+//    @Test
+//    public void initMetaAndGetLastPos() throws IOException {
+//        setInternalState(f, "offset", Offset.BYTE);
+//        when(connector.exists(any(FileBlock.class))).thenReturn(false, true);
+//
+//        assertThat(File.initMetaAndGetLastPos(f)).isZero();
+//
+//        when(connector.read(argThat(arg -> arg.getName().equals(File.META))))
+//                .thenReturn(new ByteArrayInputStream(new byte[]{0xA, 0, 0, 0, 1}))
+//                .thenThrow(new IOException())
+//                .thenReturn(new ByteArrayInputStream(new byte[1]));
+//
+//        assertThat(File.initMetaAndGetLastPos(f)).isEqualTo(1);
+//        assertThat(f.blockOffset).isEqualTo((byte) 0xA);
+//        assertThat(File.initMetaAndGetLastPos(f)).isZero();
+//        assertThat(File.initMetaAndGetLastPos(f)).isZero();
+//    }
 }
