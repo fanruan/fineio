@@ -15,6 +15,7 @@ public class IntWriteFile extends WriteFile<IntDirectBuffer> {
     public IntWriteFile(FileBlock fileBlock, Connector connector, boolean asyncWrite) {
         super(fileBlock, Offset.INT, connector, asyncWrite);
         buffers = new IntDirectBuffer[16];
+        initLastBuf();
     }
 
     public static IntWriteFile ofAsync(FileBlock fileBlock, Connector connector) {
@@ -49,4 +50,8 @@ public class IntWriteFile extends WriteFile<IntDirectBuffer> {
         buffers[nthBuf].putInt(nthVal, value);
     }
 
+    @Override
+    IntDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock, int maxCap) {
+        return new IntDirectBuf(address, size, fileBlock, maxCap);
+    }
 }
