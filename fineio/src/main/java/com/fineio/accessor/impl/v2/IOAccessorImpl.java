@@ -57,6 +57,26 @@ public class IOAccessorImpl implements IOAccessor {
     }
 
     @Override
+    public <F extends IAppendFile<? extends ByteBuf>> void put(F file, int pos, byte value) {
+        put(file, value);
+    }
+
+    @Override
+    public <F extends IAppendFile<? extends LongBuf>> void put(F file, int pos, long value) {
+        put(file, value);
+    }
+
+    @Override
+    public <F extends IAppendFile<? extends IntBuf>> void put(F file, int pos, int value) {
+        put(file, value);
+    }
+
+    @Override
+    public <F extends IAppendFile<? extends DoubleBuf>> void put(F file, int pos, double value) {
+        put(file, value);
+    }
+
+    @Override
     public <F extends IWriteFile<? extends ByteBuf>> void put(F file, int pos, byte value) {
         IOFile.put((IOFile<ByteBuffer>) file, pos, value);
     }

@@ -1,5 +1,7 @@
 package com.fineio.v3.file.impl.write;
 
+import com.fineio.accessor.FileMode;
+import com.fineio.accessor.file.IAppendFile;
 import com.fineio.accessor.file.IWriteFile;
 import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
@@ -8,14 +10,22 @@ import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.file.impl.File;
 import com.fineio.v3.file.sync.FileSync;
 import com.fineio.v3.file.sync.FileSyncJob;
+import com.fineio.v3.memory.MemoryManager;
+import com.fineio.v3.memory.MemoryUtils;
 import com.fineio.v3.memory.Offset;
+import com.fineio.v3.utils.IOUtils;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
  * @author yee
  */
-public abstract class WriteFile<B extends DirectBuffer> extends File<B> implements IWriteFile<B> {
+public abstract class WriteFile<B extends DirectBuffer> extends File<B> implements IWriteFile<B>, IAppendFile<B> {
     private final boolean asyncWrite;
     private int curBuf = -1;
     private int lastPos;
@@ -23,14 +33,46 @@ public abstract class WriteFile<B extends DirectBuffer> extends File<B> implemen
     WriteFile(FileBlock fileBlock, Offset offset, Connector connector, boolean asyncWrite) {
         super(fileBlock, offset, connector);
         this.asyncWrite = asyncWrite;
+
+        lastPos = initMetaAndGetLastPos();
     }
+
+    void initLastBuf() {
+        if (nthVal(lastPos) == 0) {
+            // 此buf没数据，不用读connector
+            return;
+        }
+        int nthBuf = nthBuf(lastPos);
+        FileBlock lastFileBlock = new FileBlock(fileBlock.getPath(), String.valueOf(nthBuf));
+        if (connector.exists(lastFileBlock)) {
+            Long address = null;
+            int size = 0;
+            try (InputStream input = new BufferedInputStream(connector.read(lastFileBlock));
+                 ByteArrayOutputStream byteOutput = new ByteArrayOutputStream()) {
+                IOUtils.copyBinaryTo(input, byteOutput);
+                size = byteOutput.size();
+                address = MemoryManager.INSTANCE.allocate(size, FileMode.WRITE);
+                MemoryUtils.copyMemory(byteOutput.toByteArray(), address, size);
+
+                growBuffers(nthBuf);
+                buffers[nthBuf] = newDirectBuf(address, size >> offset.getOffset(), lastFileBlock, 1 << (blockOffset - offset.getOffset()));
+            } catch (Throwable e) {
+                if (address != null) {
+                    MemoryManager.INSTANCE.release(address, size);
+                }
+                FineIOLoggers.getLogger().error(e);
+            }
+        }
+    }
+
+    abstract B newDirectBuf(long address, int size, FileBlock fileBlock, int maxCap);
 
     /**
      * 给append file的后门
      *
      * @param nthBuf 第n个buf
      */
-    public void growBuffers(int nthBuf) {
+    void growBuffers(int nthBuf) {
         if (nthBuf >= buffers.length) {
             buffers = Arrays.copyOf(buffers, nthBuf + 16);
         }
@@ -57,7 +99,7 @@ public abstract class WriteFile<B extends DirectBuffer> extends File<B> implemen
     public void close() {
         if (closed.compareAndSet(false, true)) {
             syncBufs();
-            writeMeta(this, lastPos);
+            writeMeta(lastPos);
         }
     }
 
@@ -71,6 +113,17 @@ public abstract class WriteFile<B extends DirectBuffer> extends File<B> implemen
                     FineIOLoggers.getLogger().error(e);
                 }
             }
+        }
+    }
+
+    private void writeMeta(int lastPos) {
+        byte[] bytes = ByteBuffer.allocate(5)
+                .put(blockOffset)
+                .putInt(lastPos << offset.getOffset()).array();
+        try {
+            connector.write(new FileBlock(fileBlock.getPath(), META), bytes);
+        } catch (IOException e) {
+            FineIOLoggers.getLogger().error(e);
         }
     }
 

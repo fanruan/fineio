@@ -74,6 +74,50 @@ public interface IOAccessor {
     <F extends IAppendFile<? extends DoubleBuf>> void put(F file, double value);
 
     /**
+     * 兼容接口，v3走write file，但会初始化最后一个buffer，顺序写相当于append
+     * v2继续走append file
+     *
+     * @param file  write file
+     * @param pos   pos
+     * @param value value
+     * @param <F>   write file
+     */
+    <F extends IAppendFile<? extends ByteBuf>> void put(F file, int pos, byte value);
+
+    /**
+     * 兼容接口，v3走write file，但会初始化最后一个buffer，顺序写相当于append
+     * v2继续走append file
+     *
+     * @param file  write file
+     * @param pos   pos
+     * @param value value
+     * @param <F>   write file
+     */
+    <F extends IAppendFile<? extends LongBuf>> void put(F file, int pos, long value);
+
+    /**
+     * 兼容接口，v3走write file，但会初始化最后一个buffer，顺序写相当于append
+     * v2继续走append file
+     *
+     * @param file  write file
+     * @param pos   pos
+     * @param value value
+     * @param <F>   write file
+     */
+    <F extends IAppendFile<? extends IntBuf>> void put(F file, int pos, int value);
+
+    /**
+     * 兼容接口，v3走write file，但会初始化最后一个buffer，顺序写相当于append
+     * v2继续走append file
+     *
+     * @param file  write file
+     * @param pos   pos
+     * @param value value
+     * @param <F>   write file
+     */
+    <F extends IAppendFile<? extends DoubleBuf>> void put(F file, int pos, double value);
+
+    /**
      * IntWriteFile put
      *
      * @param file

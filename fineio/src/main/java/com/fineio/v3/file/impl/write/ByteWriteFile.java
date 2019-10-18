@@ -16,6 +16,7 @@ public class ByteWriteFile extends WriteFile<ByteDirectBuffer> {
     public ByteWriteFile(FileBlock fileBlock, Connector connector, boolean asyncWrite) {
         super(fileBlock, Offset.BYTE, connector, asyncWrite);
         buffers = new ByteDirectBuffer[16];
+        initLastBuf();
     }
 
     public static ByteWriteFile ofAsync(FileBlock fileBlock, Connector connector) {
@@ -50,4 +51,8 @@ public class ByteWriteFile extends WriteFile<ByteDirectBuffer> {
         buffers[nthBuf].putByte(nthVal, value);
     }
 
+    @Override
+    ByteDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock, int maxCap) {
+        return new ByteDirectBuf(address, size, fileBlock, maxCap);
+    }
 }
