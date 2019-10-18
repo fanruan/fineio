@@ -17,6 +17,7 @@ import java.io.InputStream;
 /**
  * @author yee
  */
+@Deprecated
 abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> implements IAppendFile<B> {
     final WF writeFile;
 
@@ -24,8 +25,9 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> imple
 
     AppendFile(WF writeFile) {
         this.writeFile = writeFile;
-        lastPos = File.initMetaAndGetLastPos(writeFile);
-        initLastBuf();
+//        lastPos = File.initMetaAndGetLastPos(writeFile);
+//        initLastBuf();
+        throw new UnsupportedOperationException();
     }
 
     private void initLastBuf() {
@@ -46,7 +48,7 @@ abstract class AppendFile<WF extends WriteFile<B>, B extends DirectBuffer> imple
                 address = MemoryManager.INSTANCE.allocate(size, FileMode.WRITE);
                 MemoryUtils.copyMemory(byteOutput.toByteArray(), address, size);
 
-                writeFile.growBuffers(nthBuf);
+//                writeFile.growBuffers(nthBuf);
                 writeFile.buffers[nthBuf] = newDirectBuf(address, size >> writeFile.offset.getOffset(), lastFileBlock);
             } catch (Throwable e) {
                 if (address != null) {

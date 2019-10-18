@@ -23,7 +23,7 @@ public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B
      * 1 byte: block offset
      * 1 int: last byte pos 单个file最大支持约21.4亿行byte，5.3亿行int，2.6亿行long/double
      */
-    static final String META = "meta";
+    protected static final String META = "meta";
 
     protected final FileBlock fileBlock;
 
@@ -40,26 +40,15 @@ public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B
         blockOffset = connector.getBlockOffset();
     }
 
-    protected static void writeMeta(File<?> file, int lastPos) {
-        byte[] bytes = ByteBuffer.allocate(5)
-                .put(file.blockOffset)
-                .putInt(lastPos << file.offset.getOffset()).array();
-        try {
-            file.connector.write(new FileBlock(file.fileBlock.getPath(), META), bytes);
-        } catch (IOException e) {
-            FineIOLoggers.getLogger().error(e);
-        }
-    }
-
-    protected static int initMetaAndGetLastPos(File<?> file) {
-        FileBlock metaFileKey = new FileBlock(file.fileBlock.getPath(), META);
-        if (file.connector.exists(metaFileKey)) {
-            try (InputStream input = file.connector.read(metaFileKey)) {
+    protected int initMetaAndGetLastPos() {
+        FileBlock metaFileKey = new FileBlock(fileBlock.getPath(), META);
+        if (connector.exists(metaFileKey)) {
+            try (InputStream input = connector.read(metaFileKey)) {
                 byte[] bytes = new byte[5];
                 if (input.read(bytes) == bytes.length) {
                     ByteBuffer buf = ByteBuffer.wrap(bytes);
-                    file.blockOffset = buf.get();
-                    return buf.getInt() >> file.offset.getOffset();
+                    blockOffset = buf.get();
+                    return buf.getInt() >> offset.getOffset();
                 }
             } catch (IOException e) {
                 FineIOLoggers.getLogger().error(e);

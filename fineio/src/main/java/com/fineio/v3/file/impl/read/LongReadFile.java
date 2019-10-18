@@ -20,7 +20,7 @@ public class LongReadFile extends ReadFile<LongDirectBuffer> {
     }
 
     private void init() {
-        int lastPos = initMetaAndGetLastPos(this);
+        int lastPos = initMetaAndGetLastPos();
         buffers = new LongDirectBuffer[nthBuf(lastPos) + 1];
     }
 

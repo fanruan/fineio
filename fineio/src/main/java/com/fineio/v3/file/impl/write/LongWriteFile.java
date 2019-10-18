@@ -15,6 +15,7 @@ public class LongWriteFile extends WriteFile<LongDirectBuffer> {
     public LongWriteFile(FileBlock fileBlock, Connector connector, boolean asyncWrite) {
         super(fileBlock, Offset.LONG, connector, asyncWrite);
         buffers = new LongDirectBuffer[16];
+        initLastBuf();
     }
 
     public static LongWriteFile ofAsync(FileBlock fileBlock, Connector connector) {
@@ -47,5 +48,10 @@ public class LongWriteFile extends WriteFile<LongDirectBuffer> {
         buffers[nthBuf] = new LongDirectBuf(new FileBlock(fileBlock.getPath(), String.valueOf(nthBuf)),
                 1 << (blockOffset - offset.getOffset()), FileMode.WRITE);
         buffers[nthBuf].putLong(nthVal, value);
+    }
+
+    @Override
+    LongDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock, int maxCap) {
+        return new LongDirectBuf(address, size, fileBlock, maxCap);
     }
 }

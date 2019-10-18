@@ -62,6 +62,26 @@ public enum FineIOAccessor implements IOAccessor {
     }
 
     @Override
+    public <F extends IAppendFile<? extends ByteBuf>> void put(F file, int pos, byte value) {
+        accessor.put(file, pos, value);
+    }
+
+    @Override
+    public <F extends IAppendFile<? extends LongBuf>> void put(F file, int pos, long value) {
+        accessor.put(file, pos, value);
+    }
+
+    @Override
+    public <F extends IAppendFile<? extends IntBuf>> void put(F file, int pos, int value) {
+        accessor.put(file, pos, value);
+    }
+
+    @Override
+    public <F extends IAppendFile<? extends DoubleBuf>> void put(F file, int pos, double value) {
+        accessor.put(file, pos, value);
+    }
+
+    @Override
     public <F extends IWriteFile<? extends ByteBuf>> void put(F file, int pos, byte value) {
         accessor.put(file, pos, value);
     }

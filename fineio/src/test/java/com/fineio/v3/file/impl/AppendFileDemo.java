@@ -23,7 +23,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class AppendFileDemo {
     private FileBlock key = new FileBlock(System.getProperty("user.dir"), "append");
-    private FileConnector connector = new FileConnector((byte) 10);
+    private FileConnector connector = new FileConnector((byte) 1);
     private FileConnector newConnector = new FileConnector((byte) 5);
     private int n = 1 << 10;
 
@@ -41,35 +41,35 @@ public class AppendFileDemo {
 
     @Test
     public void testByte() {
-        ByteAppendFile byteFile = new ByteAppendFile(ByteWriteFile.ofSync(key, connector));
-        for (int i = -128; i < 0; i++) {
-            byteFile.putByte((byte) i);
+        ByteWriteFile byteFile = ByteWriteFile.ofSync(key, connector);
+        for (int i = 0; i < 128; i++) {
+            byteFile.putByte(i, (byte) i);
         }
         byteFile.close();
 
-        byteFile = new ByteAppendFile(ByteWriteFile.ofSync(key, newConnector));
-        for (int i = 0; i < 128; i++) {
-            byteFile.putByte((byte) i);
+        byteFile = ByteWriteFile.ofSync(key, newConnector);
+        for (int i = 128; i < 256; i++) {
+            byteFile.putByte(i, (byte) i);
         }
         byteFile.close();
 
         ByteReadFile byteReadFile = new ByteReadFile(key, connector);
         for (int i = 0; i < 256; i++) {
-            assertEquals(i - 128, byteReadFile.getByte(i));
+            assertEquals(i, byteReadFile.getByte(i) & 0xFF);
         }
     }
 
     @Test
     public void testInt() {
-        IntAppendFile intFile = new IntAppendFile(IntWriteFile.ofSync(key, connector));
+        IntWriteFile intFile = IntWriteFile.ofSync(key, connector);
         for (int i = 0; i < n >> 1; i++) {
-            intFile.putInt(i);
+            intFile.putInt(i, i);
         }
         intFile.close();
 
-        intFile = new IntAppendFile(IntWriteFile.ofSync(key, newConnector));
+        intFile = IntWriteFile.ofSync(key, newConnector);
         for (int i = n >> 1; i < n; i++) {
-            intFile.putInt(i);
+            intFile.putInt(i, i);
         }
         intFile.close();
 
@@ -81,17 +81,17 @@ public class AppendFileDemo {
 
     @Test
     public void testLong() {
-        LongAppendFile longAppendFile = new LongAppendFile(LongWriteFile.ofSync(key, connector));
+        LongWriteFile longWriteFile = LongWriteFile.ofSync(key, connector);
         for (int i = 0; i < n >> 1; i++) {
-            longAppendFile.putLong(i);
+            longWriteFile.putLong(i, i);
         }
-        longAppendFile.close();
+        longWriteFile.close();
 
-        longAppendFile = new LongAppendFile(LongWriteFile.ofSync(key, newConnector));
+        longWriteFile = LongWriteFile.ofSync(key, newConnector);
         for (int i = n >> 1; i < n; i++) {
-            longAppendFile.putLong(i);
+            longWriteFile.putLong(i, i);
         }
-        longAppendFile.close();
+        longWriteFile.close();
 
         LongReadFile longReadFile = new LongReadFile(key, connector);
         for (int i = 0; i < n; i++) {
@@ -101,17 +101,17 @@ public class AppendFileDemo {
 
     @Test
     public void testDouble() {
-        DoubleAppendFile doubleAppendFile = new DoubleAppendFile(DoubleWriteFile.ofSync(key, connector));
+        DoubleWriteFile doubleWriteFile = DoubleWriteFile.ofSync(key, connector);
         for (int i = 0; i < n >> 1; i++) {
-            doubleAppendFile.putDouble(i);
+            doubleWriteFile.putDouble(i, i);
         }
-        doubleAppendFile.close();
+        doubleWriteFile.close();
 
-        doubleAppendFile = new DoubleAppendFile(DoubleWriteFile.ofSync(key, newConnector));
+        doubleWriteFile = DoubleWriteFile.ofSync(key, newConnector);
         for (int i = n >> 1; i < n; i++) {
-            doubleAppendFile.putDouble(i);
+            doubleWriteFile.putDouble(i, i);
         }
-        doubleAppendFile.close();
+        doubleWriteFile.close();
 
         DoubleReadFile doubleReadFile = new DoubleReadFile(key, connector);
         for (int i = 0; i < n; i++) {

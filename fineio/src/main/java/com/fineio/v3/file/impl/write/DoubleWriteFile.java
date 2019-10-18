@@ -15,6 +15,7 @@ public class DoubleWriteFile extends WriteFile<DoubleDirectBuffer> {
     public DoubleWriteFile(FileBlock fileBlock, Connector connector, boolean asyncWrite) {
         super(fileBlock, Offset.DOUBLE, connector, asyncWrite);
         buffers = new DoubleDirectBuffer[16];
+        initLastBuf();
     }
 
     public static DoubleWriteFile ofAsync(FileBlock fileBlock, Connector connector) {
@@ -49,4 +50,8 @@ public class DoubleWriteFile extends WriteFile<DoubleDirectBuffer> {
         buffers[nthBuf].putDouble(nthVal, value);
     }
 
+    @Override
+    DoubleDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock, int maxCap) {
+        return new DoubleDirectBuf(address, size, fileBlock, maxCap);
+    }
 }

@@ -20,7 +20,7 @@ public class IntReadFile extends ReadFile<IntDirectBuffer> {
     }
 
     private void init() {
-        int lastPos = initMetaAndGetLastPos(this);
+        int lastPos = initMetaAndGetLastPos();
         buffers = new IntDirectBuffer[nthBuf(lastPos) + 1];
     }
 

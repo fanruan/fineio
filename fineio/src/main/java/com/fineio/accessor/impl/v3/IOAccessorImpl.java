@@ -13,10 +13,6 @@ import com.fineio.accessor.file.IReadFile;
 import com.fineio.accessor.file.IWriteFile;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
-import com.fineio.v3.file.impl.ByteAppendFile;
-import com.fineio.v3.file.impl.DoubleAppendFile;
-import com.fineio.v3.file.impl.IntAppendFile;
-import com.fineio.v3.file.impl.LongAppendFile;
 import com.fineio.v3.file.impl.read.ByteReadFile;
 import com.fineio.v3.file.impl.read.DoubleReadFile;
 import com.fineio.v3.file.impl.read.IntReadFile;
@@ -51,22 +47,42 @@ public class IOAccessorImpl implements IOAccessor {
 
     @Override
     public <F extends IAppendFile<? extends ByteBuf>> void put(F file, byte value) {
-        ((ByteAppendFile) file).putByte(value);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public <F extends IAppendFile<? extends LongBuf>> void put(F file, long value) {
-        ((LongAppendFile) file).putLong(value);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public <F extends IAppendFile<? extends IntBuf>> void put(F file, int value) {
-        ((IntAppendFile) file).putInt(value);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public <F extends IAppendFile<? extends DoubleBuf>> void put(F file, double value) {
-        ((DoubleAppendFile) file).putDouble(value);
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <F extends IAppendFile<? extends ByteBuf>> void put(F file, int pos, byte value) {
+        ((ByteWriteFile) file).putByte(pos, value);
+    }
+
+    @Override
+    public <F extends IAppendFile<? extends LongBuf>> void put(F file, int pos, long value) {
+        ((LongWriteFile) file).putLong(pos, value);
+    }
+
+    @Override
+    public <F extends IAppendFile<? extends IntBuf>> void put(F file, int pos, int value) {
+        ((IntWriteFile) file).putInt(pos, value);
+    }
+
+    @Override
+    public <F extends IAppendFile<? extends DoubleBuf>> void put(F file, int pos, double value) {
+        ((DoubleWriteFile) file).putDouble(pos, value);
     }
 
     @Override
@@ -113,11 +129,10 @@ public class IOAccessorImpl implements IOAccessor {
     private IFile createByte(Connector connector, URI uri, FileMode mode) {
         FileBlock fileBlock = new FileBlock(uri.getPath(), "");
         switch (mode) {
-            case APPEND:
-                return new ByteAppendFile(new ByteWriteFile(fileBlock, connector, false));
             case READ:
                 return new ByteReadFile(fileBlock, connector);
             case WRITE:
+            case APPEND:
                 return new ByteWriteFile(fileBlock, connector, false);
             default:
                 return null;
@@ -127,11 +142,10 @@ public class IOAccessorImpl implements IOAccessor {
     private IFile createInt(Connector connector, URI uri, FileMode mode) {
         FileBlock fileBlock = new FileBlock(uri.getPath(), "");
         switch (mode) {
-            case APPEND:
-                return new IntAppendFile(new IntWriteFile(fileBlock, connector, false));
             case READ:
                 return new IntReadFile(fileBlock, connector);
             case WRITE:
+            case APPEND:
                 return new IntWriteFile(fileBlock, connector, false);
             default:
                 return null;
@@ -141,11 +155,10 @@ public class IOAccessorImpl implements IOAccessor {
     private IFile createLong(Connector connector, URI uri, FileMode mode) {
         FileBlock fileBlock = new FileBlock(uri.getPath(), "");
         switch (mode) {
-            case APPEND:
-                return new LongAppendFile(new LongWriteFile(fileBlock, connector, false));
             case READ:
                 return new LongReadFile(fileBlock, connector);
             case WRITE:
+            case APPEND:
                 return new LongWriteFile(fileBlock, connector, false);
             default:
                 return null;
@@ -155,11 +168,10 @@ public class IOAccessorImpl implements IOAccessor {
     private IFile createDouble(Connector connector, URI uri, FileMode mode) {
         FileBlock fileBlock = new FileBlock(uri.getPath(), "");
         switch (mode) {
-            case APPEND:
-                return new DoubleAppendFile(new DoubleWriteFile(fileBlock, connector, false));
             case READ:
                 return new DoubleReadFile(fileBlock, connector);
             case WRITE:
+            case APPEND:
                 return new DoubleWriteFile(fileBlock, connector, false);
             default:
                 return null;
