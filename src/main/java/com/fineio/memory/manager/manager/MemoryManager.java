@@ -3,7 +3,6 @@ package com.fineio.memory.manager.manager;
 import com.fineio.FineIoService;
 import com.fineio.cache.AtomicWatchLong;
 import com.fineio.cache.Watcher;
-import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.ReadAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
@@ -38,7 +37,6 @@ public enum MemoryManager implements FineIoService {
     private static final int MIN_WRITE_OFFSET = 3;
     private static final int TRY_CLEAN_TIME = 100;
     private static final double DEFAULT_INCREMENT_RATE = 1.1D;
-    private Lock cleanOneLock = new ReentrantLock();
     /**
      * 释放内存上限
      */
@@ -70,6 +68,7 @@ public enum MemoryManager implements FineIoService {
     private Lock memoryLock = new ReentrantLock();
     private ExecutorService gcThread;
     private ScheduledExecutorService releaseLimitThread;
+    private ScheduledExecutorService timeoutCleaner;
     private volatile AtomicInteger releaseLimitCount = new AtomicInteger(0);
     private volatile AtomicInteger triggerCount = new AtomicInteger(0);
     private volatile AtomicInteger triggerGcCount = new AtomicInteger(0);
@@ -120,6 +119,13 @@ public enum MemoryManager implements FineIoService {
                 releaseLimitCount.set(0);
             }
         }, 10, 10, TimeUnit.SECONDS);
+        timeoutCleaner = FineIOExecutors.newScheduledExecutorService(1, "fineio-timeout-cleaner");
+        timeoutCleaner.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                cleaner.cleanTimeout();
+            }
+        }, 10, 10, TimeUnit.MINUTES);
     }
 
     @Override
@@ -127,6 +133,7 @@ public enum MemoryManager implements FineIoService {
         taskQueue.clear();
         releaseLimitThread.shutdownNow();
         gcThread.shutdownNow();
+        timeoutCleaner.shutdownNow();
 
         triggerGcCount.set(0);
         triggerCount.set(0);
@@ -370,31 +377,6 @@ public enum MemoryManager implements FineIoService {
 
         public long getCheckSize() {
             return readSize.get() + writeSize.get() + allocateSize;
-        }
-    }
-
-    private class CleanOneTask implements Runnable {
-
-        @Override
-        public void run() {
-            if (null != cleaner) {
-                cleanOneLock.lock();
-                try {
-                    if (cleaner.cleanTimeout() && triggerGcCount.incrementAndGet() >= 20) {
-                        System.gc();
-                        triggerGcCount.set(0);
-                    } else if (triggerCount.incrementAndGet() > 2) {
-                        if (!cleaner.cleanOne()) {
-                            cleaner.cleanReadable();
-                        }
-                        triggerCount.set(0);
-                    }
-                } catch (Exception e) {
-                    FineIOLoggers.getLogger().error(e);
-                } finally {
-                    cleanOneLock.unlock();
-                }
-            }
         }
     }
 }
