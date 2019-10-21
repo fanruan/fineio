@@ -44,7 +44,7 @@ public final class CacheManager {
             private DeAllocator deAllocator = BaseDeAllocator.Builder.READ.build();
 
             @Override
-            public boolean clean() {
+            public boolean cleanTimeout() {
                 boolean result = false;
                 result |= clean(BYTE_CREATOR);
                 result |= clean(INT_CREATOR);
@@ -57,7 +57,7 @@ public final class CacheManager {
             }
 
             @Override
-            public boolean cleanAllCleanable() {
+            public boolean cleanOne() {
                 boolean result = false;
                 result |= BYTE_CREATOR.cleanBuffers(Level.CLEAN);
                 result |= INT_CREATOR.cleanBuffers(Level.CLEAN);

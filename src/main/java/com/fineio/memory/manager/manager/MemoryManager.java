@@ -324,9 +324,9 @@ public enum MemoryManager implements FineIoService {
     }
 
     public interface Cleaner {
-        boolean clean();
+        boolean cleanTimeout();
 
-        boolean cleanAllCleanable();
+        boolean cleanOne();
 
         void cleanReadable();
     }
@@ -344,9 +344,9 @@ public enum MemoryManager implements FineIoService {
             if (null != cleaner) {
                 int tryTime = 0;
                 boolean triggerGC = true;
-                while (!cleaner.clean()) {
+                while (!cleaner.cleanTimeout()) {
                     if (++tryTime >= TRY_CLEAN_TIME / 2) {
-                        triggerGC = cleaner.cleanAllCleanable();
+                        triggerGC = cleaner.cleanOne();
                         if (triggerGC) {
                             break;
                         }
@@ -380,11 +380,11 @@ public enum MemoryManager implements FineIoService {
             if (null != cleaner) {
                 cleanOneLock.lock();
                 try {
-                    if (cleaner.clean() && triggerGcCount.incrementAndGet() >= 20) {
+                    if (cleaner.cleanTimeout() && triggerGcCount.incrementAndGet() >= 20) {
                         System.gc();
                         triggerGcCount.set(0);
                     } else if (triggerCount.incrementAndGet() > 2) {
-                        if (!cleaner.cleanAllCleanable()) {
+                        if (!cleaner.cleanOne()) {
                             cleaner.cleanReadable();
                         }
                         triggerCount.set(0);
