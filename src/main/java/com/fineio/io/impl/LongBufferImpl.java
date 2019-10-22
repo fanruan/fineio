@@ -15,7 +15,7 @@ public class LongBufferImpl extends BufferWrapper implements LongBuffer {
     }
 
     @Override
-    public long getLong(int pos) {
+    public synchronized long getLong(int pos) {
         final int offset = unsafeBuf.ensurePos(pos);
         return MemoryUtils.getLong(unsafeBuf.getAddress(), offset);
     }

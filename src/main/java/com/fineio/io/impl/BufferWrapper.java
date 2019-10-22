@@ -19,7 +19,7 @@ public class BufferWrapper implements Buffer {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         this.unsafeBuf.close();
     }
 
