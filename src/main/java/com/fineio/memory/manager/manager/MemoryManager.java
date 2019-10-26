@@ -1,8 +1,8 @@
 package com.fineio.memory.manager.manager;
 
+import com.fineio.FineIoService;
 import com.fineio.cache.AtomicWatchLong;
 import com.fineio.cache.Watcher;
-import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.ReadAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
@@ -24,7 +24,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author yee
  * @date 2018/9/18
  */
-public enum MemoryManager {
+public enum MemoryManager implements FineIoService {
     /**
      * 单例
      */
@@ -37,7 +37,6 @@ public enum MemoryManager {
     private static final int MIN_WRITE_OFFSET = 3;
     private static final int TRY_CLEAN_TIME = 100;
     private static final double DEFAULT_INCREMENT_RATE = 1.1D;
-    private Lock cleanOneLock = new ReentrantLock();
     /**
      * 释放内存上限
      */
@@ -45,7 +44,7 @@ public enum MemoryManager {
     /**
      * 扩容上限
      */
-    private final long memorySizeUpLimit;
+    private long memorySizeUpLimit;
     /**
      * 读内存空间
      */
@@ -67,9 +66,9 @@ public enum MemoryManager {
      */
     private volatile AtomicInteger writeWaitCount = new AtomicInteger(0);
     private Lock memoryLock = new ReentrantLock();
-    private ExecutorService gcThread = FineIOExecutors.newSingleThreadExecutor("io-gc-thread");
-    private ScheduledExecutorService gcTrigger = FineIOExecutors.newScheduledExecutorService(1, "io-gc-trigger");
-    private ScheduledExecutorService releaseLimitThread = FineIOExecutors.newScheduledExecutorService(1, "io-limit-thread");
+    private ExecutorService gcThread;
+    private ScheduledExecutorService releaseLimitThread;
+    private ScheduledExecutorService timeoutCleaner;
     private volatile AtomicInteger releaseLimitCount = new AtomicInteger(0);
     private volatile AtomicInteger triggerCount = new AtomicInteger(0);
     private volatile AtomicInteger triggerGcCount = new AtomicInteger(0);
@@ -77,12 +76,14 @@ public enum MemoryManager {
 
     private Cleaner cleaner;
 
-    MemoryManager() {
+    @Override
+    public void start() {
         this.readSize = new AtomicWatchLong(createReadWatcher());
         this.writeSize = new AtomicWatchLong(createWriteWatcher());
         currentMaxSize = Math.min(VM.maxDirectMemory(), getMaxSize());
         releaseLimit = (long) (currentMaxSize * DEFAULT_RELEASE_RATE);
         memorySizeUpLimit = (long) (getMaxSize() * DEFAULT_RELEASE_RATE);
+        gcThread = FineIOExecutors.newSingleThreadExecutor("io-gc-thread");
         gcThread.execute(new Runnable() {
             @Override
             public void run() {
@@ -96,13 +97,16 @@ public enum MemoryManager {
                             }
                         }
                         LockSupport.parkNanos(1000);
+                    } catch (InterruptedException e) {
+                        return;
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
             }
         });
-        gcTrigger.scheduleAtFixedRate(new CleanOneTask(), 30, 30, TimeUnit.SECONDS);
+//        gcTrigger.scheduleAtFixedRate(new CleanOneTask(), 30, 30, TimeUnit.SECONDS);
+        releaseLimitThread = FineIOExecutors.newScheduledExecutorService(1, "io-limit-thread");
         releaseLimitThread.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -115,6 +119,27 @@ public enum MemoryManager {
                 releaseLimitCount.set(0);
             }
         }, 10, 10, TimeUnit.SECONDS);
+        timeoutCleaner = FineIOExecutors.newScheduledExecutorService(1, "fineio-timeout-cleaner");
+        timeoutCleaner.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                cleaner.cleanTimeout();
+            }
+        }, 10, 10, TimeUnit.MINUTES);
+    }
+
+    @Override
+    public void stop() {
+        taskQueue.clear();
+        releaseLimitThread.shutdownNow();
+        gcThread.shutdownNow();
+        timeoutCleaner.shutdownNow();
+
+        triggerGcCount.set(0);
+        triggerCount.set(0);
+        releaseLimitCount.set(0);
+        writeWaitCount.set(0);
+        readWaitCount.set(0);
     }
 
     public final void updateRead(long size) {
@@ -306,9 +331,9 @@ public enum MemoryManager {
     }
 
     public interface Cleaner {
-        boolean clean();
+        boolean cleanTimeout();
 
-        boolean cleanAllCleanable();
+        boolean cleanOne();
 
         void cleanReadable();
     }
@@ -326,9 +351,9 @@ public enum MemoryManager {
             if (null != cleaner) {
                 int tryTime = 0;
                 boolean triggerGC = true;
-                while (!cleaner.clean()) {
+                while (!cleaner.cleanTimeout()) {
                     if (++tryTime >= TRY_CLEAN_TIME / 2) {
-                        triggerGC = cleaner.cleanAllCleanable();
+                        triggerGC = cleaner.cleanOne();
                         if (triggerGC) {
                             break;
                         }
@@ -352,31 +377,6 @@ public enum MemoryManager {
 
         public long getCheckSize() {
             return readSize.get() + writeSize.get() + allocateSize;
-        }
-    }
-
-    private class CleanOneTask implements Runnable {
-
-        @Override
-        public void run() {
-            if (null != cleaner) {
-                cleanOneLock.lock();
-                try {
-                    if (cleaner.clean() && triggerGcCount.incrementAndGet() >= 20) {
-                        System.gc();
-                        triggerGcCount.set(0);
-                    } else if (triggerCount.incrementAndGet() > 2) {
-                        if (!cleaner.cleanAllCleanable()) {
-                            cleaner.cleanReadable();
-                        }
-                        triggerCount.set(0);
-                    }
-                } catch (Exception e) {
-                    FineIOLoggers.getLogger().error(e);
-                } finally {
-                    cleanOneLock.unlock();
-                }
-            }
         }
     }
 }

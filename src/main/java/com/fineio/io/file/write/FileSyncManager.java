@@ -1,5 +1,6 @@
 package com.fineio.io.file.write;
 
+import com.fineio.FineIoService;
 import com.fineio.io.Buffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
@@ -16,11 +17,10 @@ import java.util.concurrent.FutureTask;
  * @author yee
  * @date 2019/9/11
  */
-public class FileSyncManager {
+public class FileSyncManager implements FineIoService {
     private ExecutorService service;
 
     private FileSyncManager() {
-        this.service = FineIOExecutors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), "FineIO-FileSync");
     }
 
     public static FileSyncManager getInstance() {
@@ -29,6 +29,18 @@ public class FileSyncManager {
 
     public Future sync(Buffer buf) {
         return service.submit(new SyncTask(buf));
+    }
+
+    @Override
+    public void start() {
+        this.service = FineIOExecutors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), "FineIO-FileSync");
+    }
+
+    @Override
+    public void stop() {
+        if (!service.isShutdown()) {
+            service.shutdown();
+        }
     }
 
     private static class SingletonHolder {

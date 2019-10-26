@@ -19,6 +19,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by daniel on 2017/2/23.
  * 可控线程池，最多cpu + 1数量的线程，相同的等待任务将被合并
  */
+@Deprecated
 public final class SyncManager {
 
     private static final int DEFAULT_THREAD_COUNT = Runtime.getRuntime().availableProcessors() + 1;

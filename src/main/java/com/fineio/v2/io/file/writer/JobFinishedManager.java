@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
  * @author yee
  * @date 2018/7/12
  */
+@Deprecated
 public final class JobFinishedManager {
     private ExecutorCompletionService<Job> service =
             new ExecutorCompletionService<Job>(FineIOExecutors.newSingleThreadExecutor("JobFinishedManager-complete"));

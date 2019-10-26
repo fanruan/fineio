@@ -19,7 +19,7 @@ public class ByteBufferImpl extends BufferWrapper implements ByteBuffer {
     }
 
     @Override
-    public byte getByte(int pos) {
+    public synchronized byte getByte(int pos) {
         final int offset = unsafeBuf.ensurePos(pos);
         return MemoryUtils.getByte(unsafeBuf.getAddress(), offset);
     }

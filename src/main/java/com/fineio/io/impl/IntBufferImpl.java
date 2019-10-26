@@ -15,7 +15,7 @@ public class IntBufferImpl extends BufferWrapper implements IntBuffer {
     }
 
     @Override
-    public int getInt(int pos) {
+    public synchronized int getInt(int pos) {
         final int offset = unsafeBuf.ensurePos(pos);
         return MemoryUtils.getInt(unsafeBuf.getAddress(), offset);
     }
