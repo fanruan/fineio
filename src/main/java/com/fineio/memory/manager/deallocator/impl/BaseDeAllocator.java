@@ -27,14 +27,22 @@ public abstract class BaseDeAllocator extends SyncObject implements DeAllocator 
             return;
         }
         FineIOLoggers.getLogger().debug(String.format("auto release address: %d, release size: %d, currentSize: %d", memoryObject.getAddress(), memoryObject.getAllocateSize(), MemoryManager.INSTANCE.getCurrentMemorySize()));
-        synchronized (this) {
-            try {
-                wait(100);
-            } catch (InterruptedException e) {
-                FineIOLoggers.getLogger().debug("release time wait interrupted");
-                beforeStatusChange();
+        //释放前让出执行时间，让其他线程尤其是读线程先跑一会
+        Thread.yield();
+        //如果同时执行的线程较少，就wait不包含fullgc的100毫秒，如果超过120毫秒，认为是发生了fullgc，需要重来一次
+        long t = System.currentTimeMillis();
+        do {
+            synchronized (this) {
+                try {
+                    wait(100);
+                } catch (InterruptedException e) {
+                    FineIOLoggers.getLogger().debug("release time wait interrupted");
+                    beforeStatusChange();
+                }
             }
-        }
+        } while (System.currentTimeMillis() - t > 120);
+        //安全起见再让一下吧
+        Thread.yield();
         long address = memoryObject.getAddress();
         MemoryUtils.free(address);
         returnMemory(memoryObject.getAllocateSize());
