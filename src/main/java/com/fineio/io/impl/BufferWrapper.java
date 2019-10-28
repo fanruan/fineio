@@ -21,6 +21,7 @@ public class BufferWrapper implements Buffer {
     @Override
     public void close() {
         this.unsafeBuf.close();
+        unsafeBuf = null;
     }
 
     @Override

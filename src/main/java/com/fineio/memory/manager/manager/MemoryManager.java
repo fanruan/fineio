@@ -8,6 +8,8 @@ import com.fineio.memory.manager.allocator.ReadAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.thread.FineIOExecutors;
 import com.sun.management.OperatingSystemMXBean;
+import sun.misc.JavaLangRefAccess;
+import sun.misc.SharedSecrets;
 import sun.misc.VM;
 
 import java.lang.management.ManagementFactory;
@@ -173,7 +175,9 @@ public enum MemoryManager implements FineIoService {
     private final long checkGC(Allocator allocator) {
         long checkSize = readSize.get() + writeSize.get() + allocator.getAllocateSize();
         if (checkSize >= releaseLimit) {
-            taskQueue.offer(new CleanTask(allocator.getAllocateSize()));
+            if (taskQueue.isEmpty()){
+                taskQueue.offer(new CleanTask(allocator.getAllocateSize()));
+            }
         }
         return checkSize;
     }
@@ -190,7 +194,9 @@ public enum MemoryManager implements FineIoService {
             }
         } else {
             memoryLock.unlock();
-            taskQueue.offer(new CleanTask(allocator.getAllocateSize()));
+            if (taskQueue.isEmpty()){
+                taskQueue.offer(new CleanTask(allocator.getAllocateSize()));
+            }
             if (allocator instanceof ReadAllocator) {
                 readWaitCount.incrementAndGet();
                 synchronized (readSize) {
@@ -351,9 +357,11 @@ public enum MemoryManager implements FineIoService {
             if (null != cleaner) {
                 int tryTime = 0;
                 boolean triggerGC = true;
+                final JavaLangRefAccess jlra = SharedSecrets.getJavaLangRefAccess();
                 while (!cleaner.cleanTimeout()) {
                     if (++tryTime >= TRY_CLEAN_TIME / 2) {
                         triggerGC = cleaner.cleanOne();
+                        jlra.tryHandlePendingReference();
                         if (triggerGC) {
                             break;
                         }
@@ -368,6 +376,7 @@ public enum MemoryManager implements FineIoService {
                     }
                     LockSupport.parkNanos(1000);
                 }
+                jlra.tryHandlePendingReference();
                 if (triggerGC && triggerGcCount.incrementAndGet() >= 20) {
                     System.gc();
                     triggerGcCount.set(0);
