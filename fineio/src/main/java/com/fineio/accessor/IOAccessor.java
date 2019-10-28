@@ -82,7 +82,7 @@ public interface IOAccessor {
      * @param value value
      * @param <F>   write file
      */
-    <F extends IAppendFile<? extends ByteBuf>> void put(F file, int pos, byte value);
+    <F extends IAppendFile<? extends ByteBuf>> void put(F file, long pos, byte value);
 
     /**
      * 兼容接口，v3走write file，但会初始化最后一个buffer，顺序写相当于append
@@ -93,7 +93,7 @@ public interface IOAccessor {
      * @param value value
      * @param <F>   write file
      */
-    <F extends IAppendFile<? extends LongBuf>> void put(F file, int pos, long value);
+    <F extends IAppendFile<? extends LongBuf>> void put(F file, long pos, long value);
 
     /**
      * 兼容接口，v3走write file，但会初始化最后一个buffer，顺序写相当于append
@@ -104,7 +104,7 @@ public interface IOAccessor {
      * @param value value
      * @param <F>   write file
      */
-    <F extends IAppendFile<? extends IntBuf>> void put(F file, int pos, int value);
+    <F extends IAppendFile<? extends IntBuf>> void put(F file, long pos, int value);
 
     /**
      * 兼容接口，v3走write file，但会初始化最后一个buffer，顺序写相当于append
@@ -115,7 +115,7 @@ public interface IOAccessor {
      * @param value value
      * @param <F>   write file
      */
-    <F extends IAppendFile<? extends DoubleBuf>> void put(F file, int pos, double value);
+    <F extends IAppendFile<? extends DoubleBuf>> void put(F file, long pos, double value);
 
     /**
      * IntWriteFile put
@@ -127,7 +127,7 @@ public interface IOAccessor {
      * @see com.fineio.v3.file.impl.write.ByteWriteFile
      * @see com.fineio.io.file.WriteIOFile
      */
-    <F extends IWriteFile<? extends ByteBuf>> void put(F file, int pos, byte value);
+    <F extends IWriteFile<? extends ByteBuf>> void put(F file, long pos, byte value);
 
     /**
      * LongWriteFile put
@@ -138,7 +138,7 @@ public interface IOAccessor {
      * @param <F>
      * @see com.fineio.v3.file.impl.write.LongWriteFile
      */
-    <F extends IWriteFile<? extends LongBuf>> void put(F file, int pos, long value);
+    <F extends IWriteFile<? extends LongBuf>> void put(F file, long pos, long value);
 
     /**
      * IntWriteFile put
@@ -149,7 +149,7 @@ public interface IOAccessor {
      * @param <F>
      * @see com.fineio.v3.file.impl.write.IntWriteFile
      */
-    <F extends IWriteFile<? extends IntBuf>> void put(F file, int pos, int value);
+    <F extends IWriteFile<? extends IntBuf>> void put(F file, long pos, int value);
 
     /**
      * DoubleWriteFile put
@@ -160,7 +160,7 @@ public interface IOAccessor {
      * @param <F>
      * @see com.fineio.v3.file.impl.write.DoubleWriteFile
      */
-    <F extends IWriteFile<? extends DoubleBuf>> void put(F file, int pos, double value);
+    <F extends IWriteFile<? extends DoubleBuf>> void put(F file, long pos, double value);
 
     /**
      * ByteReadFile get
@@ -172,7 +172,7 @@ public interface IOAccessor {
      * @see com.fineio.v3.file.impl.read.ByteReadFile
      * @see com.fineio.io.file.ReadIOFile
      */
-    <F extends IReadFile<? extends ByteBuf>> byte getByte(F file, int pos);
+    <F extends IReadFile<? extends ByteBuf>> byte getByte(F file, long pos);
 
     /**
      * LongReadFile get
@@ -183,7 +183,7 @@ public interface IOAccessor {
      * @return
      * @see com.fineio.v3.file.impl.read.LongReadFile
      */
-    <F extends IReadFile<? extends LongBuf>> long getLong(F file, int pos);
+    <F extends IReadFile<? extends LongBuf>> long getLong(F file, long pos);
 
     /**
      * IntReadFile get
@@ -194,7 +194,7 @@ public interface IOAccessor {
      * @return
      * @see com.fineio.v3.file.impl.read.IntReadFile
      */
-    <F extends IReadFile<? extends IntBuf>> int getInt(F file, int pos);
+    <F extends IReadFile<? extends IntBuf>> int getInt(F file, long pos);
 
     /**
      * DoubleReadFile get
@@ -205,5 +205,5 @@ public interface IOAccessor {
      * @return
      * @see com.fineio.v3.file.impl.read.DoubleReadFile
      */
-    <F extends IReadFile<? extends DoubleBuf>> double getDouble(F file, int pos);
+    <F extends IReadFile<? extends DoubleBuf>> double getDouble(F file, long pos);
 }

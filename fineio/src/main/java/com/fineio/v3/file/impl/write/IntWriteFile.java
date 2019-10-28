@@ -26,7 +26,7 @@ public class IntWriteFile extends WriteFile<IntDirectBuffer> {
         return new IntWriteFile(fileBlock, connector, false);
     }
 
-    public void putInt(int pos, int value) {
+    public void putInt(long pos, int value) {
         ensureOpen();
         int nthBuf = nthBuf(pos);
         syncBufIfNeed(nthBuf);
