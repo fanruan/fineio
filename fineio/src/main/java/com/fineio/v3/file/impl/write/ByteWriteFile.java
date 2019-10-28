@@ -27,7 +27,7 @@ public class ByteWriteFile extends WriteFile<ByteDirectBuffer> {
         return new ByteWriteFile(fileBlock, connector, false);
     }
 
-    public void putByte(int pos, byte value) {
+    public void putByte(long pos, byte value) {
         ensureOpen();
         int nthBuf = nthBuf(pos);
         syncBufIfNeed(nthBuf);

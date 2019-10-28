@@ -20,11 +20,11 @@ public class LongReadFile extends ReadFile<LongDirectBuffer> {
     }
 
     private void init() {
-        int lastPos = initMetaAndGetLastPos();
+        long lastPos = initMetaAndGetLastPos();
         buffers = new LongDirectBuffer[nthBuf(lastPos) + 1];
     }
 
-    public long getLong(int pos) {
+    public long getLong(long pos) {
         ensureOpen();
         int nthBuf = nthBuf(pos);
         int nthVal = nthVal(pos);

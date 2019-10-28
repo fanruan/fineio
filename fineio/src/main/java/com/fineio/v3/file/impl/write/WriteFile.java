@@ -28,7 +28,7 @@ import java.util.Arrays;
 public abstract class WriteFile<B extends DirectBuffer> extends File<B> implements IWriteFile<B>, IAppendFile<B> {
     private final boolean asyncWrite;
     private int curBuf = -1;
-    private int lastPos;
+    private long lastPos;
 
     WriteFile(FileBlock fileBlock, Offset offset, Connector connector, boolean asyncWrite) {
         super(fileBlock, offset, connector);
@@ -78,7 +78,7 @@ public abstract class WriteFile<B extends DirectBuffer> extends File<B> implemen
         }
     }
 
-    void updateLastPos(int pos) {
+    void updateLastPos(long pos) {
         if (pos >= lastPos) {
             lastPos = pos + 1;
         }
@@ -99,7 +99,7 @@ public abstract class WriteFile<B extends DirectBuffer> extends File<B> implemen
     public void close() {
         if (closed.compareAndSet(false, true)) {
             syncBufs();
-            writeMeta(lastPos);
+            writeMeta();
         }
     }
 
@@ -116,10 +116,10 @@ public abstract class WriteFile<B extends DirectBuffer> extends File<B> implemen
         }
     }
 
-    private void writeMeta(int lastPos) {
-        byte[] bytes = ByteBuffer.allocate(5)
+    private void writeMeta() {
+        byte[] bytes = ByteBuffer.allocate(META_BYTES)
                 .put(blockOffset)
-                .putInt(lastPos << offset.getOffset()).array();
+                .putLong(lastPos << offset.getOffset()).array();
         try {
             connector.write(new FileBlock(fileBlock.getPath(), META), bytes);
         } catch (IOException e) {

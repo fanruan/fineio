@@ -20,11 +20,11 @@ public class ByteReadFile extends ReadFile<ByteDirectBuffer> {
     }
 
     private void init() {
-        int lastPos = initMetaAndGetLastPos();
+        long lastPos = initMetaAndGetLastPos();
         buffers = new ByteDirectBuffer[nthBuf(lastPos) + 1];
     }
 
-    public byte getByte(int pos) {
+    public byte getByte(long pos) {
         ensureOpen();
         int nthBuf = nthBuf(pos);
         int nthVal = nthVal(pos);
