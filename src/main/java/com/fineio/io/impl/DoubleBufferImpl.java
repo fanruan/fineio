@@ -15,7 +15,7 @@ public class DoubleBufferImpl extends BufferWrapper implements DoubleBuffer {
     }
 
     @Override
-    public synchronized double getDouble(int pos) {
+    public double getDouble(int pos) {
         final int offset = unsafeBuf.ensurePos(pos);
         return MemoryUtils.getDouble(unsafeBuf.getAddress(), offset);
     }

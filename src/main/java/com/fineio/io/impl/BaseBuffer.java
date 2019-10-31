@@ -16,6 +16,7 @@ import com.fineio.memory.manager.manager.MemoryManager;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.memory.manager.obj.impl.AllocateObject;
 import com.fineio.v2.io.base.StreamCloseChecker;
+import sun.misc.Cleaner;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +44,7 @@ public class BaseBuffer implements Buffer {
     private Level level;
     private URI uri;
     private ReentrantLock lock = new ReentrantLock();
+    private Cleaner cleaner;
     private volatile AtomicInteger status = new AtomicInteger(0);
 
     private BaseBuffer(BufferKey bufferKey) {
@@ -50,6 +52,7 @@ public class BaseBuffer implements Buffer {
         this.level = Level.READ;
         this.uri = bufferKey.getBlock().getBlockURI();
         loadContent();
+        cleaner = Cleaner.create(this, new BufferDeallocator(address, memorySize));
     }
 
     private BaseBuffer(BufferKey bufferKey, int maxOffset) {
@@ -71,6 +74,10 @@ public class BaseBuffer implements Buffer {
 
     @Override
     public void close() {
+        //读通过cleaner来释放了，其他的同步释放。
+        if(level == Level.READ){
+            return;
+        }
         lock.lock();
         try {
             if (close.compareAndSet(false, true)) {
