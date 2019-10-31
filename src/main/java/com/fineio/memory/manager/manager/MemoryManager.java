@@ -204,59 +204,62 @@ public enum MemoryManager implements FineIoService {
         }
 
         public boolean run() {
+            try{
 
-            if (null != cleaner) {
-                final JavaLangRefAccess jlra = SharedSecrets.getJavaLangRefAccess();
-                //先把虚引用全清理了
-                while (jlra.tryHandlePendingReference()) {
-                    if (isMemoryEnough()) {
-                        return true;
-                    }
-                }
-                //内存不够就清理超时的，触发gc再清理虚引用
-                if (cleaner.cleanTimeout()) {
-                    System.gc();
+                if (null != cleaner) {
+                    final JavaLangRefAccess jlra = SharedSecrets.getJavaLangRefAccess();
+                    //先把虚引用全清理了
                     while (jlra.tryHandlePendingReference()) {
                         if (isMemoryEnough()) {
                             return true;
                         }
                     }
-                }
-                //还不够就随机丢掉一个，丢10次，再失败就没内存了
-                boolean interrupted = false;
-                try {
-                    long sleepTime = 1;
-                    int loopCount = 0;
-                    while (true) {
-                        cleaner.cleanOne();
-                        //释放不掉就等一会
-                        if (!jlra.tryHandlePendingReference()) {
-                            try {
-                                Thread.sleep(sleepTime);
-                            } catch (InterruptedException e) {
-                                interrupted = true;
+                    //内存不够就清理超时的，触发gc再清理虚引用
+                    if (cleaner.cleanTimeout()) {
+                        System.gc();
+                        while (jlra.tryHandlePendingReference()) {
+                            if (isMemoryEnough()) {
+                                return true;
                             }
                         }
-                        if (isMemoryEnough()) {
-                            return true;
-                        }
-                        sleepTime <<= 1;
-                        //等太多次就gc下
-                        if (sleepTime > 100) {
-                            System.gc();
-                        }
-                        if (loopCount++ > 10) {
-                            break;
-                        }
                     }
-                    return false;
+                    //还不够就随机丢掉一个，丢10次，再失败就没内存了
+                    boolean interrupted = false;
+                    try {
+                        long sleepTime = 1;
+                        int loopCount = 0;
+                        while (true) {
+                            cleaner.cleanOne();
+                            //释放不掉就等一会
+                            if (!jlra.tryHandlePendingReference()) {
+                                try {
+                                    Thread.sleep(sleepTime);
+                                } catch (InterruptedException e) {
+                                    interrupted = true;
+                                }
+                            }
+                            if (isMemoryEnough()) {
+                                return true;
+                            }
+                            sleepTime <<= 1;
+                            //等太多次就gc下
+                            if (sleepTime > 100) {
+                                System.gc();
+                            }
+                            if (loopCount++ > 10) {
+                                break;
+                            }
+                        }
+                        return false;
 
-                } finally {
-                    if (interrupted) {
-                        Thread.currentThread().interrupt();
+                    } finally {
+                        if (interrupted) {
+                            Thread.currentThread().interrupt();
+                        }
                     }
+
                 }
-
+            } catch (Throwable ignore){
             }
             return false;
         }
