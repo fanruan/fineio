@@ -1,15 +1,15 @@
 package com.fineio.directio;
 
-import com.fineio.io.Buffer;
-import com.fineio.io.ByteBuffer;
-import com.fineio.io.CharBuffer;
-import com.fineio.io.DoubleBuffer;
-import com.fineio.io.FloatBuffer;
-import com.fineio.io.IntBuffer;
-import com.fineio.io.LongBuffer;
-import com.fineio.io.ShortBuffer;
-import com.fineio.io.file.FileModel;
 import com.fineio.storage.Connector;
+import com.fineio.v2.io.Buffer;
+import com.fineio.v2.io.ByteBuffer;
+import com.fineio.v2.io.CharBuffer;
+import com.fineio.v2.io.DoubleBuffer;
+import com.fineio.v2.io.FloatBuffer;
+import com.fineio.v2.io.IntBuffer;
+import com.fineio.v2.io.LongBuffer;
+import com.fineio.v2.io.ShortBuffer;
+import com.fineio.v2.io.file.FileModel;
 
 import java.net.URI;
 
@@ -17,6 +17,7 @@ import java.net.URI;
  * @author yee
  * @date 2018/10/2
  */
+@Deprecated
 public abstract class DirectIOFile<B extends Buffer> {
     protected Connector connector;
     protected URI uri;
