@@ -74,19 +74,23 @@ public class BaseBuffer implements Buffer {
     }
 
     byte getByte(int pos) {
-        return MemoryUtils.getByte(getAddress(), ensurePos(pos));
+        final int position = ensurePos(pos);
+        return MemoryUtils.getByte(getAddress(), position);
     }
 
     double getDouble(int pos) {
-        return MemoryUtils.getDouble(getAddress(), ensurePos(pos));
+        final int position = ensurePos(pos);
+        return MemoryUtils.getDouble(getAddress(), position);
     }
 
     int getInt(int pos) {
-        return MemoryUtils.getInt(getAddress(), ensurePos(pos));
+        final int position = ensurePos(pos);
+        return MemoryUtils.getInt(getAddress(), position);
     }
 
     long getLong(int pos) {
-        return MemoryUtils.getLong(getAddress(), ensurePos(pos));
+        final int position = ensurePos(pos);
+        return MemoryUtils.getLong(getAddress(), position);
     }
 
     @Override
