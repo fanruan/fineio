@@ -9,6 +9,7 @@ import com.fineio.io.ByteBuffer;
 import com.fineio.io.Level;
 import com.fineio.io.base.BufferKey;
 import com.fineio.io.base.DirectInputStream;
+import com.fineio.memory.MemoryUtils;
 import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.impl.BaseMemoryAllocator;
 import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
@@ -70,6 +71,22 @@ public class BaseBuffer implements Buffer {
 
     public static ByteBuffer newBuffer(BufferKey bufferKey, int maxOffset) {
         return new ByteBufferImpl(new BaseBuffer(bufferKey, maxOffset));
+    }
+
+    byte getByte(int pos) {
+        return MemoryUtils.getByte(getAddress(), ensurePos(pos));
+    }
+
+    double getDouble(int pos) {
+        return MemoryUtils.getDouble(getAddress(), ensurePos(pos));
+    }
+
+    int getInt(int pos) {
+        return MemoryUtils.getInt(getAddress(), ensurePos(pos));
+    }
+
+    long getLong(int pos) {
+        return MemoryUtils.getLong(getAddress(), ensurePos(pos));
     }
 
     @Override
