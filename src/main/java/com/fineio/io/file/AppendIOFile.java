@@ -1,58 +1,70 @@
 package com.fineio.io.file;
 
-import com.fineio.io.BaseBuffer;
+import com.fineio.exception.BlockNotFoundException;
+import com.fineio.exception.BufferConstructException;
 import com.fineio.io.Buffer;
+import com.fineio.io.file.append.ByteAppendIOFile;
+import com.fineio.io.file.append.DoubleAppendIOFile;
+import com.fineio.io.file.append.IntAppendIOFile;
+import com.fineio.io.file.append.LongAppendIOFile;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.storage.Connector;
+import com.fineio.v21.cache.CacheManager;
 
 import java.net.URI;
 
 /**
  * @author yee
- * @date 2018/9/20
+ * @date 2019/9/11
  */
-public final class AppendIOFile<B extends Buffer> extends BaseReadIOFile<B> {
-    private final boolean sync;
+public abstract class AppendIOFile<B extends Buffer> extends WriteIOFile<B> {
+    protected volatile int lastPos;
 
-    AppendIOFile(Connector connector, URI uri, FileModel model, boolean sync) {
-        super(connector, uri, model);
-        this.sync = sync;
-        int maxBlock = blocks - 1;
-        if (maxBlock >= 0) {
-            buffers[maxBlock] = initBuffer(maxBlock);
+    protected AppendIOFile(Connector connector, URI uri, byte offset) {
+        super(connector, uri, offset);
+        try {
+            readHeader(offset);
+            initLastBuffer(offset);
+        } catch (BlockNotFoundException e) {
+            this.blockSizeOffset = (byte) (connector.getBlockOffset() - offset);
         }
     }
 
-    @Override
-    protected FileLevel getFileLevel() {
-        return FileLevel.APPEND;
+    public static ByteAppendIOFile asByte(Connector connector, URI uri) {
+        return new ByteAppendIOFile(connector, uri);
     }
 
-    public static final <E extends BaseBuffer> AppendIOFile<E> createFineIO(Connector connector, URI uri, FileModel model, boolean sync) {
-        return new AppendIOFile<E>(connector, uri, model, sync);
+    public static IntAppendIOFile asInt(Connector connector, URI uri) {
+        return new IntAppendIOFile(connector, uri);
     }
 
-    @Override
-    protected Buffer initBuffer(int index) {
+    public static LongAppendIOFile asLong(Connector connector, URI uri) {
+        return new LongAppendIOFile(connector, uri);
+    }
 
-        synchronized (this) {
-            Buffer buffer = buffers[index];
-            if (buffer == null) {
-                buffer = model.createBuffer(connector, createIndexBlock(index), block_size_offset, sync);
-            } else {
-                return buffer;
+    public static DoubleAppendIOFile asDouble(Connector connector, URI uri) {
+        return new DoubleAppendIOFile(connector, uri);
+    }
+
+    private void initLastBuffer(int offset) {
+        final int idx = buffers.length - 1;
+        if (idx >= 0) {
+            try {
+                URI uri = new FileBlock(this.uri, String.valueOf(idx)).getBlockURI();
+                Buffer byteBuffer = CacheManager.getInstance().get(uri, new CacheManager.BufferCreator() {
+                    @Override
+                    public Buffer createBuffer() {
+                        return createBuf(idx);
+                    }
+                });
+                buffers[idx] = byteBuffer.flip();
+                int preSize = (idx << connector.getBlockOffset()) >> offset;
+                lastPos = preSize + byteBuffer.getLength();
+            } catch (BufferConstructException e) {
+                FineIOLoggers.getLogger().error(String.format("load buffer %s%d failed ", uri.getPath(), idx), e);
             }
-            if (index == blocks - 1) {
-                buffers[index] = buffer.asAppend();
-            } else {
-                buffers[index] = buffer.asWrite();
-            }
-            return buffers[index];
         }
     }
 
-    @Override
-    public final void close() {
-        writeHeader();
-        super.close();
-    }
+    protected abstract Buffer createBuf(int idx);
 }

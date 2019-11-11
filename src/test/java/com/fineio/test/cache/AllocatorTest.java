@@ -1,8 +1,8 @@
 package com.fineio.test.cache;
 
-import com.fineio.cache.Allocator;
-import com.fineio.cache.NewAllocator;
-import com.fineio.cache.ReAllocator;
+import com.fineio.v2.cache.Allocator;
+import com.fineio.v2.cache.NewAllocator;
+import com.fineio.v2.cache.ReAllocator;
 import junit.framework.TestCase;
 
 /**
