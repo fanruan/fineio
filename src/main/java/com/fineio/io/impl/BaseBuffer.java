@@ -95,25 +95,7 @@ public class BaseBuffer implements Buffer {
 
     @Override
     public void close() {
-        //读通过cleaner来释放了，其他的同步释放。
-        if(level == Level.READ){
-            return;
-        }
-        lock.lock();
-        try {
-            if (close.compareAndSet(false, true)) {
-                AllocateObject memoryObject = new AllocateObject(address, memorySize);
-                address = 0L;
-                memorySize = 0L;
-                if (level == Level.WRITE) {
-                    BaseDeAllocator.Builder.WRITE.build().deAllocate(memoryObject);
-                } else {
-                    BaseDeAllocator.Builder.READ.build().deAllocate(memoryObject);
-                }
-            }
-        } finally {
-            lock.unlock();
-        }
+        //读通过cleaner来释放了，其他的同步释放。wirte的内存不释放，直接转read了
     }
 
     private void loadContent() {
@@ -232,6 +214,14 @@ public class BaseBuffer implements Buffer {
             MemoryManager.INSTANCE.flip(memorySize, true);
         } else {
             level = Level.READ;
+            lock.lock();
+            try{
+                if (cleaner == null){
+                    cleaner = Cleaner.create(this, new BufferDeallocator(address, memorySize));
+                }
+            } finally {
+                lock.unlock();
+            }
             maxSize = writePos + 1;
             MemoryManager.INSTANCE.flip(memorySize, false);
         }
