@@ -53,7 +53,7 @@ public class BaseBuffer implements Buffer {
         this.level = Level.READ;
         this.uri = bufferKey.getBlock().getBlockURI();
         loadContent();
-        cleaner = Cleaner.create(this, new BufferDeallocator(address, memorySize));
+        initCleaner();
     }
 
     private BaseBuffer(BufferKey bufferKey, int maxOffset) {
@@ -111,6 +111,17 @@ public class BaseBuffer implements Buffer {
             }
         } catch (IOException e) {
             throw new BufferConstructException(e);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private void initCleaner(){
+        lock.lock();
+        try{
+            if (cleaner == null){
+                cleaner = Cleaner.create(this, new BufferDeallocator(address, memorySize));
+            }
         } finally {
             lock.unlock();
         }
@@ -214,14 +225,7 @@ public class BaseBuffer implements Buffer {
             MemoryManager.INSTANCE.flip(memorySize, true);
         } else {
             level = Level.READ;
-            lock.lock();
-            try{
-                if (cleaner == null){
-                    cleaner = Cleaner.create(this, new BufferDeallocator(address, memorySize));
-                }
-            } finally {
-                lock.unlock();
-            }
+            initCleaner();
             maxSize = writePos + 1;
             MemoryManager.INSTANCE.flip(memorySize, false);
         }
