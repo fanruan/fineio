@@ -166,14 +166,7 @@ public class CacheManager implements FineIoService {
 
     public void close(final Buffer buf) {
         if (null != buf) {
-            exec.submit(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    FineIOLoggers.getLogger().debug(String.format("Buf %s close. Release %d", buf.getUri().getPath(), buf.getMemorySize()));
-                    buf.close();
-                    return null;
-                }
-            });
+            buf.close();
         }
     }
 
@@ -225,15 +218,12 @@ public class CacheManager implements FineIoService {
 
     }
 
-    private ExecutorService exec;
 
     @Override
     public void start() {
-        exec = FineIOThreadPoolExecutor.newInstance(Runtime.getRuntime().availableProcessors(), "fineio-cache-event-dispatcher");
     }
 
     @Override
     public void stop() {
-        exec.shutdownNow();
     }
 }

@@ -12,11 +12,9 @@ import com.fineio.io.base.DirectInputStream;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.impl.BaseMemoryAllocator;
-import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.manager.MemoryManager;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.memory.manager.obj.impl.AllocateObject;
-import com.fineio.v2.io.base.StreamCloseChecker;
 import sun.misc.Cleaner;
 
 import java.io.IOException;
@@ -46,7 +44,6 @@ public class BaseBuffer implements Buffer {
     private URI uri;
     private ReentrantLock lock = new ReentrantLock();
     private Cleaner cleaner;
-    private volatile AtomicInteger status = new AtomicInteger(0);
 
     private BaseBuffer(BufferKey bufferKey) {
         this.bufferKey = bufferKey;
@@ -177,11 +174,9 @@ public class BaseBuffer implements Buffer {
         setCurrentCapacity(this.currentOffset + 1);
         int newLen = this.currentMaxSize << offset;
         Allocator allocator = BaseMemoryAllocator.Builder.BLOCK.build(address, len, newLen);
-        status.incrementAndGet();
         MemoryObject object = MemoryManager.INSTANCE.allocate(allocator);
         address = object.getAddress();
         memorySize = newLen;
-        status.decrementAndGet();
     }
 
     long getAddress() {
@@ -193,12 +188,7 @@ public class BaseBuffer implements Buffer {
         if (address == 0) {
             throw new StreamCloseException();
         }
-        return new DirectInputStream(address, (writePos + 1) << offset, new StreamCloseChecker(status.get()) {
-            @Override
-            public boolean check() {
-                return getStatus() == status.get();
-            }
-        });
+        return new DirectInputStream(address, (writePos + 1) << offset, null);
     }
 
     @Override

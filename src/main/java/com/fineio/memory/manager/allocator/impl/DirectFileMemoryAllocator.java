@@ -36,7 +36,6 @@ public class DirectFileMemoryAllocator extends BaseMemoryAllocator {
             }
             bytes = ba.toByteArray();
             int off = bytes.length;
-            beforeStatusChange();
             long address = MemoryUtils.allocate(off);
             object = new AllocateObject(address, off);
             MemoryUtils.copyMemory(bytes, address);
