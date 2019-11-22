@@ -28,18 +28,6 @@ public enum MemoryManager implements FineIoService {
      */
     INSTANCE;
     /**
-     * 触发释放的内存百分比
-     */
-    private static final double DEFAULT_RELEASE_RATE = 0.8D;
-    /**
-     * 释放内存上限
-     */
-    private long releaseLimit;
-    /**
-     * 扩容上限
-     */
-    private long memorySizeUpLimit;
-    /**
      * 读内存空间
      */
     private volatile AtomicLong readSize;
@@ -71,8 +59,6 @@ public enum MemoryManager implements FineIoService {
         this.readSize = new AtomicLong();
         this.writeSize = new AtomicLong();
         currentMaxSize = Math.min(VM.maxDirectMemory(), getMaxSize());
-        releaseLimit = (long) (currentMaxSize * DEFAULT_RELEASE_RATE);
-        memorySizeUpLimit = (long) (getMaxSize() * DEFAULT_RELEASE_RATE);
         timeoutCleaner = FineIOExecutors.newScheduledExecutorService(1, "fineio-timeout-cleaner");
         timeoutCleaner.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -107,11 +93,11 @@ public enum MemoryManager implements FineIoService {
         size = Math.abs(size);
         // 如果当前是读内存，转成写内存
         if (isRead) {
-            readSize.addAndGet(0 - size);
             writeSize.addAndGet(size);
+            readSize.addAndGet(0 - size);
         } else {
-            writeSize.addAndGet(0 - size);
             readSize.addAndGet(size);
+            writeSize.addAndGet(0 - size);
         }
     }
 
@@ -243,10 +229,15 @@ public enum MemoryManager implements FineIoService {
                             }
                             sleepTime <<= 1;
                             //等太多次就gc下
-                            if (sleepTime > 100) {
+                            if (sleepTime > 1000) {
                                 System.gc();
+                                while (jlra.tryHandlePendingReference()) {
+                                    if (isMemoryEnough()) {
+                                        return true;
+                                    }
+                                }
                             }
-                            if (loopCount++ > 10) {
+                            if (loopCount++ > 11) {
                                 break;
                             }
                         }
@@ -265,7 +256,7 @@ public enum MemoryManager implements FineIoService {
         }
 
         public boolean isMemoryEnough() {
-            return (readSize.get() + writeSize.get() + allocateSize) < releaseLimit;
+            return (readSize.get() + writeSize.get() + allocateSize) < currentMaxSize;
         }
     }
 }

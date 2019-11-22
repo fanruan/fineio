@@ -32,7 +32,6 @@ public class BlockFileMemoryAllocator extends BaseMemoryAllocator {
             while ((len = is.read(bytes, off, size - off)) > 0) {
                 off += len;
             }
-            beforeStatusChange();
             long address = MemoryUtils.allocate(off);
             object = new AllocateObject(address, off);
             MemoryUtils.copyMemory(bytes, address, off);

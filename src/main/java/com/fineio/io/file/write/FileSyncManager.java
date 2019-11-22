@@ -33,7 +33,7 @@ public class FileSyncManager implements FineIoService {
 
     @Override
     public void start() {
-        this.service = FineIOExecutors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), "FineIO-FileSync");
+        this.service = FineIOExecutors.newFixedThreadPool(Math.min(4, Runtime.getRuntime().availableProcessors()), "FineIO-FileSync");
     }
 
     @Override
