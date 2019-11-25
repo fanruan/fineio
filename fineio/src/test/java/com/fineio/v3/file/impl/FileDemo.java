@@ -79,28 +79,4 @@ public class FileDemo {
             assertEquals(i, doubleReadFile.getDouble(i), 0);
         }
     }
-
-    @Test
-    public void testNew() {
-        FileBlock key = new FileBlock(System.getProperty("user.dir"), "testNew");
-        FileConnector connector = new FileConnector();
-
-        int n = 1 << 25;
-
-        IntWriteFile intWriteFile = IntWriteFile.ofSync(key, connector);
-        for (int i = 0; i < 3; i++) {
-            System.out.println(i);
-            for (int j = 0; j < n; j++) {
-                intWriteFile.putInt(i * n + j, i * n + j);
-            }
-        }
-        intWriteFile.close();
-
-
-        IntReadFile intReadFile = new IntReadFile(key, connector);
-        for (int i = 0; i < 3 * n; i++) {
-            assertEquals(i, intReadFile.getInt(i));
-        }
-        intReadFile.close();
-    }
 }
