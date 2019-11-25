@@ -9,14 +9,10 @@ import com.fineio.v3.memory.allocator.BaseMemoryAllocator;
 import com.fineio.v3.memory.allocator.MemoryAllocator;
 import com.fineio.v3.memory.allocator.MemoryReAllocator;
 import com.fineio.v3.memory.allocator.WriteMemoryAllocator;
-import sun.misc.JavaLangRefAccess;
-import sun.misc.SharedSecrets;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Condition;
 
-import static com.fineio.accessor.FileMode.READ;
 import static com.fineio.accessor.FileMode.WRITE;
 
 /**
@@ -76,17 +72,17 @@ public enum MemoryManager {
         memoryMode.remove(address);
     }
 
-    public void transferWriteToRead(long address, long size) throws OutOfDirectMemoryException {
-        if (!memoryMode.containsKey(address) || memoryMode.get(address) != WRITE) {
-            throw new IllegalArgumentException("cannot transfer memory which doesn't exist or isn't write-memory");
-        }
-
-        allocator.addMemory(size, FileMode.READ);
-
-        reAllocator.addMemory(-size, WRITE);
-
-        memoryMode.replace(address, WRITE, READ);
-    }
+//    public void transferWriteToRead(long address, long size) throws OutOfDirectMemoryException {
+//        if (!memoryMode.containsKey(address) || memoryMode.get(address) != WRITE) {
+//            throw new IllegalArgumentException("cannot transfer memory which doesn't exist or isn't write-memory");
+//        }
+//
+//        allocator.addMemory(size, FileMode.READ);
+//
+//        reAllocator.addMemory(-size, WRITE);
+//
+//        memoryMode.replace(address, WRITE, READ);
+//    }
 
     public void clear() {
         allocator.clear();

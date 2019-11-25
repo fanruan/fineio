@@ -103,39 +103,39 @@ public class BaseMemoryAllocator implements MemoryAllocator {
         memorySize.reset();
     }
 
-    @Override
-    public void addMemory(long size, FileMode mode) throws OutOfDirectMemoryException {
-        mode.getLock().lock();
-        Condition condition = mode.getCondition();
-
-        if (size < 0) {
-            this.memorySize.add(size);
-            condition.signalAll();
-        } else {
-            int retryTime = 0;
-            while (true) {
-                retryTime++;
-
-                cleanBeforeAllocate(size);
-
-                mode.getLock().lock();
-                try {
-                    if (memorySize.sum() + size < limitMemorySize) {
-                        memorySize.add(size);
-                        return;
-                    }
-                    try {
-                        if (!condition.await(10, TimeUnit.MINUTES) || retryTime > MAX_RETRY_TIME) {
-                            throw new OutOfDirectMemoryException("Cannot allocate memory size " + size + " for 10 min. Max memory is " + limitMemorySize);
-                        }
-                    } catch (InterruptedException e) {
-                        throw new OutOfDirectMemoryException(e);
-                    }
-                } finally {
-                    mode.getLock().unlock();
-                }
-
-            }
-        }
-    }
+//    @Override
+//    public void addMemory(long size, FileMode mode) throws OutOfDirectMemoryException {
+//        mode.getLock().lock();
+//        Condition condition = mode.getCondition();
+//
+//        if (size < 0) {
+//            this.memorySize.add(size);
+//            condition.signalAll();
+//        } else {
+//            int retryTime = 0;
+//            while (true) {
+//                retryTime++;
+//
+//                cleanBeforeAllocate(size);
+//
+//                mode.getLock().lock();
+//                try {
+//                    if (memorySize.sum() + size < limitMemorySize) {
+//                        memorySize.add(size);
+//                        return;
+//                    }
+//                    try {
+//                        if (!condition.await(10, TimeUnit.MINUTES) || retryTime > MAX_RETRY_TIME) {
+//                            throw new OutOfDirectMemoryException("Cannot allocate memory size " + size + " for 10 min. Max memory is " + limitMemorySize);
+//                        }
+//                    } catch (InterruptedException e) {
+//                        throw new OutOfDirectMemoryException(e);
+//                    }
+//                } finally {
+//                    mode.getLock().unlock();
+//                }
+//
+//            }
+//        }
+//    }
 }

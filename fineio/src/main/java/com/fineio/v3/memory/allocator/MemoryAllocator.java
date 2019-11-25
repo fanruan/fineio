@@ -3,8 +3,6 @@ package com.fineio.v3.memory.allocator;
 import com.fineio.accessor.FileMode;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 
-import java.util.concurrent.locks.Condition;
-
 /**
  * @author yee
  */
@@ -34,5 +32,5 @@ public interface MemoryAllocator {
 
     void clear();
 
-    void addMemory(long size, FileMode mode) throws OutOfDirectMemoryException;
+//    void addMemory(long size, FileMode mode) throws OutOfDirectMemoryException;
 }
