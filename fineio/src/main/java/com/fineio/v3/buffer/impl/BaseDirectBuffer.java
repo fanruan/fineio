@@ -150,11 +150,11 @@ public abstract class BaseDirectBuffer implements DirectBuffer {
     }
 
     private Cleaner cleaner;
-    private AtomicBoolean intiCleaner = new AtomicBoolean(false);
+    private AtomicBoolean initCleaner = new AtomicBoolean(false);
 
     @Override
     public void letGcHelpRelease() {
-        if (intiCleaner.compareAndSet(false, true)) {
+        if (initCleaner.compareAndSet(false, true)) {
             cleaner = Cleaner.create(this, new Deallocator(address, getCapInBytes()));
         }
     }

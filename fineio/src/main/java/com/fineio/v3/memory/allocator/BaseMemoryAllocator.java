@@ -63,7 +63,7 @@ public class BaseMemoryAllocator implements MemoryAllocator {
                     return MemoryUtils.allocate(size);
                 }
                 try {
-                    if (!condition.await(10, TimeUnit.SECONDS) || retryTime > MAX_RETRY_TIME) {
+                    if (!condition.await(10, TimeUnit.MINUTES) || retryTime > MAX_RETRY_TIME) {
                         throw new OutOfDirectMemoryException("Cannot allocate memory size " + size + " for 10 min. Max memory is " + limitMemorySize);
                     }
                 } catch (InterruptedException e) {
