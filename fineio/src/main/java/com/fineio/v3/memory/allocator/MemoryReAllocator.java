@@ -1,5 +1,6 @@
 package com.fineio.v3.memory.allocator;
 
+import com.fineio.accessor.FileMode;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 
 import java.util.concurrent.locks.Condition;
@@ -17,5 +18,5 @@ public interface MemoryReAllocator extends MemoryAllocator {
      * @param newSize
      * @return
      */
-    long reallocate(long address, long oldSize, long newSize, Condition condition) throws OutOfDirectMemoryException;
+    long reallocate(long address, long oldSize, long newSize, FileMode mode) throws OutOfDirectMemoryException;
 }

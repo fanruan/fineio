@@ -1,7 +1,10 @@
 package com.fineio.v3.memory.allocator;
 
+import com.fineio.accessor.FileMode;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.MemoryUtils;
+import sun.misc.JavaLangRefAccess;
+import sun.misc.SharedSecrets;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
@@ -21,31 +24,56 @@ public class BaseMemoryAllocator implements MemoryAllocator {
      */
     protected LongAdder memorySize;
 
+    protected final int MAX_RETRY_TIME = 10;
+    protected final JavaLangRefAccess jlra = SharedSecrets.getJavaLangRefAccess();
 
     public BaseMemoryAllocator(long limitMemorySize) {
         this.limitMemorySize = limitMemorySize;
         this.memorySize = new LongAdder();
     }
 
+    public void cleanBeforeAllocate(long size) {
+        if (memorySize.sum() + size >= limitMemorySize) {
+            while (jlra.tryHandlePendingReference()) {
+                if (memorySize.sum() + size < limitMemorySize) {
+                    break;
+                }
+            }
+            if (memorySize.sum() + size >= limitMemorySize) {
+                System.gc();
+            }
+        }
+    }
+
     /**
-     * @param size      allocate size
-     * @param condition
+     * @param size allocate size
+     * @param mode
      */
     @Override
-    public long allocate(long size, Condition condition) throws OutOfDirectMemoryException {
-        do {
-            if (memorySize.sum() + size < limitMemorySize) {
-                memorySize.add(size);
-                return MemoryUtils.allocate(size);
-            }
+    public long allocate(long size, FileMode mode) throws OutOfDirectMemoryException {
+        Condition condition = mode.getCondition();
+        int retryTime = 0;
+        while (true) {
+            retryTime++;
+            cleanBeforeAllocate(size);
+            mode.getLock().lock();
             try {
-                if (!condition.await(10, TimeUnit.MINUTES)) {
-                    throw new OutOfDirectMemoryException("Cannot allocate memory size " + size + " for 10 min. Max memory is " + limitMemorySize);
+                if (memorySize.sum() + size < limitMemorySize) {
+                    memorySize.add(size);
+                    return MemoryUtils.allocate(size);
                 }
-            } catch (InterruptedException e) {
-                throw new OutOfDirectMemoryException(e);
+                try {
+                    if (!condition.await(10, TimeUnit.MINUTES) || retryTime > MAX_RETRY_TIME) {
+                        throw new OutOfDirectMemoryException("Cannot allocate memory size " + size + " for 10 min. Max memory is " + limitMemorySize);
+                    }
+                } catch (InterruptedException e) {
+                    throw new OutOfDirectMemoryException(e);
+                }
+            } finally {
+                mode.getLock().unlock();
             }
-        } while (true);
+
+        }
     }
 
     /**
@@ -53,10 +81,16 @@ public class BaseMemoryAllocator implements MemoryAllocator {
      * @param size    memory size
      */
     @Override
-    public void release(long address, long size, Condition condition) {
-        MemoryUtils.free(address);
-        this.memorySize.add(0 - size);
-        condition.signalAll();
+    public void release(long address, long size, FileMode mode) {
+        mode.getLock().lock();
+        try {
+            MemoryUtils.free(address);
+            this.memorySize.add(0 - size);
+            mode.getCondition().signalAll();
+        } finally {
+            mode.getLock().unlock();
+        }
+
     }
 
     @Override
@@ -69,25 +103,39 @@ public class BaseMemoryAllocator implements MemoryAllocator {
         memorySize.reset();
     }
 
-    @Override
-    public void addMemory(long size, Condition condition) throws OutOfDirectMemoryException {
-        if (size < 0) {
-            this.memorySize.add(size);
-            condition.signalAll();
-        } else {
-            do {
-                if (memorySize.sum() + size < limitMemorySize) {
-                    memorySize.add(size);
-                    return;
-                }
-                try {
-                    if (!condition.await(10, TimeUnit.MINUTES)) {
-                        throw new OutOfDirectMemoryException("Cannot allocate memory size " + size + " for 10 min. Max memory is " + limitMemorySize);
-                    }
-                } catch (InterruptedException e) {
-                    throw new OutOfDirectMemoryException(e);
-                }
-            } while (true);
-        }
-    }
+//    @Override
+//    public void addMemory(long size, FileMode mode) throws OutOfDirectMemoryException {
+//        mode.getLock().lock();
+//        Condition condition = mode.getCondition();
+//
+//        if (size < 0) {
+//            this.memorySize.add(size);
+//            condition.signalAll();
+//        } else {
+//            int retryTime = 0;
+//            while (true) {
+//                retryTime++;
+//
+//                cleanBeforeAllocate(size);
+//
+//                mode.getLock().lock();
+//                try {
+//                    if (memorySize.sum() + size < limitMemorySize) {
+//                        memorySize.add(size);
+//                        return;
+//                    }
+//                    try {
+//                        if (!condition.await(10, TimeUnit.MINUTES) || retryTime > MAX_RETRY_TIME) {
+//                            throw new OutOfDirectMemoryException("Cannot allocate memory size " + size + " for 10 min. Max memory is " + limitMemorySize);
+//                        }
+//                    } catch (InterruptedException e) {
+//                        throw new OutOfDirectMemoryException(e);
+//                    }
+//                } finally {
+//                    mode.getLock().unlock();
+//                }
+//
+//            }
+//        }
+//    }
 }

@@ -58,7 +58,7 @@ public class ReadFileTest {
 
         BaseMemoryAllocator allocator = mock(BaseMemoryAllocator.class);
         setInternalState(MemoryManager.INSTANCE, "allocator", allocator);
-        when(allocator.allocate(1, FileMode.READ.getCondition())).thenReturn(1L);
+        when(allocator.allocate(1, FileMode.READ)).thenReturn(1L);
 
         when(input.read()).thenReturn(1, -1);
 
@@ -87,7 +87,7 @@ public class ReadFileTest {
         } catch (BufferAcquireFailedException ignore) {
         }
 
-        verify(allocator).release(1, 1, FileMode.READ.getCondition());
+        verify(allocator).release(1, 1, FileMode.READ);
     }
 
     @Test

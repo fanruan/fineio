@@ -70,7 +70,7 @@ public class BaseDirectBufferTest {
 
         assertEquals(512, (int) Whitebox.getInternalState(buf, "cap"));
 
-        when(reAllocator.reallocate(0, 512, 1024, FileMode.WRITE.getCondition())).thenThrow(new OutOfDirectMemoryException(""));
+        when(reAllocator.reallocate(0, 512, 1024, FileMode.WRITE)).thenThrow(new OutOfDirectMemoryException(""));
         try {
             // max cap exceeds, grow up to max cap
             buf.ensureCap(1024);
@@ -114,7 +114,7 @@ public class BaseDirectBufferTest {
 
         WriteMemoryAllocator reAllocator = mock(WriteMemoryAllocator.class);
         setInternalState(MemoryManager.INSTANCE, "reAllocator", reAllocator);
-        when(reAllocator.allocate(16, FileMode.WRITE.getCondition())).thenReturn(1L);
+        when(reAllocator.allocate(16, FileMode.WRITE)).thenReturn(1L);
 
         assertEquals(1, new DirectBuffer(mock(FileBlock.class), Offset.BYTE, 1024, FileMode.WRITE).getAddress());
     }
@@ -143,7 +143,7 @@ public class BaseDirectBufferTest {
         buf.close();
         buf.close();
 
-        verify(allocator).release(1, 16 * Integer.BYTES, FileMode.READ.getCondition());
+        verify(allocator).release(1, 16 * Integer.BYTES, FileMode.READ);
         verify(closed, atLeast(2)).compareAndSet(false, true);
     }
 
