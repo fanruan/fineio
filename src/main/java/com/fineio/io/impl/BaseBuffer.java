@@ -44,6 +44,7 @@ public class BaseBuffer implements Buffer {
     private URI uri;
     private ReentrantLock lock = new ReentrantLock();
     private Cleaner cleaner;
+    private BufferDeallocator deallocator;
 
     private BaseBuffer(BufferKey bufferKey) {
         this.bufferKey = bufferKey;
@@ -102,6 +103,7 @@ public class BaseBuffer implements Buffer {
                 MemoryObject allocate = MemoryManager.INSTANCE.allocate(BaseMemoryAllocator.Builder.BLOCK.build(
                         bufferKey.getConnector().read(bufferKey.getBlock()), 1 << bufferKey.getConnector().getBlockOffset()));
                 address = allocate.getAddress();
+                resetDeallocatorAddress();
                 this.memorySize = allocate.getAllocateSize();
                 this.maxSize = (int) (this.memorySize >> offset);
                 this.close.compareAndSet(true, false);
@@ -117,10 +119,17 @@ public class BaseBuffer implements Buffer {
         lock.lock();
         try{
             if (cleaner == null){
-                cleaner = Cleaner.create(this, new BufferDeallocator(address, memorySize));
+                deallocator = new BufferDeallocator(address, memorySize);
+                cleaner = Cleaner.create(this, deallocator);
             }
         } finally {
             lock.unlock();
+        }
+    }
+
+    private void resetDeallocatorAddress(){
+        if (deallocator != null){
+            deallocator.setAddress(address);
         }
     }
 
@@ -176,6 +185,7 @@ public class BaseBuffer implements Buffer {
         Allocator allocator = BaseMemoryAllocator.Builder.BLOCK.build(address, len, newLen);
         MemoryObject object = MemoryManager.INSTANCE.allocate(allocator);
         address = object.getAddress();
+        resetDeallocatorAddress();
         memorySize = newLen;
     }
 
