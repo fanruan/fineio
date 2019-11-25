@@ -1,11 +1,8 @@
 package com.fineio.v3.buffer.impl.safe;
 
+import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
-import com.fineio.v3.buffer.BufferAllocateFailedException;
-import com.fineio.v3.buffer.BufferClosedException;
-import com.fineio.v3.buffer.BufferOutOfBoundsException;
-import com.fineio.v3.buffer.DirectBuffer;
-import com.fineio.v3.buffer.LongDirectBuffer;
+import com.fineio.v3.buffer.*;
 
 /**
  * @author anchore
@@ -28,31 +25,24 @@ public class SafeLongDirectBuf extends BaseSafeDirectBuf<LongDirectBuffer> imple
 
     @Override
     public void close() {
-        DirectBuffer realBuf = buf;
-        buf = new VoidLongDirectBuf(realBuf);
-        try {
-            // 等待最后一次读完就释放
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            FineIOLoggers.getLogger().error(e);
-        } finally {
-            realBuf.close();
-        }
+        long address = buf.getAddress();
+        FileBlock fileBlock = buf.getFileBlock();
+        buf = new VoidLongDirectBuf(address, fileBlock);
     }
 
     private static class VoidLongDirectBuf extends BaseVoidDirectBuf implements LongDirectBuffer {
-        VoidLongDirectBuf(DirectBuffer realBuf) {
-            super(realBuf);
+        public VoidLongDirectBuf(long address, FileBlock fileBlock) {
+            super(address, fileBlock);
         }
 
         @Override
         public void putLong(int pos, long val) throws BufferClosedException, BufferAllocateFailedException, BufferOutOfBoundsException {
-            throw new BufferClosedException(realBuf.getAddress(), getFileBlock());
+            throw new BufferClosedException(address, fileBlock);
         }
 
         @Override
         public long getLong(int pos) throws BufferClosedException, BufferOutOfBoundsException {
-            throw new BufferClosedException(realBuf.getAddress(), getFileBlock());
+            throw new BufferClosedException(address, fileBlock);
         }
     }
 }

@@ -9,6 +9,7 @@ import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.Offset;
+import sun.misc.Cleaner;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -16,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author anchore
  * @date 2019/4/16
  */
-abstract class BaseDirectBuffer implements DirectBuffer {
+public abstract class BaseDirectBuffer implements DirectBuffer {
     /**
      * 写时能增长到的最大容量
      */
@@ -147,4 +148,36 @@ abstract class BaseDirectBuffer implements DirectBuffer {
             MemoryManager.INSTANCE.release(address, getCapInBytes());
         }
     }
+
+    private Cleaner cleaner;
+    private AtomicBoolean intiCleaner = new AtomicBoolean(false);
+
+    @Override
+    public void letGcHelpRelease() {
+        if (intiCleaner.compareAndSet(false, true)) {
+            cleaner = Cleaner.create(this, new Deallocator(address, getCapInBytes()));
+        }
+    }
+
+    private static class Deallocator implements Runnable {
+        private long address;
+        private int capacity;
+
+        private Deallocator(long address, int capacity) {
+            assert (address != 0);
+            this.address = address;
+            this.capacity = capacity;
+        }
+
+        @Override
+        public void run() {
+            if (address == 0) {
+                // Paranoia
+                return;
+            }
+            MemoryManager.INSTANCE.release(address, capacity);
+            address = 0;
+        }
+    }
+
 }

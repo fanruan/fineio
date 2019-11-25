@@ -9,6 +9,8 @@ import com.fineio.v3.memory.allocator.BaseMemoryAllocator;
 import com.fineio.v3.memory.allocator.MemoryAllocator;
 import com.fineio.v3.memory.allocator.MemoryReAllocator;
 import com.fineio.v3.memory.allocator.WriteMemoryAllocator;
+import sun.misc.JavaLangRefAccess;
+import sun.misc.SharedSecrets;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -45,51 +47,33 @@ public enum MemoryManager {
     }
 
     public long allocate(long size, FileMode mode) throws OutOfDirectMemoryException {
-        mode.getLock().lock();
-
-        try {
-            Condition condition = mode.getCondition();
-            long address;
-            if (mode == FileMode.READ) {
-                address = allocator.allocate(size, condition);
-            } else {
-                address = reAllocator.allocate(size, condition);
-            }
-            memoryMode.putIfAbsent(address, mode);
-            return address;
-        } finally {
-            mode.getLock().unlock();
+        long address;
+        if (mode == FileMode.READ) {
+            address = allocator.allocate(size, mode);
+        } else {
+            address = reAllocator.allocate(size, mode);
         }
+        memoryMode.putIfAbsent(address, mode);
+        return address;
     }
 
     public long allocate(long address, long oldSize, long newSize) throws OutOfDirectMemoryException {
-        WRITE.getLock().lock();
-        try {
-            long reallocate = reAllocator.reallocate(address, oldSize, newSize, WRITE.getCondition());
-            if (address != reallocate) {
-                memoryMode.remove(address);
-                memoryMode.putIfAbsent(reallocate, WRITE);
-            }
-            return reallocate;
-        } finally {
-            WRITE.getLock().unlock();
+        long reallocate = reAllocator.reallocate(address, oldSize, newSize, WRITE);
+        if (address != reallocate) {
+            memoryMode.remove(address);
+            memoryMode.putIfAbsent(reallocate, WRITE);
         }
+        return reallocate;
     }
 
     public void release(long address, long size) {
         FileMode mode = memoryMode.get(address);
-        mode.getLock().lock();
-        try {
-            Condition condition = mode.getCondition();
-            if (mode == FileMode.READ) {
-                allocator.release(address, size, condition);
-            } else {
-                reAllocator.release(address, size, condition);
-            }
-            memoryMode.remove(address);
-        } finally {
-            mode.getLock().unlock();
+        if (mode == FileMode.READ) {
+            allocator.release(address, size, mode);
+        } else {
+            reAllocator.release(address, size, mode);
         }
+        memoryMode.remove(address);
     }
 
     public void transferWriteToRead(long address, long size) throws OutOfDirectMemoryException {
@@ -97,19 +81,9 @@ public enum MemoryManager {
             throw new IllegalArgumentException("cannot transfer memory which doesn't exist or isn't write-memory");
         }
 
-        FileMode.READ.getLock().lock();
-        try {
-            allocator.addMemory(size, FileMode.READ.getCondition());
-        } finally {
-            FileMode.READ.getLock().unlock();
-        }
+        allocator.addMemory(size, FileMode.READ);
 
-        WRITE.getLock().lock();
-        try {
-            reAllocator.addMemory(-size, WRITE.getCondition());
-        } finally {
-            WRITE.getLock().unlock();
-        }
+        reAllocator.addMemory(-size, WRITE);
 
         memoryMode.replace(address, WRITE, READ);
     }
