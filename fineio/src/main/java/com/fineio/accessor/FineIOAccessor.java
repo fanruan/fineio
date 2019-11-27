@@ -62,62 +62,62 @@ public enum FineIOAccessor implements IOAccessor {
     }
 
     @Override
-    public <F extends IAppendFile<? extends ByteBuf>> void put(F file, int pos, byte value) {
+    public <F extends IAppendFile<? extends ByteBuf>> void put(F file, long pos, byte value) {
         accessor.put(file, pos, value);
     }
 
     @Override
-    public <F extends IAppendFile<? extends LongBuf>> void put(F file, int pos, long value) {
+    public <F extends IAppendFile<? extends LongBuf>> void put(F file, long pos, long value) {
         accessor.put(file, pos, value);
     }
 
     @Override
-    public <F extends IAppendFile<? extends IntBuf>> void put(F file, int pos, int value) {
+    public <F extends IAppendFile<? extends IntBuf>> void put(F file, long pos, int value) {
         accessor.put(file, pos, value);
     }
 
     @Override
-    public <F extends IAppendFile<? extends DoubleBuf>> void put(F file, int pos, double value) {
+    public <F extends IAppendFile<? extends DoubleBuf>> void put(F file, long pos, double value) {
         accessor.put(file, pos, value);
     }
 
     @Override
-    public <F extends IWriteFile<? extends ByteBuf>> void put(F file, int pos, byte value) {
+    public <F extends IWriteFile<? extends ByteBuf>> void put(F file, long pos, byte value) {
         accessor.put(file, pos, value);
     }
 
     @Override
-    public <F extends IWriteFile<? extends LongBuf>> void put(F file, int pos, long value) {
+    public <F extends IWriteFile<? extends LongBuf>> void put(F file, long pos, long value) {
         accessor.put(file, pos, value);
     }
 
     @Override
-    public <F extends IWriteFile<? extends IntBuf>> void put(F file, int pos, int value) {
+    public <F extends IWriteFile<? extends IntBuf>> void put(F file, long pos, int value) {
         accessor.put(file, pos, value);
     }
 
     @Override
-    public <F extends IWriteFile<? extends DoubleBuf>> void put(F file, int pos, double value) {
+    public <F extends IWriteFile<? extends DoubleBuf>> void put(F file, long pos, double value) {
         accessor.put(file, pos, value);
     }
 
     @Override
-    public <F extends IReadFile<? extends ByteBuf>> byte getByte(F file, int pos) {
+    public <F extends IReadFile<? extends ByteBuf>> byte getByte(F file, long pos) {
         return accessor.getByte(file, pos);
     }
 
     @Override
-    public <F extends IReadFile<? extends LongBuf>> long getLong(F file, int pos) {
+    public <F extends IReadFile<? extends LongBuf>> long getLong(F file, long pos) {
         return accessor.getLong(file, pos);
     }
 
     @Override
-    public <F extends IReadFile<? extends IntBuf>> int getInt(F file, int pos) {
+    public <F extends IReadFile<? extends IntBuf>> int getInt(F file, long pos) {
         return accessor.getInt(file, pos);
     }
 
     @Override
-    public <F extends IReadFile<? extends DoubleBuf>> double getDouble(F file, int pos) {
+    public <F extends IReadFile<? extends DoubleBuf>> double getDouble(F file, long pos) {
         return accessor.getDouble(file, pos);
     }
 }

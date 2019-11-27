@@ -57,63 +57,63 @@ public class IOAccessorImpl implements IOAccessor {
     }
 
     @Override
-    public <F extends IAppendFile<? extends ByteBuf>> void put(F file, int pos, byte value) {
+    public <F extends IAppendFile<? extends ByteBuf>> void put(F file, long pos, byte value) {
         put(file, value);
     }
 
     @Override
-    public <F extends IAppendFile<? extends LongBuf>> void put(F file, int pos, long value) {
+    public <F extends IAppendFile<? extends LongBuf>> void put(F file, long pos, long value) {
         put(file, value);
     }
 
     @Override
-    public <F extends IAppendFile<? extends IntBuf>> void put(F file, int pos, int value) {
+    public <F extends IAppendFile<? extends IntBuf>> void put(F file, long pos, int value) {
         put(file, value);
     }
 
     @Override
-    public <F extends IAppendFile<? extends DoubleBuf>> void put(F file, int pos, double value) {
+    public <F extends IAppendFile<? extends DoubleBuf>> void put(F file, long pos, double value) {
         put(file, value);
     }
 
     @Override
-    public <F extends IWriteFile<? extends ByteBuf>> void put(F file, int pos, byte value) {
+    public <F extends IWriteFile<? extends ByteBuf>> void put(F file, long pos, byte value) {
         IOFile.put((IOFile<ByteBuffer>) file, pos, value);
     }
 
     @Override
-    public <F extends IWriteFile<? extends LongBuf>> void put(F file, int pos, long value) {
+    public <F extends IWriteFile<? extends LongBuf>> void put(F file, long pos, long value) {
         IOFile.put((IOFile<LongBuffer>) file, pos, value);
 
     }
 
     @Override
-    public <F extends IWriteFile<? extends IntBuf>> void put(F file, int pos, int value) {
+    public <F extends IWriteFile<? extends IntBuf>> void put(F file, long pos, int value) {
         IOFile.put((IOFile<IntBuffer>) file, pos, value);
     }
 
     @Override
-    public <F extends IWriteFile<? extends DoubleBuf>> void put(F file, int pos, double value) {
+    public <F extends IWriteFile<? extends DoubleBuf>> void put(F file, long pos, double value) {
         IOFile.put((IOFile<DoubleBuffer>) file, pos, value);
     }
 
     @Override
-    public <F extends IReadFile<? extends ByteBuf>> byte getByte(F file, int pos) {
+    public <F extends IReadFile<? extends ByteBuf>> byte getByte(F file, long pos) {
         return IOFile.getByte((IOFile<ByteBuffer>) file, pos);
     }
 
     @Override
-    public <F extends IReadFile<? extends LongBuf>> long getLong(F file, int pos) {
+    public <F extends IReadFile<? extends LongBuf>> long getLong(F file, long pos) {
         return IOFile.getLong((IOFile<LongBuffer>) file, pos);
     }
 
     @Override
-    public <F extends IReadFile<? extends IntBuf>> int getInt(F file, int pos) {
+    public <F extends IReadFile<? extends IntBuf>> int getInt(F file, long pos) {
         return IOFile.getInt((IOFile<IntBuffer>) file, pos);
     }
 
     @Override
-    public <F extends IReadFile<? extends DoubleBuf>> double getDouble(F file, int pos) {
+    public <F extends IReadFile<? extends DoubleBuf>> double getDouble(F file, long pos) {
         return IOFile.getDouble((IOFile<DoubleBuffer>) file, pos);
     }
 

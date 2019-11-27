@@ -26,7 +26,7 @@ public class DoubleWriteFile extends WriteFile<DoubleDirectBuffer> {
         return new DoubleWriteFile(fileBlock, connector, false);
     }
 
-    public void putDouble(int pos, double value) {
+    public void putDouble(long pos, double value) {
         ensureOpen();
         int nthBuf = nthBuf(pos);
         syncBufIfNeed(nthBuf);

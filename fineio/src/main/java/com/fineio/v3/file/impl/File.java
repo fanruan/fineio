@@ -21,9 +21,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B> {
     /**
      * 1 byte: block offset
-     * 1 int: last byte pos 单个file最大支持约21.4亿行byte，5.3亿行int，2.6亿行long/double
+     * 1 long: last byte pos
      */
     protected static final String META = "meta";
+    private static final int OLD_META_BYTES = Byte.BYTES + Integer.BYTES;
+    protected static final int META_BYTES = Byte.BYTES + Long.BYTES;
 
     protected final FileBlock fileBlock;
 
@@ -40,13 +42,18 @@ public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B
         blockOffset = connector.getBlockOffset();
     }
 
-    protected int initMetaAndGetLastPos() {
+    protected long initMetaAndGetLastPos() {
         FileBlock metaFileKey = new FileBlock(fileBlock.getPath(), META);
         if (connector.exists(metaFileKey)) {
             try (InputStream input = connector.read(metaFileKey)) {
-                byte[] bytes = new byte[5];
-                if (input.read(bytes) == bytes.length) {
-                    ByteBuffer buf = ByteBuffer.wrap(bytes);
+                byte[] bytes = new byte[META_BYTES];
+                final int read = input.read(bytes);
+                ByteBuffer buf = ByteBuffer.wrap(bytes);
+                if (read == bytes.length) {
+                    blockOffset = buf.get();
+                    return buf.getLong() >> offset.getOffset();
+                } else if (read == OLD_META_BYTES) {
+                    // 兼容以前int的lastPos
                     blockOffset = buf.get();
                     return buf.getInt() >> offset.getOffset();
                 }
@@ -57,11 +64,11 @@ public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B
         return 0;
     }
 
-    protected int nthBuf(int pos) {
-        return pos >> (blockOffset - offset.getOffset());
+    protected int nthBuf(long pos) {
+        return (int) (pos >> (blockOffset - offset.getOffset()));
     }
 
-    protected int nthVal(int pos) {
+    protected int nthVal(long pos) {
         return (int) (pos & ((1L << blockOffset - offset.getOffset()) - 1));
     }
 

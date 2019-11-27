@@ -26,7 +26,7 @@ public class LongWriteFile extends WriteFile<LongDirectBuffer> {
         return new LongWriteFile(fileBlock, connector, false);
     }
 
-    public void putLong(int pos, long value) {
+    public void putLong(long pos, long value) {
         ensureOpen();
         int nthBuf = nthBuf(pos);
         syncBufIfNeed(nthBuf);
