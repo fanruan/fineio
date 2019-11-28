@@ -51,13 +51,14 @@ public enum MemoryManager implements FineIoService {
     private ScheduledExecutorService timeoutCleaner;
     private volatile AtomicInteger triggerCount = new AtomicInteger(0);
     private volatile AtomicInteger triggerGcCount = new AtomicInteger(0);
-
+    private volatile long lastGCTime;
     private Cleaner cleaner;
 
     @Override
     public void start() {
         this.readSize = new AtomicLong();
         this.writeSize = new AtomicLong();
+        lastGCTime = System.currentTimeMillis();
         currentMaxSize = Math.min(VM.maxDirectMemory(), getMaxSize());
         timeoutCleaner = FineIOExecutors.newScheduledExecutorService(1, "fineio-timeout-cleaner");
         timeoutCleaner.scheduleAtFixedRate(new Runnable() {
@@ -75,6 +76,7 @@ public enum MemoryManager implements FineIoService {
         triggerCount.set(0);
         writeWaitCount.set(0);
         readWaitCount.set(0);
+        lastGCTime = System.currentTimeMillis();
     }
 
     public final void updateRead(long size) {
@@ -176,9 +178,23 @@ public enum MemoryManager implements FineIoService {
     public interface Cleaner {
         boolean cleanTimeout();
 
-        boolean cleanOne();
+        boolean clean(int maxCount);
 
         void cleanReadable();
+    }
+
+    private void gc(){
+        System.gc();
+        lastGCTime = System.currentTimeMillis();
+    }
+
+    //获取GC频率，频率越高释放越快
+    //最大移除66 << frequency 个buffer
+    //大约5s内gc2次4档可清除约4G内存，5-7s 3档 2G，7-10s 2档。。。
+    private int getGCFrequency(){
+        long gap = System.currentTimeMillis() - lastGCTime;
+        int v = (int) (TimeUnit.SECONDS.toMillis(20) / gap);
+        return Math.min(v, 4);
     }
 
     private class CleanTask {
@@ -202,20 +218,21 @@ public enum MemoryManager implements FineIoService {
                     }
                     //内存不够就清理超时的，触发gc再清理虚引用
                     if (cleaner.cleanTimeout()) {
-                        System.gc();
+                        gc();
                         while (jlra.tryHandlePendingReference()) {
                             if (isMemoryEnough()) {
                                 return true;
                             }
                         }
                     }
-                    //还不够就随机丢掉一个，丢10次，再失败就没内存了
+                    //还不够就随机丢掉loopCount个，丢11次，再失败就没内存了
                     boolean interrupted = false;
                     try {
                         long sleepTime = 1;
                         int loopCount = 0;
+                        int frequency = getGCFrequency();
                         while (true) {
-                            cleaner.cleanOne();
+                            cleaner.clean((loopCount + 1) << frequency);
                             //释放不掉就等一会
                             if (!jlra.tryHandlePendingReference()) {
                                 try {
@@ -228,16 +245,13 @@ public enum MemoryManager implements FineIoService {
                                 return true;
                             }
                             sleepTime <<= 1;
-                            //等太多次就gc下
-                            if (sleepTime > 1000) {
-                                System.gc();
+                            if (++loopCount > 10) {
+                                gc();
                                 while (jlra.tryHandlePendingReference()) {
                                     if (isMemoryEnough()) {
                                         return true;
                                     }
                                 }
-                            }
-                            if (loopCount++ > 11) {
                                 break;
                             }
                         }
