@@ -35,11 +35,6 @@ abstract class BaseSafeDirectBuf<B extends DirectBuffer> implements DirectBuffer
         return buf.getCapInBytes();
     }
 
-    @Override
-    public void letGcHelpRelease() {
-        buf.letGcHelpRelease();
-    }
-
     static class BaseVoidDirectBuf implements DirectBuffer {
         long address;
         FileBlock fileBlock;
@@ -71,10 +66,6 @@ abstract class BaseSafeDirectBuf<B extends DirectBuffer> implements DirectBuffer
 
         @Override
         public void close() {
-        }
-
-        @Override
-        public void letGcHelpRelease() {
         }
     }
 }

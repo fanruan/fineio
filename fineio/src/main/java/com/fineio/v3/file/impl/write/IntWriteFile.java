@@ -52,6 +52,6 @@ public class IntWriteFile extends WriteFile<IntDirectBuffer> {
 
     @Override
     IntDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock, int maxCap) {
-        return new IntDirectBuf(address, size, fileBlock, maxCap);
+        return new IntDirectBuf(address, size, maxCap, fileBlock);
     }
 }

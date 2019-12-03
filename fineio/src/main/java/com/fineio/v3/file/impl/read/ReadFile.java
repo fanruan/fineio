@@ -7,7 +7,6 @@ import com.fineio.logger.FineIOLoggers;
 import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.BufferAcquireFailedException;
 import com.fineio.v3.buffer.DirectBuffer;
-import com.fineio.v3.buffer.impl.BaseDirectBuffer;
 import com.fineio.v3.file.impl.BufferCache;
 import com.fineio.v3.file.impl.File;
 import com.fineio.v3.memory.MemoryManager;
@@ -42,9 +41,7 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
                 address = MemoryManager.INSTANCE.allocate(size, FileMode.READ);
                 MemoryUtils.copyMemory(byteOutput.toByteArray(), address, size);
 
-                final DirectBuffer buffer = newDirectBuf(address, size >> offset.getOffset(), fb);
-                buffer.letGcHelpRelease();
-                return buffer;
+                return newDirectBuf(address, size >> offset.getOffset(), fb);
             } catch (Throwable e) {
                 if (address != null) {
                     MemoryManager.INSTANCE.release(address, size);
