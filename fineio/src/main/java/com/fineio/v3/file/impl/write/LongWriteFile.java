@@ -52,6 +52,6 @@ public class LongWriteFile extends WriteFile<LongDirectBuffer> {
 
     @Override
     LongDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock, int maxCap) {
-        return new LongDirectBuf(address, size, fileBlock, maxCap);
+        return new LongDirectBuf(address, size, maxCap, fileBlock);
     }
 }

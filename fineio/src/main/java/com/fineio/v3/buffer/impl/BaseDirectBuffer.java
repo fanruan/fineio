@@ -2,6 +2,7 @@ package com.fineio.v3.buffer.impl;
 
 import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.v3.buffer.BufferAllocateFailedException;
 import com.fineio.v3.buffer.BufferClosedException;
 import com.fineio.v3.buffer.BufferOutOfBoundsException;
@@ -17,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author anchore
  * @date 2019/4/16
  */
-public abstract class BaseDirectBuffer implements DirectBuffer {
+abstract class BaseDirectBuffer implements DirectBuffer {
     /**
      * 写时能增长到的最大容量
      */
@@ -37,22 +38,10 @@ public abstract class BaseDirectBuffer implements DirectBuffer {
      */
     private int size;
 
-    /**
-     * for write, may grow cap
-     *
-     * @param fileBlock file key
-     * @param offset    offset
-     * @param maxCap    max cap
-     */
-    BaseDirectBuffer(FileBlock fileBlock, Offset offset, int maxCap, FileMode fileMode) throws BufferAllocateFailedException {
-        this(allocate(16, offset, fileMode, fileBlock), 16, fileBlock, offset, maxCap);
-        this.size = 0;
-    }
+    private final Cleaner cleaner;
 
     /**
      * for read, won't grow cap, cap = maxCap
-     * <p>
-     * for append, write after read
      *
      * @param address   address
      * @param cap       cap
@@ -67,6 +56,38 @@ public abstract class BaseDirectBuffer implements DirectBuffer {
         this.cap = cap;
         this.maxCap = maxCap;
         this.size = cap;
+        this.cleaner = Cleaner.create(this, new Deallocator(address, getCapInBytes()));
+    }
+
+    /**
+     * for overwrite, may grow cap
+     *
+     * @param fileBlock file key
+     * @param offset    offset
+     * @param maxCap    max cap
+     */
+    BaseDirectBuffer(FileBlock fileBlock, Offset offset, int maxCap, FileMode fileMode) throws BufferAllocateFailedException {
+        this(allocate(16, offset, fileMode, fileBlock), 16, maxCap, fileBlock, offset);
+        this.size = 0;
+    }
+
+    /**
+     * for append, write after read
+     *
+     * @param address   address
+     * @param cap       cap
+     * @param fileBlock file key
+     * @param offset    offset
+     * @param maxCap    maxCap
+     */
+    BaseDirectBuffer(long address, int cap, int maxCap, FileBlock fileBlock, Offset offset) {
+        this.fileBlock = fileBlock;
+        this.offset = offset;
+        this.address = address;
+        this.cap = cap;
+        this.maxCap = maxCap;
+        this.size = cap;
+        this.cleaner = null;
     }
 
     private static long allocate(int cap, Offset offset, FileMode fileMode, FileBlock fileBlock) {
@@ -142,21 +163,11 @@ public abstract class BaseDirectBuffer implements DirectBuffer {
         return fileBlock;
     }
 
+    /**
+     * 依靠Cleaner和gc机制进行释放
+     */
     @Override
     public void close() {
-        if (closed.compareAndSet(false, true)) {
-            MemoryManager.INSTANCE.release(address, getCapInBytes());
-        }
-    }
-
-    private Cleaner cleaner;
-    private AtomicBoolean initCleaner = new AtomicBoolean(false);
-
-    @Override
-    public void letGcHelpRelease() {
-        if (initCleaner.compareAndSet(false, true)) {
-            cleaner = Cleaner.create(this, new Deallocator(address, getCapInBytes()));
-        }
     }
 
     private static class Deallocator implements Runnable {
@@ -175,7 +186,12 @@ public abstract class BaseDirectBuffer implements DirectBuffer {
                 // Paranoia
                 return;
             }
-            MemoryManager.INSTANCE.release(address, capacity);
+            try {
+                MemoryManager.INSTANCE.release(address, capacity);
+            } catch (Throwable e) {
+                // 防止Cleaner catch到，直接自杀
+                FineIOLoggers.getLogger().error(e);
+            }
             address = 0;
         }
     }

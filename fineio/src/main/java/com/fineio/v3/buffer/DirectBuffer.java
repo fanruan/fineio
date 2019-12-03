@@ -20,6 +20,4 @@ public interface DirectBuffer extends Closeable, Buf {
 
     @Override
     void close();
-
-    void letGcHelpRelease();
 }
