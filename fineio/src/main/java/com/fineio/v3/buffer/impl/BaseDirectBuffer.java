@@ -163,11 +163,11 @@ abstract class BaseDirectBuffer implements DirectBuffer {
         return fileBlock;
     }
 
-    /**
-     * 依靠Cleaner和gc机制进行释放
-     */
     @Override
     public void close() {
+        if (cleaner == null && closed.compareAndSet(false, true)) {
+            MemoryManager.INSTANCE.release(address, getCapInBytes());
+        }
     }
 
     private static class Deallocator implements Runnable {
