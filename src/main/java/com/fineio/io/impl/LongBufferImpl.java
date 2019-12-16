@@ -21,8 +21,7 @@ public class LongBufferImpl extends BufferWrapper implements LongBuffer {
 
     @Override
     public void putLong(int pos, long v) {
-        final int offset = unsafeBuf.ensureCap(pos);
-        MemoryUtils.put(unsafeBuf.getAddress(), offset, v);
+        unsafeBuf.putLong(pos, v);
     }
 
 }
