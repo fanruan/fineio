@@ -161,33 +161,37 @@ public class CacheManager implements FineIoService {
 
     private boolean closeTimeout() {
         boolean cleared = false;
-        final Iterator<Map.Entry<URI, CacheObject<ReadIOFile>>> iterator = files.entrySet().iterator();
-        while (iterator.hasNext()) {
-            final Map.Entry<URI, CacheObject<ReadIOFile>> next = iterator.next();
-            final CacheObject<ReadIOFile> cache = next.getValue();
-            if (cache.getIdle() > TimeUnit.MINUTES.toMillis(5)) {
-                final ReadIOFile readIOFile = cache.get();
-                if (null == readIOFile) {
-                    iterator.remove();
-                    byte[] remove = heads.remove(next.getKey());
-                    if (null != remove) {
-                        int size = Bits.getInt(remove, 0);
-                        removeBuffers(next.getKey(), size, true);
-                    } else {
-                        while (iterator.hasNext()) {
-                            Iterator<Map.Entry<URI, Buffer>> mit = buffers.entrySet().iterator();
-                            final Map.Entry<URI, Buffer> entry = mit.next();
-                            if (entry.getKey().getPath().contains(next.getKey().getPath()) && entry.getValue().getLevel() == Level.READ) {
-                                entry.getValue().close();
-                                mit.remove();
+        try {
+            final Iterator<Map.Entry<URI, CacheObject<ReadIOFile>>> iterator = files.entrySet().iterator();
+            while (iterator.hasNext()) {
+                final Map.Entry<URI, CacheObject<ReadIOFile>> next = iterator.next();
+                final CacheObject<ReadIOFile> cache = next.getValue();
+                if (cache.getIdle() > TimeUnit.MINUTES.toMillis(5)) {
+                    final ReadIOFile readIOFile = cache.get();
+                    if (null == readIOFile) {
+                        iterator.remove();
+                        byte[] remove = heads.remove(next.getKey());
+                        if (null != remove) {
+                            int size = Bits.getInt(remove, 0);
+                            removeBuffers(next.getKey(), size, true);
+                        } else {
+                            while (iterator.hasNext()) {
+                                Iterator<Map.Entry<URI, Buffer>> mit = buffers.entrySet().iterator();
+                                final Map.Entry<URI, Buffer> entry = mit.next();
+                                if (entry.getKey().getPath().contains(next.getKey().getPath()) && entry.getValue().getLevel() == Level.READ) {
+                                    entry.getValue().close();
+                                    mit.remove();
+                                }
                             }
                         }
+                    } else {
+                        readIOFile.close();
                     }
-                } else {
-                    readIOFile.close();
+                    cleared = true;
                 }
-                cleared = true;
             }
+        } catch (Exception e){
+            FineIOLoggers.getLogger().error(e);
         }
         return cleared;
     }
