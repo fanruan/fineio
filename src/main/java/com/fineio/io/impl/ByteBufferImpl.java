@@ -25,8 +25,7 @@ public class ByteBufferImpl extends BufferWrapper implements ByteBuffer {
 
     @Override
     public void putByte(int pos, byte v) {
-        final int offset = unsafeBuf.ensureCap(pos);
-        MemoryUtils.put(unsafeBuf.getAddress(), offset, v);
+        unsafeBuf.putByte(pos, v);
     }
 
     @Override

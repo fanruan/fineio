@@ -76,9 +76,19 @@ public class BaseBuffer implements Buffer {
         return MemoryUtils.getByte(getAddress(), position);
     }
 
+    void putByte(int pos, byte v) {
+        final int offset = ensureCap(pos);
+        MemoryUtils.put(getAddress(), offset, v);
+    }
+
     double getDouble(int pos) {
         final int position = ensurePos(pos);
         return MemoryUtils.getDouble(getAddress(), position);
+    }
+
+     void putDouble(int pos, double v) {
+        final int offset = ensureCap(pos);
+        MemoryUtils.put(getAddress(), offset, v);
     }
 
     int getInt(int pos) {
@@ -86,9 +96,19 @@ public class BaseBuffer implements Buffer {
         return MemoryUtils.getInt(getAddress(), position);
     }
 
+    void putInt(int pos, int v) {
+        final int offset = ensureCap(pos);
+        MemoryUtils.put(getAddress(), offset, v);
+    }
+
     long getLong(int pos) {
         final int position = ensurePos(pos);
         return MemoryUtils.getLong(getAddress(), position);
+    }
+
+    void putLong(int pos, long v) {
+        final int offset = ensureCap(pos);
+        MemoryUtils.put(getAddress(), offset, v);
     }
 
     @Override
