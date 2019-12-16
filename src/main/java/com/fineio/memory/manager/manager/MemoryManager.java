@@ -1,6 +1,7 @@
 package com.fineio.memory.manager.manager;
 
 import com.fineio.FineIoService;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.ReadAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
@@ -257,14 +258,18 @@ public enum MemoryManager implements FineIoService {
                         }
                         return false;
 
-                    } finally {
+                    } catch (Throwable e){
+                        FineIOLoggers.getLogger().error(e);
+                    }
+                    finally {
                         if (interrupted) {
                             Thread.currentThread().interrupt();
                         }
                     }
 
                 }
-            } catch (Throwable ignore){
+            } catch (Throwable t){
+                FineIOLoggers.getLogger().error(t);
             }
             return false;
         }

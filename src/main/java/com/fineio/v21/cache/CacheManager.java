@@ -4,6 +4,7 @@ import com.fineio.FineIoService;
 import com.fineio.base.Bits;
 import com.fineio.cache.CacheObject;
 import com.fineio.io.Buffer;
+import com.fineio.io.Level;
 import com.fineio.io.file.ReadIOFile;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.manager.manager.MemoryManager;
@@ -44,10 +45,13 @@ public class CacheManager implements FineIoService {
                     final Iterator<Map.Entry<URI, Buffer>> iterator = buffers.entrySet().iterator();
                     boolean hasOne = iterator.hasNext();
                     while (iterator.hasNext()) {
-                        iterator.next().getValue().close();
-                        iterator.remove();
-                        if (--maxCount <= 0){
-                            return true;
+                        Buffer buffer = iterator.next().getValue();
+                        if (buffer.getLevel() == Level.READ){
+                            buffer.close();
+                            iterator.remove();
+                            if (--maxCount <= 0){
+                                return true;
+                            }
                         }
                     }
                     return hasOne;
@@ -137,10 +141,13 @@ public class CacheManager implements FineIoService {
     public void removeBuffers(URI uri, int length, boolean release) {
         for (int i = 0; i < length; i++) {
             String path = uri.getPath();
-            Buffer remove = buffers.remove(URI.create(path.endsWith("/") ? path + i : path + "/" + i));
-            if (release && null != remove) {
-                synchronized (getURILock(remove.getUri())) {
-                    remove.close();
+            URI uri1 = URI.create(path.endsWith("/") ? path + i : path + "/" + i);
+            if (buffers.containsKey(uri1) && buffers.get(uri1).getLevel() == Level.READ){
+                Buffer remove = buffers.remove(uri1);
+                if (release && null != remove) {
+                    synchronized (getURILock(remove.getUri())) {
+                        remove.close();
+                    }
                 }
             }
         }
@@ -170,7 +177,7 @@ public class CacheManager implements FineIoService {
                         while (iterator.hasNext()) {
                             Iterator<Map.Entry<URI, Buffer>> mit = buffers.entrySet().iterator();
                             final Map.Entry<URI, Buffer> entry = mit.next();
-                            if (entry.getKey().getPath().contains(next.getKey().getPath())) {
+                            if (entry.getKey().getPath().contains(next.getKey().getPath()) && entry.getValue().getLevel() == Level.READ) {
                                 entry.getValue().close();
                                 mit.remove();
                             }

@@ -1,6 +1,7 @@
 package com.fineio.io.impl;
 
 import com.fineio.io.Buffer;
+import com.fineio.io.Level;
 import com.fineio.io.base.BufferKey;
 
 import java.io.InputStream;
@@ -53,6 +54,11 @@ public class BufferWrapper implements Buffer {
     @Override
     public int getLength() {
         return this.unsafeBuf.getLength();
+    }
+
+    @Override
+    public Level getLevel() {
+        return unsafeBuf.getLevel();
     }
 
 }
