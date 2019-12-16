@@ -26,4 +26,6 @@ public interface Buffer extends Closeable {
     void close();
 
     int getLength();
+
+    Level getLevel();
 }

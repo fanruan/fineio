@@ -262,4 +262,9 @@ public class BaseBuffer implements Buffer {
         return writePos + 1;
     }
 
+    @Override
+    public Level getLevel() {
+        return level;
+    }
+
 }
