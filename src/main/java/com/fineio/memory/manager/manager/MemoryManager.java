@@ -194,7 +194,10 @@ public enum MemoryManager implements FineIoService {
     //大约5s内gc2次4档可清除约4G内存，5-7s 3档 2G，7-10s 2档。。。
     private int getGCFrequency(){
         long gap = System.currentTimeMillis() - lastGCTime;
-        int v = (int) (TimeUnit.SECONDS.toMillis(20) / gap);
+        if (gap == 0){
+            return 4;
+        }
+        int v = (int) ((TimeUnit.SECONDS.toMillis(20) / gap));
         return Math.min(v, 4);
     }
 
