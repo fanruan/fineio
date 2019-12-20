@@ -4,15 +4,16 @@ import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.thread.FineIOExecutors;
 import com.fineio.v3.FineIoProperty;
+import com.fineio.v3.buffer.BufferAcquireFailedException;
 import com.fineio.v3.buffer.DirectBuffer;
-import com.fineio.v3.cache.core.Cache;
-import com.fineio.v3.cache.core.Caffeine;
 import com.fineio.v3.memory.MemoryManager;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import java.text.MessageFormat;
 import java.time.Duration;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 /**
  * This class created on 2019/5/21
@@ -39,15 +40,16 @@ public class BufferCache {
         final long halfReadMem = MemoryManager.INSTANCE.getReadMemoryLimit() / 2;
         // 50% or 1G
         long maximumWeight = Math.min(halfReadMem, FineIoProperty.CACHE_MEM_LIMIT.getValue() << 30);
-        cache = Caffeine.newBuilder()
+        cache = CacheBuilder.newBuilder()
                 // 读内存上限的一半
                 .maximumWeight(maximumWeight)
                 .<FileBlock, DirectBuffer>weigher((key, value) -> value.getCapInBytes())
                 .expireAfterAccess(Duration.ofMinutes(10))
                 .recordStats()
-                .removalListener((key, value, cause) -> {
-                    value.close();
-                    FineIOLoggers.getLogger().debug(MessageFormat.format("fineio cache removed {0}, cause {1}", key, cause));
+                .concurrencyLevel(2)
+                .removalListener((removalNotification) -> {
+                    removalNotification.getValue().close();
+                    FineIOLoggers.getLogger().debug(MessageFormat.format("fineio cache removed {0}, cause {1}", removalNotification.getKey(), removalNotification.getCause()));
                 })
                 .build();
 
@@ -58,8 +60,12 @@ public class BufferCache {
         return INSTANCE;
     }
 
-    public DirectBuffer get(FileBlock key, Function<? super FileBlock, ? extends DirectBuffer> mappingFunction) {
-        return cache.get(key, mappingFunction);
+    public DirectBuffer get(FileBlock key, Callable<? extends DirectBuffer> loadFunction) {
+        try {
+            return cache.get(key, loadFunction);
+        } catch (Exception e) {
+            throw new BufferAcquireFailedException(key);
+        }
     }
 
     public void put(FileBlock key, DirectBuffer value) {
