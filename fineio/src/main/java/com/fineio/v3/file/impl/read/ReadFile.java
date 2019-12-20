@@ -31,17 +31,17 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
     B loadBuffer(int nthBuf) {
         FileBlock nthFileBlock = new FileBlock(fileBlock.getPath(), String.valueOf(nthBuf));
 
-        DirectBuffer buf = BufferCache.get().get(nthFileBlock, fb -> {
+        DirectBuffer buf = BufferCache.get().get(nthFileBlock, () -> {
             Long address = null;
             int size = 0;
-            try (InputStream input = new BufferedInputStream(connector.read(fb));
+            try (InputStream input = new BufferedInputStream(connector.read(nthFileBlock));
                  ByteArrayOutputStream byteOutput = new ByteArrayOutputStream()) {
                 IOUtils.copyBinaryTo(input, byteOutput);
                 size = byteOutput.size();
                 address = MemoryManager.INSTANCE.allocate(size, FileMode.READ);
                 MemoryUtils.copyMemory(byteOutput.toByteArray(), address, size);
 
-                return newDirectBuf(address, size >> offset.getOffset(), fb);
+                return newDirectBuf(address, size >> offset.getOffset(), nthFileBlock);
             } catch (Throwable e) {
                 if (address != null) {
                     MemoryManager.INSTANCE.release(address, size);
