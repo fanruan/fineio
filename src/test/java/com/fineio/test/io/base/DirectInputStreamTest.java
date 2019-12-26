@@ -5,6 +5,7 @@ import com.fineio.io.base.Checker;
 import com.fineio.io.base.DirectInputStream;
 import com.fineio.memory.MemoryUtils;
 import junit.framework.TestCase;
+import org.junit.Ignore;
 
 import java.io.*;
 import java.lang.reflect.Constructor;
@@ -13,6 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Created by daniel on 2017/2/23.
  */
+@Ignore
 public class DirectInputStreamTest extends TestCase{
 
 
