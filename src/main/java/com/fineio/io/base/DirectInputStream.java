@@ -2,7 +2,6 @@ package com.fineio.io.base;
 
 import com.fineio.exception.StreamCloseException;
 import com.fineio.io.ByteBuffer;
-import com.fineio.memory.MemoryUtils;
 
 import java.io.InputStream;
 
@@ -25,7 +24,7 @@ public final class DirectInputStream extends InputStream {
     @Override
     public int read() {
         doCheck();
-        return available() > 0 ? byteBuffer.getByte(cursor++) : EOF;
+        return available() > 0 ? byteBuffer.getByte(cursor++) & 0xFF : EOF;
     }
 
     @Override
