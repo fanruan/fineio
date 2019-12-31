@@ -28,4 +28,6 @@ public interface Buffer extends Closeable {
     int getLength();
 
     Level getLevel();
+
+    void release();
 }

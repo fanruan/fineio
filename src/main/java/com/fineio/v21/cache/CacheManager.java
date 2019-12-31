@@ -8,17 +8,13 @@ import com.fineio.io.Level;
 import com.fineio.io.file.ReadIOFile;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.manager.manager.MemoryManager;
-import com.fineio.storage.Connector;
-import com.fineio.v21.exec.FineIOThreadPoolExecutor;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,7 +43,15 @@ public class CacheManager implements FineIoService {
                     while (iterator.hasNext()) {
                         Buffer buffer = iterator.next().getValue();
                         if (buffer.getLevel() == Level.READ){
-                            buffer.close();
+                            String path = buffer.getUri().getPath();
+                            int index = path.lastIndexOf("/");
+                            URI fileURI = URI.create(path.substring(0, index));
+                            CacheObject<ReadIOFile> cache = files.get(fileURI);
+                            if (null != cache && cache.get() != null) {
+                                cache.get().closeBuffer(buffer);
+                            } else {
+                                buffer.close();
+                            }
                             iterator.remove();
                             if (--maxCount <= 0){
                                 return true;

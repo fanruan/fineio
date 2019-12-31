@@ -12,6 +12,7 @@ import com.fineio.io.base.DirectInputStream;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.impl.BaseMemoryAllocator;
+import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.manager.MemoryManager;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.memory.manager.obj.impl.AllocateObject;
@@ -21,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -109,6 +109,14 @@ public class BaseBuffer implements Buffer {
     void putLong(int pos, long v) {
         final int offset = ensureCap(pos);
         MemoryUtils.put(getAddress(), offset, v);
+    }
+
+    @Override
+    public void release() {
+        cleaner = null;
+        AllocateObject memoryObject = new AllocateObject(address, memorySize);
+        address = 0;
+        BaseDeAllocator.Builder.READ.build().deAllocate(memoryObject);
     }
 
     @Override

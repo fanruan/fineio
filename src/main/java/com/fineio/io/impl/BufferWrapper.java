@@ -21,8 +21,11 @@ public class BufferWrapper implements Buffer {
 
     @Override
     public void close() {
-        this.unsafeBuf.close();
-        unsafeBuf = null;
+        try {
+            this.unsafeBuf.close();
+            unsafeBuf = null;
+        } catch (NullPointerException ignore) {
+        }
     }
 
     @Override
@@ -44,6 +47,11 @@ public class BufferWrapper implements Buffer {
     public Buffer flip() {
         unsafeBuf.flip();
         return this;
+    }
+
+    @Override
+    public void release() {
+        unsafeBuf.release();
     }
 
     @Override
