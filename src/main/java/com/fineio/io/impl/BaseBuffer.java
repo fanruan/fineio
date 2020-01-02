@@ -129,7 +129,7 @@ public class BaseBuffer implements Buffer {
 
     @Override
     public void close() {
-        //读通过cleaner来释放了，其他的同步释放。wirte的内存不释放，直接转read了
+        //读通过cleaner来释放了，其他的同步释放。
     }
 
     private void loadContent() {
