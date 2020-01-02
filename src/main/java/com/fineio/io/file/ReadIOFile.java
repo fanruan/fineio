@@ -129,18 +129,6 @@ public class ReadIOFile<B extends Buffer> extends IOFile<B> {
         }
     }
 
-    public void closeBuffer(Buffer buf) {
-        for (int i = 0; i < buffers.length; i++) {
-            if (buffers[i] != null) {
-                if (buffers[i].getBufferKey().equals(buf.getBufferKey())) {
-                    CacheManager.getInstance().close(buf);
-                    buffers[i] = null;
-                    break;
-                }
-            }
-        }
-    }
-
     public boolean isValid() {
         return null != buffers;
     }

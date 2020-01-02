@@ -92,18 +92,6 @@ public enum MemoryManager implements FineIoService {
         writeSize.addAndGet(size);
     }
 
-    public final void flip(long size, boolean isRead) {
-        size = Math.abs(size);
-        // 如果当前是读内存，转成写内存
-        if (isRead) {
-            writeSize.addAndGet(size);
-            readSize.addAndGet(0 - size);
-        } else {
-            readSize.addAndGet(size);
-            writeSize.addAndGet(0 - size);
-        }
-    }
-
     public final MemoryObject allocate(Allocator allocator) {
         return checkMemory(allocator);
     }
