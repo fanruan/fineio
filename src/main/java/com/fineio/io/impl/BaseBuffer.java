@@ -6,12 +6,12 @@ import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.StreamCloseException;
 import com.fineio.io.Buffer;
 import com.fineio.io.ByteBuffer;
-import com.fineio.io.Level;
 import com.fineio.io.base.BufferKey;
 import com.fineio.io.base.DirectInputStream;
 import com.fineio.memory.MemoryUtils;
 import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.impl.BaseMemoryAllocator;
+import com.fineio.memory.manager.deallocator.impl.BaseDeAllocator;
 import com.fineio.memory.manager.manager.MemoryManager;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.memory.manager.obj.impl.AllocateObject;
@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -34,21 +33,25 @@ public class BaseBuffer implements Buffer {
     private volatile long address;
     private long memorySize;
     private AtomicBoolean close = new AtomicBoolean(false);
+    // 当前最大的元素个数
     private int maxSize;
+    // 单个元素大小offset
     private int offset;
+    // 单块文件最多容纳元素个数的offset
     private int maxOffset;
+    // 容量的offset
     private int currentOffset = 10;
+    // 容量
     private int currentMaxSize;
     private int writePos;
-    private Level level;
     private URI uri;
     private ReentrantLock lock = new ReentrantLock();
     private Cleaner cleaner;
     private BufferDeallocator deallocator;
+    private boolean isAppend;
 
     private BaseBuffer(BufferKey bufferKey) {
         this.bufferKey = bufferKey;
-        this.level = Level.READ;
         this.uri = bufferKey.getBlock().getBlockURI();
         loadContent();
         initCleaner();
@@ -59,8 +62,14 @@ public class BaseBuffer implements Buffer {
         this.maxOffset = maxOffset;
         int maxMemory = 1 << (maxOffset + offset);
         this.maxSize = maxMemory >> offset;
-        this.level = Level.WRITE;
         this.uri = bufferKey.getBlock().getBlockURI();
+    }
+
+    private BaseBuffer(BufferKey bufferKey, boolean isAppend) {
+        this.isAppend = isAppend;
+        this.bufferKey = bufferKey;
+        this.uri = bufferKey.getBlock().getBlockURI();
+        loadContent();
     }
 
     public static ByteBuffer newBuffer(BufferKey bufferKey) {
@@ -69,6 +78,10 @@ public class BaseBuffer implements Buffer {
 
     public static ByteBuffer newBuffer(BufferKey bufferKey, int maxOffset) {
         return new ByteBufferImpl(new BaseBuffer(bufferKey, maxOffset));
+    }
+
+    public static ByteBuffer newAppendBuffer(BufferKey bufferKey) {
+        return new ByteBufferImpl(new BaseBuffer(bufferKey, true));
     }
 
     byte getByte(int pos) {
@@ -112,8 +125,16 @@ public class BaseBuffer implements Buffer {
     }
 
     @Override
+    public void release() {
+        // 写buffer直接释放，不通过cleaner
+        AllocateObject memoryObject = new AllocateObject(address, memorySize);
+        address = 0;
+        BaseDeAllocator.Builder.WRITE.build().deAllocate(memoryObject);
+    }
+
+    @Override
     public void close() {
-        //读通过cleaner来释放了，其他的同步释放。wirte的内存不释放，直接转read了
+        //读通过cleaner来释放了，其他的同步释放。
     }
 
     private void loadContent() {
@@ -123,7 +144,6 @@ public class BaseBuffer implements Buffer {
                 MemoryObject allocate = MemoryManager.INSTANCE.allocate(BaseMemoryAllocator.Builder.BLOCK.build(
                         bufferKey.getConnector().read(bufferKey.getBlock()), 1 << bufferKey.getConnector().getBlockOffset()));
                 address = allocate.getAddress();
-                resetDeallocatorAddress();
                 this.memorySize = allocate.getAllocateSize();
                 this.maxSize = (int) (this.memorySize >> offset);
                 this.close.compareAndSet(true, false);
@@ -147,20 +167,27 @@ public class BaseBuffer implements Buffer {
         }
     }
 
-    private void resetDeallocatorAddress(){
-        if (deallocator != null){
-            deallocator.setAddress(address);
-        }
-    }
-
     BaseBuffer setOffset(int offset) {
         this.offset = offset;
-        this.maxSize = (int) (memorySize >> offset) + 1;
+        this.maxSize = (int) (memorySize >> offset);
         if (maxOffset != 0) {
             int maxMemory = 1 << (maxOffset + offset);
             this.maxSize = (maxMemory >> offset);
         }
+        if (isAppend) {
+            initAppend();
+        }
         return this;
+    }
+
+    private void initAppend() {
+        final byte blockOffset = bufferKey.getConnector().getBlockOffset();
+        maxOffset = blockOffset - this.offset;
+        final int offset = Maths.log2(maxSize);
+        setCurrentCapacity(offset);
+        currentMaxSize = maxSize;
+        writePos = maxSize - 1;
+        this.maxSize = 1 << maxOffset;
     }
 
     int ensurePos(int pos) {
@@ -205,7 +232,6 @@ public class BaseBuffer implements Buffer {
         Allocator allocator = BaseMemoryAllocator.Builder.BLOCK.build(address, len, newLen);
         MemoryObject object = MemoryManager.INSTANCE.allocate(allocator);
         address = object.getAddress();
-        resetDeallocatorAddress();
         memorySize = newLen;
     }
 
@@ -231,26 +257,6 @@ public class BaseBuffer implements Buffer {
         return memorySize;
     }
 
-    @Override
-    public Buffer flip() {
-        if (level == Level.READ) {
-            level = Level.WRITE;
-            final byte blockOffset = bufferKey.getConnector().getBlockOffset();
-            maxOffset = blockOffset - this.offset;
-            final int offset = Maths.log2(maxSize);
-            setCurrentCapacity(offset);
-            currentMaxSize = maxSize;
-            writePos = maxSize - 1;
-            this.maxSize = 1 << maxOffset;
-            MemoryManager.INSTANCE.flip(memorySize, true);
-        } else {
-            level = Level.READ;
-            initCleaner();
-            maxSize = writePos + 1;
-            MemoryManager.INSTANCE.flip(memorySize, false);
-        }
-        return this;
-    }
 
     @Override
     public URI getUri() {
@@ -260,11 +266,6 @@ public class BaseBuffer implements Buffer {
     @Override
     public int getLength() {
         return writePos + 1;
-    }
-
-    @Override
-    public Level getLevel() {
-        return level;
     }
 
 }

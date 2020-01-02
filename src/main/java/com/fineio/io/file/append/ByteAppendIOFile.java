@@ -48,6 +48,6 @@ public class ByteAppendIOFile extends AppendIOFile<ByteBuffer> {
 
     @Override
     protected Buffer createBuf(int idx) {
-        return BaseBuffer.newBuffer(new BufferKey(connector, new FileBlock(uri, String.valueOf(idx))));
+        return BaseBuffer.newAppendBuffer(new BufferKey(connector, new FileBlock(uri, String.valueOf(idx))));
     }
 }

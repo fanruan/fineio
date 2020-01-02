@@ -5,7 +5,6 @@ import com.fineio.io.Buffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.thread.FineIOExecutors;
-import com.fineio.v21.cache.CacheManager;
 
 import java.io.InputStream;
 import java.util.concurrent.Callable;
@@ -58,8 +57,8 @@ public class FileSyncManager implements FineIoService {
                     final InputStream inputStream = buf.asInputStream();
                     if (inputStream.available() > 0) {
                         connector.write(block, inputStream);
-                        buf.flip();
-                        CacheManager.getInstance().put(buf);
+                        // 写内存直接释放，不转化为读内存
+                        buf.release();
                     }
                     return null;
                 }

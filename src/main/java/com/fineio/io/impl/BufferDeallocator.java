@@ -28,7 +28,4 @@ class BufferDeallocator implements Runnable {
         BaseDeAllocator.Builder.READ.build().deAllocate(memoryObject);
     }
 
-    public void setAddress(long address) {
-        this.address = address;
-    }
 }

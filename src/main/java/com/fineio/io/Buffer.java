@@ -18,8 +18,6 @@ public interface Buffer extends Closeable {
 
     long getMemorySize();
 
-    Buffer flip();
-
     URI getUri();
 
     @Override
@@ -27,5 +25,5 @@ public interface Buffer extends Closeable {
 
     int getLength();
 
-    Level getLevel();
+    void release();
 }
