@@ -33,10 +33,15 @@ public class BaseBuffer implements Buffer {
     private volatile long address;
     private long memorySize;
     private AtomicBoolean close = new AtomicBoolean(false);
+    // 当前最大的元素个数
     private int maxSize;
+    // 单个元素大小offset
     private int offset;
+    // 单块文件最多容纳元素个数的offset
     private int maxOffset;
+    // 容量的offset
     private int currentOffset = 10;
+    // 容量
     private int currentMaxSize;
     private int writePos;
     private URI uri;
