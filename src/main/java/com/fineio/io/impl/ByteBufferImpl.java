@@ -5,7 +5,6 @@ import com.fineio.io.DoubleBuffer;
 import com.fineio.io.IntBuffer;
 import com.fineio.io.LongBuffer;
 import com.fineio.memory.MemoryConstants;
-import com.fineio.memory.MemoryUtils;
 
 /**
  * @author yee
@@ -26,6 +25,11 @@ public class ByteBufferImpl extends BufferWrapper implements ByteBuffer {
     @Override
     public void putByte(int pos, byte v) {
         unsafeBuf.putByte(pos, v);
+    }
+
+    @Override
+    public ByteBuffer asByte() {
+        return new ByteBufferImpl(unsafeBuf.setOffset(MemoryConstants.OFFSET_BYTE));
     }
 
     @Override

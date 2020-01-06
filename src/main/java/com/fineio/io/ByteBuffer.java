@@ -10,6 +10,8 @@ public interface ByteBuffer extends Buffer {
 
     void putByte(int pos, byte v);
 
+    ByteBuffer asByte();
+
     IntBuffer asInt();
 
     DoubleBuffer asDouble();
