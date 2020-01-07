@@ -62,7 +62,7 @@ public class FileSyncManager implements FineIoService {
                         buf.release();
                         // read append read的时候，第二次read会读cache中的内容，append的结果没有被加载，会导致一些问题。
                         // 写完之后将对应缓存内容清掉，重新加载
-                        CacheManager.getInstance().closeIfExist(buf);
+                        CacheManager.getInstance().closeIfExist(buf.getUri());
                     }
                     return null;
                 }
