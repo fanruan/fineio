@@ -5,6 +5,7 @@ import com.fineio.io.Buffer;
 import com.fineio.io.file.FileBlock;
 import com.fineio.storage.Connector;
 import com.fineio.thread.FineIOExecutors;
+import com.fineio.v21.cache.CacheManager;
 
 import java.io.InputStream;
 import java.util.concurrent.Callable;
@@ -59,6 +60,9 @@ public class FileSyncManager implements FineIoService {
                         connector.write(block, inputStream);
                         // 写内存直接释放，不转化为读内存
                         buf.release();
+                        // read append read的时候，第二次read会读cache中的内容，append的结果没有被加载，会导致一些问题。
+                        // 写完之后将对应缓存内容清掉，重新加载
+                        CacheManager.getInstance().closeIfExist(buf);
                     }
                     return null;
                 }

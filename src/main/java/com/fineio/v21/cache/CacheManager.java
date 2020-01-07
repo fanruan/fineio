@@ -209,6 +209,15 @@ public class CacheManager implements FineIoService {
         }
     }
 
+    public void closeIfExist(Buffer buf) {
+        Buffer buffer = buffers.get(buf.getUri());
+        if (buffer != null) {
+            URI uri = buffer.getUri();
+            buffer.close();
+            buffers.remove(uri);
+        }
+    }
+
     public interface BufferCreator {
         Buffer createBuffer();
     }
