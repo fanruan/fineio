@@ -6,6 +6,7 @@ import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.ReadAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.thread.FineIOExecutors;
+import com.fineio.v21.FineIoProperty;
 import com.sun.management.OperatingSystemMXBean;
 import sun.misc.JavaLangRefAccess;
 import sun.misc.SharedSecrets;
@@ -60,7 +61,7 @@ public enum MemoryManager implements FineIoService {
         this.readSize = new AtomicLong();
         this.writeSize = new AtomicLong();
         lastGCTime = System.currentTimeMillis();
-        currentMaxSize = Math.min(VM.maxDirectMemory(), getMaxSize());
+        currentMaxSize = getDirectMemSize();
         timeoutCleaner = FineIOExecutors.newScheduledExecutorService(1, "fineio-timeout-cleaner");
         timeoutCleaner.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -68,6 +69,16 @@ public enum MemoryManager implements FineIoService {
                 cleaner.cleanTimeout();
             }
         }, 10, 10, TimeUnit.MINUTES);
+    }
+
+    private long getDirectMemSize() {
+        long direct_mem_limit = FineIoProperty.DIRECT_MEM_LIMIT.getValue();
+
+        if (direct_mem_limit != -1L) {
+            return direct_mem_limit;
+        } else {
+            return Math.min(VM.maxDirectMemory(), getMaxSize());
+        }
     }
 
     @Override
@@ -172,7 +183,7 @@ public enum MemoryManager implements FineIoService {
         void cleanReadable();
     }
 
-    private void gc(){
+    private void gc() {
         System.gc();
         lastGCTime = System.currentTimeMillis();
     }
@@ -180,9 +191,9 @@ public enum MemoryManager implements FineIoService {
     //获取GC频率，频率越高释放越快
     //最大移除66 << frequency 个buffer
     //大约5s内gc2次4档可清除约4G内存，5-7s 3档 2G，7-10s 2档。。。
-    private int getGCFrequency(){
+    private int getGCFrequency() {
         long gap = System.currentTimeMillis() - lastGCTime;
-        if (gap <= 0){
+        if (gap <= 0) {
             return 4;
         }
         int v = (int) ((TimeUnit.SECONDS.toMillis(20) / gap));
@@ -198,7 +209,7 @@ public enum MemoryManager implements FineIoService {
         }
 
         public boolean run() {
-            try{
+            try {
 
                 if (null != cleaner) {
                     final JavaLangRefAccess jlra = SharedSecrets.getJavaLangRefAccess();
@@ -249,17 +260,16 @@ public enum MemoryManager implements FineIoService {
                         }
                         return false;
 
-                    } catch (Throwable e){
+                    } catch (Throwable e) {
                         FineIOLoggers.getLogger().error(e);
-                    }
-                    finally {
+                    } finally {
                         if (interrupted) {
                             Thread.currentThread().interrupt();
                         }
                     }
 
                 }
-            } catch (Throwable t){
+            } catch (Throwable t) {
                 FineIOLoggers.getLogger().error(t);
             }
             return false;
