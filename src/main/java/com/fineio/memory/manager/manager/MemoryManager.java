@@ -6,7 +6,6 @@ import com.fineio.memory.manager.allocator.Allocator;
 import com.fineio.memory.manager.allocator.ReadAllocator;
 import com.fineio.memory.manager.obj.MemoryObject;
 import com.fineio.thread.FineIOExecutors;
-import com.fineio.v21.FineIoProperty;
 import com.sun.management.OperatingSystemMXBean;
 import sun.misc.JavaLangRefAccess;
 import sun.misc.SharedSecrets;
@@ -72,10 +71,10 @@ public enum MemoryManager implements FineIoService {
     }
 
     private long getDirectMemSize() {
-        long direct_mem_limit = FineIoProperty.DIRECT_MEM_LIMIT.getValue();
+        String direct_mem_limit = System.getProperty("fineio.direct_mem_limit");
 
-        if (direct_mem_limit != -1L) {
-            return direct_mem_limit;
+        if (direct_mem_limit != null) {
+            return (long) (Double.parseDouble(direct_mem_limit) * (1 << 30));
         } else {
             return Math.min(VM.maxDirectMemory(), getMaxSize());
         }
@@ -158,7 +157,7 @@ public enum MemoryManager implements FineIoService {
         try {
             OperatingSystemMXBean mb = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
             long max = mb.getTotalPhysicalMemorySize();
-            return max - Runtime.getRuntime().maxMemory();
+            return max / 4;
         } catch (Throwable e) {
             //如果发生异常则使用xmx值
             return Runtime.getRuntime().maxMemory();
