@@ -195,7 +195,7 @@ public class BaseBuffer implements Buffer {
         if (pos > -1 && pos < maxSize && address > 0) {
             return pos;
         }
-        if (pos <= 0 || pos >= maxSize) {
+        if (pos < 0 || pos >= maxSize) {
             throw new BufferIndexOutOfBoundsException(bufferKey.getBlock().getBlockURI(), pos, maxSize);
         }
         throw new BufferClosedException(bufferKey.getBlock().getBlockURI().toString());
