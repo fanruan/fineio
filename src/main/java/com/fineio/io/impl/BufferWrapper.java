@@ -12,7 +12,7 @@ import java.net.URI;
  * Created by yee on 2019/9/10
  */
 public class BufferWrapper implements Buffer {
-    BaseBuffer unsafeBuf;
+    volatile BaseBuffer unsafeBuf;
 
     BufferWrapper(BaseBuffer unsafeBuf) {
         this.unsafeBuf = unsafeBuf;
