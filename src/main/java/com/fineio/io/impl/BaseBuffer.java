@@ -1,6 +1,7 @@
 package com.fineio.io.impl;
 
 import com.fineio.base.Maths;
+import com.fineio.exception.BufferClosedException;
 import com.fineio.exception.BufferConstructException;
 import com.fineio.exception.BufferIndexOutOfBoundsException;
 import com.fineio.exception.StreamCloseException;
@@ -99,7 +100,7 @@ public class BaseBuffer implements Buffer {
         return MemoryUtils.getDouble(getAddress(), position);
     }
 
-     void putDouble(int pos, double v) {
+    void putDouble(int pos, double v) {
         final int offset = ensureCap(pos);
         MemoryUtils.put(getAddress(), offset, v);
     }
@@ -155,10 +156,10 @@ public class BaseBuffer implements Buffer {
         }
     }
 
-    private void initCleaner(){
+    private void initCleaner() {
         lock.lock();
-        try{
-            if (cleaner == null){
+        try {
+            if (cleaner == null) {
                 deallocator = new BufferDeallocator(address, memorySize);
                 cleaner = Cleaner.create(this, deallocator);
             }
@@ -194,11 +195,10 @@ public class BaseBuffer implements Buffer {
         if (pos > -1 && pos < maxSize && address > 0) {
             return pos;
         }
-        loadContent();
-        if (address == 0) {
+        if (pos <= 0 || pos >= maxSize) {
             throw new BufferIndexOutOfBoundsException(bufferKey.getBlock().getBlockURI(), pos, maxSize);
         }
-        return pos;
+        throw new BufferClosedException(bufferKey.getBlock().getBlockURI().toString());
     }
 
     int ensureCap(int pos) {
