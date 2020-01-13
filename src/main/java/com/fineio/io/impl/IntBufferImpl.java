@@ -21,8 +21,7 @@ public class IntBufferImpl extends BufferWrapper implements IntBuffer {
 
     @Override
     public void putInt(int pos, int v) {
-        final int offset = unsafeBuf.ensureCap(pos);
-        MemoryUtils.put(unsafeBuf.getAddress(), offset, v);
+        unsafeBuf.putInt(pos, v);
     }
 
 }

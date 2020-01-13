@@ -57,6 +57,7 @@ public class WriteIOFile<B extends Buffer> extends IOFile<B> {
                     FineIOLoggers.getLogger().error(e);
                 }
             }
+            CacheManager.getInstance().updateFile(uri);
         }
     }
 
@@ -140,7 +141,12 @@ public class WriteIOFile<B extends Buffer> extends IOFile<B> {
 
     private void writeIdx(int idx) {
         if (idx >= 0) {
-            writeBuffer(buffers[idx]);
+            Future future = writeBuffer(buffers[idx]);
+            try {
+                future.get();
+            } catch (Exception e) {
+                FineIOLoggers.getLogger().error(e);
+            }
             buffers[idx] = null;
         }
     }
