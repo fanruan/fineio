@@ -9,7 +9,6 @@ import com.fineio.io.file.append.IntAppendIOFile;
 import com.fineio.io.file.append.LongAppendIOFile;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.storage.Connector;
-import com.fineio.v21.cache.CacheManager;
 
 import java.net.URI;
 
@@ -50,16 +49,10 @@ public abstract class AppendIOFile<B extends Buffer> extends WriteIOFile<B> {
         final int idx = buffers.length - 1;
         if (idx >= 0) {
             try {
-                URI uri = new FileBlock(this.uri, String.valueOf(idx)).getBlockURI();
-                Buffer byteBuffer = CacheManager.getInstance().get(uri, new CacheManager.BufferCreator() {
-                    @Override
-                    public Buffer createBuffer() {
-                        return createBuf(idx);
-                    }
-                });
-                buffers[idx] = byteBuffer.flip();
+                Buffer byteBuffer = createBuf(idx);
                 int preSize = (idx << connector.getBlockOffset()) >> offset;
                 lastPos = preSize + byteBuffer.getLength();
+                buffers[idx] = byteBuffer;
             } catch (BufferConstructException e) {
                 FineIOLoggers.getLogger().error(String.format("load buffer %s%d failed ", uri.getPath(), idx), e);
             }

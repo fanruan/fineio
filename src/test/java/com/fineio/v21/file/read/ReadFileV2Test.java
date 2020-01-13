@@ -2,6 +2,7 @@
 //
 //import com.fineio.FineIO;
 //import com.fineio.io.IntBuffer;
+//import com.fineio.io.file.AppendIOFile;
 //import com.fineio.io.file.ReadIOFile;
 //import org.junit.Ignore;
 //import org.junit.Test;
@@ -24,43 +25,28 @@
 //public class ReadFileV2Test {
 //
 //    @Test
-//    @Ignore
-//    public void getInt() throws IOException, ExecutionException, InterruptedException {
+//    public void testRead() throws IOException, ExecutionException, InterruptedException {
+//        FineIO.start();
 //        final FileConnector connector = new FileConnector();
-////        AppendIOFile<IntBuffer> file = FineIO.createIOFile(connector, URI.create("/Users/yee/testLongHead/"), FineIO.MODEL.APPEND_INT);
-////        for (int i = 0; i < 100000000; i++) {
-////            file.put(i, i);
-////        }
-////        file.close();
-////        file = FineIO.createIOFile(connector, URI.create("/Users/yee/testLongHead/"), FineIO.MODEL.APPEND_INT);
-////        for (int i = 0; i < 100000000; i++) {
-////            file.put(i, i);
-////        }
-////        file.close();
-//        ExecutorService service = Executors.newFixedThreadPool(100);
-//        List<Future> futures = new ArrayList<Future>();
-//        for (int i = 0; i < 1; i++) {
-//            Future future = service.submit(new Runnable() {
-//                @Override
-//                public void run() {
-//                    final ReadIOFile<IntBuffer> ioFile = FineIO.createIOFile(connector, URI.create("/Users/yee/testLongHead/"), FineIO.MODEL.READ_INT);
-//                    long sum = 0, sum1 = 0;
-//                    final long start = System.currentTimeMillis();
-//                    for (int i = 0; i < 200000000; i++) {
-//                        sum += FineIO.getInt(ioFile, i);
-//                        sum1 += i % 100000000;
+//        ExecutorService service = Executors.newFixedThreadPool(1);
+//        for (int j = 0; j < 10000;j++){
+//            for (int i = 0; i < 10; i++) {
+//                final int finalI = i;
+//                service.submit(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        ReadIOFile<IntBuffer> file = FineIO.createIOFile(connector, URI.create("v21" + finalI), FineIO.MODEL.READ_INT, true);
+//                        int sum = 0;
+//                        for (int i = 0; i < 100000000; i++) {
+//                            sum += FineIO.getInt(file, i);
+//                        }
+//                        System.out.println(sum);
+//                        file.close();
 //                    }
-//                    System.out.println(System.currentTimeMillis() - start);
-//                    assertEquals(sum, sum1);
-//                    ioFile.close();
-//                }
-//            });
-//            futures.add(future);
+//                });
+//            }
 //        }
-//
-//        for (Future future : futures) {
-//            future.get();
-//        }
+//        Thread.sleep(10000000);
 //
 //    }
 //}
