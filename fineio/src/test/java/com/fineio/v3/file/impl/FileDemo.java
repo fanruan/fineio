@@ -13,8 +13,6 @@ import com.fineio.v3.file.impl.write.LongWriteFile;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.stream.IntStream;
-
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -35,7 +33,9 @@ public class FileDemo {
     @Test
     public void testByte() {
         ByteWriteFile byteWriteFile = ByteWriteFile.ofSync(key, connector);
-        IntStream.range(-128, 128).forEachOrdered(i -> byteWriteFile.putByte(i + 128, (byte) i));
+        for (int i = 0; i < 256; i++) {
+            byteWriteFile.putByte(i, (byte) (i - 128));
+        }
         byteWriteFile.close();
 
         ByteReadFile byteReadFile = new ByteReadFile(key, newConnector);
@@ -47,7 +47,9 @@ public class FileDemo {
     @Test
     public void testInt() {
         IntWriteFile intWriteFile = IntWriteFile.ofSync(key, connector);
-        IntStream.range(0, n).forEachOrdered(i -> intWriteFile.putInt(i, i));
+        for (int i = 0; i < n; i++) {
+            intWriteFile.putInt(i, i);
+        }
         intWriteFile.close();
 
         IntReadFile intReadFile = new IntReadFile(key, newConnector);
@@ -59,7 +61,9 @@ public class FileDemo {
     @Test
     public void testLong() {
         LongWriteFile longWriteFile = LongWriteFile.ofSync(key, connector);
-        IntStream.range(0, n).forEachOrdered(i -> longWriteFile.putLong(i, i));
+        for (int i = 0; i < n; i++) {
+            longWriteFile.putLong(i, i);
+        }
         longWriteFile.close();
 
         LongReadFile longReadFile = new LongReadFile(key, newConnector);
@@ -71,7 +75,9 @@ public class FileDemo {
     @Test
     public void testDouble() {
         DoubleWriteFile doubleWriteFile = DoubleWriteFile.ofSync(key, connector);
-        IntStream.range(0, n).forEachOrdered(i -> doubleWriteFile.putDouble(i, i));
+        for (int i = 0; i < n; i++) {
+            doubleWriteFile.putDouble(i, i);
+        }
         doubleWriteFile.close();
 
         DoubleReadFile doubleReadFile = new DoubleReadFile(key, newConnector);

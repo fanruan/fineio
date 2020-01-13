@@ -4,23 +4,13 @@ import com.fineio.storage.v3.Connector;
 import com.fineio.transfer.Transfer;
 import com.fineio.transfer.TransferProgressListener;
 
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JRadioButton;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 
 /**
@@ -78,11 +68,21 @@ public class TransferDialog extends JDialog {
         getContentPane().add(buttonPane, BorderLayout.SOUTH);
         JButton okButton = new JButton("OK");
         okButton.setActionCommand("OK");
-        okButton.addActionListener((e) -> onOK());
+        okButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                TransferDialog.this.onOK();
+            }
+        });
         buttonPane.add(okButton);
         getRootPane().setDefaultButton(okButton);
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener((e) -> onCancel());
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                TransferDialog.this.onCancel();
+            }
+        });
         cancelButton.setActionCommand("Cancel");
         buttonPane.add(cancelButton);
     }
@@ -106,13 +106,16 @@ public class TransferDialog extends JDialog {
         p.add(fromConnector);
         fromConnector.setColumns(10);
         JButton btnNewButton = new JButton("配置");
-        btnNewButton.addActionListener(e -> {
-            try {
-                final ConnectorDialog connectorDialog = new ConnectorDialog(fromConnector.getText());
-                connectorDialog.setVisible(true);
-                from = connectorDialog.connector;
-            } catch (ClassNotFoundException ex) {
-                JOptionPane.showMessageDialog(TransferDialog.this, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        btnNewButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    final ConnectorDialog connectorDialog = new ConnectorDialog(fromConnector.getText());
+                    connectorDialog.setVisible(true);
+                    from = connectorDialog.connector;
+                } catch (ClassNotFoundException ex) {
+                    JOptionPane.showMessageDialog(TransferDialog.this, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
         p.add(btnNewButton);
@@ -122,13 +125,16 @@ public class TransferDialog extends JDialog {
         p.add(toConnector);
         toConnector.setColumns(10);
         JButton button = new JButton("配置");
-        button.addActionListener((e) -> {
-            try {
-                final ConnectorDialog connectorDialog = new ConnectorDialog(toConnector.getText());
-                connectorDialog.setVisible(true);
-                to = connectorDialog.connector;
-            } catch (ClassNotFoundException ex) {
-                JOptionPane.showMessageDialog(TransferDialog.this, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    final ConnectorDialog connectorDialog = new ConnectorDialog(toConnector.getText());
+                    connectorDialog.setVisible(true);
+                    to = connectorDialog.connector;
+                } catch (ClassNotFoundException ex) {
+                    JOptionPane.showMessageDialog(TransferDialog.this, ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
         p.add(button);
@@ -157,11 +163,11 @@ public class TransferDialog extends JDialog {
         panel.setLayout(new GridLayout(0, 4, 0, 0));
         JLabel label = new JLabel("模式：");
         panel.add(label);
-        JRadioButton upgrade = new JRadioButton("升级");
+        final JRadioButton upgrade = new JRadioButton("升级");
         panel.add(upgrade);
-        JRadioButton downgrade = new JRadioButton("降级");
+        final JRadioButton downgrade = new JRadioButton("降级");
         panel.add(downgrade);
-        JRadioButton transfer = new JRadioButton("迁移");
+        final JRadioButton transfer = new JRadioButton("迁移");
         panel.add(transfer);
         final ButtonGroup buttonGroup = new ButtonGroup();
         buttonGroup.add(upgrade);
@@ -170,28 +176,40 @@ public class TransferDialog extends JDialog {
 
         upgrade.setSelected(true);
         this.mode = UPGRADE;
-        upgrade.addChangeListener((e -> {
-            if (upgrade.isSelected()) {
-                mode = UPGRADE;
+        upgrade.addChangeListener((new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (upgrade.isSelected()) {
+                    mode = UPGRADE;
+                }
             }
         }));
 
-        downgrade.addChangeListener((e -> {
-            if (downgrade.isSelected()) {
-                mode = DOWNGRADE;
+        downgrade.addChangeListener((new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (downgrade.isSelected()) {
+                    mode = DOWNGRADE;
+                }
             }
         }));
 
-        transfer.addChangeListener((e -> {
-            if (transfer.isSelected()) {
-                mode = TRANSFER;
+        transfer.addChangeListener((new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (transfer.isSelected()) {
+                    mode = TRANSFER;
+                }
             }
         }));
     }
 
     private void onOK() {
-        final TransferProgressListener listener = (progress, path) -> {
-            progressBar.setValue(progress);
+        final TransferProgressListener listener = new TransferProgressListener() {
+            @Override
+            public void progress(int progress, String path) {
+                progressBar.setValue(progress);
+            }
         };
         try {
             switch (mode) {

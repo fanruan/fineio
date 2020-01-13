@@ -11,7 +11,6 @@ import com.fineio.io.FloatBuffer;
 import com.fineio.io.IntBuffer;
 import com.fineio.io.LongBuffer;
 import com.fineio.io.ShortBuffer;
-import com.fineio.io.file.AppendIOFile;
 import com.fineio.io.file.FileModel;
 import com.fineio.io.file.IOFile;
 import com.fineio.io.file.ReadIOFile;
@@ -708,57 +707,6 @@ public final class FineIO {
             @Override
             public WriteIOFile<ShortBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
                 return WriteIOFile.createFineIO(connector, uri, FileModel.SHORT, sync);
-            }
-        };
-
-        FineIO.MODEL<AppendIOFile<LongBuffer>> APPEND_LONG = new FineIO.MODEL<AppendIOFile<LongBuffer>>() {
-
-            @Override
-            public AppendIOFile<LongBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
-                return AppendIOFile.createFineIO(connector, uri, FileModel.LONG, sync);
-            }
-        };
-        FineIO.MODEL<AppendIOFile<DoubleBuffer>> APPEND_DOUBLE = new FineIO.MODEL<AppendIOFile<DoubleBuffer>>() {
-
-            @Override
-            public AppendIOFile<DoubleBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
-                return AppendIOFile.createFineIO(connector, uri, FileModel.DOUBLE, sync);
-            }
-        };
-        FineIO.MODEL<AppendIOFile<FloatBuffer>> APPEND_FLOAT = new FineIO.MODEL<AppendIOFile<FloatBuffer>>() {
-
-            @Override
-            public AppendIOFile<FloatBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
-                return AppendIOFile.createFineIO(connector, uri, FileModel.FLOAT, sync);
-            }
-        };
-        FineIO.MODEL<AppendIOFile<IntBuffer>> APPEND_INT = new FineIO.MODEL<AppendIOFile<IntBuffer>>() {
-
-            @Override
-            public AppendIOFile<IntBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
-                return AppendIOFile.createFineIO(connector, uri, FileModel.INT, sync);
-            }
-        };
-        FineIO.MODEL<AppendIOFile<CharBuffer>> APPEND_CHAR = new FineIO.MODEL<AppendIOFile<CharBuffer>>() {
-
-            @Override
-            public AppendIOFile<CharBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
-                return AppendIOFile.createFineIO(connector, uri, FileModel.CHAR, sync);
-            }
-        };
-        FineIO.MODEL<AppendIOFile<ByteBuffer>> APPEND_BYTE = new FineIO.MODEL<AppendIOFile<ByteBuffer>>() {
-
-            @Override
-            public AppendIOFile<ByteBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
-                return AppendIOFile.createFineIO(connector, uri, FileModel.BYTE, sync);
-            }
-        };
-
-        FineIO.MODEL<AppendIOFile<ShortBuffer>> APPEND_SHORT = new FineIO.MODEL<AppendIOFile<ShortBuffer>>() {
-
-            @Override
-            public AppendIOFile<ShortBuffer> createIOFile(Connector connector, URI uri, boolean sync) {
-                return AppendIOFile.createFineIO(connector, uri, FileModel.SHORT, sync);
             }
         };
 

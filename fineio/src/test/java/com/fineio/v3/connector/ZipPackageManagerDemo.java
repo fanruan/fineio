@@ -14,7 +14,7 @@ import java.io.InputStream;
  */
 public class ZipPackageManagerDemo {
     public static void main(String[] args) throws IOException {
-        FileConnector connector = new FileConnector();
+        final FileConnector connector = new FileConnector();
         ZipPackageManager zipPackageManager = new ZipPackageManager(connector, new PackageConnector() {
             @Override
             public void write(String path, InputStream is) throws IOException {

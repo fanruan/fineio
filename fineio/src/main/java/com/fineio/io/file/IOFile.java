@@ -63,12 +63,6 @@ public abstract class IOFile<B extends Buf> implements IFile<B> {
         this.model = model;
     }
 
-//    static void checkAppendIOFile(IOFile file) {
-//        if (file instanceof AppendIOFile) {
-//            throw new IllegalArgumentException(String.format("File %s is an append file", file.uri));
-//        }
-//    }
-
     public final static int getInt(IOFile<IntBuffer> file, long p) {
 
         return ((IntBuffer.IntReadBuffer) file.getBuffer(file.checkBufferForRead((int) (p >> file.block_size_offset)))).get((int) (p & file.single_block_len));

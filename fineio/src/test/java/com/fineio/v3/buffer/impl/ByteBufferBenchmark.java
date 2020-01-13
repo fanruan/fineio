@@ -26,13 +26,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
+
+//import java.util.concurrent.CompletableFuture;
+//import java.util.function.IntConsumer;
 
 /**
  * @author anchore
@@ -58,29 +59,35 @@ public class ByteBufferBenchmark {
                 .build()).run();
     }
 
-    private static void manualBenchmark() throws IOException {
-        ReadBuf readBuf = new ReadBuf();
-        readBuf.setupOnTrial();
-
-        ByteBufferBenchmark benchmark = new ByteBufferBenchmark();
-        int n = 10000000;
-
-        CompletableFuture.runAsync(() -> {
-            System.out.println("1 " + System.currentTimeMillis());
-            for (int i = 0; i < n; i++) {
-                benchmark.randomRead(readBuf);
-            }
-            System.out.println("1 " + System.currentTimeMillis());
-        });
-
-        CompletableFuture.runAsync(() -> {
-            System.out.println("2 " + System.currentTimeMillis());
-            for (int i = 0; i < n; i++) {
-                benchmark.randomReadOld(readBuf);
-            }
-            System.out.println("2 " + System.currentTimeMillis());
-        });
-    }
+//    private static void manualBenchmark() throws IOException {
+//        final ReadBuf readBuf = new ReadBuf();
+//        readBuf.setupOnTrial();
+//
+//        final ByteBufferBenchmark benchmark = new ByteBufferBenchmark();
+//        final int n = 10000000;
+//
+//        CompletableFuture.runAsync(new Runnable() {
+//            @Override
+//            public void run() {
+//                System.out.println("1 " + System.currentTimeMillis());
+//                for (int i = 0; i < n; i++) {
+//                    benchmark.randomRead(readBuf);
+//                }
+//                System.out.println("1 " + System.currentTimeMillis());
+//            }
+//        });
+//
+//        CompletableFuture.runAsync(new Runnable() {
+//            @Override
+//            public void run() {
+//                System.out.println("2 " + System.currentTimeMillis());
+//                for (int i = 0; i < n; i++) {
+//                    benchmark.randomReadOld(readBuf);
+//                }
+//                System.out.println("2 " + System.currentTimeMillis());
+//            }
+//        });
+//    }
 
     @Benchmark
     public void seqRead(ReadBuf buf) {
@@ -96,19 +103,19 @@ public class ByteBufferBenchmark {
         }
     }
 
-    @Benchmark
-    public void randomRead(ReadBuf buf) {
-        for (int i = 0; i < buf.cap; i++) {
-            buf.buf.getByte(buf.randomReadIndex[i]);
-        }
-    }
-
-    @Benchmark
-    public void randomReadOld(ReadBuf buf) {
-        for (int i = 0; i < buf.cap; i++) {
-            buf.oldBuf.get(buf.randomReadIndex[i]);
-        }
-    }
+//    @Benchmark
+//    public void randomRead(ReadBuf buf) {
+//        for (int i = 0; i < buf.cap; i++) {
+//            buf.buf.getByte(buf.randomReadIndex[i]);
+//        }
+//    }
+//
+//    @Benchmark
+//    public void randomReadOld(ReadBuf buf) {
+//        for (int i = 0; i < buf.cap; i++) {
+//            buf.oldBuf.get(buf.randomReadIndex[i]);
+//        }
+//    }
 
     @Benchmark
     public void seqWrite(WriteBuf buf) {
@@ -146,7 +153,7 @@ public class ByteBufferBenchmark {
         ByteDirectBuffer buf;
         ByteReadBuffer oldBuf;
 
-        int[] randomReadIndex = random.ints(0, cap).distinct().limit(cap).toArray();
+//        int[] randomReadIndex = random.ints(0, cap).distinct().limit(cap).toArray();
 
         @Setup
         public void setupOnTrial() throws IOException {
@@ -185,14 +192,19 @@ public class ByteBufferBenchmark {
 
         int[] randomWriteIndex = new int[cap];
 
-        @Setup
-        public void setupOnTrial() {
-            AtomicInteger idx = new AtomicInteger(0);
-            // 避免出现一开始容量就增加到最大，在每个grow区间内随机写入，既有随机又有grow
-            for (int left = 0, right = 16; right <= cap; left = right, right <<= 1) {
-                random.ints(left, right).distinct().limit(right - left).forEach(i -> randomWriteIndex[idx.getAndIncrement()] = i);
-            }
-        }
+//        @Setup
+//        public void setupOnTrial() {
+//            final AtomicInteger idx = new AtomicInteger(0);
+//            // 避免出现一开始容量就增加到最大，在每个grow区间内随机写入，既有随机又有grow
+//            for (int left = 0, right = 16; right <= cap; left = right, right <<= 1) {
+//                random.ints(left, right).distinct().limit(right - left).forEach(new IntConsumer() {
+//                    @Override
+//                    public void accept(int i) {
+//                        randomWriteIndex[idx.getAndIncrement()] = i;
+//                    }
+//                });
+//            }
+//        }
 
         @Setup(Level.Invocation)
         public void setupOnInvocation() {

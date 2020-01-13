@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -52,8 +53,18 @@ public class FileConnector extends BaseConnector {
     }
 
     @Override
+    public boolean delete(FileBlock block) {
+        return delete((Block) block);
+    }
+
+    @Override
     public boolean exists(Block block) {
         return new File(block.getPath()).exists();
+    }
+
+    @Override
+    public boolean exists(FileBlock block) {
+        return exists((Block) block);
     }
 
     @Override
@@ -61,7 +72,12 @@ public class FileConnector extends BaseConnector {
         File f = new File(file);
         if (f.isDirectory()) {
             List<Block> blocks = new ArrayList<>();
-            File[] list = f.listFiles((dir, name) -> !(".".equals(name) || "..".equals(name)));
+            File[] list = f.listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    return !(".".equals(name) || "..".equals(name));
+                }
+            });
             if (null != list) {
                 for (File s : list) {
                     blocks.add(list(s.getAbsolutePath()));

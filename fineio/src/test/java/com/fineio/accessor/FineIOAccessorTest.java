@@ -1,7 +1,6 @@
 package com.fineio.accessor;
 
 import com.fineio.accessor.buffer.ByteBuf;
-import com.fineio.accessor.file.IAppendFile;
 import com.fineio.accessor.file.IFile;
 import com.fineio.accessor.file.IWriteFile;
 import com.fineio.accessor.impl.BaseModel;
@@ -51,17 +50,17 @@ public class FineIOAccessorTest {
         assertTrue(file instanceof File);
     }
 
-    @Test
-    public void put() throws IOException {
-        PowerMockito.mockStatic(JavaVersion.class);
-        Mockito.when(JavaVersion.isOverJava8()).thenReturn(true);
-        Connector mock = Mockito.mock(Connector.class);
-        IFile<ByteBuf> file = FineIOAccessor.INSTANCE.createFile(mock, URI.create("0"), BaseModel.ofByte().asAppend());
-        assertTrue(file instanceof IAppendFile);
-        FineIOAccessor.INSTANCE.put((IAppendFile<ByteBuf>) file, (byte) 0);
-        file.close();
-        Mockito.verify(mock).write(Mockito.any(FileBlock.class), Mockito.any(InputStream.class));
-    }
+//    @Test
+//    public void put() throws IOException {
+//        PowerMockito.mockStatic(JavaVersion.class);
+//        Mockito.when(JavaVersion.isOverJava8()).thenReturn(true);
+//        Connector mock = Mockito.mock(Connector.class);
+//        IFile<ByteBuf> file = FineIOAccessor.INSTANCE.createFile(mock, URI.create("0"), BaseModel.ofByte().asAppend());
+//        assertTrue(file instanceof IAppendFile);
+//        FineIOAccessor.INSTANCE.put((IAppendFile<ByteBuf>) file, (byte) 0);
+//        file.close();
+//        Mockito.verify(mock).write(Mockito.any(FileBlock.class), Mockito.any(InputStream.class));
+//    }
 
     @Test
     public void put1() throws IOException {

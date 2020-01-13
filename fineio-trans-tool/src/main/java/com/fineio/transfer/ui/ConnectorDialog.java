@@ -2,18 +2,13 @@ package com.fineio.transfer.ui;
 
 import com.fineio.storage.v3.Connector;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.lang.reflect.Constructor;
 
 /**
@@ -56,16 +51,19 @@ public class ConnectorDialog extends JDialog {
         getContentPane().add(buttonPane, BorderLayout.SOUTH);
         JButton okButton = new JButton("OK");
         okButton.setActionCommand("OK");
-        okButton.addActionListener((e -> {
+        okButton.addActionListener((new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
 
-            constructor.setAccessible(true);
-            try {
-                connector = constructor.newInstance(table.getArgs());
-                constructor.setAccessible(false);
-            } catch (Exception ex) {
-                ex.printStackTrace();
+                constructor.setAccessible(true);
+                try {
+                    connector = constructor.newInstance(table.getArgs());
+                    constructor.setAccessible(false);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                ConnectorDialog.this.dispose();
             }
-            dispose();
         }));
         buttonPane.add(okButton);
         getRootPane().setDefaultButton(okButton);
@@ -96,7 +94,7 @@ public class ConnectorDialog extends JDialog {
         gbcLabel.gridx = 0;
         gbcLabel.gridy = 0;
         contentPanel.add(label, gbcLabel);
-        JList<Constructor<? extends Connector>> list = new JList<>();
+        final JList<Constructor<? extends Connector>> list = new JList<>();
         GridBagConstraints gbcList = new GridBagConstraints();
         gbcList.insets = new Insets(0, 0, 5, 0);
         gbcList.fill = GridBagConstraints.BOTH;
@@ -111,10 +109,13 @@ public class ConnectorDialog extends JDialog {
         }
         list.setModel(model);
 
-        list.addListSelectionListener(e -> {
-            constructor = list.getSelectedValue();
-            final Class<?>[] parameterTypes = constructor.getParameterTypes();
-            table.setData(parameterTypes);
+        list.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                constructor = list.getSelectedValue();
+                final Class<?>[] parameterTypes = constructor.getParameterTypes();
+                table.setData(parameterTypes);
+            }
         });
     }
 

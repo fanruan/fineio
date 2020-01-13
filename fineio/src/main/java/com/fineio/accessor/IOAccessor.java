@@ -4,7 +4,6 @@ import com.fineio.accessor.buffer.ByteBuf;
 import com.fineio.accessor.buffer.DoubleBuf;
 import com.fineio.accessor.buffer.IntBuf;
 import com.fineio.accessor.buffer.LongBuf;
-import com.fineio.accessor.file.IAppendFile;
 import com.fineio.accessor.file.IFile;
 import com.fineio.accessor.file.IReadFile;
 import com.fineio.accessor.file.IWriteFile;
@@ -31,91 +30,6 @@ public interface IOAccessor {
      * @see com.fineio.io.file.IOFile
      */
     <F extends IFile> F createFile(Connector connector, URI uri, Model<F> model);
-
-    /**
-     * ByteAppendFile put
-     *
-     * @param file
-     * @param value
-     * @param <F>
-     * @see com.fineio.v3.file.impl.ByteAppendFile
-     * @see com.fineio.io.file.AppendIOFile
-     */
-    <F extends IAppendFile<? extends ByteBuf>> void put(F file, byte value);
-
-    /**
-     * LongAppendFile put
-     *
-     * @param file
-     * @param value
-     * @param <F>
-     * @see com.fineio.v3.file.impl.LongAppendFile
-     */
-    <F extends IAppendFile<? extends LongBuf>> void put(F file, long value);
-
-    /**
-     * IntAppendFile put
-     *
-     * @param file
-     * @param value
-     * @param <F>
-     * @see com.fineio.v3.file.impl.IntAppendFile
-     */
-    <F extends IAppendFile<? extends IntBuf>> void put(F file, int value);
-
-    /**
-     * DoubleAppendFile put
-     *
-     * @param file
-     * @param value
-     * @param <F>
-     * @see com.fineio.v3.file.impl.DoubleAppendFile
-     */
-    <F extends IAppendFile<? extends DoubleBuf>> void put(F file, double value);
-
-    /**
-     * 兼容接口，v3走write file，但会初始化最后一个buffer，顺序写相当于append
-     * v2继续走append file
-     *
-     * @param file  write file
-     * @param pos   pos
-     * @param value value
-     * @param <F>   write file
-     */
-    <F extends IAppendFile<? extends ByteBuf>> void put(F file, long pos, byte value);
-
-    /**
-     * 兼容接口，v3走write file，但会初始化最后一个buffer，顺序写相当于append
-     * v2继续走append file
-     *
-     * @param file  write file
-     * @param pos   pos
-     * @param value value
-     * @param <F>   write file
-     */
-    <F extends IAppendFile<? extends LongBuf>> void put(F file, long pos, long value);
-
-    /**
-     * 兼容接口，v3走write file，但会初始化最后一个buffer，顺序写相当于append
-     * v2继续走append file
-     *
-     * @param file  write file
-     * @param pos   pos
-     * @param value value
-     * @param <F>   write file
-     */
-    <F extends IAppendFile<? extends IntBuf>> void put(F file, long pos, int value);
-
-    /**
-     * 兼容接口，v3走write file，但会初始化最后一个buffer，顺序写相当于append
-     * v2继续走append file
-     *
-     * @param file  write file
-     * @param pos   pos
-     * @param value value
-     * @param <F>   write file
-     */
-    <F extends IAppendFile<? extends DoubleBuf>> void put(F file, long pos, double value);
 
     /**
      * IntWriteFile put

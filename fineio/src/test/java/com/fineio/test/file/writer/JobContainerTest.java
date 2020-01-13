@@ -1,5 +1,6 @@
 package com.fineio.test.file.writer;
 
+import com.fineio.io.base.Job;
 import com.fineio.io.base.JobAssist;
 import com.fineio.io.file.FileBlock;
 import com.fineio.io.file.writer.JobContainer;
@@ -27,31 +28,52 @@ public class JobContainerTest extends TestCase {
         Connector connector = control.createMock(Connector.class);
         control.replay();
         String uri = "";
-        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), () -> {
+        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
+            @Override
+            public void doJob() {
 
+            }
         })));
 
-        assertFalse(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), () -> {
+        assertFalse(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
+            @Override
+            public void doJob() {
 
+            }
         })));
         container.get();
         assertTrue(container.isEmpty());
-        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), () -> {
+        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
+            @Override
+            public void doJob() {
 
+            }
         })));
-        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "2"), () -> {
+        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "2"), new Job() {
+            @Override
+            public void doJob() {
 
+            }
         })));
-        assertTrue(container.put(new JobAssist(null, constructor.newInstance(uri, "1"), () -> {
+        assertTrue(container.put(new JobAssist(null, constructor.newInstance(uri, "1"), new Job() {
+            @Override
+            public void doJob() {
 
+            }
         })));
         container.get();
-        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), () -> {
+        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "1"), new Job() {
+            @Override
+            public void doJob() {
 
+            }
         })));
         container.get();
-        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "2"), () -> {
+        assertTrue(container.put(new JobAssist(connector, constructor.newInstance(uri, "2"), new Job() {
+            @Override
+            public void doJob() {
 
+            }
         })));
         assertFalse(container.isEmpty());
         container.get();
@@ -71,18 +93,27 @@ public class JobContainerTest extends TestCase {
         final Connector connector = control.createMock(Connector.class);
         control.replay();
         final URI uri = new URI("");
-        JobAssist jobAssist = new JobAssist(connector, constructor.newInstance(uri.getPath(), "1"), () -> {
+        JobAssist jobAssist = new JobAssist(connector, constructor.newInstance(uri.getPath(), "1"), new Job() {
+            @Override
+            public void doJob() {
 
+            }
         });
-        final JobAssist jobAssist3 = new JobAssist(connector, constructor.newInstance(uri.getPath(), "1"), () -> {
+        final JobAssist jobAssist3 = new JobAssist(connector, constructor.newInstance(uri.getPath(), "1"), new Job() {
+            @Override
+            public void doJob() {
 
+            }
         });
         assertTrue(container.put(jobAssist));
         final AtomicInteger atomicInteger = new AtomicInteger(0);
-        new Thread(() -> {
-            atomicInteger.addAndGet(1);
-            container.waitJob(jobAssist3);
-            atomicInteger.addAndGet(1);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                atomicInteger.addAndGet(1);
+                container.waitJob(jobAssist3);
+                atomicInteger.addAndGet(1);
+            }
         }).start();
         Thread.sleep(200);
         assertEquals(atomicInteger.get(), 1);
@@ -98,8 +129,11 @@ public class JobContainerTest extends TestCase {
         Thread.sleep(200);
         assertEquals(atomicInteger.get(), 2);
 
-        final JobAssist jobAssist2 = new JobAssist(connector, constructor.newInstance(uri.getPath(), "2"), () -> {
+        final JobAssist jobAssist2 = new JobAssist(connector, constructor.newInstance(uri.getPath(), "2"), new Job() {
+            @Override
+            public void doJob() {
 
+            }
         });
         new Thread() {
             public void run() {
@@ -138,7 +172,12 @@ public class JobContainerTest extends TestCase {
                         for (int q = 0; q < len; q++) {
                             try {
                                 final int k = q;
-                                container.put(new JobAssist(connector, constructor.newInstance(uri.getPath(), String.valueOf(q)), () -> sign[k] = true));
+                                container.put(new JobAssist(connector, constructor.newInstance(uri.getPath(), String.valueOf(q)), new Job() {
+                                    @Override
+                                    public void doJob() {
+                                        sign[k] = true;
+                                    }
+                                }));
                             } catch (InstantiationException e) {
                                 e.printStackTrace();
                             } catch (IllegalAccessException e) {

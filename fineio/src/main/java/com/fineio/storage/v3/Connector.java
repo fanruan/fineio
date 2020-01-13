@@ -30,14 +30,10 @@ public interface Connector extends com.fineio.storage.Connector {
     Block list(String dir) throws IOException;
 
     @Override
-    default boolean exists(FileBlock block) {
-        return exists((Block) block);
-    }
+    boolean exists(FileBlock block);
 
     @Override
-    default boolean delete(FileBlock block) {
-        return delete((Block) block);
-    }
+    boolean delete(FileBlock block);
 
 
     long size(Block block);

@@ -1,7 +1,6 @@
 package com.fineio.v3.file.impl.write;
 
 import com.fineio.accessor.FileMode;
-import com.fineio.accessor.file.IAppendFile;
 import com.fineio.accessor.file.IWriteFile;
 import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
@@ -17,15 +16,13 @@ import com.fineio.v3.utils.IOUtils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
  * @author yee
  */
-public abstract class WriteFile<B extends DirectBuffer> extends File<B> implements IWriteFile<B>, IAppendFile<B> {
+public abstract class WriteFile<B extends DirectBuffer> extends File<B> implements IWriteFile<B>, com.fineio.accessor.file.IFile<B> {
     private final boolean asyncWrite;
     private int curBuf = -1;
     private long lastPos;
@@ -99,7 +96,7 @@ public abstract class WriteFile<B extends DirectBuffer> extends File<B> implemen
     public void close() {
         if (closed.compareAndSet(false, true)) {
             syncBufs();
-            writeMeta();
+            writeMeta(lastPos);
         }
     }
 
@@ -113,17 +110,6 @@ public abstract class WriteFile<B extends DirectBuffer> extends File<B> implemen
                     FineIOLoggers.getLogger().error(e);
                 }
             }
-        }
-    }
-
-    private void writeMeta() {
-        byte[] bytes = ByteBuffer.allocate(META_BYTES)
-                .put(blockOffset)
-                .putLong(lastPos << offset.getOffset()).array();
-        try {
-            connector.write(new FileBlock(fileBlock.getPath(), META), bytes);
-        } catch (IOException e) {
-            FineIOLoggers.getLogger().error(e);
         }
     }
 
