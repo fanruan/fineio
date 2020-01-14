@@ -14,6 +14,7 @@ import com.fineio.v3.utils.IOUtils;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -79,13 +80,15 @@ public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B
     }
 
     private long getLastPos(FileBlock fileBlock) throws IOException {
-        InputStream input = new BufferedInputStream(connector.read(fileBlock));
-        ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
-        IOUtils.copyBinaryTo(input, byteOutput);
-        long size = byteOutput.size();
-        input.close();
-        byteOutput.close();
-        return size >> offset.getOffset();
+        try (InputStream input = new BufferedInputStream(connector.read(fileBlock))) {
+            try (ByteArrayOutputStream byteOutput = new ByteArrayOutputStream()) {
+                IOUtils.copyBinaryTo(input, byteOutput);
+                long size = byteOutput.size();
+                return size >> offset.getOffset();
+            }
+        } catch (IOException e) {
+            throw new FileNotFoundException("File not found " + fileBlock.toString());
+        }
     }
 
     protected void writeMeta(long lastPos) {

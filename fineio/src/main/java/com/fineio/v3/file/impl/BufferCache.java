@@ -41,7 +41,7 @@ public class BufferCache {
     private void initCache() {
         final long halfReadMem = MemoryManager.INSTANCE.getReadMemoryLimit() / 2;
         // 50% or 1G
-        long maximumWeight = (long) Math.min(halfReadMem, FineIoProperty.CACHE_MEM_LIMIT.getValue() * (1 << 30));
+        long maximumWeight = Math.min(halfReadMem, FineIoProperty.CACHE_MEM_LIMIT.getValue());
         cache = CacheBuilder.newBuilder()
                 // 读内存上限的一半
                 .maximumWeight(maximumWeight)

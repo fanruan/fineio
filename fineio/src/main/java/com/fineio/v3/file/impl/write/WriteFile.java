@@ -22,7 +22,7 @@ import java.util.Arrays;
 /**
  * @author yee
  */
-public abstract class WriteFile<B extends DirectBuffer> extends File<B> implements IWriteFile<B>, com.fineio.accessor.file.IFile<B> {
+public abstract class WriteFile<B extends DirectBuffer> extends File<B> implements IWriteFile<B> {
     private final boolean asyncWrite;
     private int curBuf = -1;
     private long lastPos;

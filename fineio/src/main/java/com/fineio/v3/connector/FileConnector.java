@@ -53,18 +53,8 @@ public class FileConnector extends BaseConnector {
     }
 
     @Override
-    public boolean delete(FileBlock block) {
-        return delete((Block) block);
-    }
-
-    @Override
     public boolean exists(Block block) {
         return new File(block.getPath()).exists();
-    }
-
-    @Override
-    public boolean exists(FileBlock block) {
-        return exists((Block) block);
     }
 
     @Override

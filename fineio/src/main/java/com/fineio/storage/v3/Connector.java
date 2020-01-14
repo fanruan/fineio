@@ -29,12 +29,5 @@ public interface Connector extends com.fineio.storage.Connector {
      */
     Block list(String dir) throws IOException;
 
-    @Override
-    boolean exists(FileBlock block);
-
-    @Override
-    boolean delete(FileBlock block);
-
-
     long size(Block block);
 }
