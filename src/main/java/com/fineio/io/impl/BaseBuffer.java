@@ -244,7 +244,7 @@ public class BaseBuffer implements Buffer {
         if (address == 0) {
             throw new StreamCloseException();
         }
-        return new DirectInputStream(new ByteBufferImpl(this), (writePos + 1) << offset, null);
+        return new DirectInputStream(address, (writePos + 1) << offset, null);
     }
 
     @Override
