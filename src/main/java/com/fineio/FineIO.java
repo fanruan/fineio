@@ -20,7 +20,6 @@ import com.fineio.memory.MemoryConf;
 import com.fineio.memory.MemoryConstants;
 import com.fineio.memory.manager.manager.MemoryManager;
 import com.fineio.storage.Connector;
-import com.fineio.v2.io.file.writer.JobFinishedManager;
 import com.fineio.v21.cache.CacheManager;
 
 import java.net.URI;
@@ -88,7 +87,8 @@ public final class FineIO {
      * @param runnable
      */
     public static Future<Void> doWhenFinished(Runnable runnable) {
-        return JobFinishedManager.getInstance().finish(runnable);
+        runnable.run();
+        return null;
     }
 
     /**
@@ -97,7 +97,12 @@ public final class FineIO {
      * @param callable
      */
     public static <T> Future<T> doWhenFinished(Callable<T> callable) {
-        return JobFinishedManager.getInstance().finish(callable);
+        try {
+            callable.call();
+        } catch (Exception e) {
+            FineIOLoggers.getLogger().error(e);
+        }
+        return null;
     }
 
     /**

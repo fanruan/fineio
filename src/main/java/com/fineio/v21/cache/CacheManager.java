@@ -7,16 +7,13 @@ import com.fineio.io.Buffer;
 import com.fineio.io.file.ReadIOFile;
 import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.manager.manager.MemoryManager;
-import com.fineio.v21.exec.FineIOThreadPoolExecutor;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,42 +30,24 @@ public class CacheManager implements FineIoService {
     private CacheManager() {
         MemoryManager.INSTANCE.registerCleaner(new MemoryManager.Cleaner() {
             @Override
-            public boolean cleanTimeout() {
-                return CacheManager.this.closeTimeout();
+            public synchronized boolean cleanTimeout() {
+                return closeTimeout();
             }
 
             @Override
-            public boolean cleanOne() {
+            public synchronized boolean clean(int maxCount) {
                 if (!cleanTimeout()) {
-                    final Iterator<Map.Entry<URI, CacheObject<ReadIOFile>>> fit = files.entrySet().iterator();
-                    while (fit.hasNext()) {
-                        Map.Entry<URI, CacheObject<ReadIOFile>> entry = fit.next();
-                        final ReadIOFile readIOFile = entry.getValue().get();
-                        if (null == readIOFile) {
-                            Iterator<Map.Entry<URI, Buffer>> iterator = buffers.entrySet().iterator();
-                            byte[] remove = heads.remove(entry.getKey());
-                            if (null != remove) {
-                                int size = Bits.getInt(remove, 0);
-                                removeBuffers(entry.getKey(), size, true);
-                            } else {
-                                while (iterator.hasNext()) {
-                                    final Map.Entry<URI, Buffer> next = iterator.next();
-                                    if (next.getKey().getPath().contains(entry.getKey().getPath())) {
-                                        next.getValue().close();
-                                        iterator.remove();
-                                    }
-                                }
-                            }
-                            fit.remove();
+                    final Iterator<Map.Entry<URI, Buffer>> iterator = buffers.entrySet().iterator();
+                    boolean hasOne = iterator.hasNext();
+                    while (iterator.hasNext()) {
+                        Buffer buffer = iterator.next().getValue();
+                        buffer.close();
+                        iterator.remove();
+                        if (--maxCount <= 0) {
                             return true;
                         }
                     }
-                    final Iterator<Map.Entry<URI, Buffer>> iterator = buffers.entrySet().iterator();
-                    if (iterator.hasNext()) {
-                        iterator.next().getValue().close();
-                        iterator.remove();
-                        return true;
-                    }
+                    return hasOne;
                 }
                 return false;
             }
@@ -155,10 +134,13 @@ public class CacheManager implements FineIoService {
     public void removeBuffers(URI uri, int length, boolean release) {
         for (int i = 0; i < length; i++) {
             String path = uri.getPath();
-            Buffer remove = buffers.remove(URI.create(path.endsWith("/") ? path + i : path + "/" + i));
-            if (release && null != remove) {
-                synchronized (getURILock(remove.getUri())) {
-                    remove.close();
+            URI uri1 = URI.create(path.endsWith("/") ? path + i : path + "/" + i);
+            if (buffers.containsKey(uri1)) {
+                Buffer remove = buffers.remove(uri1);
+                if (release && null != remove) {
+                    synchronized (getURILock(remove.getUri())) {
+                        remove.close();
+                    }
                 }
             }
         }
@@ -166,46 +148,73 @@ public class CacheManager implements FineIoService {
 
     public void close(final Buffer buf) {
         if (null != buf) {
-            exec.submit(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    FineIOLoggers.getLogger().debug(String.format("Buf %s close. Release %d", buf.getUri().getPath(), buf.getMemorySize()));
-                    buf.close();
-                    return null;
-                }
-            });
+            buf.close();
         }
     }
 
     private boolean closeTimeout() {
-        final Iterator<Map.Entry<URI, CacheObject<ReadIOFile>>> iterator = files.entrySet().iterator();
-        while (iterator.hasNext()) {
-            final Map.Entry<URI, CacheObject<ReadIOFile>> next = iterator.next();
-            final CacheObject<ReadIOFile> cache = next.getValue();
-            if (cache.getIdle() > TimeUnit.MINUTES.toMillis(5)) {
-                final ReadIOFile readIOFile = cache.get();
-                if (null == readIOFile) {
-                    iterator.remove();
-                    byte[] remove = heads.remove(next.getKey());
-                    if (null != remove) {
-                        int size = Bits.getInt(remove, 0);
-                        removeBuffers(next.getKey(), size, true);
-                    } else {
-                        while (iterator.hasNext()) {
-                            Iterator<Map.Entry<URI, Buffer>> mit = buffers.entrySet().iterator();
-                            final Map.Entry<URI, Buffer> entry = mit.next();
-                            if (entry.getKey().getPath().contains(next.getKey().getPath())) {
-                                entry.getValue().close();
-                                mit.remove();
+        boolean cleared = false;
+        try {
+            final Iterator<Map.Entry<URI, CacheObject<ReadIOFile>>> iterator = files.entrySet().iterator();
+            while (iterator.hasNext()) {
+                final Map.Entry<URI, CacheObject<ReadIOFile>> next = iterator.next();
+                final CacheObject<ReadIOFile> cache = next.getValue();
+                if (cache.getIdle() > TimeUnit.MINUTES.toMillis(5)) {
+                    final ReadIOFile readIOFile = cache.get();
+                    if (null == readIOFile) {
+                        iterator.remove();
+                        byte[] remove = heads.remove(next.getKey());
+                        if (null != remove) {
+                            int size = Bits.getInt(remove, 0);
+                            removeBuffers(next.getKey(), size, true);
+                        } else {
+                            while (iterator.hasNext()) {
+                                Iterator<Map.Entry<URI, Buffer>> mit = buffers.entrySet().iterator();
+                                final Map.Entry<URI, Buffer> entry = mit.next();
+                                if (entry.getKey().getPath().contains(next.getKey().getPath())) {
+                                    entry.getValue().close();
+                                    mit.remove();
+                                }
                             }
                         }
+                    } else {
+                        readIOFile.close();
                     }
-                } else {
-                    readIOFile.close();
+                    cleared = true;
                 }
             }
+        } catch (Exception e){
+            FineIOLoggers.getLogger().error(e);
         }
-        return false;
+        return cleared;
+    }
+
+    /**
+     * 缓存一个空的cache的readfile的uri，释放的时候可以被超时释放，读的时候因为cache为null会再加载一次的
+     * @param uri
+     */
+    public void updateFile(URI uri) {
+        CacheObject<ReadIOFile> cache = files.get(uri);
+        if (null != cache && null != cache.get()) {
+            cache.updateTime();
+            return;
+        }
+        synchronized (getURILock(uri)) {
+            CacheObject<ReadIOFile> cacheObject = files.get(uri);
+            if (null == cacheObject) {
+                cacheObject = new CacheObject<ReadIOFile>(null);
+                files.put(uri, cacheObject);
+            }
+            cacheObject.updateTime();
+        }
+    }
+
+    public void closeIfExist(URI uri) {
+        Buffer buffer = buffers.get(uri);
+        if (buffer != null) {
+            buffer.close();
+            buffers.remove(uri);
+        }
     }
 
     public interface BufferCreator {
@@ -225,15 +234,12 @@ public class CacheManager implements FineIoService {
 
     }
 
-    private ExecutorService exec;
 
     @Override
     public void start() {
-        exec = FineIOThreadPoolExecutor.newInstance(Runtime.getRuntime().availableProcessors(), "fineio-cache-event-dispatcher");
     }
 
     @Override
     public void stop() {
-        exec.shutdownNow();
     }
 }

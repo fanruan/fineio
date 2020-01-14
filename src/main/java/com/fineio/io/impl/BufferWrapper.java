@@ -12,7 +12,7 @@ import java.net.URI;
  * Created by yee on 2019/9/10
  */
 public class BufferWrapper implements Buffer {
-    BaseBuffer unsafeBuf;
+    volatile BaseBuffer unsafeBuf;
 
     BufferWrapper(BaseBuffer unsafeBuf) {
         this.unsafeBuf = unsafeBuf;
@@ -20,8 +20,11 @@ public class BufferWrapper implements Buffer {
 
     @Override
     public void close() {
-        this.unsafeBuf.close();
-        unsafeBuf = null;
+        try {
+            this.unsafeBuf.close();
+            unsafeBuf = null;
+        } catch (NullPointerException ignore) {
+        }
     }
 
     @Override
@@ -40,9 +43,8 @@ public class BufferWrapper implements Buffer {
     }
 
     @Override
-    public Buffer flip() {
-        unsafeBuf.flip();
-        return this;
+    public void release() {
+        unsafeBuf.release();
     }
 
     @Override

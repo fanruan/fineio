@@ -33,7 +33,7 @@ public class FileSyncManager implements FineIoService {
 
     @Override
     public void start() {
-        this.service = FineIOExecutors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), "FineIO-FileSync");
+        this.service = FineIOExecutors.newFixedThreadPool(Math.min(4, Runtime.getRuntime().availableProcessors()), "FineIO-FileSync");
     }
 
     @Override
@@ -58,8 +58,11 @@ public class FileSyncManager implements FineIoService {
                     final InputStream inputStream = buf.asInputStream();
                     if (inputStream.available() > 0) {
                         connector.write(block, inputStream);
-                        buf.flip();
-                        CacheManager.getInstance().put(buf);
+                        // 写内存直接释放，不转化为读内存
+                        buf.release();
+                        // read append read的时候，第二次read会读cache中的内容，append的结果没有被加载，会导致一些问题。
+                        // 写完之后将对应缓存内容清掉，重新加载
+                        CacheManager.getInstance().closeIfExist(buf.getUri());
                     }
                     return null;
                 }

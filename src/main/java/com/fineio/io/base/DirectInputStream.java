@@ -20,7 +20,7 @@ public final class DirectInputStream extends InputStream {
     @Override
     public int read() {
         doCheck();
-        return available() > 0 ? MemoryUtils.getByte(address, cursor++) : EOF;
+        return available() > 0 ? MemoryUtils.getByte(address, cursor++) & 0xFF : EOF;
     }
 
     @Override
@@ -51,12 +51,12 @@ public final class DirectInputStream extends InputStream {
      * 流长度
      * @return
      */
-    public long size(){
+    public long size() {
         return size;
     }
 
     private final void doCheck() {
-        if(checker != null && !checker.check()) {
+        if (checker != null && !checker.check()) {
             throw new StreamCloseException();
         }
     }
