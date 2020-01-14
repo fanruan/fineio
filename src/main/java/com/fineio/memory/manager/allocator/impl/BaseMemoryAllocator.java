@@ -55,75 +55,17 @@ public abstract class BaseMemoryAllocator extends SyncObject {
                     }
                 };
             }
-        },
+        };
         /**
          * 直接单文件Builder
          */
-        DIRECT {
-            @Override
-            public Allocator build(final InputStream is) {
-                return new DirectFileMemoryAllocator.DirectFileReadAllocator() {
-                    @Override
-                    public MemoryObject allocate() throws OutOfMemoryError {
-                        return allocateRead(is);
-                    }
-                };
-            }
-
-            @Override
-            public Allocator build(final InputStream is, final int maxLength) {
-                return new DirectFileMemoryAllocator.DirectFileReadAllocator() {
-                    @Override
-                    public MemoryObject allocate() throws OutOfMemoryError {
-                        return allocateRead(is, maxLength);
-                    }
-                };
-            }
-        };
 
         public abstract Allocator build(InputStream is, int maxLength);
 
         public abstract Allocator build(InputStream is);
 
-        public Allocator build(final int size) {
-            return new CommonWriteAllocator() {
-                @Override
-                public MemoryObject allocate() throws OutOfMemoryError {
-                    return allocate(size);
-                }
-            };
-        }
-
         public ReAllocator build(final long address, final long size, final long newSize) {
-            return new BaseReAllocator() {
-                @Override
-                public MemoryObject allocate() throws OutOfMemoryError {
-                    return reAllocate(address, size, newSize);
-                }
-            };
-        }
-
-        public ReAllocator build(final MemoryObject memoryObject, final long newSize) {
-            return build(memoryObject.getAddress(), memoryObject.getAllocateSize(), newSize);
-        }
-    }
-
-    private abstract static class CommonWriteAllocator extends SyncObject implements WriteAllocator {
-        private long allocateSize;
-
-        protected MemoryObject allocate(int size) throws OutOfMemoryError {
-            beforeStatusChange();
-            long address = MemoryUtils.allocate(size);
-            MemoryUtils.fill0(address, size);
-            MemoryObject memoryObject = new AllocateObject(address, size);
-            MemoryManager.INSTANCE.updateWrite(size);
-            allocateSize = size;
-            return memoryObject;
-        }
-
-        @Override
-        public long getAllocateSize() {
-            return allocateSize;
+            return new BaseReAllocator(address, size, newSize);
         }
     }
 }

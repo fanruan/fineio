@@ -21,8 +21,7 @@ public class DoubleBufferImpl extends BufferWrapper implements DoubleBuffer {
 
     @Override
     public void putDouble(int pos, double v) {
-        final int offset = unsafeBuf.ensureCap(pos);
-        MemoryUtils.put(unsafeBuf.getAddress(), offset, v);
+        unsafeBuf.putDouble(pos, v);
     }
 
 }

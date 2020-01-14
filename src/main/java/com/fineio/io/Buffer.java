@@ -18,12 +18,12 @@ public interface Buffer extends Closeable {
 
     long getMemorySize();
 
-    Buffer flip();
-
     URI getUri();
 
     @Override
     void close();
 
     int getLength();
+
+    void release();
 }

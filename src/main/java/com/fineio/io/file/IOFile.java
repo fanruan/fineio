@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class IOFile<B extends Buffer> implements Closeable {
     protected final static int STEP_LEN = MemoryConstants.STEP_LONG;
     protected final static int HEAD_LEN = STEP_LEN + 1;
-    protected Buffer[] buffers;
+    protected volatile Buffer[] buffers;
     protected Connector connector;
     protected URI uri;
     protected AtomicBoolean close = new AtomicBoolean(false);
