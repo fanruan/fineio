@@ -20,7 +20,7 @@ public final class DirectInputStream extends InputStream {
     @Override
     public int read() {
         doCheck();
-        return available() > 0 ? MemoryUtils.getByte(address, cursor++) : EOF;
+        return available() > 0 ? MemoryUtils.getByte(address, cursor++) & 0xFF : EOF;
     }
 
     @Override
