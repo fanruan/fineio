@@ -66,8 +66,8 @@ public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B
                 byte[] bytes = new byte[META_BYTES];
                 final int read = input.read(bytes);
                 ByteBuffer buf = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
-                long lastBlockIndex = buf.getLong(0) - 1;
-                blockOffset = buf.get(8);
+                long lastBlockIndex = buf.getLong() - 1;
+                blockOffset = buf.get();
                 long lastBlockPos = getLastPos(new FileBlock(fileBlock.getPath(), String.valueOf(lastBlockIndex)));
                 long lastPos = (lastBlockIndex << (blockOffset - offset.getOffset())) + lastBlockPos;
                 writeMeta(lastPos);
