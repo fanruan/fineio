@@ -15,6 +15,7 @@ import com.fr.third.guava.cache.Weigher;
 
 import java.text.MessageFormat;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,15 +28,21 @@ public class BufferCache {
 
     private static final BufferCache INSTANCE = new BufferCache();
     private Cache<FileBlock, DirectBuffer> cache;
+    private ScheduledExecutorService scheduledExecutorService;
 
-    private BufferCache() {
+    public void start() {
+        scheduledExecutorService = FineIOExecutors.newSingleThreadScheduledExecutor(BufferCacheRefresher.class);
         initCache();
         initRefresher();
     }
 
+    public void stop() {
+        scheduledExecutorService.shutdownNow();
+    }
+
     private void initRefresher() {
-        FineIOExecutors.newSingleThreadScheduledExecutor(BufferCacheRefresher.class)
-                .scheduleWithFixedDelay(new BufferCacheRefresher(), TimeUnit.MINUTES.toSeconds(10), 10, TimeUnit.SECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(new BufferCacheRefresher(),
+                TimeUnit.MINUTES.toSeconds(10), 10, TimeUnit.SECONDS);
     }
 
     private void initCache() {
@@ -58,7 +65,8 @@ public class BufferCache {
                     @Override
                     public void onRemoval(RemovalNotification<FileBlock, DirectBuffer> removalNotification) {
                         removalNotification.getValue().close();
-                        FineIOLoggers.getLogger().debug(MessageFormat.format("fineio cache removed {0}, cause {1}", removalNotification.getKey(), removalNotification.getCause()));
+                        FineIOLoggers.getLogger().debug(MessageFormat.format("fineio cache removed {0}, cause {1}",
+                                removalNotification.getKey(), removalNotification.getCause()));
                     }
                 })
                 .build();
@@ -98,7 +106,8 @@ public class BufferCache {
                   guava惰性释放，不用就不释放，即使过期、超重
                   这里刷掉过期的，超重的
                  */
-                FineIOLoggers.getLogger().info(String.format("fineio read mem %d, fineio write mem %d", MemoryManager.INSTANCE.getReadMemory(), MemoryManager.INSTANCE.getWriteMemory()));
+                FineIOLoggers.getLogger().info(String.format("fineio read mem %d, fineio write mem %d",
+                        MemoryManager.INSTANCE.getReadMemory(), MemoryManager.INSTANCE.getWriteMemory()));
 
                 cache.cleanUp();
             } catch (Throwable e) {

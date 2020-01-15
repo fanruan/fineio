@@ -26,10 +26,12 @@ public class FileSync implements Runnable {
     private BlockingQueue<FileSyncJob> waitingJobs;
 
     private FileSync() {
-        int threads = Runtime.getRuntime().availableProcessors();
-        exec = FineIOExecutors.newFixedThreadPool(threads, FileSync.class.getSimpleName() + "-Worker");
-        waitingJobs = new LinkedBlockingQueue<>();
-        runningJobs = new HashSet<>();
+        // 暂时不用了
+        throw new UnsupportedOperationException();
+//        int threads = Runtime.getRuntime().availableProcessors();
+//        exec = FineIOExecutors.newFixedThreadPool(threads, FileSync.class.getSimpleName() + "-Worker");
+//        waitingJobs = new LinkedBlockingQueue<>();
+//        runningJobs = new HashSet<>();
     }
 
     public static FileSync get() {

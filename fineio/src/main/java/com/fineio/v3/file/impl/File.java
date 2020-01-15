@@ -1,10 +1,8 @@
 package com.fineio.v3.file.impl;
 
 import com.fineio.accessor.file.IFile;
-import com.fineio.base.Bits;
 import com.fineio.io.file.FileBlock;
 import com.fineio.logger.FineIOLoggers;
-import com.fineio.memory.MemoryConstants;
 import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.file.FileClosedException;
@@ -18,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -66,9 +65,9 @@ public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B
             try (InputStream input = connector.read(oldMetaFileKey)) {
                 byte[] bytes = new byte[META_BYTES];
                 final int read = input.read(bytes);
-                ByteBuffer buf = ByteBuffer.wrap(bytes);
-                long lastBlockIndex = buf.get(0) - 1;
-                blockOffset = (byte) buf.getLong(MemoryConstants.STEP_BYTE);
+                ByteBuffer buf = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
+                long lastBlockIndex = buf.getLong(0) - 1;
+                blockOffset = buf.get(8);
                 long lastBlockPos = getLastPos(new FileBlock(fileBlock.getPath(), String.valueOf(lastBlockIndex)));
                 long lastPos = (lastBlockIndex << (blockOffset - offset.getOffset())) + lastBlockPos;
                 writeMeta(lastPos);
@@ -81,7 +80,8 @@ public abstract class File<B extends DirectBuffer> implements Closeable, IFile<B
     }
 
     private long getLastPos(FileBlock fileBlock) throws IOException {
-        try (InputStream input = new BufferedInputStream(connector.read(fileBlock)); ByteArrayOutputStream byteOutput = new ByteArrayOutputStream()) {
+        try (InputStream input = new BufferedInputStream(connector.read(fileBlock));
+             ByteArrayOutputStream byteOutput = new ByteArrayOutputStream()) {
             IOUtils.copyBinaryTo(input, byteOutput);
             long size = byteOutput.size();
             return size >> offset.getOffset();
