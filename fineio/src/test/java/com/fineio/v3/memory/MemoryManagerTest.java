@@ -1,8 +1,8 @@
 package com.fineio.v3.memory;
 
-import com.fineio.FineIO;
 import com.fineio.accessor.FileMode;
 import com.fineio.logger.FineIOLogger;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.memory.MemoryHelper;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.allocator.BaseMemoryAllocator;
@@ -58,7 +58,7 @@ public class MemoryManagerTest {
 
     @Test
     public void threads() throws ExecutionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
-        FineIO.setLogger(FineIOLogger.DEFAULT, true);
+        FineIOLoggers.setLogger(FineIOLogger.DEFAULT);
         long maxMemory = MemoryHelper.getMaxMemory();
         double maxMemorySize = maxMemory * 0.6;
         long size = (long) (maxMemorySize / 10 + 1024);

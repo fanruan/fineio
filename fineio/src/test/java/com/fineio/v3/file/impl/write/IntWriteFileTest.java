@@ -5,6 +5,8 @@ import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.IntDirectBuffer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -32,14 +34,17 @@ public class IntWriteFileTest {
     public void putInt() throws Exception {
         Connector connector = mock(Connector.class);
         when(connector.getBlockOffset()).thenReturn((byte) 3);
-        IntWriteFile wf = spy(IntWriteFile.ofSync(mock(FileBlock.class), connector));
+        final IntWriteFile wf = spy(IntWriteFile.ofSync(mock(FileBlock.class), connector));
         doNothing().when(wf).syncBufIfNeed(anyInt());
-        doAnswer(invocation -> {
-            IntDirectBuffer[] buffers = getInternalState(wf, "buffers");
-            int nthBuf = invocation.getArgument(0);
-            buffers[nthBuf] = mock(IntDirectBuffer.class);
-            buffers[nthBuf].putInt(invocation.getArgument(1), invocation.getArgument(2));
-            return null;
+        doAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                IntDirectBuffer[] buffers = getInternalState(wf, "buffers");
+                int nthBuf = invocation.getArgument(0);
+                buffers[nthBuf] = mock(IntDirectBuffer.class);
+                buffers[nthBuf].putInt(invocation.<Integer>getArgument(1), invocation.<Integer>getArgument(2));
+                return null;
+            }
         }).when(wf, "newAndPut", anyInt(), anyInt(), anyInt());
 
         IntDirectBuffer[] buffers = getInternalState(wf, "buffers");

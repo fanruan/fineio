@@ -1,7 +1,9 @@
 package com.fineio.v3.memory;
 
-import com.fineio.base.Bits;
 import junit.framework.TestCase;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * @author yee
@@ -376,9 +378,7 @@ public class MemoryUtilsTest extends TestCase {
     }
 
     private byte[] long2byte(long v) {
-        byte[] bytes = new byte[8];
-        Bits.putLong(bytes, 0, v);
-        return bytes;
+        return ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).putLong(v).array();
     }
 }
 

@@ -32,12 +32,12 @@ public enum MemoryManager {
     MemoryManager() {
         long total = MemoryHelper.getMaxMemory();
         // 60% free or read_mem_limit
-        readMemorySize = Math.min((long) (total * 0.6), FineIoProperty.READ_MEM_LIMIT.getValue() << 30);
+        readMemorySize = Math.min((long) (total * 0.6), FineIoProperty.READ_MEM_LIMIT.getValue());
         this.allocator = new BaseMemoryAllocator(readMemorySize);
         FineIOLoggers.getLogger().info(String.format("fineio read memory size %d", readMemorySize));
 
         // 20% free or write_mem_limit
-        writeMemorySize = Math.min((long) (total * 0.2), FineIoProperty.WRITE_MEM_LIMIT.getValue() << 30);
+        writeMemorySize = Math.min((long) (total * 0.2), FineIoProperty.WRITE_MEM_LIMIT.getValue());
         this.reAllocator = new WriteMemoryAllocator(writeMemorySize);
         FineIOLoggers.getLogger().info(String.format("fineio write memory size %d", writeMemorySize));
     }

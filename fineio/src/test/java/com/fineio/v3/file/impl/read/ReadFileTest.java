@@ -17,12 +17,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -32,10 +28,8 @@ import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.doThrow;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
-import static org.powermock.reflect.Whitebox.getInternalState;
 import static org.powermock.reflect.Whitebox.invokeMethod;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
@@ -90,15 +84,15 @@ public class ReadFileTest {
         verify(allocator).release(1, 1, FileMode.READ);
     }
 
-    @Test
-    public void close() {
-        ReadFile<?> rf = mock(ReadFile.class, CALLS_REAL_METHODS);
-        setInternalState(rf, "buffers", new DirectBuffer[]{mock(DirectBuffer.class)});
-        AtomicBoolean closed = spy(new AtomicBoolean(false));
-        setInternalState(rf, "closed", closed);
-
-        rf.close();
-        assertTrue(closed.get());
-        assertThat((DirectBuffer[]) getInternalState(rf, "buffers")).allMatch(Objects::isNull);
-    }
+//    @Test
+//    public void close() {
+//        ReadFile<?> rf = mock(ReadFile.class, CALLS_REAL_METHODS);
+//        setInternalState(rf, "buffers", new DirectBuffer[]{mock(DirectBuffer.class)});
+//        AtomicBoolean closed = spy(new AtomicBoolean(false));
+//        setInternalState(rf, "closed", closed);
+//
+//        rf.close();
+//        assertTrue(closed.get());
+//        assertThat((DirectBuffer[]) getInternalState(rf, "buffers")).allMatch(Objects::isNull);
+//    }
 }

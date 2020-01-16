@@ -38,9 +38,7 @@ public interface FineIOLogger {
 
         @Override
         public void debug(String msg) {
-            if (FineIO.DEBUG) {
-                System.out.println("[DEBUG] " + msg);
-            }
+            System.out.println("[DEBUG] " + msg);
         }
 
         @Override

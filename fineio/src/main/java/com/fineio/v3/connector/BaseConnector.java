@@ -1,5 +1,7 @@
 package com.fineio.v3.connector;
 
+import com.fineio.accessor.Block;
+import com.fineio.io.file.FileBlock;
 import com.fineio.storage.v3.Connector;
 
 /**
@@ -20,6 +22,16 @@ public abstract class BaseConnector implements Connector {
 
     public BaseConnector() {
         this((byte) 22);
+    }
+
+    @Override
+    public boolean exists(FileBlock block) {
+        return exists((Block) block);
+    }
+
+    @Override
+    public boolean delete(FileBlock block) {
+        return delete((Block) block);
     }
 
     @Override

@@ -5,6 +5,8 @@ import com.fineio.storage.Connector;
 import com.fineio.v3.buffer.DoubleDirectBuffer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -33,14 +35,17 @@ public class DoubleWriteFileTest {
     public void putDouble() throws Exception {
         Connector connector = mock(Connector.class);
         when(connector.getBlockOffset()).thenReturn((byte) 4);
-        DoubleWriteFile wf = spy(DoubleWriteFile.ofSync(mock(FileBlock.class), connector));
+        final DoubleWriteFile wf = spy(DoubleWriteFile.ofSync(mock(FileBlock.class), connector));
         doNothing().when(wf).syncBufIfNeed(anyInt());
-        doAnswer(invocation -> {
-            DoubleDirectBuffer[] buffers = getInternalState(wf, "buffers");
-            int nthBuf = invocation.getArgument(0);
-            buffers[nthBuf] = mock(DoubleDirectBuffer.class);
-            buffers[nthBuf].putDouble(invocation.getArgument(1), invocation.getArgument(2));
-            return null;
+        doAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                DoubleDirectBuffer[] buffers = getInternalState(wf, "buffers");
+                int nthBuf = invocation.getArgument(0);
+                buffers[nthBuf] = mock(DoubleDirectBuffer.class);
+                buffers[nthBuf].putDouble(invocation.<Integer>getArgument(1), invocation.<Double>getArgument(2));
+                return null;
+            }
         }).when(wf, "newAndPut", anyInt(), anyInt(), anyDouble());
 
         DoubleDirectBuffer[] buffers = getInternalState(wf, "buffers");

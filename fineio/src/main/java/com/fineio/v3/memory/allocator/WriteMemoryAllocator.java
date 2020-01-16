@@ -33,8 +33,8 @@ public class WriteMemoryAllocator extends BaseMemoryAllocator implements MemoryR
                 return address;
             } else {
                 do {
-                    if (memorySize.sum() + addSize < limitMemorySize) {
-                        memorySize.add(addSize);
+                    if (memorySize.get() + addSize < limitMemorySize) {
+                        memorySize.addAndGet(addSize);
                         long reallocate = MemoryUtils.reallocate(address, newSize);
                         MemoryUtils.fill0(reallocate + oldSize, addSize);
                         return reallocate;

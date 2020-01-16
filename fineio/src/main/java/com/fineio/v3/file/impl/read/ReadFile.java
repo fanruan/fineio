@@ -18,6 +18,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.concurrent.Callable;
 
 /**
  * @author anchore
@@ -29,25 +30,28 @@ abstract class ReadFile<B extends DirectBuffer> extends File<B> implements IRead
     }
 
     B loadBuffer(int nthBuf) {
-        FileBlock nthFileBlock = new FileBlock(fileBlock.getPath(), String.valueOf(nthBuf));
+        final FileBlock nthFileBlock = new FileBlock(fileBlock.getPath(), String.valueOf(nthBuf));
 
-        DirectBuffer buf = BufferCache.get().get(nthFileBlock, () -> {
-            Long address = null;
-            int size = 0;
-            try (InputStream input = new BufferedInputStream(connector.read(nthFileBlock));
-                 ByteArrayOutputStream byteOutput = new ByteArrayOutputStream()) {
-                IOUtils.copyBinaryTo(input, byteOutput);
-                size = byteOutput.size();
-                address = MemoryManager.INSTANCE.allocate(size, FileMode.READ);
-                MemoryUtils.copyMemory(byteOutput.toByteArray(), address, size);
+        DirectBuffer buf = BufferCache.get().get(nthFileBlock, new Callable<DirectBuffer>() {
+            @Override
+            public DirectBuffer call() throws Exception {
+                Long address = null;
+                int size = 0;
+                try (InputStream input = new BufferedInputStream(connector.read(nthFileBlock));
+                     ByteArrayOutputStream byteOutput = new ByteArrayOutputStream()) {
+                    IOUtils.copyBinaryTo(input, byteOutput);
+                    size = byteOutput.size();
+                    address = MemoryManager.INSTANCE.allocate(size, FileMode.READ);
+                    MemoryUtils.copyMemory(byteOutput.toByteArray(), address, size);
 
-                return newDirectBuf(address, size >> offset.getOffset(), nthFileBlock);
-            } catch (Throwable e) {
-                if (address != null) {
-                    MemoryManager.INSTANCE.release(address, size);
+                    return ReadFile.this.newDirectBuf(address, size >> offset.getOffset(), nthFileBlock);
+                } catch (Throwable e) {
+                    if (address != null) {
+                        MemoryManager.INSTANCE.release(address, size);
+                    }
+                    FineIOLoggers.getLogger().error(e);
+                    return null;
                 }
-                FineIOLoggers.getLogger().error(e);
-                return null;
             }
         });
         if (buf == null) {

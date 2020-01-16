@@ -7,7 +7,6 @@ import com.fineio.accessor.buffer.ByteBuf;
 import com.fineio.accessor.buffer.DoubleBuf;
 import com.fineio.accessor.buffer.IntBuf;
 import com.fineio.accessor.buffer.LongBuf;
-import com.fineio.accessor.file.IAppendFile;
 import com.fineio.accessor.file.IFile;
 import com.fineio.accessor.file.IReadFile;
 import com.fineio.accessor.file.IWriteFile;
@@ -43,46 +42,6 @@ public class IOAccessorImpl implements IOAccessor {
             default:
         }
         return null;
-    }
-
-    @Override
-    public <F extends IAppendFile<? extends ByteBuf>> void put(F file, byte value) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <F extends IAppendFile<? extends LongBuf>> void put(F file, long value) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <F extends IAppendFile<? extends IntBuf>> void put(F file, int value) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <F extends IAppendFile<? extends DoubleBuf>> void put(F file, double value) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <F extends IAppendFile<? extends ByteBuf>> void put(F file, long pos, byte value) {
-        ((ByteWriteFile) file).putByte(pos, value);
-    }
-
-    @Override
-    public <F extends IAppendFile<? extends LongBuf>> void put(F file, long pos, long value) {
-        ((LongWriteFile) file).putLong(pos, value);
-    }
-
-    @Override
-    public <F extends IAppendFile<? extends IntBuf>> void put(F file, long pos, int value) {
-        ((IntWriteFile) file).putInt(pos, value);
-    }
-
-    @Override
-    public <F extends IAppendFile<? extends DoubleBuf>> void put(F file, long pos, double value) {
-        ((DoubleWriteFile) file).putDouble(pos, value);
     }
 
     @Override
