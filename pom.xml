@@ -7,10 +7,6 @@
         <groupId>com.fineio</groupId>
         <artifactId>fineio-project</artifactId>
     <version>10.0.5-FEATURE-SNAPSHOT</version>
-        <modules>
-            <module>fineio-trans-tool</module>
-            <module>fineio</module>
-    </modules>
     <properties>
         <mockito.version>2.8.9</mockito.version>
         <powermock.version>1.7.4</powermock.version>
@@ -175,6 +171,11 @@
             <artifactId>ehcache</artifactId>
             <version>3.7.1</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fr.third</groupId>
+            <artifactId>fine-third</artifactId>
+            <version>10.0-PERSIST-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

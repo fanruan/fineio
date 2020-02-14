@@ -1,5 +1,6 @@
 package com.fineio.v3.file.impl;
 
+import com.fineio.FineIO;
 import com.fineio.io.file.FileBlock;
 import com.fineio.v3.connector.FileConnector;
 import com.fineio.v3.file.impl.read.ByteReadFile;
@@ -27,6 +28,7 @@ public class FileDemo {
 
     @Before
     public void setUp() {
+        FineIO.start();
         BufferCache.get().invalidateAll();
     }
 
