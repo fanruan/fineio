@@ -15,6 +15,7 @@ public interface MemoryAllocator {
      * @param mode
      */
     long allocate(long size, FileMode mode) throws OutOfDirectMemoryException;
+
     /**
      * 释放内存
      *
