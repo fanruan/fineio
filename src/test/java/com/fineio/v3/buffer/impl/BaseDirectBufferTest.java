@@ -9,7 +9,6 @@ import com.fineio.v3.buffer.BufferOutOfBoundsException;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.Offset;
-import com.fineio.v3.memory.allocator.BaseMemoryAllocator;
 import com.fineio.v3.memory.allocator.WriteMemoryAllocator;
 import org.junit.Rule;
 import org.junit.Test;
@@ -135,16 +134,16 @@ public class BaseDirectBufferTest {
         AtomicBoolean closed = spy(new AtomicBoolean(false));
         whenNew(AtomicBoolean.class).withArguments(false).thenReturn(closed);
 
-        BaseMemoryAllocator allocator = mock(BaseMemoryAllocator.class);
-        setInternalState(MemoryManager.INSTANCE, "allocator", allocator);
-        setInternalState(MemoryManager.INSTANCE, "memoryMode", new ConcurrentHashMap<>(Collections.singletonMap(1L, FileMode.READ)));
+        WriteMemoryAllocator reAllocator = mock(WriteMemoryAllocator.class);
+        setInternalState(MemoryManager.INSTANCE, "reAllocator", reAllocator);
+        setInternalState(MemoryManager.INSTANCE, "memoryMode", new ConcurrentHashMap<>(Collections.singletonMap(1L, FileMode.WRITE)));
 
-        DirectBuffer buf = new DirectBuffer(1, 16, mock(FileBlock.class), Offset.INT, 1024);
+        DirectBuffer buf = new DirectBuffer(mock(FileBlock.class), Offset.INT, 1024, FileMode.WRITE);
         buf.close();
         buf.close();
 
-        verify(allocator).release(1, 16 * Integer.BYTES, FileMode.READ);
-        verify(closed, atLeast(2)).compareAndSet(false, true);
+        verify(reAllocator).release(buf.getAddress(), 16 * 4, FileMode.WRITE);
+        verify(closed, atLeast(1)).compareAndSet(false, true);
     }
 
     static class DirectBuffer extends BaseDirectBuffer {
