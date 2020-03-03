@@ -29,11 +29,14 @@ public class BufferCache {
     private static final BufferCache INSTANCE = new BufferCache();
     private Cache<FileBlock, DirectBuffer> cache;
     private ScheduledExecutorService scheduledExecutorService;
+    private volatile long lastInfoTime;
+    private static int INFO_PERIOD = 3 * 60 * 1000;  //3分钟输出一次日志
 
     public void start() {
         scheduledExecutorService = FineIOExecutors.newSingleThreadScheduledExecutor(BufferCacheRefresher.class);
         initCache();
         initRefresher();
+        lastInfoTime = System.currentTimeMillis();
     }
 
     public void stop() {
@@ -106,8 +109,12 @@ public class BufferCache {
                   guava惰性释放，不用就不释放，即使过期、超重
                   这里刷掉过期的，超重的
                  */
-                FineIOLoggers.getLogger().info(String.format("fineio read mem %d, fineio write mem %d",
-                        MemoryManager.INSTANCE.getReadMemory(), MemoryManager.INSTANCE.getWriteMemory()));
+                long now = System.currentTimeMillis();
+                if (now - lastInfoTime >= INFO_PERIOD) {
+                    FineIOLoggers.getLogger().info(String.format("fineio read mem %d, fineio write mem %d",
+                            MemoryManager.INSTANCE.getReadMemory(), MemoryManager.INSTANCE.getWriteMemory()));
+                    lastInfoTime = now;
+                }
 
                 cache.cleanUp();
             } catch (Throwable e) {
