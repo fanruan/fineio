@@ -111,7 +111,7 @@ public class BufferCache {
                  */
                 long now = System.currentTimeMillis();
                 if (now - lastInfoTime >= INFO_PERIOD) {
-                    FineIOLoggers.getLogger().info(String.format("fineio read mem %d, fineio write mem %d",
+                    FineIOLoggers.getLogger().debug(String.format("fineio read mem %d, fineio write mem %d",
                             MemoryManager.INSTANCE.getReadMemory(), MemoryManager.INSTANCE.getWriteMemory()));
                     lastInfoTime = now;
                 }
