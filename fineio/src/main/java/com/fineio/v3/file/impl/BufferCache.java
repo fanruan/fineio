@@ -33,7 +33,7 @@ public class BufferCache {
 
     private void initRefresher() {
         FineIOExecutors.newSingleThreadScheduledExecutor(BufferCacheRefresher.class)
-                .scheduleWithFixedDelay(new BufferCacheRefresher(), TimeUnit.MINUTES.toSeconds(10), 10, TimeUnit.SECONDS);
+                .scheduleWithFixedDelay(new BufferCacheRefresher(), TimeUnit.MINUTES.toSeconds(1), 10, TimeUnit.SECONDS);
     }
 
     private void initCache() {
