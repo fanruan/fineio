@@ -53,6 +53,6 @@ public class ByteWriteFile extends WriteFile<ByteDirectBuffer> {
 
     @Override
     ByteDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock, int maxCap) {
-        return new ByteDirectBuf(address, size, fileBlock, maxCap);
+        return new ByteDirectBuf(address, size, maxCap, fileBlock);
     }
 }

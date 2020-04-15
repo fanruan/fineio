@@ -36,30 +36,32 @@ abstract class BaseSafeDirectBuf<B extends DirectBuffer> implements DirectBuffer
     }
 
     static class BaseVoidDirectBuf implements DirectBuffer {
-        DirectBuffer realBuf;
+        long address;
+        FileBlock fileBlock;
 
-        BaseVoidDirectBuf(DirectBuffer realBuf) {
-            this.realBuf = realBuf;
+        public BaseVoidDirectBuf(long address, FileBlock fileBlock) {
+            this.address = address;
+            this.fileBlock = fileBlock;
         }
 
         @Override
         public FileBlock getFileBlock() {
-            return realBuf.getFileBlock();
+            throw new BufferClosedException(address, fileBlock);
         }
 
         @Override
         public long getAddress() {
-            throw new BufferClosedException(realBuf.getAddress(), getFileBlock());
+            throw new BufferClosedException(address, fileBlock);
         }
 
         @Override
         public int getSizeInBytes() {
-            return realBuf.getSizeInBytes();
+            throw new BufferClosedException(address, fileBlock);
         }
 
         @Override
         public int getCapInBytes() {
-            return realBuf.getCapInBytes();
+            throw new BufferClosedException(address, fileBlock);
         }
 
         @Override

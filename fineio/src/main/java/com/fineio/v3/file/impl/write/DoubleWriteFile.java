@@ -52,6 +52,6 @@ public class DoubleWriteFile extends WriteFile<DoubleDirectBuffer> {
 
     @Override
     DoubleDirectBuffer newDirectBuf(long address, int size, FileBlock fileBlock, int maxCap) {
-        return new DoubleDirectBuf(address, size, fileBlock, maxCap);
+        return new DoubleDirectBuf(address, size, maxCap, fileBlock);
     }
 }

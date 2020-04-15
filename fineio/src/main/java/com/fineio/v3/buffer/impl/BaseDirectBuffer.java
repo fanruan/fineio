@@ -2,6 +2,7 @@ package com.fineio.v3.buffer.impl;
 
 import com.fineio.accessor.FileMode;
 import com.fineio.io.file.FileBlock;
+import com.fineio.logger.FineIOLoggers;
 import com.fineio.v3.buffer.BufferAllocateFailedException;
 import com.fineio.v3.buffer.BufferClosedException;
 import com.fineio.v3.buffer.BufferOutOfBoundsException;
@@ -9,6 +10,7 @@ import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.MemoryManager;
 import com.fineio.v3.memory.Offset;
+import sun.misc.Cleaner;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -36,22 +38,10 @@ abstract class BaseDirectBuffer implements DirectBuffer {
      */
     private int size;
 
-    /**
-     * for write, may grow cap
-     *
-     * @param fileBlock file key
-     * @param offset    offset
-     * @param maxCap    max cap
-     */
-    BaseDirectBuffer(FileBlock fileBlock, Offset offset, int maxCap, FileMode fileMode) throws BufferAllocateFailedException {
-        this(allocate(16, offset, fileMode, fileBlock), 16, fileBlock, offset, maxCap);
-        this.size = 0;
-    }
+    private final Cleaner cleaner;
 
     /**
      * for read, won't grow cap, cap = maxCap
-     * <p>
-     * for append, write after read
      *
      * @param address   address
      * @param cap       cap
@@ -66,6 +56,38 @@ abstract class BaseDirectBuffer implements DirectBuffer {
         this.cap = cap;
         this.maxCap = maxCap;
         this.size = cap;
+        this.cleaner = Cleaner.create(this, new Deallocator(address, getCapInBytes()));
+    }
+
+    /**
+     * for overwrite, may grow cap
+     *
+     * @param fileBlock file key
+     * @param offset    offset
+     * @param maxCap    max cap
+     */
+    BaseDirectBuffer(FileBlock fileBlock, Offset offset, int maxCap, FileMode fileMode) throws BufferAllocateFailedException {
+        this(allocate(16, offset, fileMode, fileBlock), 16, maxCap, fileBlock, offset);
+        this.size = 0;
+    }
+
+    /**
+     * for append, write after read
+     *
+     * @param address   address
+     * @param cap       cap
+     * @param fileBlock file key
+     * @param offset    offset
+     * @param maxCap    maxCap
+     */
+    BaseDirectBuffer(long address, int cap, int maxCap, FileBlock fileBlock, Offset offset) {
+        this.fileBlock = fileBlock;
+        this.offset = offset;
+        this.address = address;
+        this.cap = cap;
+        this.maxCap = maxCap;
+        this.size = cap;
+        this.cleaner = null;
     }
 
     private static long allocate(int cap, Offset offset, FileMode fileMode, FileBlock fileBlock) {
@@ -143,8 +165,35 @@ abstract class BaseDirectBuffer implements DirectBuffer {
 
     @Override
     public void close() {
-        if (closed.compareAndSet(false, true)) {
+        if (cleaner == null && closed.compareAndSet(false, true)) {
             MemoryManager.INSTANCE.release(address, getCapInBytes());
         }
     }
+
+    private static class Deallocator implements Runnable {
+        private long address;
+        private int capacity;
+
+        private Deallocator(long address, int capacity) {
+            assert (address != 0);
+            this.address = address;
+            this.capacity = capacity;
+        }
+
+        @Override
+        public void run() {
+            if (address == 0) {
+                // Paranoia
+                return;
+            }
+            try {
+                MemoryManager.INSTANCE.release(address, capacity);
+            } catch (Throwable e) {
+                // 防止Cleaner catch到，直接自杀
+                FineIOLoggers.getLogger().error(e);
+            }
+            address = 0;
+        }
+    }
+
 }

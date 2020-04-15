@@ -12,7 +12,18 @@ import com.fineio.v3.memory.Offset;
  */
 public class ByteDirectBuf extends BaseDirectBuffer implements ByteDirectBuffer {
     /**
-     * for write
+     * for read
+     *
+     * @param address   地址
+     * @param cap       容量
+     * @param fileBlock file key
+     */
+    public ByteDirectBuf(long address, int cap, FileBlock fileBlock, int maxCap) {
+        super(address, cap, fileBlock, Offset.BYTE, maxCap);
+    }
+
+    /**
+     * for overwrite
      *
      * @param fileBlock file key
      */
@@ -21,14 +32,12 @@ public class ByteDirectBuf extends BaseDirectBuffer implements ByteDirectBuffer 
     }
 
     /**
-     * for read or append
+     * for append
      *
-     * @param address   地址
-     * @param cap       容量
      * @param fileBlock file key
      */
-    public ByteDirectBuf(long address, int cap, FileBlock fileBlock, int maxCap) {
-        super(address, cap, fileBlock, Offset.BYTE, maxCap);
+    public ByteDirectBuf(long address, int cap, int maxCap, FileBlock fileBlock) {
+        super(address, cap, maxCap, fileBlock, Offset.BYTE);
     }
 
     @Override

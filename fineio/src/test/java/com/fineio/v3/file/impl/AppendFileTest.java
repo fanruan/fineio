@@ -97,6 +97,6 @@ public class AppendFileTest {
 
         invokeMethod(af, "initLastBuf");
         // throwable
-        verify(reAllocator).release(eq(0L), eq(1L), eq(FileMode.WRITE.getCondition()));
+        verify(reAllocator).release(eq(0L), eq(1L), eq(FileMode.WRITE));
     }
 }

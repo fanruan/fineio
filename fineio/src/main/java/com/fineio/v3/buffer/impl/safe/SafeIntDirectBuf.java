@@ -1,10 +1,9 @@
 package com.fineio.v3.buffer.impl.safe;
 
-import com.fineio.logger.FineIOLoggers;
+import com.fineio.io.file.FileBlock;
 import com.fineio.v3.buffer.BufferAllocateFailedException;
 import com.fineio.v3.buffer.BufferClosedException;
 import com.fineio.v3.buffer.BufferOutOfBoundsException;
-import com.fineio.v3.buffer.DirectBuffer;
 import com.fineio.v3.buffer.IntDirectBuffer;
 
 /**
@@ -28,31 +27,24 @@ public class SafeIntDirectBuf extends BaseSafeDirectBuf<IntDirectBuffer> impleme
 
     @Override
     public void close() {
-        DirectBuffer realBuf = buf;
-        buf = new VoidIntDirectBuf(realBuf);
-        try {
-            // 等待最后一次读完就释放
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            FineIOLoggers.getLogger().error(e);
-        } finally {
-            realBuf.close();
-        }
+        long address = buf.getAddress();
+        FileBlock fileBlock = buf.getFileBlock();
+        buf = new VoidIntDirectBuf(address, fileBlock);
     }
 
     private static class VoidIntDirectBuf extends BaseVoidDirectBuf implements IntDirectBuffer {
-        VoidIntDirectBuf(DirectBuffer realBuf) {
-            super(realBuf);
+        public VoidIntDirectBuf(long address, FileBlock fileBlock) {
+            super(address, fileBlock);
         }
 
         @Override
         public void putInt(int pos, int val) throws BufferClosedException, BufferAllocateFailedException, BufferOutOfBoundsException {
-            throw new BufferClosedException(realBuf.getAddress(), getFileBlock());
+            throw new BufferClosedException(address, fileBlock);
         }
 
         @Override
         public int getInt(int pos) throws BufferClosedException, BufferOutOfBoundsException {
-            throw new BufferClosedException(realBuf.getAddress(), getFileBlock());
+            throw new BufferClosedException(address, fileBlock);
         }
     }
 }
