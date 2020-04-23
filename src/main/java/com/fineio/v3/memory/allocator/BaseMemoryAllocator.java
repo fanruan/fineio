@@ -1,6 +1,7 @@
 package com.fineio.v3.memory.allocator;
 
 import com.fineio.accessor.FileMode;
+import com.fineio.java.JavaVersion;
 import com.fineio.v3.exception.OutOfDirectMemoryException;
 import com.fineio.v3.memory.MemoryUtils;
 import sun.misc.JavaLangRefAccess;
@@ -27,7 +28,6 @@ public class BaseMemoryAllocator implements MemoryAllocator {
     protected AtomicLong memorySize;
 
     protected final int MAX_RETRY_TIME = 10;
-    protected final JavaLangRefAccess jlra = SharedSecrets.getJavaLangRefAccess();
 
     public BaseMemoryAllocator(long limitMemorySize) {
         this.limitMemorySize = limitMemorySize;
@@ -36,11 +36,15 @@ public class BaseMemoryAllocator implements MemoryAllocator {
 
     public void cleanBeforeAllocate(long size) {
         if (memorySize.get() + size >= limitMemorySize) {
-            while (jlra.tryHandlePendingReference()) {
-                if (memorySize.get() + size < limitMemorySize) {
-                    break;
+            if (JavaVersion.isOverJava8()) {
+                JavaLangRefAccess jlra = SharedSecrets.getJavaLangRefAccess();
+                while (jlra.tryHandlePendingReference()) {
+                    if (memorySize.get() + size < limitMemorySize) {
+                        break;
+                    }
                 }
             }
+
             if (memorySize.get() + size >= limitMemorySize) {
                 System.gc();
             }
